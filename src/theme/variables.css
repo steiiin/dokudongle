@@ -1,2 +1,39 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
+
+body {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* .with-badge {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.with-badge ion-title {
+  position: relative;
+  z-index: 2;
+}
+
+.with-badge .badge {
+  position: absolute;
+  font-size: 1.25em;
+  z-index: 1;
+} */
+
+.with-badge {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+}
+
+.with-badge ion-title {
+  display: inline-flex;
+  flex: 0; padding-right: 0;
+}
+
+.with-badge .badge {
+  font-size: 1.25em;
+}
