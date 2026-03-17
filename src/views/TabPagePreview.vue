@@ -1,24 +1,20 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
+  <IonPage>
+    <IonHeader>
+      <IonToolbar>
         <div class="with-badge">
-          <ion-title>Vorschau</ion-title>
-          <connection-badge></connection-badge>
+          <IonTitle>Vorschau</IonTitle>
+          <DodoConnectionBadge></DodoConnectionBadge>
         </div>
-      </ion-toolbar>
-    </ion-header>
+      </IonToolbar>
+    </IonHeader>
 
-    <ion-content :fullscreen="true">
+    <IonContent :fullscreen="true">
       <textarea readonly>{{ store.generatedProtocol }}</textarea>
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 <script setup lang="ts">
-
-import { IonPage, IonHeader, IonToolbar, IonContent, IonTitle } from '@ionic/vue';
-
-import ConnectionBadge from '@/components/ConnectionBadge.vue';
 
 import { useDokuStore } from '@/store/doku';
 const store = useDokuStore();

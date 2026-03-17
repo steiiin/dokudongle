@@ -1,28 +1,27 @@
 <template>
-  <ion-page>
-    <ion-tabs>
-      <ion-router-outlet></ion-router-outlet>
-      <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="connect" href="/tabs/connect">
-          <ion-icon aria-hidden="true" :icon="wifi" />
-          <ion-label>Dongle</ion-label>
-        </ion-tab-button>
+  <IonPage>
+    <IonTabs>
+      <IonRouterOutlet></IonRouterOutlet>
+      <IonTabBar slot="bottom">
+        <IonTabButton tab="connect" href="/tabs/connect">
+          <IonIcon aria-hidden="true" :icon="wifi" />
+          <IonLabel>Dongle</IonLabel>
+        </IonTabButton>
 
-        <ion-tab-button tab="doku" href="/tabs/doku">
-          <ion-icon aria-hidden="true" :icon="flask" />
-          <ion-label>Eingabe</ion-label>
-        </ion-tab-button>
+        <IonTabButton tab="doku" href="/tabs/doku">
+          <IonIcon aria-hidden="true" :icon="flask" />
+          <IonLabel>Eingabe</IonLabel>
+        </IonTabButton>
 
-        <ion-tab-button tab="preview" href="/tabs/preview">
-          <ion-icon aria-hidden="true" :icon="eye" />
-          <ion-label>Vorschau</ion-label>
-        </ion-tab-button>
-      </ion-tab-bar>
-    </ion-tabs>
-  </ion-page>
+        <IonTabButton tab="preview" href="/tabs/preview">
+          <IonIcon aria-hidden="true" :icon="eye" />
+          <IonLabel>Vorschau</IonLabel>
+        </IonTabButton>
+      </IonTabBar>
+    </IonTabs>
+  </IonPage>
 </template>
 
 <script setup lang="ts">
-import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { eye, flask, wifi } from 'ionicons/icons';
 </script>

@@ -1,15 +1,15 @@
 <template>
-  <ion-button
+  <IonButton
     :fill="isActive ? 'solid' : 'outline'" size="small"
     :class="{ expand: expand }"
     @click="() => setToggleValue(props.value)"
   >
     <slot />
-  </ion-button>
+  </IonButton>
 </template>
 
 <script setup lang="ts">
-import { IonButton } from '@ionic/vue'
+
 
 import { computed, inject } from 'vue'
 import type { Ref } from 'vue'

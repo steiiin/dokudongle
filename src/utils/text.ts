@@ -28,7 +28,7 @@ export function capitalizeBegin(text: string): string {
 /**
  * Prefix given text with prefix if not empty
  */
-export function prefix(text: string, prefix: string): string {
+export function prefix(prefix: string, text: string): string {
   const trimmed = text.trim()
   if (trimmed.length==0) { return '' }
   return `${prefix} ${trimmed}`
@@ -44,10 +44,26 @@ export function suffix(text: string, suffix: string): string {
 }
 
 /**
+ * Returns placeholder text if original text is empty
+ */
+export function placeholder(text: string, placeholder: string): string {
+  const trimmed = text.trim()
+  if (trimmed.length==0) { return `[${placeholder.toUpperCase()}]` }
+  return trimmed
+}
+
+/**
  * Trims punctuation and whitespace from both ends of the provided string.
  */
 export function supertrim(text: string): string {
   return text.replace(/^[.,; ]+|[.,; ]+$/g, "")
+}
+
+/**
+ * Trims breaks of the text
+ */
+export function unbreak(text: string): string {
+  return text.replace(/[\r\n]+/g, "")
 }
 
 /**

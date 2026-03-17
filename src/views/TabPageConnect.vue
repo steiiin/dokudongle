@@ -1,38 +1,35 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Verbindung</ion-title>
-        <ion-progress-bar v-if="store.isDongleTransmitting" type="indeterminate"></ion-progress-bar>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
+  <IonPage>
+    <IonHeader>
+      <IonToolbar>
+        <IonTitle>Verbindung</IonTitle>
+        <IonProgressBar v-if="store.isDongleTransmitting" type="indeterminate"></IonProgressBar>
+      </IonToolbar>
+    </IonHeader>
+    <IonContent :fullscreen="true">
 
       <div id="container">
 
-        <connection-badge class="symbol"></connection-badge>
+        <DodoConnectionBadge class="symbol"></DodoConnectionBadge>
 
         <h1>{{ stateText.title }}</h1>
         <p>{{ stateText.description }}</p>
 
-        <ion-button v-if="!store.isDongleConnected"
+        <IonButton v-if="!store.isDongleConnected"
           :disabled="store.isDongleConnecting"
           @click="store.connectDongle"
           >Dongle suchen
-        </ion-button>
+        </IonButton>
 
       </div>
 
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup lang="ts">
 
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, IonButton, IonProgressBar } from '@ionic/vue';
 import { ellipsisHorizontalCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
-
-import ConnectionBadge from '@/components/ConnectionBadge.vue';
 
 import { computed } from 'vue';
 

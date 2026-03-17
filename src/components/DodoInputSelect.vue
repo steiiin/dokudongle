@@ -1,44 +1,54 @@
 <template>
-  <ion-item :lines="isCustomMode ? 'none' : lines">
-    <ion-select :label="label" interface="popover" v-model="selectValue">
-      <ion-select-option v-if="emptyLabel" value="">
+  <IonItem :lines="isCustomMode ? 'none' : lines">
+    <IonSelect :label="label" interface="popover" v-model="selectValue">
+      <IonSelectOption v-if="emptyLabel" value="">
         {{ emptyLabel }}
-      </ion-select-option>
-      <ion-select-option v-for="opt in options"
-        :key="opt" :value="opt">
-        {{ opt }}
-      </ion-select-option>
-      <ion-select-option v-if="allowCustom" :value="CUSTOM_VALUE">
-        Andere
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
+      </IonSelectOption>
 
-  <ion-item v-if="isCustomMode" :lines="lines">
-    <dd-input-box ref="customInput"
+      <IonSelectOption
+        v-for="opt in normalizedOptions"
+        :key="opt.value"
+        :value="opt.value"
+      >
+        {{ opt.label }}
+      </IonSelectOption>
+      <IonSelectOption v-if="allowCustom" :value="CUSTOM_VALUE">
+        Andere
+      </IonSelectOption>
+    </IonSelect>
+  </IonItem>
+
+  <IonItem v-if="isCustomMode" :lines="lines">
+    <DodoInputText
+      ref="customInput"
       v-model="customText"
       :label="'↳ ' + customLabel"
       :placeholder="customPlaceholder"
-      :autocorrectFn="basicCap"
+      :autocorrectFn="autocorrectFn"
       @leaved-empty="handleEmpty"
     />
-  </ion-item>
+  </IonItem>
 </template>
 
 <script setup lang="ts">
 
-import { IonItem, IonSelect, IonSelectOption } from '@ionic/vue'
 import { computed, ref, watch } from 'vue'
 
-import DdInputBox from './DdInputBox.vue'
-import { basicCap } from '@/utils/autocorrect/basic';
+import DodoInputText from './DodoInputText.vue'
 
 const CUSTOM_VALUE = '__custom'
 
-const props = defineProps<{
-  modelValue: string
+export type SelectOption = {
+  value: SelectValue
   label: string
-  options: string[]
+}
+type OptionInput = SelectValue | SelectOption
+type SelectValue = string | number
+
+const props = defineProps<{
+  modelValue: SelectValue
+  label: string
+  options: OptionInput[]
   emptyLabel?: string
   allowCustom?: boolean
   customLabel?: string
@@ -48,42 +58,55 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
+  (e: 'update:modelValue', value: SelectValue): void
 }>()
 
 const customInput = ref<any|null>(null)
 const customText = ref('')
 const isCustomMode = ref(false)
 
-function isKnownOption(value: string): boolean {
-  return props.options.includes(value)
+const normalizedOptions = computed<SelectOption[]>(() => {
+  return props.options.map((opt) => {
+    if (typeof opt === 'string' || typeof opt === 'number') {
+      return {
+        value: opt,
+        label: String(opt),
+      }
+    }
+    return opt
+  })
+})
+
+function isKnownOption(value: SelectValue): boolean {
+  return normalizedOptions.value.some((opt) => opt.value === value)
 }
 
-function isEmptyOption(value: string): boolean {
+function isEmptyOption(value: SelectValue): boolean {
   return value === ''
 }
 
 const selectValue = computed({
-  get(): string {
+  get(): SelectValue {
     if (isCustomMode.value) {
       return CUSTOM_VALUE
     }
     return props.modelValue
   },
-  set(val: string) {
+  set(val: SelectValue) {
     if (val === CUSTOM_VALUE) {
       isCustomMode.value = true
       emit('update:modelValue', customText.value)
       setTimeout(() => { customInput.value?.setFocus() }, 300)
       return
     }
+
     isCustomMode.value = false
     emit('update:modelValue', val)
-  }
+  },
 })
 
 const handleEmpty = () => {
-  selectValue.value = ''
+  selectValue.value = !props.emptyLabel ? normalizedOptions.value[0].value : ''
 }
 
 watch(customText, (value) => {
@@ -108,7 +131,7 @@ watch(
 
     // external modelValue is a custom value
     isCustomMode.value = true
-    customText.value = value
+    customText.value = String(value)
   },
   { immediate: true }
 )

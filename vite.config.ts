@@ -1,5 +1,6 @@
 /// <reference types="vitest" />
 
+import Components from 'unplugin-vue-components/vite'
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
@@ -9,7 +10,19 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     vue(),
-    legacy()
+    legacy(),
+    Components({
+      resolvers: [
+        (name) => {
+          if (name.startsWith('Ion')) {
+            return { name, from: '@ionic/vue' }
+          }
+          if (name.startsWith('Dodo')) {
+            return { name, from: './src/components'}
+          }
+        }
+      ]
+    })
   ],
   resolve: {
     alias: {

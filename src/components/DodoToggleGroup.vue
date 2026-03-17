@@ -29,10 +29,12 @@ provide('setToggleValue', (v: string|number) => {
 </script>
 
 <style scoped>
+
 .dd-toggle-group {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
   justify-content: space-between;
 }
+
 </style>

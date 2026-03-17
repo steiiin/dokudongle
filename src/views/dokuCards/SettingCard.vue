@@ -1,12 +1,12 @@
 <template>
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Umgebung</ion-card-title>
-    </ion-card-header>
-    <ion-card-content class="with-list">
-      <ion-list lines="full">
+  <IonCard>
+    <IonCardHeader>
+      <IonCardTitle>Umgebung</IonCardTitle>
+    </IonCardHeader>
+    <IonCardContent class="with-list">
+      <IonList lines="full">
 
-        <dd-input-option label="Einsatzort" v-model="store.doku.setting.location" lines="full"
+        <DodoInputSelect label="Einsatzort" v-model="store.doku.setting.location" lines="full"
           empty-label="Keine Angabe"
           :options="[
             'Häuslichkeit',
@@ -18,33 +18,33 @@
           ]"
           allow-custom custom-label="Wo?" custom-placeholder="z.B. Fußweg"
           :autocorrect-fn="basicCap">
-        </dd-input-option>
+        </DodoInputSelect>
 
-        <ion-item>
-          <ion-toggle v-model="store.doku.setting.isAlone" label-placement="end">
+        <IonItem>
+          <IonToggle v-model="store.doku.setting.isAlone" label-placement="end">
             Lebt allein?
-          </ion-toggle>
-        </ion-item>
+          </IonToggle>
+        </IonItem>
 
-        <ion-item lines="full">
-          <ion-toggle v-model="store.doku.setting.isForcedEntry" label-placement="end">
+        <IonItem lines="full">
+          <IonToggle v-model="store.doku.setting.isForcedEntry" label-placement="end">
             Türöffnung?
-          </ion-toggle>
-        </ion-item>
+          </IonToggle>
+        </IonItem>
 
 
-        <dd-input-option label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
+        <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
           empty-label="Normal / k.A."
           :options="[
-            'am Stock mobil',
-            'rollatormobil',
-            'rollstuhlmobil',
-            'bettlägerig',
+            { value: 'am Stock mobil', label: 'Am Stock' },
+            { value: 'rollatormobil', label: 'Rollator' },
+            { value: 'rollstuhlmobil', label: 'Rollstuhl' },
+            { value: 'bettlägerig', label: 'Bettlägerig' },
           ]">
-        </dd-input-option>
+        </DodoInputSelect>
 
 
-        <dd-input-option label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
+        <DodoInputSelect label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
           empty-label="Keiner / k.A."
           :options="[
             'Pflegedienst',
@@ -55,18 +55,14 @@
           ]"
           allow-custom custom-label="Wer?" custom-placeholder="z.B. Tochter & Nachbarin"
           :autocorrect-fn="basicCap">
-        </dd-input-option>
+        </DodoInputSelect>
 
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
+      </IonList>
+    </IonCardContent>
+  </IonCard>
 </template>
 
 <script setup lang="ts">
-
-import { IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonItem, IonList, IonSelect, IonSelectOption, IonToggle } from '@ionic/vue'
-
-import DdInputOption from '@/components/DdInputOption.vue'
 
 import { ref, watch } from 'vue'
 import { basicCap } from '@/utils/autocorrect/basic';

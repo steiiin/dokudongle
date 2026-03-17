@@ -1,36 +1,61 @@
 <template>
-  <ion-page>
-    <ion-header>
-      <ion-toolbar>
+  <IonPage>
+    <IonHeader>
+      <IonToolbar>
         <div class="with-badge">
-          <ion-title>Eingabe</ion-title>
-          <connection-badge></connection-badge>
+          <IonTitle>Eingabe</IonTitle>
+          <DodoConnectionBadge></DodoConnectionBadge>
         </div>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content :fullscreen="true">
+      </IonToolbar>
+    </IonHeader>
+    <IonContent :fullscreen="true">
 
       <div id="container">
 
         <DetailLevelCard />
+        <FlavorsCard />
 
         <!-- SETTING -->
-        <SettingCard></SettingCard>
+        <IdentifikationCard></IdentifikationCard>
+        <SettingCard v-if="ctx.requireSceneDetails"></SettingCard>
+
+        <!-- FLAVORS -->
+
+        <!-- SITUATION -->
+        <SituationCard></SituationCard>
+
+        <!-- ABCDE -->
+        <AbcdeContainerCard></AbcdeContainerCard>
+
+        <!-- SAMPLE -->
+        <SampleContainerCard></SampleContainerCard>
+
+        <!-- BEHANDLUNG -->
+        <TreatmentContainerCard></TreatmentContainerCard>
 
       </div>
 
-    </ion-content>
-  </ion-page>
+    </IonContent>
+  </IonPage>
 </template>
 
 <script setup lang="ts">
 
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import DetailLevelCard from './dokuCards/DetailLevelCard.vue'
+import FlavorsCard from './dokuCards/FlavorsCard.vue'
 
-import ConnectionBadge from '@/components/ConnectionBadge.vue';
+import IdentifikationCard from './dokuCards/IdentifikationCard.vue'
+import SettingCard from './dokuCards/SettingCard.vue'
+import SituationCard from './dokuCards/SituationCard.vue'
+import AbcdeContainerCard from './dokuCards/AbcdeContainerCard.vue'
+import SampleContainerCard from './dokuCards/SampleContainerCard.vue'
+import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 
-import DetailLevelCard from './dokuCards/DetailLevelCard.vue';
-import SettingCard from './dokuCards/SettingCard.vue';
+import { computed } from 'vue'
+
+import { useDokuStore } from '@/store/doku'
+const store = useDokuStore()
+const ctx = computed(() => store.context)
 
 </script>
 <style lang="scss" scoped>

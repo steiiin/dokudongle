@@ -1,17 +1,15 @@
 <template>
-  <ion-input class="dd-input-box"
+  <IonInput class="dd-input-text"
     ref="inputRef"
     v-model="inputValue"
     :label="label"
     :placeholder="placeholder"
     :inputmode="inputmode"
     @ionBlur="handleBlur">
-  </ion-input>
+  </IonInput>
 </template>
 
 <script setup lang="ts">
-
-import { IonInput } from '@ionic/vue'
 
 import { computed, ref } from 'vue'
 
@@ -28,7 +26,7 @@ const emit = defineEmits<{
   (e: 'leaved-empty'): void,
 }>()
 
-const inputRef = ref<InstanceType<typeof IonInput> | null>(null)
+const inputRef = ref<any|null>(null)
 
 const inputValue = computed({
   get: () => props.modelValue,
@@ -66,7 +64,7 @@ defineExpose({
 
 <style>
 
-ion-input.dd-input-box .native-input {
+ion-input.dd-input-text .native-input {
   text-align: right !important;
 }
 

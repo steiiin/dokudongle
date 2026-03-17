@@ -5,24 +5,7 @@ body {
   padding-top: env(safe-area-inset-top);
 }
 
-/* .with-badge {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.with-badge ion-title {
-  position: relative;
-  z-index: 2;
-}
-
-.with-badge .badge {
-  position: absolute;
-  font-size: 1.25em;
-  z-index: 1;
-} */
-
+/* Titlebar Badge */
 .with-badge {
   display: flex;
   align-items: center;
@@ -36,4 +19,43 @@ body {
 
 .with-badge .badge {
   font-size: 1.25em;
+}
+
+/* ListInCard */
+ion-card-content.with-list {
+  padding-inline: 0;
+}
+
+/* CardInCard */
+ion-card-content.card-in-card  {
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  padding: 0;
+  --card-bg: #333;
+}
+
+ion-card-content.card-in-card ion-card-header {
+  --background: var(--card-bg);
+  padding-top: .8rem;
+  padding-bottom: .8rem;
+}
+
+ion-card-content.card-in-card ion-card-title {
+  font-size: .9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+ion-card-content.card-in-card ion-card-content {
+  padding: 0
+}
+
+ion-card-content.card-in-card ion-card {
+  border: 1px solid var(--card-bg);
+}
+
+ion-card-content.card-in-card .dd-input-textarea {
+  /* treatment block*/
+  margin: .5rem .5rem 0 .5rem;
+  width: calc(100% - 1rem);
 }

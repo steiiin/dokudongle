@@ -1,19 +1,65 @@
+import { AbcdeAirway, AbcdeBleeding, AbcdeBreathing, AbcdeCirculation, AbcdeDisability, AbcdeExposure, AbcdeStu } from "./protocol/abcde"
+import { EnhanceableText } from "./protocol/input"
+import { SampleAllergies } from "./protocol/sample/sampleAllergies"
+import { Sampler } from "./protocol/sampler"
 import { Setting } from "./protocol/setting"
+import { TreatmentConsent } from "./protocol/treatment/treatmentConsent"
+import { TreatmentRedflags } from "./protocol/treatment/treatmentRedflags"
 
 export interface Protocol {
 
   course: ProtocolCourse,
-  specificVerbosity: null|ProtocolVerbosity,
+  flavors: ProtocolFlavors,
 
+  ident: Patient,
   setting: Setting,
+  situation: EnhanceableText,
+
+  Xabcde: AbcdeBleeding,
+  xAbcde: AbcdeAirway,
+  xaBcde: AbcdeBreathing,
+  xabCde: AbcdeCirculation,
+  xabcDe: AbcdeDisability,
+  xabcdE: AbcdeExposure,
+  xabcdeStu: AbcdeStu,
+
+  sampler: Sampler,
+
+  treatment: EnhanceableText,
+  redflags: TreatmentRedflags,
+  consent: TreatmentConsent,
 
 }
 
 export function resetProtocol(): Protocol {
   const result: Protocol = {
+
     course: ProtocolCourse.TRANSPORT,
-    specificVerbosity: null,
+    flavors: {
+      simple: false,
+      trauma: false,
+      non_verbal: false,
+      reanimation: false
+    },
+
+    ident: new Patient(),
     setting: new Setting(),
+    situation: new EnhanceableText(),
+
+    Xabcde: new AbcdeBleeding(),
+    xAbcde: new AbcdeAirway(),
+    xaBcde: new AbcdeBreathing(),
+    xabCde: new AbcdeCirculation(),
+    xabcDe: new AbcdeDisability(),
+    xabcdE: new AbcdeExposure(),
+    xabcdeStu: new AbcdeStu(),
+
+    sampler: new Sampler(),
+
+    treatment: new EnhanceableText(),
+    redflags: new TreatmentRedflags(),
+    consent: new TreatmentConsent(),
+
   }
   return result
 }
@@ -31,4 +77,87 @@ export enum ProtocolCourse {
   VERLEGUNG,
   EINWEISUNG,
   NEF_VOR_ORT,
+}
+
+export interface ProtocolFlavors {
+  simple: boolean
+  trauma: boolean
+  non_verbal: boolean
+  reanimation: boolean
+}
+
+// #######################################################################
+
+export class Patient {
+  public age: PatientAge
+  constructor() {
+    this.age = new PatientAge(50, 'years')
+  }
+}
+
+export class PatientAge {
+
+  constructor(
+    public timespan: number,
+    public unit: 'years' | 'months',
+  ) { }
+
+  // #######################################################################
+
+  public toString(): string {
+
+    const num = this.timespan
+    if (!num) return ''
+    const text =
+      this.unit === 'years'
+        ? num === 1
+          ? 'Jahr'
+          : 'Jahre'
+        : num === 1
+        ? 'Monat'
+        : 'Monate'
+    return `${num} ${text}`
+
+  }
+
+  // #######################################################################
+
+  get totalYears(): number {
+    return this.unit == 'years'
+      ? this.timespan
+      : this.timespan / 12
+  }
+
+}
+
+// #######################################################################
+
+export interface ProtocolContext {
+
+  verbosity: ProtocolVerbosity,
+  isLow: boolean,
+  isNormal: boolean,
+  isHigh: boolean,
+
+  requireSceneDetails: boolean,
+
+  isBreathing: boolean,
+  hasPulse: boolean,
+  isNonVerbal: boolean,
+  isLowVigilant: boolean,
+  isCritical: boolean,
+  gcs: number,
+  isBaseline: boolean,
+
+  hasNausea: boolean,
+  hasEmesis: boolean,
+  hasHeadache: boolean,
+  hasDizziness: boolean,
+  hasSensomotoricDeficit: boolean,
+
+  isTrauma: boolean,
+  isPediatric: boolean,
+  isGeriatric: boolean,
+
+
 }

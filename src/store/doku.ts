@@ -4,8 +4,9 @@ import { defineStore } from 'pinia';
 
 import { textToHidEvents } from '@/utils/keymap-german';
 import { Device, DeviceConnection, ServiceUUID } from '@/types/dongle';
-import { Protocol, ProtocolCourse, resetProtocol } from '@/types/protocol';
-import { breakDoku, multiline } from '@/utils/text';
+import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol';
+import { breakDoku, multiline, placeholder } from '@/utils/text';
+import { textIf } from '@/utils/filter';
 
 export const useDokuStore = defineStore('doku', {
   state: () => ({
@@ -117,6 +118,79 @@ export const useDokuStore = defineStore('doku', {
     transmissionProgress: (state) => (state.connection.isConnected && state.connection.isTransmitting && state.connection.transmissionLength>0) ? (state.connection.transmissionCurrent / state.connection.transmissionLength) : 0,
     connectedDongleName: (state) => state.connection.isConnected ? state.connection.device?.name ?? 'Unbekanntes Dongle' : '',
 
+    // context
+    context(state): ProtocolContext {
+
+      const requireSceneDetails: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.NEF_VOR_ORT
+
+      const nothingToTreat: boolean = (
+        !state.doku.Xabcde.hasCriticalBleeding
+        && !state.doku.xAbcde.needTreatment
+        && !state.doku.xaBcde.needTreatment
+        && !state.doku.xabCde.needTreatment
+        && !state.doku.xabcDe.needTreatment
+        && !state.doku.xabcdE.needTreatment
+        // TODO: STU
+      )
+
+      const gcs: number = state.doku.xabcDe.gcs.score
+      const isBaseline: boolean = state.doku.xabcDe.psychBaseline
+
+      const isTrauma: boolean = requireSceneDetails && (true /* Trauma-Tag */)
+
+      const isCritical: boolean = state.doku.Xabcde.hasCriticalBleeding
+        || !state.doku.xAbcde.isBreathing
+        || state.doku.xaBcde.breathlessness == 'schwere'
+        || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
+        || state.doku.xaBcde.hasTrachealDeviation
+        || state.doku.xabCde.pulse.peripheralStrength == 'nicht'
+        || state.doku.xabCde.pulse.centralStrength != 'gut'
+        || (isTrauma && gcs <= 12 && !isBaseline)
+        || (state.doku.xabcDe.avpu == 'bewusstlos' && !isBaseline)
+        || state.doku.xabcdeStu.head.Anisocoria != ''
+        || state.doku.xabcdeStu.spine.hasObviousSevereInjury
+        || state.doku.xabcdeStu.thorax.hasUnstableChestWall
+        || state.doku.xabcdeStu.pelvis.hasHemodynamicInstability
+
+      const verbosity: ProtocolVerbosity = state.doku.course !== ProtocolCourse.TRANSPORT || isCritical
+        ? ProtocolVerbosity.HIGH
+        : nothingToTreat
+          ? ProtocolVerbosity.LOW
+          : ProtocolVerbosity.NORMAL
+
+      const isNonVerbal: boolean = false
+      const isLowVigilant: boolean = false
+
+      return {
+
+        verbosity,
+        isLow: verbosity == ProtocolVerbosity.LOW,
+        isNormal: verbosity == ProtocolVerbosity.NORMAL,
+        isHigh: verbosity == ProtocolVerbosity.HIGH,
+
+        requireSceneDetails,
+
+        isBreathing: state.doku.xAbcde.isBreathing,
+        hasPulse: state.doku.xabCde.pulse.centralStrength != 'nicht',
+        isNonVerbal,
+        isLowVigilant,
+        isCritical,
+        gcs,
+        isBaseline,
+
+        hasNausea: state.doku.xabcdE.nausea,
+        hasEmesis: state.doku.xabcdE.emesis.needTreatment,
+        hasHeadache: state.doku.xabcDe.headache,
+        hasDizziness: state.doku.xabcDe.dizziness != 'kein',
+        hasSensomotoricDeficit: state.doku.xabcDe.paresis.active,
+
+        isTrauma,
+        isPediatric: state.doku.ident.age.totalYears <= 3,
+        isGeriatric: state.doku.ident.age.totalYears >= 65,
+
+      } as ProtocolContext
+    },
+
     // protocol
     generatedProtocol(state): string {
       let text = ''
@@ -133,10 +207,43 @@ export const useDokuStore = defineStore('doku', {
       // Situation
       text += breakDoku([
         state.doku.setting.generateText(),
-
+        placeholder(state.doku.situation.value, 'Situation'),
       ], true)
 
-      return text
+      // ABCDE
+      text += breakDoku([
+        state.doku.Xabcde.generateText(),
+        state.doku.xAbcde.generateText(),
+        state.doku.xaBcde.generateText(),
+        state.doku.xabCde.generateText(),
+        state.doku.xabcdE.generateText(),
+      ], true)
+
+      // STU
+      text += textIf(breakDoku([
+        state.doku.xabcdeStu.head.generateText(),
+        state.doku.xabcdeStu.spine.generateText(),
+        state.doku.xabcdeStu.thorax.generateText(),
+        state.doku.xabcdeStu.pelvis.generateText(),
+        state.doku.xabcdeStu.limbs.generateText(),
+      ], true), this.context.isTrauma)
+
+      // SAMPLE
+      text += breakDoku([
+        state.doku.sampler.allergies.generateText(),
+        state.doku.sampler.medication.generateText(),
+        state.doku.sampler.pler.generateText(),
+        state.doku.sampler.contacts.generateText(),
+      ], true)
+
+      // TREATMENT
+      text += breakDoku([
+        state.doku.treatment.value,
+        state.doku.redflags.getBlock(),
+        state.doku.consent.getBlock(),
+      ], true)
+
+      return text.trim()
 
     },
 
