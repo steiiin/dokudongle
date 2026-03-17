@@ -1,14 +1,14 @@
 <template>
   <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>Patient</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent>
+    <IonCardContent class="">
+
+      <DodoInputAge v-model="store.doku.ident.age.value" />
+
       <!-- <DodoToggleGroup v-model="store.doku.ident.Sex">
         <DodoToggleButton value="männlich">Männlich</DodoToggleButton>
         <DodoToggleButton value="weiblich">Weiblich</DodoToggleButton>
       </DodoToggleGroup> -->
-      <DodoInputAge v-model="store.doku.ident.age" />
+
     </IonCardContent>
   </IonCard>
 </template>
@@ -17,5 +17,23 @@
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+
+import { computed, ref, watch } from 'vue'
+
+const ageRelevant = ref(false)
+watch(() => store.doku.ident.age.active, (v) => {
+  ageRelevant.value = v
+})
+
+const ageRelevantString = computed({
+  get() {
+    return ageRelevant.value ? 'true' : 'false'
+  },
+  set(v) {
+    ageRelevant.value = v === 'true'
+  }
+})
+
+
 
 </script>

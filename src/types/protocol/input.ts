@@ -141,36 +141,67 @@ export class EnhanceableText {
   }
 }
 
-export interface AssessedValue<T> {
-  assessed: boolean
-  value: T
-}
-export function unassessed<T>(defaultValue: T): AssessedValue<T> {
-  return {
-    assessed: false,
-    value: defaultValue,
+export class AssessedValue<T> {
+  constructor(
+    public assessed: boolean,
+    public value: T
+  ) {}
+
+  get isAssessed(): boolean {
+    if (!this.assessed) return false
+
+    const value = this.value as any
+
+    if (value == null) return false
+    if (typeof value === 'string' && value.trim() === '') return false
+    if (Array.isArray(value) && value.length === 0) return false
+
+    return true
   }
-}
-export function assessed<T>(value: T): AssessedValue<T> {
-  return {
-    assessed: true,
-    value,
+
+  static assessed<T>(value: T): AssessedValue<T> {
+    return new AssessedValue(true, value)
+  }
+
+  static unassessed<T>(value: T): AssessedValue<T> {
+    return new AssessedValue(false, value)
   }
 }
 
-export interface OptionalValue<T> {
-  active: boolean
-  value: T
-}
-export function active<T>(defaultValue: T): OptionalValue<T> {
-  return {
-    active: false,
-    value: defaultValue,
+export class OptionalValue<T> {
+  constructor(
+    public active: boolean,
+    public value: T
+  ) {}
+
+  get isActive(): boolean {
+    if (!this.active) return false
+
+    const value = this.value as any
+
+    if (value == null) return false
+    if (typeof value === 'string' && value.trim() === '') return false
+    if (Array.isArray(value) && value.length === 0) return false
+
+    return true
+  }
+
+  static active<T>(value: T): OptionalValue<T> {
+    return new OptionalValue(true, value)
+  }
+
+  static inactive<T>(value: T): OptionalValue<T> {
+    return new OptionalValue(false, value)
   }
 }
-export function inactive<T>(value: T): OptionalValue<T> {
+
+export type ProtocolStateValue = {
+  modalState: string
+  protocolText: string
+}
+export function PSV(state: string, text?: string): ProtocolStateValue {
   return {
-    active: true,
-    value,
+    modalState: state,
+    protocolText: text ?? state,
   }
 }

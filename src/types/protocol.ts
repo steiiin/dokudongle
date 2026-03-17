@@ -1,5 +1,5 @@
 import { AbcdeAirway, AbcdeBleeding, AbcdeBreathing, AbcdeCirculation, AbcdeDisability, AbcdeExposure, AbcdeStu } from "./protocol/abcde"
-import { EnhanceableText } from "./protocol/input"
+import { EnhanceableText, OptionalValue } from "./protocol/input"
 import { SampleAllergies } from "./protocol/sample/sampleAllergies"
 import { Sampler } from "./protocol/sampler"
 import { Setting } from "./protocol/setting"
@@ -89,9 +89,9 @@ export interface ProtocolFlavors {
 // #######################################################################
 
 export class Patient {
-  public age: PatientAge
+  public age: OptionalValue<PatientAge>
   constructor() {
-    this.age = new PatientAge(50, 'years')
+    this.age = OptionalValue.inactive(new PatientAge(50, 'years'))
   }
 }
 

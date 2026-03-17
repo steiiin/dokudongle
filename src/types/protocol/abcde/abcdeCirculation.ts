@@ -1,6 +1,7 @@
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { AssessedValue, unassessed } from "../input"
+import { AssessedValue } from "../input"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
+import { PSV, ProtocolStateValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }
@@ -44,7 +45,7 @@ export class AbcdeCirculation {
   public capillaryRefill: '1s' | '2s' | '3s' | '>3s'
   public edema: CirculationEdema
 
-  public ecg: 'SR' | 'VHF' | string
+  public ecg: AssessedValue<'SR' | 'VHF' | string>
 
   public treatment: string
 
@@ -71,14 +72,14 @@ export class AbcdeCirculation {
       pain: 'keine',
       tenderness: false,
       aggravation: false,
-      radiation: unassessed(''),
+      radiation: AssessedValue.unassessed(''),
     }
     this.capillaryRefill = '2s'
     this.edema = {
       grade: 'keine Ödeme',
       variation: '',
     }
-    this.ecg = 'SR'
+    this.ecg = AssessedValue.unassessed('SR')
     this.treatment = ''
   }
 
@@ -89,7 +90,7 @@ export class AbcdeCirculation {
       || !this.pulse.rhythmic
       || this.pulse.peripheralStrength != 'gut'
       || this.rr != ''
-      || !(this.ecg == 'SR' || this.ecg == 'VHF')
+      || (this.ecg.assessed && !(this.ecg.value == 'SR' || this.ecg.value == 'VHF'))
       || this.skin.color != 'rosig'
       || this.skin.centralTemp != 'warm'
       || this.skin.poorSkinTurgor
@@ -142,14 +143,17 @@ export class AbcdeCirculation {
 
   ///////////////////////////////////////////////
 
-  get ecgDescription(): string {
-    if (this.ecg.length>0) { return this.ecg }
-    return 'kein EKG'
+  get ecgPSV(): ProtocolStateValue {
+    if (!this.ecg.isAssessed) { return PSV('nicht durchgeführt', '') }
+    return PSV(this.ecg.value)
+  }
+
+  get ecgState(): string {
+    return this.ecgPSV.modalState
   }
 
   get ecgText(): string {
-    if (this.ecg.length>0) { return this.ecg }
-    return ''
+    return this.ecgPSV.protocolText
   }
 
   ///////////////////////////////////////////////
@@ -162,29 +166,36 @@ export class AbcdeCirculation {
 
   ///////////////////////////////////////////////
 
-  get chestDescription(): string {
-    if (!this.chest.tightness && this.chest.pain == 'keine') { return 'normal' }
-    return this.chestText
+  get chestpainPSV(): ProtocolStateValue {
+    if (!this.chest.tightness && this.chest.pain == 'keine') { return PSV('unauffällig', 'keine Brustenge/-schmerzen') }
+    if (this.chest.pain == 'keine') { return PSV('Brustenge ohne Schmerz', 'Brustenge ohne Brustschmerz') }
+
+    const _strength = `${this.chest.pain} Brustschmerzen`
+    const _radiation = this.chest.radiation.isAssessed
+      ? prefix('strahlen aus: ', this.chest.radiation.value) // TODO: prefixChestpainRadiation
+      : onHigh('strahlen nicht aus')
+
+    return PSV(concatDoku([
+      textIf('Brustenge', this.chest.tightness),
+      [
+        _strength,
+        _radiation,
+
+        textIf('druckdolent', this.chest.tenderness),
+        this.chest.aggravation
+          ? 'bewegungsabh.'
+          : 'bewegungsunabh.'
+      ]
+    ], false))
+
   }
 
-  get chestText(): string {
-    if (!this.chest.tightness && this.chest.pain == 'keine') { return 'keine Brustenge/-schmerzen' }
-    if (this.chest.pain == 'keine') { return 'Brustenge, aber kein Brustschmerz' }
-    let strength = `${this.chest.pain} Brustschmerzen`
-    let radiation = this.chest.radiation.assessed
-      ? prefix('strahlen aus:', this.chest.radiation.value)
-      : onHigh('strahlen nicht aus')
-    return concatDoku([[
-      textIf('Brustenge', this.chest.tightness),
-      strength,
-      radiation,
-      this.chest.tenderness
-        ? 'druckdolent'
-        : onHigh('nicht druckdolent'),
-      this.chest.aggravation
-        ? 'bewegungsabhängig'
-        : 'nicht bewegungsabh.'
-    ]], false)
+  get chestpainState(): string {
+    return this.chestpainPSV.modalState
+  }
+
+  get chestpainText(): string {
+    return this.chestpainPSV.protocolText
   }
 
   // #####################################################################
@@ -202,7 +213,7 @@ export class AbcdeCirculation {
         this.capillaryRefill == '>3s' ? 'Rekap>3s' : onNormal(`Rekap ${this.capillaryRefill}`),
         getCtx().hasPulse
       ),
-      textIf(this.chestText, !isNonVerbal),
+      textIf(this.chestpainText, !isNonVerbal),
       textIf(this.rr, hasPulse),
       this.edemaText,
       this.ecgText,

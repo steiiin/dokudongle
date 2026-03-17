@@ -1,5 +1,5 @@
 import { onHigh, onNormal, textIf } from "@/utils/filter"
-import { AssessedValue, inactive, OptionalValue, unassessed } from "../input"
+import { AssessedValue, OptionalValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
@@ -172,8 +172,8 @@ export class AbcdeDisability {
     this.zops = new DisabilityZops()
     this.gcs = new DisabilityGcs()
     this.aphasia = false
-    this.paresis = inactive('')
-    this.paresthesia = inactive('')
+    this.paresis = OptionalValue.inactive('')
+    this.paresthesia = OptionalValue.inactive('')
     this.headache = false
     this.dizziness = 'kein'
     this.psychRass = ''
@@ -185,7 +185,7 @@ export class AbcdeDisability {
     this.psychBehavioralChange = false
     this.psychBaseline = false
     this.bloodGlucose = ''
-    this.intoxication = inactive('')
+    this.intoxication = OptionalValue.inactive('')
     this.treatment = ''
   }
 

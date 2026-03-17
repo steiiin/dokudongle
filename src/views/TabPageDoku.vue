@@ -12,14 +12,14 @@
 
       <div id="container">
 
+        <IdentifikationCard></IdentifikationCard>
         <DetailLevelCard />
+
+        <!-- FLAVORS -->
         <FlavorsCard />
 
         <!-- SETTING -->
-        <IdentifikationCard></IdentifikationCard>
         <SettingCard v-if="ctx.requireSceneDetails"></SettingCard>
-
-        <!-- FLAVORS -->
 
         <!-- SITUATION -->
         <SituationCard></SituationCard>

@@ -49,6 +49,8 @@ export class AbcdeAirway {
       : `Mundraum ${this.obstruction}`
   }
 
+  ///////////////////////////////////////////////
+
   get mucosaText(): string {
     return `${this.mucosa.e}/${this.mucosa.m}`
   }

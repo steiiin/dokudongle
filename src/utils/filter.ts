@@ -11,6 +11,27 @@ export function textIf(text: string, expr: boolean): string {
 }
 
 /**
+ * return given default text if expression is empty, otherwise text
+ */
+export function textDef(def: string, text: string): string {
+  return text == '' ? def : text
+}
+
+/**
+ * return 'full' if true, otherwise 'none'
+ */
+export function fullIf(expr: boolean): string {
+  return expr ? 'full' : 'none'
+}
+
+/**
+ * return 'none' if true, otherwise 'full'
+ */
+export function noneIf(expr: boolean): string {
+  return expr ? 'none' : 'full'
+}
+
+/**
  * return given text if verbosity == HIGH
  */
 export function onHigh(text: string): string {

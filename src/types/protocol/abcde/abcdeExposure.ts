@@ -1,5 +1,5 @@
 import { useDokuStore } from "@/store/doku"
-import { inactive, OptionalValue } from "../input"
+import { OptionalValue } from "../input"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { ProtocolContext } from "@/types/protocol"
@@ -81,8 +81,8 @@ export class ExposureAbdominal {
   constructor()
   {
     this.guarding = ''
-    this.pain = inactive('')
-    this.peristalsis = inactive('')
+    this.pain = OptionalValue.inactive('')
+    this.peristalsis = OptionalValue.inactive('')
   }
 
 }
@@ -109,7 +109,7 @@ export class AbcdeExposure {
     this.bodyTemperature = 36.5
     this.nausea = false
     this.emesis = new ExposureEmisis()
-    this.bowelAbnormalities = inactive('')
+    this.bowelAbnormalities = OptionalValue.inactive('')
     this.urinary = new ExposureUrinary()
     this.urinaryIncontinence = false
     this.abdominal = new ExposureAbdominal()

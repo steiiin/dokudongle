@@ -1,5 +1,4 @@
 <template>
-
   <IonItem :lines="props.toggle ? 'none' : props.lines">
     <IonToggle
       :model-value="props.toggle"
@@ -11,43 +10,61 @@
   </IonItem>
 
   <IonItem v-if="props.toggle" :lines="props.lines">
-    <DodoInputText
-      ref="textInput"
-      :model-value="props.text"
-      :label="props.textLabel ? '↳ ' + props.textLabel : '↳ '"
-      :placeholder="props.textPlaceholder"
-      :autocorrectFn="props.autocorrectFn"
-      @update:model-value="onTextChange"
-      @leaved-empty="handleEmpty"
-    />
-  </IonItem>
 
+    <DodoInputSelect
+      ref="textSelect"
+      :label="props.textLabel ? '↳ ' + props.textLabel : '↳ '" v-model="props.text"
+      :empty-label="props.emptyLabel"
+      :options="props.options"
+      :allow-custom="props.allowCustom" :custom-label="props.customLabel" :custom-placeholder="props.customPlaceholder"
+      :autocorrect-fn="props.autocorrectFn"
+      @update:model-value="onTextChange"
+      @leaved-empty="handleEmpty">
+    </DodoInputSelect>
+
+  </IonItem>
 </template>
 
 <script setup lang="ts">
 
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
+import DodoInputSelect from './DodoInputSelect.vue'
+
+export type SelectOption = {
+  value: SelectValue
+  label: string
+}
+type OptionInput = SelectValue | SelectOption
+type SelectValue = string | number
 
 const props = withDefaults(defineProps<{
+
   toggleLabel: string
   toggle: boolean
+
   textLabel?: string
-  textPlaceholder?: string
   text: string
+
+  emptyLabel?: string
+  options: OptionInput[]
+  allowCustom?: boolean
+  customLabel?: string
+  customPlaceholder?: string
+
   autocorrectFn?: (draft: string) => string
   lines?: 'full' | 'inset' | 'none'
+
 }>(), {
   textLabel: '',
-  textPlaceholder: '',
   lines: 'full',
 })
 
 const emit = defineEmits<{
   (e: 'update:toggle', value: boolean): void
-  (e: 'update:text', value: string): void
+  (e: 'update:text', value: SelectValue): void
 }>()
 
-const textInput = ref<any|null>(null)
+const textSelect = ref<InstanceType<typeof DodoInputSelect> | null>(null)
 let focusTimeout: ReturnType<typeof setTimeout> | null = null
 
 const clearFocusTimeout = () => {
@@ -61,7 +78,7 @@ const onToggleChange = (value: boolean | null | undefined) => {
   emit('update:toggle', !!value)
 }
 
-const onTextChange = (value: string | null | undefined) => {
+const onTextChange = (value: SelectValue) => {
   emit('update:text', value ?? '')
 }
 
@@ -75,7 +92,7 @@ watch(
     await nextTick()
 
     focusTimeout = setTimeout(() => {
-      textInput.value?.setFocus?.()
+      textSelect.value?.$el.click?.()
     }, 300)
   }
 )

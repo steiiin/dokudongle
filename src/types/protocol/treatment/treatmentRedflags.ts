@@ -1,4 +1,4 @@
-import { EnhanceableText, inactive, OptionalValue } from "../input"
+import { EnhanceableText, OptionalValue } from "../input"
 import { getAllRedDiagnoses, getAllRedFlags, RedCase, RedDiagnose, RedFlag } from "@/data/redflags"
 
 export class TreatmentRedflags {
@@ -25,7 +25,7 @@ export class TreatmentRedflags {
     this.allRedFlags = getAllRedFlags()
     this.allRedDiagnoses = getAllRedDiagnoses()
 
-    this.attendant = inactive('')
+    this.attendant = OptionalValue.inactive('')
 
     this.Consent = ''
   }

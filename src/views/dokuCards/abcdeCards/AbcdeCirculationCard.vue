@@ -144,18 +144,33 @@
           ]">
         </DodoInputSelect>
 
-        <DodoInputSelect v-model="store.doku.xabCde.ecg"
-          label="EKG" lines="full"
-          :options="[
-            { value: 'SR', label: 'Sinusrhythmus' },
-            { value: 'VHF', label: 'Vorhofflimmern' },
-          ]"
-          allow-custom custom-label="Rhythmus"
-          custom-placeholder="z.B. TAA 130-160/min">
-        </DodoInputSelect>
+        <DodoItemModal label="EKG" modal-label="EKG"
+          :state="store.doku.xabCde.ecgState" lines="full">
+
+          <IonItem :lines="store.doku.xabCde.ecg.assessed ? 'full' : 'none'">
+            <IonToggle v-model="store.doku.xabCde.ecg.assessed" label-placement="end">
+              EKG geschrieben?
+            </IonToggle>
+          </IonItem>
+
+          <template v-if="store.doku.xabCde.ecg.assessed">
+
+            <DodoInputSelect v-model="store.doku.xabCde.ecg.value"
+              label="EKG" lines="full"
+              :options="[
+                { value: 'SR', label: 'Sinusrhythmus' },
+                { value: 'VHF', label: 'Vorhofflimmern' },
+              ]"
+              allow-custom custom-label="Rhythmus"
+              custom-placeholder="z.B. TAA 130-160/min">
+            </DodoInputSelect>
+
+          </template>
+
+        </DodoItemModal>
 
         <DodoItemModal label="Brustschmerz" modal-label="Brustschmerz" v-if="!ctx.isNonVerbal"
-          :state="store.doku.xabCde.chestDescription" lines="full">
+          :state="store.doku.xabCde.chestpainState" lines="full">
 
           <IonItem lines="full">
             <IonToggle v-model="store.doku.xabCde.chest.tightness" label-placement="end">
@@ -241,9 +256,10 @@
 
 import { computed, ref, watch } from 'vue'
 
-import { useDokuStore } from '@/store/doku'
+import { AssessedValue } from '@/types/protocol/input'
 import { basicCap } from '@/utils/autocorrect/basic'
-import { unassessed } from '@/types/protocol/input'
+
+import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -267,7 +283,7 @@ watch(() => store.doku.xabCde.chest.pain, (v) => {
   if (v == 'keine') {
     store.doku.xabCde.chest.tenderness = false
     store.doku.xabCde.chest.aggravation = false
-    store.doku.xabCde.chest.radiation = unassessed('')
+    store.doku.xabCde.chest.radiation = AssessedValue.unassessed('')
   }
 })
 

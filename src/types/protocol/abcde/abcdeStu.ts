@@ -1,7 +1,7 @@
 import { useDokuStore } from "@/store/doku"
 import { onHigh, onNormal } from "@/utils/filter"
 import { concatDoku } from "@/utils/text"
-import { AssessedValue, inactive, OptionalValue, unassessed } from "../input"
+import { AssessedValue, OptionalValue } from "../input"
 function getCtx() { return useDokuStore().context }
 
 export const IMMO_AMPEL_COMMENTARY = {
@@ -247,10 +247,10 @@ export class StuLimbs {
 
   constructor()
   {
-    this.armLeft = unassessed(new StuLimbsDms())
-    this.armRight = unassessed(new StuLimbsDms())
-    this.legLeft = unassessed(new StuLimbsDms())
-    this.legRight = unassessed(new StuLimbsDms())
+    this.armLeft = AssessedValue.unassessed(new StuLimbsDms())
+    this.armRight = AssessedValue.unassessed(new StuLimbsDms())
+    this.legLeft = AssessedValue.unassessed(new StuLimbsDms())
+    this.legRight = AssessedValue.unassessed(new StuLimbsDms())
   }
 
   // ##########################################################################
@@ -328,7 +328,7 @@ export class StuLimbsDms {
 
   constructor()
   {
-    this.deficit = inactive('')
+    this.deficit = OptionalValue.inactive('')
   }
 
   get isIO(): boolean

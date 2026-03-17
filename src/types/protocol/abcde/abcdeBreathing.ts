@@ -1,9 +1,9 @@
 import { ProtocolVerbosity } from "@/types/protocol"
-import { AssessedValue, unassessed } from "../input"
+import { AssessedValue, ProtocolStateValue, PSV } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { onHigh, onNormal, textIf } from "@/utils/filter"
+import { onHigh, onNormal, textDef, textIf } from "@/utils/filter"
 function getCtx() { return useDokuStore().context }
 
 export interface BreathingMech {
@@ -47,7 +47,7 @@ export class AbcdeBreathing {
     this.useAccessoryMuscles = false
     this.hasRetractions = false
 
-    this.auscultation = unassessed({ wheezing: '', crackles: '', dimished: '' })
+    this.auscultation = AssessedValue.unassessed({ wheezing: '', crackles: '', dimished: '' })
 
     this.isParadoxical = false
     this.hasJugularVenousDistension = false
@@ -103,29 +103,35 @@ export class AbcdeBreathing {
     )
   }
 
-  get breathingDescription(): string {
-    if (this.normalBreathing) { return 'normal' }
-    return this.breathingText
+  get breathingPSV(): ProtocolStateValue
+  {
+    if (this.normalBreathing)
+    {
+      return PSV(
+        'normal',
+        getCtx().isLow
+          ? 'Atmung normal'
+          : 'Atmung iO (Freq./Tiefe/Form)'
+      )
+    }
+
+    if (this.mechanics.pattern != '')
+    {
+      return PSV(this.mechanics.pattern)
+    }
+
+    const _frequency = textDef('Freq. iO', this.mechanics.frequency)
+    const _depth = textDef('Tiefe iO', this.mechanics.depth)
+    return PSV(concatDoku([ _frequency, _depth ], false))
+
+  }
+
+  get breathingState(): string {
+    return this.breathingPSV.modalState
   }
 
   get breathingText(): string {
-
-    if (this.normalBreathing) {
-      return getCtx().isLow ? 'Atmung normal' : 'Atmung iO (Freq./Tiefe/Form)'
-    }
-
-    let freqDesc = this.mechanics.frequency == '' ? 'Freq. iO' : this.mechanics.frequency
-    let depthDesc = this.mechanics.depth == '' ? 'Tiefe iO' : this.mechanics.depth
-    if (this.mechanics.pattern != '') {
-      freqDesc = ''
-      depthDesc = ''
-    }
-
-    return concatDoku([
-      [ freqDesc, depthDesc ],
-      this.mechanics.pattern,
-    ], false)
-
+    return this.breathingPSV.protocolText
   }
 
   ///////////////////////////////////////////////
@@ -138,30 +144,43 @@ export class AbcdeBreathing {
     )
   }
 
-  get auscultationDescription(): string {
-    if (!this.auscultation.assessed) { return 'Nicht Abgehört' }
-    return this.auscultationText
+  get auscultationPSV(): ProtocolStateValue {
+
+    if (!this.auscultation.isAssessed) { return PSV('Nicht Abgehört', '') }
+
+    if (this.auscultation.value.wheezing == ''
+        && this.auscultation.value.crackles == ''
+        && this.auscultation.value.dimished == '') {
+      return PSV('unauffällig', onNormal('Ausk. unauffällig')) }
+
+    const _wheezing = textIf(`Giemen ${this.auscultation.value.wheezing}`, !!this.auscultation.value.wheezing)
+    const _crackles = textIf(`RGs ${this.auscultation.value.crackles}`, !!this.auscultation.value.crackles)
+    const _dimished = textIf(`Abgeschwächt ${this.auscultation.value.dimished}`, !!this.auscultation.value.dimished)
+
+    return PSV(concatDoku([ _wheezing, _crackles, _dimished ], false))
+
+  }
+
+  get auscultationState(): string {
+    return this.auscultationPSV.modalState
   }
 
   get auscultationText(): string {
-    if (!this.auscultation.assessed) { return '' }
-    if (this.normalAuscultation) { return onNormal('Ausk. unauffällig') }
-    const wheezingText = textIf(`Giemen ${this.auscultation.value.wheezing}`, this.auscultation.value.wheezing != '')
-    const cracklesText = textIf(`RGs ${this.auscultation.value.crackles}`, this.auscultation.value.crackles != '')
-    const dimishedText = textIf(`Abgeschwächt ${this.auscultation.value.dimished}`, this.auscultation.value.dimished != '')
-    return concatDoku([ wheezingText, cracklesText, dimishedText ], false)
+    return this.auscultationPSV.protocolText
   }
 
   ///////////////////////////////////////////////
 
-  get thoraxDescription(): string {
+  get thoraxState(): string {
+
     if (!this.useAccessoryMuscles
-      && !this.hasRetractions
-      && !this.isParadoxical
-      && !this.hasJugularVenousDistension
-      && !this.hasEmphysema
-      && !this.hasTrachealDeviation
-    ) { return 'normal' }
+        && !this.hasRetractions
+        && !this.isParadoxical
+        && !this.hasJugularVenousDistension
+        && !this.hasEmphysema
+        && !this.hasTrachealDeviation
+    ) { return 'unauffällig' }
+
     return concatDoku([
       textIf('Einsatz AHM', this.useAccessoryMuscles),
       textIf('Einziehungen', this.hasRetractions),
@@ -169,16 +188,18 @@ export class AbcdeBreathing {
       textIf('Halsvenenstauung', this.hasJugularVenousDistension),
       textIf('subkutanes Emphysem', this.hasEmphysema),
       textIf('Trachea verschoben', this.hasTrachealDeviation),
-    ])
+    ], false)
+
   }
 
   get thoraxText(): string {
+
     return concatDoku([
       [
         textIf('Einsatz AHM', this.useAccessoryMuscles),
         this.hasRetractions
           ? 'Einziehungen'
-          : textIf('keine Einziehungen', getCtx().isHigh && this.hasDyspnoe),
+          : textIf('keine Einziehungen', (getCtx().isHigh && this.hasDyspnoe) || getCtx().isPediatric),
         textIf('paradoxe Atmung', this.isParadoxical)
       ],
       this.hasJugularVenousDistension
@@ -187,6 +208,7 @@ export class AbcdeBreathing {
       textIf('subkutanes Emphysem', this.hasEmphysema),
       textIf('Trachea verschoben', this.hasTrachealDeviation),
     ])
+
   }
 
   // #####################################################################
