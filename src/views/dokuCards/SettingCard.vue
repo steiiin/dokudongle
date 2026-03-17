@@ -1,12 +1,12 @@
 <template>
-  <IonCard>
+  <IonCard v-if="ctx.requireSceneDetails">
     <IonCardHeader>
       <IonCardTitle>Umgebung</IonCardTitle>
     </IonCardHeader>
     <IonCardContent class="with-list">
-      <IonList lines="full">
+      <IonList lines="inset">
 
-        <DodoInputSelect label="Einsatzort" v-model="store.doku.setting.location" lines="full"
+        <DodoInputSelect label="Einsatzort" v-model="store.doku.setting.location" lines="inset"
           empty-label="Keine Angabe"
           :options="[
             'Häuslichkeit',
@@ -64,10 +64,11 @@
 
 <script setup lang="ts">
 
-import { ref, watch } from 'vue'
-import { basicCap } from '@/utils/autocorrect/basic';
+import { computed } from 'vue'
+import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+const ctx = computed(() => store.context)
 
 </script>
