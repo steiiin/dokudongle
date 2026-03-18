@@ -28,16 +28,16 @@
             <IonLabel>Atemmuster</IonLabel>
           </IonItemDivider>
           <IonRadioGroup v-model="store.doku.xaBcde.mechanics.pattern">
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="">Normal</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="Hyperventilation">Hyperventilation</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="Biotsche Atmung">Biotsche Atmung</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="Cheyne-Stokes-Atmung">Cheyne-Stokes-Atmung</IonRadio>
             </IonItem>
             <IonItem>
@@ -50,14 +50,14 @@
             <IonItemDivider>
               <IonLabel>Parameter</IonLabel>
             </IonItemDivider>
-            <DodoInputSelect label="Frequenz" v-model="store.doku.xaBcde.mechanics.frequency" lines="full"
+            <DodoInputSelect label="Frequenz" v-model="store.doku.xaBcde.mechanics.frequency" lines="inset"
               :options="[
                 { value: '', label: 'Normal' },
                 { value: 'Bradypnoe', label: 'Bradypnoe (< 12/min)' },
                 { value: 'Tachypnoe', label: 'Tachypnoe (> 20/min)' },
               ]">
             </DodoInputSelect>
-            <DodoInputSelect label="Tiefe" v-model="store.doku.xaBcde.mechanics.depth" lines="full"
+            <DodoInputSelect label="Tiefe" v-model="store.doku.xaBcde.mechanics.depth" lines="none"
               :options="[
                 { value: '', label: 'Normal' },
                 { value: 'Flach', label: 'Flache Atmung' },
@@ -112,31 +112,31 @@
         <DodoItemModal label="Thoraxbefunde" modal-label="Thoraxbefunde"
           :state="store.doku.xaBcde.thoraxState" lines="none">
 
-          <IonItem v-show="store.doku.xAbcde.isBreathing">
+          <IonItem v-show="store.doku.xAbcde.isBreathing" lines="inset">
             <IonToggle v-model="store.doku.xaBcde.useAccessoryMuscles" label-placement="end">
               Hilfsmuskulatur?
             </IonToggle>
           </IonItem>
 
-          <IonItem v-show="store.doku.xAbcde.isBreathing">
+          <IonItem v-show="store.doku.xAbcde.isBreathing" lines="inset">
             <IonToggle v-model="store.doku.xaBcde.hasRetractions" label-placement="end">
               Einziehungen?
             </IonToggle>
           </IonItem>
 
-          <IonItem v-show="store.doku.xAbcde.isBreathing">
+          <IonItem v-show="store.doku.xAbcde.isBreathing" lines="inset">
             <IonToggle v-model="store.doku.xaBcde.isParadoxical" label-placement="end">
               Paradoxe Atmung?
             </IonToggle>
           </IonItem>
 
-          <IonItem>
+          <IonItem lines="inset">
             <IonToggle v-model="store.doku.xaBcde.hasJugularVenousDistension" label-placement="end">
               Halsvenenstauung?
             </IonToggle>
           </IonItem>
 
-          <IonItem>
+          <IonItem lines="inset">
             <IonToggle v-model="store.doku.xaBcde.hasEmphysema" label-placement="end">
               Subkutanes Emphysem?
             </IonToggle>

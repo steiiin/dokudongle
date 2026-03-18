@@ -17,67 +17,77 @@
           ></IonInput>
         </IonItem>
 
-        <DodoItemModal
-          label="Wasserlassen" modal-label="Wasserlassen"
-          :description="store.doku.xabcdE.urinary.text">
+        <IonItem :lines="store.doku.xabcdE.hasAssessedExcretions ? 'inset' : 'full'">
+          <IonToggle v-model="store.doku.xabcdE.hasAssessedExcretions" label-placement="end">
+            Ausscheidungen erfassen?
+          </IonToggle>
+        </IonItem>
 
-          <IonItemDivider>
-            <IonLabel>Katheter</IonLabel>
-          </IonItemDivider>
+        <template v-if="store.doku.xabcdE.hasAssessedExcretions">
 
-          <DodoInputSelect v-model="store.doku.xabcdE.urinary.catheterType"
-            label="Typ" lines="full"
-            :options="[
-              { value: '', label: 'Kein Katheter' },
-              { value: 'ISK', label: 'Einmalkatheter' },
-              { value: 'transurethraler DK', label: 'Transurethral' },
-              { value: 'suprapubischer DK', label: 'Suprapubisch' },
-              { value: 'Nierenkatheter', label: 'Nierenkatheter' },
-            ]">
-          </DodoInputSelect>
+          <DodoItemModal lines="inset"
+            label="Wasserlassen" modal-label="Wasserlassen"
+            :description="store.doku.xabcdE.urinary.text">
 
-          <DodoInputSelect v-if="store.doku.xabcdE.urinary.catheterType != ''"
-            v-model="store.doku.xabcdE.urinary.catheterIssues"
-            label="Komplikation" lines="full"
-            :options="[
-              { value: '', label: 'Keine' },
-              { value: 'disloziert', label: 'Disloziert' },
-              { value: 'gezogen', label: 'Gezogen' },
-              { value: 'verstopft', label: 'Verstopft' },
-            ]">
-          </DodoInputSelect>
+            <IonItemDivider>
+              <IonLabel>Katheter</IonLabel>
+            </IonItemDivider>
 
-          <IonItemDivider>
-            <IonLabel>Auffälligkeiten</IonLabel>
-          </IonItemDivider>
+            <DodoInputSelect v-model="store.doku.xabcdE.urinary.catheterType"
+              label="Typ" lines="full"
+              :options="[
+                { value: '', label: 'Kein Katheter' },
+                { value: 'ISK', label: 'Einmalkatheter' },
+                { value: 'transurethraler DK', label: 'Transurethral' },
+                { value: 'suprapubischer DK', label: 'Suprapubisch' },
+                { value: 'Nierenkatheter', label: 'Nierenkatheter' },
+              ]">
+            </DodoInputSelect>
 
-          <DodoInputSelect
-            v-model="store.doku.xabcdE.urinary.output"
-            label="Komplikation" lines="full"
-            :options="[
-              { value: '', label: 'Normal' },
-              { value: 'verringert', label: 'Verringert' },
-              { value: 'Harnverhalt', label: 'Harnverhalt' },
-              { value: 'vermehrt', label: 'Vermehrt' },
-            ]">
-          </DodoInputSelect>
+            <DodoInputSelect v-if="store.doku.xabcdE.urinary.catheterType != ''"
+              v-model="store.doku.xabcdE.urinary.catheterIssues"
+              label="Komplikation" lines="full"
+              :options="[
+                { value: '', label: 'Keine' },
+                { value: 'disloziert', label: 'Disloziert' },
+                { value: 'gezogen', label: 'Gezogen' },
+                { value: 'verstopft', label: 'Verstopft' },
+              ]">
+            </DodoInputSelect>
 
-          <IonItem>
-            <IonSelect label="Urin" interface="popover" :multiple="true" v-model="store.doku.xabcdE.urinary.abnormalities">
-              <IonSelectOption value="blutig">Blutig</IonSelectOption>
-              <IonSelectOption value="flockig">Flockig</IonSelectOption>
-              <IonSelectOption value="dunkel">Dunkel</IonSelectOption>
-              <IonSelectOption value="übelriechend">Übelriechend</IonSelectOption>
-            </IonSelect>
-          </IonItem>
+            <IonItemDivider>
+              <IonLabel>Auffälligkeiten</IonLabel>
+            </IonItemDivider>
 
-        </DodoItemModal>
+            <DodoInputSelect
+              v-model="store.doku.xabcdE.urinary.output"
+              label="Ausfuhr" lines="full"
+              :options="[
+                { value: '', label: 'Normal' },
+                { value: 'verringert', label: 'Verringert' },
+                { value: 'Harnverhalt', label: 'Harnverhalt' },
+                { value: 'vermehrt', label: 'Vermehrt' },
+              ]">
+            </DodoInputSelect>
 
-        <DodoInputTextOptional
-          toggle-label="Stuhlgang auffällig?" v-model:toggle="store.doku.xabcdE.bowelAbnormalities.active"
-          text-label="Beschreibung:" text-placeholder="z.B. Durchfall" v-model:text="store.doku.xabcdE.bowelAbnormalities.value"
-          :autocorrect-fn="basicCap">
-        </DodoInputTextOptional>
+            <IonItem>
+              <IonSelect label="Erscheinung" interface="popover" :multiple="true" v-model="store.doku.xabcdE.urinary.abnormalities">
+                <IonSelectOption value="blutig">Blutig</IonSelectOption>
+                <IonSelectOption value="flockig">Flockig</IonSelectOption>
+                <IonSelectOption value="dunkel">Dunkel</IonSelectOption>
+                <IonSelectOption value="übelriechend">Übelriechend</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+
+          </DodoItemModal>
+
+          <DodoInputTextOptional
+            toggle-label="Stuhlgang auffällig?" v-model:toggle="store.doku.xabcdE.bowelAbnormalities.active"
+            text-label="Beschreibung:" text-placeholder="z.B. Durchfall" v-model:text="store.doku.xabcdE.bowelAbnormalities.value"
+            :autocorrect-fn="basicCap">
+          </DodoInputTextOptional>
+
+        </template>
 
         <IonItem lines="full">
           <IonToggle v-model="store.doku.xabcdE.urinaryIncontinence" label-placement="end">
@@ -182,6 +192,7 @@ import { computed, ref, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 import { basicCap } from '@/utils/autocorrect/basic'
+import { insetIf } from '@/utils/filter'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

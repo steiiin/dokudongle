@@ -1,6 +1,5 @@
-import { AbcdeAirway, AbcdeBleeding, AbcdeBreathing, AbcdeCirculation, AbcdeDisability, AbcdeExposure, AbcdeStu } from "./protocol/abcde"
-import { EnhanceableText, OptionalValue } from "./protocol/input"
-import { SampleAllergies } from "./protocol/sample/sampleAllergies"
+import { AbcdeAirway, AbcdeBleeding, AbcdeBreathing, AbcdeCirculation, AbcdeDisability, AbcdeExposure } from "./protocol/abcde"
+import { EnhanceableText } from "./protocol/input"
 import { Sampler } from "./protocol/sampler"
 import { Setting } from "./protocol/setting"
 import { TreatmentConsent } from "./protocol/treatment/treatmentConsent"
@@ -21,7 +20,6 @@ export interface Protocol {
   xabCde: AbcdeCirculation,
   xabcDe: AbcdeDisability,
   xabcdE: AbcdeExposure,
-  xabcdeStu: AbcdeStu,
 
   sampler: Sampler,
 
@@ -52,7 +50,6 @@ export function resetProtocol(): Protocol {
     xabCde: new AbcdeCirculation(),
     xabcDe: new AbcdeDisability(),
     xabcdE: new AbcdeExposure(),
-    xabcdeStu: new AbcdeStu(),
 
     sampler: new Sampler(),
 
@@ -89,9 +86,9 @@ export interface ProtocolFlavors {
 // #######################################################################
 
 export class Patient {
-  public age: OptionalValue<PatientAge>
+  public age: PatientAge
   constructor() {
-    this.age = OptionalValue.inactive(new PatientAge(50, 'years'))
+    this.age = new PatientAge(50, 'years')
   }
 }
 

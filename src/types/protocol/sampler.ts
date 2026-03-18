@@ -1,8 +1,8 @@
-import { SampleAllergies, SampleMedication, SamplePler, SampleContacts } from "@/types/protocol/sample"
+import { SampleSymptoms, SampleAllergies, SampleMedication, SamplePler, SampleContacts } from "@/types/protocol/sample"
 
 export class Sampler {
 
-  // public symptoms: sampleSymptoms
+  public symptoms: SampleSymptoms
   public allergies: SampleAllergies
   public medication: SampleMedication
   public pler: SamplePler
@@ -10,6 +10,7 @@ export class Sampler {
 
   constructor()
   {
+    this.symptoms = new SampleSymptoms()
     this.allergies = new SampleAllergies()
     this.medication = new SampleMedication()
     this.pler = new SamplePler()

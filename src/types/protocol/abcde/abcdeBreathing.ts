@@ -122,7 +122,14 @@ export class AbcdeBreathing {
 
     const _frequency = textDef('Freq. iO', this.mechanics.frequency)
     const _depth = textDef('Tiefe iO', this.mechanics.depth)
-    return PSV(concatDoku([ _frequency, _depth ], false))
+
+    const protocolText = concatDoku([ _frequency, _depth ], false)
+    const isNormal = !this.mechanics.frequency && !this.mechanics.depth
+
+    return PSV(
+      isNormal ? 'normal' : protocolText,
+      protocolText
+    )
 
   }
 

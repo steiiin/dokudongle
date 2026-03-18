@@ -6,33 +6,29 @@ function getCtx() { return useDokuStore().context }
 
 export class AbcdeBleeding {
 
-  public hasCriticalBleeding: boolean
-  public bleeding: EnhanceableText
-  public treatment: string
+  public description: EnhanceableText
 
   // #####################################################################
 
   constructor()
   {
-    this.hasCriticalBleeding = false
-    this.bleeding = new EnhanceableText()
-    this.treatment = ''
+    this.description = new EnhanceableText()
   }
 
   // #####################################################################
 
+  get hasCriticalBleeding(): boolean
+  {
+    return !this.description.isEmpty
+  }
+
   public generateText(): string
   {
-    if (!getCtx().isTrauma) { return '' }
-    if (this.hasCriticalBleeding)
+    if (getCtx().isTrauma && this.hasCriticalBleeding)
     {
-      const description = placeholder(unbreak(this.bleeding.value), 'Blutungen')
-      return breakDoku(prefix('x:', description))
+      return breakDoku(prefix('x:', this.description.value))
     }
-    else
-    {
-      return breakDoku(prefix('x:', 'Keine kritischen Blutungen.'))
-    }
+    return ''
   }
 
 }

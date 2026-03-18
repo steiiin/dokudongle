@@ -94,6 +94,7 @@ export class AbcdeExposure {
   public nausea: boolean
   public emesis: ExposureEmisis
 
+  public hasAssessedExcretions: boolean
   public bowelAbnormalities: OptionalValue<string>
   public urinary: ExposureUrinary
   public urinaryIncontinence: boolean
@@ -109,6 +110,7 @@ export class AbcdeExposure {
     this.bodyTemperature = 36.5
     this.nausea = false
     this.emesis = new ExposureEmisis()
+    this.hasAssessedExcretions = false
     this.bowelAbnormalities = OptionalValue.inactive('')
     this.urinary = new ExposureUrinary()
     this.urinaryIncontinence = false
@@ -149,7 +151,7 @@ export class AbcdeExposure {
 
     let bowelSegment = (this.bowelAbnormalities.active)
       ? prefix('Stuhlgang:', this.bowelAbnormalities.value)
-      : onNormal('Stuhlgang oB')
+      : 'Stuhlgang o.B.'
 
 
     const hasCatheter = catheterSegment.length > 0;
@@ -159,7 +161,7 @@ export class AbcdeExposure {
 
     // 1) all good
     if (!hasCatheter && !hasIncontinence && !hasUrinarySegment && isBowelNormal) {
-      return onNormal('Wasserlassen/Stuhlgang o.B.')
+      return 'Wasserlassen/Stuhlgang o.B.'
     }
 
     // 2) only incontinence, else good
@@ -239,7 +241,7 @@ export class AbcdeExposure {
         ),
         this.emesis.text
       ],
-      this.excretionsText,
+      textIf(this.excretionsText, this.hasAssessedExcretions),
       this.abdominalText,
     ]))))
 

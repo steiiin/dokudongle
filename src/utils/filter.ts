@@ -25,6 +25,13 @@ export function fullIf(expr: boolean): string {
 }
 
 /**
+ * return 'inset' if true, otherwise 'none'
+ */
+export function insetIf(expr: boolean): string {
+  return expr ? 'inset' : 'none'
+}
+
+/**
  * return 'none' if true, otherwise 'full'
  */
 export function noneIf(expr: boolean): string {

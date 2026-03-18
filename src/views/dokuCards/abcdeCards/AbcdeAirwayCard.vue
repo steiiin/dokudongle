@@ -12,7 +12,7 @@
           </IonToggle>
         </IonItem>
 
-        <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction" lines="full"
+        <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction" lines="inset"
           empty-label="Keine"
           :options="[
             'Fremdkörper',
@@ -30,20 +30,14 @@
           </IonToggle>
         </IonItem>
 
-        <IonItem lines="full">
-          <IonToggle v-model="store.doku.xAbcde.hasTongueBite" label-placement="end">
-            Zungenbiss?
-          </IonToggle>
-        </IonItem>
-
         <DodoItemModal label="Schleimhaut" modal-label="Mundschleimhaut"
-          :state="store.doku.xAbcde.mucosaText" lines="none">
+          :state="store.doku.xAbcde.mucosaText" lines="full">
 
           <IonItemDivider>
             <IonLabel>Feuchtigkeit</IonLabel>
           </IonItemDivider>
           <IonRadioGroup v-model="store.doku.xAbcde.mucosa.m">
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="feucht">Feucht</IonRadio>
             </IonItem>
             <IonItem>
@@ -54,13 +48,13 @@
             <IonLabel>Erythema / Farbe</IonLabel>
           </IonItemDivider>
           <IonRadioGroup v-model="store.doku.xAbcde.mucosa.e">
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="rosig">Rosig</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="blass">Blass</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="gerötet">Gerötet</IonRadio>
             </IonItem>
             <IonItem>
@@ -69,6 +63,12 @@
           </IonRadioGroup>
 
         </DodoItemModal>
+
+        <IonItem lines="none">
+          <IonToggle v-model="store.doku.xAbcde.hasTongueBite" label-placement="end">
+            Zungenbiss?
+          </IonToggle>
+        </IonItem>
 
       </IonList>
 
@@ -94,6 +94,7 @@ const ctx = computed(() => store.context)
 watch(() => store.doku.xAbcde.isBreathing, (v) => {
 
   store.doku.xAbcde.hasStridor = false
+  store.doku.xAbcde.mucosa.e = v ? 'rosig' : 'bläulich'
 
   store.doku.xaBcde.breathlessness = 'keine'
   store.doku.xaBcde.mechanics.frequency = ''

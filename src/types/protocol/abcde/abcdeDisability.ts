@@ -1,9 +1,12 @@
 import { onHigh, onNormal, textIf } from "@/utils/filter"
-import { AssessedValue, OptionalValue } from "../input"
+import { AssessedValue, OptionalValue, ProtocolStateValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 function getCtx() { return useDokuStore().context }
+
+type ZopsKey = 'Z' | 'O' | 'P' | 'S';
+type ZopsValue = 'ja' | 'teilweise' | 'nein';
 
 export class DisabilityZops {
 
@@ -37,6 +40,10 @@ export class DisabilityZops {
     return this.Z == 'ja' && this.O == 'ja' && this.P == 'ja' && this.S == 'ja'
   }
 
+  get isPartialUnoriented(): boolean{
+    return this.Z != 'ja' && this.O != 'ja' && this.P != 'ja' && this.S != 'ja'
+  }
+
   get isUnoriented(): boolean {
     return this.Z != 'nein' && this.O != 'nein' && this.P != 'nein' && this.S != 'nein'
   }
@@ -47,7 +54,42 @@ export class DisabilityZops {
 
   ///////////////////////////////////////////////
 
-  get generatePediatricText(): string {
+  get isPediatricNonVerbal(): boolean {
+    return this.consciousness == 'abwesend'
+      || this.response == 'keine'
+  }
+
+  get pediatricState(): string
+  {
+
+    const vigilanzMap: Record<typeof this.consciousness, string> = {
+      aufmerksam: 'aufmerksam',
+      ablenkbar: 'teils aufmerksam',
+      unaufmerksam: 'verlangsamt',
+      abwesend: 'abwesend',
+    }
+
+    const affektMap: Record<typeof this.affect, string> = {
+      ruhig: 'ruhig',
+      troestbar: 'tröstbar',
+      untroestbar: 'untröstbar',
+    }
+
+    const reaktionMap: Record<typeof this.response, string> = {
+      adaequat: 'adäquat',
+      inadaequat: 'inadäquat',
+      keine: 'keine Reaktion',
+    }
+
+    return [
+      vigilanzMap[this.consciousness],
+      affektMap[this.affect],
+      reaktionMap[this.response],
+    ].join(', ')
+
+  }
+
+  get pediatricText(): string {
 
     const vigilanzMap: Record<typeof this.consciousness, string> = {
       aufmerksam: 'altersentsprechend aufmerksam',
@@ -76,41 +118,57 @@ export class DisabilityZops {
 
   }
 
-  get generateAdultText(): string {
+  ///////////////////////////////////////////////
 
-    const mapping: Record<'Z'|'O'|'P'|'S', string> = {
-      Z: (/*shortLabel ? 'Z' : */'zeitlich'),
-      O: (/*shortLabel ? 'Ö' : */'örtlich'),
-      P: (/*shortLabel ? 'P' : */'zur Person'),
-      S: (/*shortLabel ? 'S' : */'situativ'),
-    };
+  private buildAdultText(
+    mapping: Record<ZopsKey, string>,
+    labels: {
+      orientiert: string;
+      teilweise: string;
+      desorientiert: string;
+    }
+  ): string {
 
-    if (this.isOriented) { return 'ZOPS orientiert' }
-    if (this.isUnoriented) { return 'desorientiert' }
+    if (this.isOriented) return 'ZOPS orientiert';
+    if (this.isUnoriented) return 'desorientiert';
 
-    const group = (value: 'ja' | 'teilweise' | 'nein') =>
+    const group = (value: ZopsValue) =>
       DisabilityZops.keys
         .filter(k => this[k] === value)
         .map(k => mapping[k]);
 
-    const parts: string[] = [];
+    return ([
+      { keys: group('ja'), text: labels.orientiert },
+      { keys: group('teilweise'), text: labels.teilweise },
+      { keys: group('nein'), text: labels.desorientiert }
+    ])
+      .filter(g => g.keys.length)
+      .map(g => `${g.keys.join('/')} ${g.text}`)
+      .join(', ');
+  }
 
-    const orientiert = group('ja');
-    if (orientiert.length) {
-      parts.push(`${orientiert.join('/')} orientiert`);
-    }
+  get adultState(): string {
+    return this.buildAdultText(
+      { Z: 'Z', O: 'Ö', P: 'P', S: 'S' },
+      {
+        orientiert: 'orientiert',
+        teilweise: 'teilw.',
+        desorientiert: 'deso.'
+      }
+    );
+  }
 
-    const teilweise = group('teilweise');
-    if (teilweise.length) {
-      parts.push(`${teilweise.join('/')} ${/*shortLabel ? 'teilw.' : */'teilweise orientiert'}`);
-    }
+  get adultText(): string {
 
-    const desorientiert = group('nein');
-    if (desorientiert.length) {
-      parts.push(`${desorientiert.join('/')} ${/*shortLabel ? 'deso.' : */'desorientiert'}`);
-    }
-
-    return parts.join(', ');
+    if (this.isOriented && getCtx().isLow) { return 'orientiert' }
+    return this.buildAdultText(
+      { Z: 'zeitlich', O: 'örtlich', P: 'zur Person', S: 'situativ' },
+      {
+        orientiert: 'orientiert',
+        teilweise: 'teilweise orientiert',
+        desorientiert: 'desorientiert'
+      }
+    );
 
   }
 
@@ -250,6 +308,20 @@ export class AbcdeDisability {
     else { return '' }
   }
 
+  ///////////////////////////////////////////////
+
+  get psychiatricState(): string {
+    if (this.psychRass == ''
+      && this.psychDisorder == ''
+      && !this.psychHallucinations
+      && !this.psychDelusions
+      && !this.psychBehavioralChange
+      && !this.psychPerseveration
+      && !this.psychDementia
+    ) { return 'normal' }
+    return this.psychiatricText
+  }
+
   get psychiatricText(): string {
     return concatDoku([
       this.psychRass,
@@ -295,6 +367,7 @@ export class AbcdeDisability {
   {
 
       const isNonVerbal = getCtx().isNonVerbal
+      const isPediatric = getCtx().isPediatric
 
       const headache = this.headache
         ? 'Kopfschmerzen'
@@ -303,7 +376,8 @@ export class AbcdeDisability {
       const assessedLine: string = breakDoku(prefix('D:', capitalizeBegin(concatDoku([
         [
           this.avpu,
-          textIf(this.zops.generateAdultText, !isNonVerbal),
+          textIf(this.zops.pediatricText, !isNonVerbal && isPediatric),
+          textIf(this.zops.adultText, !isNonVerbal && !isPediatric),
         ],
         this.gcs.score == 15
           ? onHigh('GCS 15')

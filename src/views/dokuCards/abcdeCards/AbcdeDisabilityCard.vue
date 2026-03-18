@@ -7,7 +7,7 @@
       <IonList lines="none">
 
         <DodoInputSelect v-model="store.doku.xabcDe.avpu"
-          label="Wachheit" lines="full"
+          label="Wachheit" lines="inset"
           :options="[
             { value: 'wach', label: 'Wach' },
             { value: 'benommen', label: 'Benommen' },
@@ -17,10 +17,9 @@
           ]">
         </DodoInputSelect>
 
-        <DodoItemModal v-if="!ctx.isNonVerbal && ctx.isPediatric"
-          label="Orientierung (pädiatrisch)"
-          modal-label="Orientierung (pädiatrisch)"
-          :state="store.doku.xabcDe.zops.generatePediatricText">
+        <DodoItemModal v-if="!ctx.isNonVerbal && ctx.isPediatric" lines="inset"
+          label="Orientierung (pädiatrisch)" modal-label="Orientierung (pädiatrisch)"
+          :state="store.doku.xabcDe.zops.pediatricState">
 
           <DodoInputSelect v-model="store.doku.xabcDe.zops.consciousness"
             label="Vigilanz" lines="full"
@@ -51,12 +50,11 @@
         </DodoItemModal>
 
         <DodoItemModal v-if="!ctx.isNonVerbal && !ctx.isPediatric"
-          label="Orientierung"
-          modal-label="Orientierung"
-          :state="store.doku.xabcDe.zops.generateAdultText">
+          label="Orientierung" modal-label="Orientierung" lines="inset"
+          :state="store.doku.xabcDe.zops.adultState">
 
           <DodoInputSelect v-model="store.doku.xabcDe.zops.Z"
-            label="Zeitlich" lines="full"
+            label="Zeitlich" lines="inset"
             :options="[
               { value: 'ja', label: 'Orientiert' },
               { value: 'teilweise', label: 'Teilweise' },
@@ -64,7 +62,7 @@
             ]">
           </DodoInputSelect>
           <DodoInputSelect v-model="store.doku.xabcDe.zops.O"
-            label="Örtlich" lines="full"
+            label="Örtlich" lines="inset"
             :options="[
               { value: 'ja', label: 'Orientiert' },
               { value: 'teilweise', label: 'Teilweise' },
@@ -72,7 +70,7 @@
             ]">
           </DodoInputSelect>
           <DodoInputSelect v-model="store.doku.xabcDe.zops.P"
-            label="Zur Person" lines="full"
+            label="Zur Person" lines="inset"
             :options="[
               { value: 'ja', label: 'Orientiert' },
               { value: 'teilweise', label: 'Teilweise' },
@@ -132,25 +130,25 @@
 
         </DodoItemModal>
 
-        <DodoInputTextOptional
+        <DodoInputTextOptional :lines="(ctx.isNonVerbal || store.doku.xabcDe.paresis.active) ? 'full' : 'inset'"
           toggle-label="Paresen?" v-model:toggle="store.doku.xabcDe.paresis.active"
           text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresis.value"
           :autocorrect-fn="basicCap">
         </DodoInputTextOptional>
 
-        <DodoInputTextOptional v-if="!ctx.isNonVerbal"
+        <DodoInputTextOptional v-if="!ctx.isNonVerbal" :lines="(store.doku.xabcDe.paresthesia.active) ? 'full' : 'inset'"
           toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.paresthesia.active"
           text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresthesia.value"
-          :autocorrect-fn="basicCap" lines="full">
+          :autocorrect-fn="basicCap">
         </DodoInputTextOptional>
 
-        <IonItem v-if="!ctx.isNonVerbal">
+        <IonItem v-if="!ctx.isNonVerbal" lines="full">
           <IonToggle v-model="store.doku.xabcDe.aphasia" label-placement="end">
             Aphasie?
           </IonToggle>
         </IonItem>
 
-        <IonItem v-if="!ctx.isNonVerbal">
+        <IonItem v-if="!ctx.isNonVerbal" lines="full">
           <IonToggle v-model="store.doku.xabcDe.headache" label-placement="end">
             Kopfschmerzen?
           </IonToggle>
@@ -167,13 +165,13 @@
 
         <DodoItemModal
           label="Psych-Befund" modal-label="Psych-Befund"
-          :state="store.doku.xabcDe.psychiatricText">
+          :state="store.doku.xabcDe.psychiatricState">
 
           <IonItemDivider>
             <IonLabel>Abweichungen</IonLabel>
           </IonItemDivider>
           <DodoInputSelect v-model="store.doku.xabcDe.psychRass"
-            label="Agitation" lines="none"
+            label="Agitation" lines="inset"
             :options="[
               { value: '', label: 'Ruhig' },
               { value: 'unruhig', label: 'Unruhig' },
@@ -182,19 +180,19 @@
               { value: 'streitsüchtig', label: 'Streitsüchtig' },
             ]">
           </DodoInputSelect>
-          <IonItem lines="full">
+          <IonItem lines="full" class="input-description">
             <IonNote slot="start">{{ rassDescription }}</IonNote>
           </IonItem>
 
           <DodoInputSelect v-model="store.doku.xabcDe.psychDisorder"
-            label="Bewusstseinsstörung" lines="none"
+            label="Bewusstseinsstörung" :lines="!disorderDescription ? 'full' : 'inset'"
             :options="[
               { value: '', label: 'Nein' },
               { value: 'Stupor', label: 'Stupor' },
               { value: 'Delir', label: 'Delir' },
             ]">
           </DodoInputSelect>
-          <IonItem lines="full">
+          <IonItem  class="input-description" lines="full" v-if="!!disorderDescription">
             <IonNote slot="start">{{ disorderDescription }}</IonNote>
           </IonItem>
 
@@ -227,6 +225,11 @@
               Demenz bekannt?
             </IonToggle>
           </IonItem>
+          <IonItem lines="none" v-if="store.doku.xabcDe.couldBeBaseline">
+            <IonToggle v-model="store.doku.xabcDe.psychBaseline" label-placement="end">
+              Entspricht Baseline?
+            </IonToggle>
+          </IonItem>
 
         </DodoItemModal>
 
@@ -246,7 +249,7 @@
           ]">
         </DodoInputSelect>
 
-        <DodoInputTextOptional
+        <DodoInputTextOptional lines="none"
           toggle-label="Intoxikation möglich?" v-model:toggle="store.doku.xabcDe.intoxication.active"
           text-label="Beschreibung" text-placeholder="z.B. C2-Geruch" v-model:text="store.doku.xabcDe.intoxication.value">
         </DodoInputTextOptional>

@@ -5,9 +5,9 @@
       {{ modelValue.value }}
     </div>
 
-    <IonButton :color="isMissingField ? 'danger' : ''"
-      fill="outline" expand="block"
-      size="small" :disabled="modelValue.isEnhancing"
+    <IonButton :color="isMissingField ? 'danger' : (inheritStyle ? 'dark' : '')"
+      :fill="inheritStyle ? 'clear' : 'outline'" expand="block"
+      size="small" :disabled="modelValue.isEnhancing" :class="{ inheritStyle }"
       @click="openModal">
       <IonIcon slot="start" :src="alertCircle" v-if="isMissingField"></IonIcon>
       {{ title }} {{ modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten' }}
@@ -84,6 +84,13 @@
               Redo
             </IonButton>
           </div>
+          <IonButton
+              size="normal" color="danger" fill="outline"
+              :disabled="modelValue.isEmpty"
+              @click="clear"
+            >
+              Eingaben löschen
+            </IonButton>
         </div>
       </IonContent>
     </IonModal>
@@ -97,12 +104,14 @@ import { toastController } from '@ionic/core'
 import { alertCircle, warningOutline } from 'ionicons/icons'
 import { computed, ref, watch } from 'vue'
 import { EnhanceableText } from '@/types/protocol/input'
+import { alertController } from '@ionic/vue';
 
 const props = withDefaults(defineProps<{
   modelValue: EnhanceableText
   title: string
   placeholder?: string
   mandatory?: boolean
+  inheritStyle?: boolean
   enhanceFn: (draft: string) => Promise<string | null>
 }>(), {})
 
@@ -232,6 +241,44 @@ const enhance = async () => {
   draft.value = updated.value
 }
 
+async function confirmDelete(): Promise<boolean> {
+  return new Promise(async (resolve) => {
+    const alert = await alertController.create({
+      header: 'Eingaben löschen',
+      message: 'Möchtest du die Eingaben wirklich löschen?',
+      buttons: [
+        {
+          text: 'Abbrechen',
+          role: 'cancel',
+          handler: () => resolve(false),
+        },
+        {
+          text: 'Ja, Löschen',
+          role: 'destructive',
+          handler: () => resolve(true),
+        },
+      ],
+    })
+
+    await alert.present()
+  })
+}
+
+const clear = async () => {
+  const confirmed = await confirmDelete()
+  if (!confirmed) return
+
+  const updated = cloneModelValue()
+  updated.commitEdit('')
+
+  emitUpdated(updated)
+
+  draft.value = ''
+  isEditing.value = false
+
+  isModalOpen.value = false
+}
+
 const showEnhanceError = async () => {
   const toast = await toastController.create({
     message: 'Die Verbesserung konnte nicht erstellt werden.',
@@ -302,5 +349,9 @@ defineExpose({
 .dd-input-modal.is-enhancing .dd-modal-data {
   pointer-events: none;
   opacity: 0.8;
+}
+
+.inheritStyle {
+  background-color: var(--card-bg);
 }
 </style>

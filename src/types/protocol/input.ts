@@ -205,3 +205,14 @@ export function PSV(state: string, text?: string): ProtocolStateValue {
     protocolText: text ?? state,
   }
 }
+
+export type StateItemValue = {
+  title: string,
+  description?: string,
+}
+export function SIV(title: string, description?: string): StateItemValue {
+  return {
+    title,
+    description,
+  }
+}

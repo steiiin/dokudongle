@@ -1,3 +1,5 @@
+export * from './sampleSymptoms'
+export * from './sampleSymptomsTrauma'
 export * from './sampleAllergies'
 export * from './sampleMedication'
 export * from './samplePler'

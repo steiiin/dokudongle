@@ -13,13 +13,13 @@
             <IonLabel>Farbe</IonLabel>
           </IonItemDivider>
           <IonRadioGroup v-model="store.doku.xabCde.skin.color">
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="rosig">Rosig</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="blass">Blass</IonRadio>
             </IonItem>
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="marmoriert">Marmoriert</IonRadio>
             </IonItem>
             <IonItem>
@@ -30,7 +30,7 @@
           <IonItemDivider>
             <IonLabel>Beschaffenheit</IonLabel>
           </IonItemDivider>
-          <IonItem>
+          <IonItem lines="inset">
             <IonToggle v-model="store.doku.xabCde.skin.clammy" label-placement="end">
               Schweißig?
             </IonToggle>
@@ -45,7 +45,7 @@
             <IonLabel>Temperatur (Extremitäten)</IonLabel>
           </IonItemDivider>
           <IonRadioGroup v-model="store.doku.xabCde.skin.peripheralTemp">
-            <IonItem>
+            <IonItem lines="inset">
               <IonRadio value="warm">Warm</IonRadio>
             </IonItem>
             <IonItem>
@@ -59,7 +59,7 @@
               <IonLabel>Temperatur (Stamm)</IonLabel>
             </IonItemDivider>
             <IonRadioGroup v-model="store.doku.xabCde.skin.centralTemp">
-              <IonItem>
+              <IonItem lines="inset">
                 <IonRadio value="warm">Warm</IonRadio>
               </IonItem>
               <IonItem>
@@ -113,7 +113,7 @@
             <IonItemDivider>
               <IonLabel>Frequenz</IonLabel>
             </IonItemDivider>
-            <IonItem>
+            <IonItem lines="full">
               <IonToggle v-model="store.doku.xabCde.pulse.rhythmic" label-placement="end">
                 Regelmäßig?
               </IonToggle>
@@ -156,7 +156,7 @@
           <template v-if="store.doku.xabCde.ecg.assessed">
 
             <DodoInputSelect v-model="store.doku.xabCde.ecg.value"
-              label="EKG" lines="full"
+              label="EKG" lines="none"
               :options="[
                 { value: 'SR', label: 'Sinusrhythmus' },
                 { value: 'VHF', label: 'Vorhofflimmern' },
@@ -179,7 +179,7 @@
           </IonItem>
 
           <DodoInputSelect v-model="store.doku.xabCde.chest.pain" v-if="ctx.hasPulse"
-            label="Blutdruck" lines="full"
+            label="Brustschmerzen" :lines="insetIf(store.doku.xabCde.chest.pain != 'keine')"
             :options="[
               { value: 'keine', label: 'Keine' },
               { value: 'leichte', label: 'Leicht' },
@@ -190,13 +190,13 @@
 
           <template v-if="store.doku.xabCde.chest.pain !== 'keine'">
 
-            <IonItem lines="full">
+            <IonItem lines="inset">
               <IonToggle v-model="store.doku.xabCde.chest.tenderness" label-placement="end">
                 Druckdolent?
               </IonToggle>
             </IonItem>
 
-            <IonItem lines="full">
+            <IonItem lines="inset">
               <IonToggle v-model="store.doku.xabCde.chest.aggravation" label-placement="end">
                 Bewegungsabhängig?
               </IonToggle>
@@ -260,6 +260,7 @@ import { AssessedValue } from '@/types/protocol/input'
 import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
+import { insetIf } from '@/utils/filter'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

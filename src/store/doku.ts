@@ -1,6 +1,6 @@
 import { BleClient, numberToUUID } from '@capacitor-community/bluetooth-le';
 import { Capacitor } from '@capacitor/core';
-import { defineStore } from 'pinia';
+import { defineStore, storeToRefs } from 'pinia';
 
 import { textToHidEvents } from '@/utils/keymap-german';
 import { Device, DeviceConnection, ServiceUUID } from '@/types/dongle';
@@ -123,6 +123,8 @@ export const useDokuStore = defineStore('doku', {
 
       const requireSceneDetails: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.NEF_VOR_ORT
 
+      const isPediatric: boolean = state.doku.ident.age.totalYears <= 3
+
       const nothingToTreat: boolean = (
         !state.doku.Xabcde.hasCriticalBleeding
         && !state.doku.xAbcde.needTreatment
@@ -136,7 +138,7 @@ export const useDokuStore = defineStore('doku', {
       const gcs: number = state.doku.xabcDe.gcs.score
       const isBaseline: boolean = state.doku.xabcDe.psychBaseline
 
-      const isTrauma: boolean = requireSceneDetails && (true /* Trauma-Tag */)
+      const isTrauma: boolean = requireSceneDetails && (state.doku.flavors.trauma)
 
       const isCritical: boolean = state.doku.Xabcde.hasCriticalBleeding
         || !state.doku.xAbcde.isBreathing
@@ -147,10 +149,10 @@ export const useDokuStore = defineStore('doku', {
         || state.doku.xabCde.pulse.centralStrength != 'gut'
         || (isTrauma && gcs <= 12 && !isBaseline)
         || (state.doku.xabcDe.avpu == 'bewusstlos' && !isBaseline)
-        || state.doku.xabcdeStu.head.Anisocoria != ''
-        || state.doku.xabcdeStu.spine.hasObviousSevereInjury
-        || state.doku.xabcdeStu.thorax.hasUnstableChestWall
-        || state.doku.xabcdeStu.pelvis.hasHemodynamicInstability
+        || state.doku.sampler.symptoms.trauma.head.Anisocoria != ''
+        || state.doku.sampler.symptoms.trauma.spine.hasObviousSevereInjury
+        || state.doku.sampler.symptoms.trauma.thorax.hasUnstableChestWall
+        || state.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability
 
       const verbosity: ProtocolVerbosity = state.doku.course !== ProtocolCourse.TRANSPORT || isCritical
         ? ProtocolVerbosity.HIGH
@@ -158,8 +160,16 @@ export const useDokuStore = defineStore('doku', {
           ? ProtocolVerbosity.LOW
           : ProtocolVerbosity.NORMAL
 
-      const isNonVerbal: boolean = false
-      const isLowVigilant: boolean = false
+      const isNonVerbal: boolean = state.doku.flavors.non_verbal
+        || !state.doku.xAbcde.isBreathing
+        || state.doku.xabcDe.avpu == 'bewusstlos'
+        || state.doku.xabcDe.avpu == 'soporös'
+        || state.doku.xabcDe.gcs.v < 4
+        || (isPediatric && state.doku.xabcDe.zops.isPediatricNonVerbal)
+
+      const isLowVigilant: boolean =
+        (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&
+        (!state.doku.xabcDe.psychBaseline && !state.doku.xabcDe.psychDementia)
 
       return {
 
@@ -185,7 +195,7 @@ export const useDokuStore = defineStore('doku', {
         hasSensomotoricDeficit: state.doku.xabcDe.paresis.active,
 
         isTrauma,
-        isPediatric: state.doku.ident.age.totalYears <= 3,
+        isPediatric,
         isGeriatric: state.doku.ident.age.totalYears >= 65,
 
       } as ProtocolContext
@@ -216,16 +226,17 @@ export const useDokuStore = defineStore('doku', {
         state.doku.xAbcde.generateText(),
         state.doku.xaBcde.generateText(),
         state.doku.xabCde.generateText(),
+        state.doku.xabcDe.generateText(),
         state.doku.xabcdE.generateText(),
       ], true)
 
       // STU
       text += textIf(breakDoku([
-        state.doku.xabcdeStu.head.generateText(),
-        state.doku.xabcdeStu.spine.generateText(),
-        state.doku.xabcdeStu.thorax.generateText(),
-        state.doku.xabcdeStu.pelvis.generateText(),
-        state.doku.xabcdeStu.limbs.generateText(),
+        state.doku.sampler.symptoms.trauma.head.generateText(),
+        state.doku.sampler.symptoms.trauma.spine.generateText(),
+        state.doku.sampler.symptoms.trauma.thorax.generateText(),
+        state.doku.sampler.symptoms.trauma.pelvis.generateText(),
+        state.doku.sampler.symptoms.trauma.limbs.generateText(),
       ], true), this.context.isTrauma)
 
       // SAMPLE

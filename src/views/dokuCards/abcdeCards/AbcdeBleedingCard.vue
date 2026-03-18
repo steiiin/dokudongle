@@ -6,16 +6,10 @@
     <IonCardContent>
       <IonList lines="none">
 
-        <IonItem>
-          <IonToggle v-model="store.doku.Xabcde.hasCriticalBleeding" label-placement="end">
-            Gab es kritische Blutungen?
-          </IonToggle>
-        </IonItem>
-
-        <DodoInputTextArea v-model="store.doku.Xabcde.bleeding" v-if="hasBleedings"
-          ref="bleedingInput"
-          title="Blutung" placeholder="z.B. Schnittverletzung Arm: Tourniquet"
-          :enhance-fn="enhanceBleeding" mandatory>
+        <DodoInputTextArea v-model="store.doku.Xabcde.description"
+          ref="bleedingInput" inherit-style
+          title="Kritische Blutung" placeholder="z.B. Schnittverletzung Arm: Tourniquet"
+          :enhance-fn="enhanceBleeding">
           Beschreibe ganz kurz die <b>kritischen Blutungen</b>
           und deine <b>Behandlung</b>.
         </DodoInputTextArea>
@@ -33,18 +27,6 @@ import { enhanceBleeding } from '@/utils/gpt/bleeding'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
-
-const hasBleedings = computed(() => store.doku.Xabcde.hasCriticalBleeding)
-
-const bleedingInput = ref<any|null>(null)
-
-watch(hasBleedings, (v) => {
-  if (v) {
-    setTimeout(() => bleedingInput.value?.openModal(), 300)
-  } else {
-    store.doku.Xabcde.bleeding.clear()
-  }
-})
 
 </script>
 

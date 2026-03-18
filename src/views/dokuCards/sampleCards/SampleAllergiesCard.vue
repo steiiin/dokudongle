@@ -6,18 +6,19 @@
     <IonCardContent>
       <IonList>
 
-        <IonItem lines="none">
-          <IonSelect label="Allergien" interface="popover" v-model="store.doku.sampler.allergies.level">
-            <IonSelectOption value="">Keine</IonSelectOption>
-            <IonSelectOption value="unknown">Unklar</IonSelectOption>
-            <IonSelectOption value="minor">Nicht-Medikamentös</IonSelectOption>
-            <IonSelectOption value="major">Klinisch-Relevant</IonSelectOption>
-          </IonSelect>
-        </IonItem>
+        <DodoInputSelect label="Allergien" v-model="store.doku.sampler.allergies.level" lines="none"
+          :options="[
+            { value: '', label: 'Keine' },
+            { value: 'unknown', label: 'Unklar' },
+            { value: 'minor', label: 'Nicht-Medikamentös' },
+            { value: 'major', label: 'Klinisch-Relevant' },
+          ]">
+        </DodoInputSelect>
+
         <IonItem lines="none" v-if="needInput">
           <DodoInputText ref="inputAllergiesDescription"
             v-model="store.doku.sampler.allergies.description"
-            label="Beschreibung:" :placeholder="getAllergiesHint"
+            label="↳ Welche:" :placeholder="placeholder"
             :beautify-fn="basicCap">
           </DodoInputText>
         </IonItem>
@@ -45,8 +46,14 @@ watch(() => store.doku.sampler.allergies.level, async (v) => {
 })
 
 const needInput = computed(() => store.doku.sampler.allergies.level == 'minor' || store.doku.sampler.allergies.level == 'major')
-const getAllergiesHint = computed(() => {
+const placeholder = computed(() => {
   if (store.doku.sampler.allergies.level == 'minor') { return 'z.B. Heuschnupfen' }
   else { return 'z.B. Metamizol' }
 })
+
 </script>
+<style scoped>
+ion-card {
+  --card-bg: #7f7e43;
+}
+</style>

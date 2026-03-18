@@ -4,6 +4,7 @@
     <IonToggle
       :model-value="props.toggle"
       label-placement="end"
+      @pointerdown="onTogglePointerDown"
       @update:model-value="onToggleChange"
     >
       {{ props.toggleLabel }}
@@ -49,6 +50,7 @@ const emit = defineEmits<{
 
 const textInput = ref<any|null>(null)
 let focusTimeout: ReturnType<typeof setTimeout> | null = null
+const toggleChanging = ref(false)
 
 const clearFocusTimeout = () => {
   if (focusTimeout) {
@@ -63,6 +65,11 @@ const onToggleChange = (value: boolean | null | undefined) => {
 
 const onTextChange = (value: string | null | undefined) => {
   emit('update:text', value ?? '')
+}
+
+const onTogglePointerDown = () => {
+  toggleChanging.value = true
+  setTimeout(() => toggleChanging.value = false, 0)
 }
 
 watch(
@@ -81,6 +88,8 @@ watch(
 )
 
 const handleEmpty = () => {
+  console.log('handleEmpty + ' + toggleChanging.value)
+  if (toggleChanging.value) { return }
   emit('update:toggle', false)
 }
 

@@ -11,7 +11,6 @@
       <AbcdeCirculationCard />
       <AbcdeDisabilityCard />
       <AbcdeExposureCard />
-      <AbcdeStuCard v-if="ctx.isTrauma" />
 
     </IonCardContent>
   </IonCard>
@@ -26,7 +25,6 @@ import AbcdeBreathingCard from './abcdeCards/AbcdeBreathingCard.vue'
 import AbcdeCirculationCard from './abcdeCards/AbcdeCirculationCard.vue'
 import AbcdeDisabilityCard from './abcdeCards/AbcdeDisabilityCard.vue'
 import AbcdeExposureCard from './abcdeCards/AbcdeExposureCard.vue'
-import AbcdeStuCard from './abcdeCards/AbcdeStuCard.vue'
 
 import { computed, watch } from 'vue'
 

@@ -5,10 +5,21 @@
     </IonCardHeader>
     <IonCardContent class="card-in-card">
 
-      <SampleAllergiesCard />
-      <SampleMedicationsCard />
-      <SamplePlerCard />
-      <SampleContactsCard />
+          <IonCard class="sample-symptoms">
+            <IonCardHeader>
+              <IonCardTitle>Symptome</IonCardTitle>
+            </IonCardHeader>
+            <IonCardContent class="card-in-card">
+
+              <SampleSymptomsTrauma v-if="ctx.isTrauma" />
+
+            </IonCardContent>
+          </IonCard>
+          <SampleAllergiesCard />
+          <SampleMedicationsCard />
+          <SamplePlerCard />
+          <SampleContactsCard />
+
 
     </IonCardContent>
   </IonCard>
@@ -16,12 +27,23 @@
 
 <script setup lang="ts">
 
+import SampleSymptomsTrauma from './sampleCards/SampleSymptomsTrauma.vue'
 import SampleAllergiesCard from './sampleCards/SampleAllergiesCard.vue'
 import SampleMedicationsCard from './sampleCards/SampleMedicationsCard.vue'
 import SamplePlerCard from './sampleCards/SamplePlerCard.vue'
 import SampleContactsCard from './sampleCards/SampleContactsCard.vue'
 
+import { computed } from 'vue'
+
+import { useDokuStore } from '@/store/doku'
+const store = useDokuStore()
+const ctx = computed(() => store.context)
+
 </script>
-<style>
+<style scoped>
+
+.sample-symptoms {
+  --card-bg: rgb(65, 48, 109);
+}
 
 </style>

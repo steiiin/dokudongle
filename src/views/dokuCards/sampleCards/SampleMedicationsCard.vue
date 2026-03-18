@@ -110,3 +110,8 @@ watch(() => ctx.value.isTrauma, () => {
 })
 
 </script>
+<style scoped>
+ion-card {
+  --card-bg: #308744;
+}
+</style>
