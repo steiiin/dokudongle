@@ -84,7 +84,6 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { enhanceSituation } from '@/utils/gpt/situation'
 import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'

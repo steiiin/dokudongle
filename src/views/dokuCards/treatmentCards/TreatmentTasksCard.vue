@@ -6,7 +6,7 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.treatment"
-        title="Maßnahmen" :enhance-fn="enhanceSituation">
+        title="Maßnahmen" :enhance-fn="enhanceGeneral">
         <p><b>Arbeitsdiagnose</b></p>
         <p><b>Maßnahmen</b></p>
         <p>Ergriffene Maßnahmen + Begründung <i>(außer Medis)</i></p>
@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 
-import { enhanceSituation } from '@/utils/gpt/situation'
+import { enhanceGeneral } from '@/utils/gpt/general';
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

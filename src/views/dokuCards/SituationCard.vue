@@ -7,7 +7,7 @@
 
       <DodoInputTextArea v-model="store.doku.situation"
         title="Situation" placeholder="Beschreibe ..."
-        :enhance-fn="enhanceSituation" mandatory>
+        :enhance-fn="enhanceGeneral" mandatory>
         Beschreibe die <b>Situation</b> vor Ort. <br>
         <template v-if="ctx.isTrauma">
           Denke an den <b>Unfallzeitpunkt</b>.
@@ -22,7 +22,7 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import { enhanceSituation } from '@/utils/gpt/situation'
+import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

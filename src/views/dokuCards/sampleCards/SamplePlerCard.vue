@@ -6,7 +6,7 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
-        title="PLER" :enhance-fn="enhanceSituation">
+        title="PLER" :enhance-fn="enhanceGeneral">
         <p><b>(P)</b> Beschreibung von:</p>
         <ul>
           <li>Vorerkrankungen</li>
@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 
-import { enhanceSituation } from '@/utils/gpt/situation'
+import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
