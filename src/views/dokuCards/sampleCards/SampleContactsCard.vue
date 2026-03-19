@@ -4,14 +4,12 @@
       <IonCardTitle>Angehörigenkontakte</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
-      <pb-contact-input v-model="store.doku.sampler.contacts" />
+      <DodoInputContacts v-model="store.doku.sampler.contacts" />
     </IonCardContent>
   </IonCard>
 </template>
 
 <script setup lang="ts">
-
-import PbContactInput from '@/components/pb-contact-input.vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

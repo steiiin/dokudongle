@@ -1,7 +1,7 @@
 <template>
 
-  <ion-card class="pb-contact-input" v-if="hasContacts">
-    <ion-card-content class="pb-contact-input-content">
+  <ion-card class="dodo-contact-input" v-if="hasContacts">
+    <ion-card-content class="dodo-contact-input-content">
       <ion-list>
         <ion-item v-for="(contact, index) in modelValue.contacts" :key="getContactKey(contact, index)"
           lines="none" button @click="editContact(contact)">
@@ -11,9 +11,9 @@
       </ion-list>
     </ion-card-content>
   </ion-card>
-  <ion-card class="pb-contact-input" style="margin-bottom:0">
-    <ion-card-content class="pb-contact-input-content pb-contact-input-actions">
-      <ion-button fill="clear" @click="addContact">
+  <ion-card class="dodo-contact-input">
+    <ion-card-content class="dodo-contact-input-content dodo-contact-input-actions">
+      <ion-button fill="solid" color="light" @click="addContact">
         <ion-icon slot="start" :icon="addCircle"></ion-icon>
         Kontakt hinzufügen
       </ion-button>
@@ -173,11 +173,16 @@ const getContactKey = (contact: SampleContactsItem, index: number) => {
 </script>
 
 <style scoped>
-.pb-contact-input-content {
+
+.dodo-contact-input {
+  --card-bg: transparent;
+  margin: .25rem;
+}
+.dodo-contact-input-content {
   padding: 0;
 }
 
-.pb-contact-input-actions {
+.dodo-contact-input-actions {
   display: flex;
   justify-content: flex-start;
 }

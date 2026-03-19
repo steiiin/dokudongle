@@ -56,6 +56,6 @@ ion-card-content.card-in-card ion-card {
 
 ion-card-content.card-in-card .dd-input-textarea {
   /* treatment block*/
-  margin: .5rem .5rem 0 .5rem;
+  margin: .5rem .5rem .5rem .5rem;
   width: calc(100% - 1rem);
 }

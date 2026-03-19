@@ -4,6 +4,7 @@
       <IonCardTitle>{{ ctx.isTrauma ? 'Situation & Unfallmechanik' : 'Situation' }}</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
+
       <DodoInputTextArea v-model="store.doku.situation"
         title="Situation" placeholder="Beschreibe ..."
         :enhance-fn="enhanceSituation" mandatory>
@@ -13,6 +14,7 @@
         </template>
         <template v-else>Wenn möglich auch den <i>Grund für den Notruf</i>.</template>
       </DodoInputTextArea>
+
     </IonCardContent>
   </IonCard>
 </template>
