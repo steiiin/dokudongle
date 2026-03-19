@@ -53,41 +53,48 @@
           label="Orientierung" modal-label="Orientierung" lines="inset"
           :state="store.doku.xabcDe.zops.adultState">
 
-          <DodoInputSelect v-model="store.doku.xabcDe.zops.Z"
-            label="Zeitlich" lines="inset"
-            :options="[
-              { value: 'ja', label: 'Orientiert' },
-              { value: 'teilweise', label: 'Teilweise' },
-              { value: 'nein', label: 'Desorientiert' },
-            ]">
-          </DodoInputSelect>
-          <DodoInputSelect v-model="store.doku.xabcDe.zops.O"
-            label="Örtlich" lines="inset"
-            :options="[
-              { value: 'ja', label: 'Orientiert' },
-              { value: 'teilweise', label: 'Teilweise' },
-              { value: 'nein', label: 'Desorientiert' },
-            ]">
-          </DodoInputSelect>
-          <DodoInputSelect v-model="store.doku.xabcDe.zops.P"
-            label="Zur Person" lines="inset"
-            :options="[
-              { value: 'ja', label: 'Orientiert' },
-              { value: 'teilweise', label: 'Teilweise' },
-              { value: 'nein', label: 'Desorientiert' },
-            ]">
-          </DodoInputSelect>
-          <DodoInputSelect v-model="store.doku.xabcDe.zops.S"
-            label="Situativ" lines="none"
-            :options="[
-              { value: 'ja', label: 'Orientiert' },
-              { value: 'teilweise', label: 'Teilweise' },
-              { value: 'nein', label: 'Desorientiert' },
-            ]">
-          </DodoInputSelect>
+          <IonItem lines="inset">
+            <IonLabel>Zeitlich</IonLabel>
+            <DodoToggleGroup v-model="store.doku.xabcDe.zops.Z">
+              <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+              <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+              <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+            </DodoToggleGroup>
+          </IonItem>
+          <IonItem lines="inset">
+            <IonLabel>Örtlich</IonLabel>
+            <DodoToggleGroup v-model="store.doku.xabcDe.zops.O">
+              <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+              <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+              <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+            </DodoToggleGroup>
+          </IonItem>
+          <IonItem lines="inset">
+            <IonLabel>Zur Person</IonLabel>
+            <DodoToggleGroup v-model="store.doku.xabcDe.zops.P">
+              <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+              <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+              <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+            </DodoToggleGroup>
+          </IonItem>
+          <IonItem lines="full">
+            <IonLabel>Situativ</IonLabel>
+            <DodoToggleGroup v-model="store.doku.xabcDe.zops.S">
+              <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+              <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+              <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+            </DodoToggleGroup>
+          </IonItem>
 
-          <div>
-            <!-- TODO: qucik toggles -->
+          <div class="quicktoggle">
+            <IonChip color="success" v-if="!store.doku.xabcDe.zops.isOriented"
+              @click="setZopsYes">
+              <IonLabel>Alle Orientiert</IonLabel>
+            </IonChip>
+            <IonChip color="danger" v-if="!store.doku.xabcDe.zops.isUnoriented"
+              @click="setZopsNo">
+              <IonLabel>Alle Desorientiert</IonLabel>
+            </IonChip>
           </div>
 
         </DodoItemModal>
@@ -274,6 +281,10 @@ const store = useDokuStore()
 const ctx = computed(() => store.context)
 
 import { basicCap } from '@/utils/autocorrect/basic'
+import DodoToggleButton from '@/components/DodoToggleButton.vue'
+import DodoToggleChip from '@/components/DodoToggleChip.vue'
+import DodoToggleGroup from '@/components/DodoToggleGroup.vue'
+import { IonChip, IonLabel } from '@ionic/vue'
 
 const rassDescription = computed(() => {
   if (store.doku.xabcDe.psychRass === 'streitsüchtig') {
@@ -299,14 +310,14 @@ const disorderDescription = computed(() => {
   }
 })
 
-const setZopsNone = () => {
+const setZopsNo = () => {
   store.doku.xabcDe.zops.Z = 'nein'
   store.doku.xabcDe.zops.O = 'nein'
   store.doku.xabcDe.zops.P = 'nein'
   store.doku.xabcDe.zops.S = 'nein'
 }
 
-const setZopsFull = () => {
+const setZopsYes = () => {
   store.doku.xabcDe.zops.Z = 'ja'
   store.doku.xabcDe.zops.O = 'ja'
   store.doku.xabcDe.zops.P = 'ja'
@@ -326,6 +337,12 @@ watch(() => store.doku.xabcDe.couldBeBaseline, (v) => {
 
 ion-card {
   --card-bg: #FF7F0080;
+}
+
+.quicktoggle {
+  margin-top: .5rem;
+  padding-inline: .5rem;
+  text-align: right;
 }
 
 </style>

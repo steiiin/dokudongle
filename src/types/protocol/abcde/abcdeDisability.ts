@@ -45,7 +45,7 @@ export class DisabilityZops {
   }
 
   get isUnoriented(): boolean {
-    return this.Z != 'nein' && this.O != 'nein' && this.P != 'nein' && this.S != 'nein'
+    return this.Z == 'nein' && this.O == 'nein' && this.P == 'nein' && this.S == 'nein'
   }
 
   // ##########################################################################
