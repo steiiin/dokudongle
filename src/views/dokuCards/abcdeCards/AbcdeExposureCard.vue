@@ -27,7 +27,7 @@
 
           <DodoItemModal lines="inset"
             label="Wasserlassen" modal-label="Wasserlassen"
-            :description="store.doku.xabcdE.urinary.text">
+            :state="store.doku.xabcdE.urinary.text">
 
             <IonItemDivider>
               <IonLabel>Katheter</IonLabel>
@@ -103,7 +103,7 @@
 
         <DodoItemModal
           label="Erbrechen" modal-label="Erbrechen"
-          :description="store.doku.xabcdE.emesis.text" lines="full">
+          :state="store.doku.xabcdE.emesis.text" lines="full">
 
           <DodoInputSelect
             v-model="store.doku.xabcdE.emesis.incidences"
@@ -145,7 +145,7 @@
 
         <DodoItemModal
           label="Bauchbefund" modal-label="Bauchbefund"
-          :description="store.doku.xabcdE.abdominalText" lines="none">
+          :state="store.doku.xabcdE.abdominalText" lines="none">
 
           <DodoInputSelect
             v-model="store.doku.xabcdE.abdominal.guarding"
