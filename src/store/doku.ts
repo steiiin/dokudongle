@@ -15,8 +15,8 @@ export const useDokuStore = defineStore('doku', {
     connection: {
       device: null,
       isConnecting: false,
-      isConnected: true,
-      isTransmitting: true,
+      isConnected: false,
+      isTransmitting: false,
       transmissionCurrent: 0, transmissionLength: 0,
       transmissionAbortController: null,
     } as DeviceConnection,
