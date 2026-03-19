@@ -92,7 +92,7 @@ const emit = defineEmits<{
 const hasContacts = computed(() => props.modelValue.contacts.length > 0)
 
 const cloneModelValue = (): ContactsModel => {
-  const clone = Object.assign(new SampleContactsItem(), props.modelValue)
+  const clone = Object.assign(new SampleContacts(), props.modelValue)
   clone.contacts = props.modelValue.contacts.map((contact) => new SampleContactsItem(contact))
   return clone
 }
