@@ -6,7 +6,7 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
-        title="PLER" :enhance-fn="enhanceGeneral">
+        title="PLER" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral">
         <p><b>(P)</b> Beschreibung von:</p>
         <ul>
           <li>Vorerkrankungen</li>

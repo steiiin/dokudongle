@@ -3,8 +3,8 @@
   <hr v-if="ctx.isTrauma">
 
   <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
-    title="Symptome" :enhance-fn="enhanceGeneral">
-    <p>Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden.</p>
+    title="Symptome" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral">
+    Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden.
   </DodoInputTextArea>
 
 </template>
