@@ -37,7 +37,7 @@ async function setupEdgeToEdge() {
   if (Capacitor.getPlatform() !== 'android') return;
 
   try {
-    await StatusBar.setOverlaysWebView({ overlay: true });
+    //await StatusBar.setOverlaysWebView({ overlay: true });
     await EdgeToEdge.enable();
 
   } catch (err) {

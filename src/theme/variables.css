@@ -1,9 +1,9 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
 
-body {
+/* body {
   padding-top: env(safe-area-inset-top);
-}
+} */
 
 /* Titlebar Badge */
 .with-badge {
