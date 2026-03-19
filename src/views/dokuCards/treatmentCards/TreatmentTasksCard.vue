@@ -6,7 +6,7 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.treatment"
-        title="Maßnahmen" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral">
+        title="Maßnahmen" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral" mandatory>
         <p><b>Arbeitsdiagnose</b></p>
         <p><b>Maßnahmen</b></p>
         <p>Ergriffene Maßnahmen + Begründung <i>(außer Medis)</i></p>

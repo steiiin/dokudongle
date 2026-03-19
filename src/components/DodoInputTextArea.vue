@@ -99,6 +99,7 @@
 <script setup lang="ts">
 
 import { alertController } from '@ionic/vue'
+import { toastController } from '@ionic/vue'
 
 import { alertCircle, warningOutline } from 'ionicons/icons'
 import { computed, ref, watch } from 'vue'
@@ -277,7 +278,7 @@ const clear = async () => {
 }
 
 const showEnhanceError = async () => {
-  const toast = await alertController.create({
+  const toast = await toastController.create({
     message: 'Die Verbesserung konnte nicht erstellt werden.',
     color: 'danger',
     icon: warningOutline,

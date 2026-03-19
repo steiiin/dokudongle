@@ -382,7 +382,7 @@ export const useDokuStore = defineStore('doku', {
       text += breakDoku(state.doku.sampler.contacts.generateText(), true)
 
       // TREATMENT
-      text += breakDoku(state.doku.treatment.value, true)
+      text += breakDoku(placeholder(state.doku.treatment.value, 'Maßnahmen'), true)
       text += breakDoku(state.doku.redflags.getBlock(), true)
       text += breakDoku(state.doku.consent.getBlock(), true)
 
