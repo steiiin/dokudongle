@@ -69,7 +69,7 @@ const onTextChange = (value: string | null | undefined) => {
 
 const onTogglePointerDown = () => {
   toggleChanging.value = true
-  setTimeout(() => toggleChanging.value = false, 0)
+  setTimeout(() => toggleChanging.value = false, 200)
 }
 
 watch(
