@@ -75,8 +75,7 @@
 
             <DodoInputText ref="inputCustom"
               v-model="currentItem.TimesCustom"
-              label="Einnahmezeiten: " placeholder="z.B. 2x/Monat"
-              :autocorrect-fn="basicCap">
+              label="Einnahmezeiten: " placeholder="z.B. 2x/Monat">
             </DodoInputText>
 
           </IonItem>

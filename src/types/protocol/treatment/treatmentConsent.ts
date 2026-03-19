@@ -88,7 +88,7 @@ export class TreatmentConsent {
       const parts: string[] = [];
       for (const t of group) {
         const medName = this.getMedName(t.MedId);
-        const dose = capitalizeBegin(t.dosageText);
+        const dose = t.dosageText;
 
         // If med occurs more than once across tasks, append the indication
         const needsIndSuffix = (medCounts.get(t.MedId) ?? 0) > 1;
