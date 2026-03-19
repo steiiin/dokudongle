@@ -137,6 +137,10 @@ export interface ProtocolContext {
   isHigh: boolean,
 
   requireSceneDetails: boolean,
+  requireFlavors: boolean,
+  requireABCDE: boolean,
+  requireSampler: boolean,
+  requireRedflags: boolean,
 
   isBreathing: boolean,
   hasPulse: boolean,

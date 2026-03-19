@@ -16,23 +16,27 @@
         <IdentifikationCard></IdentifikationCard>
         <DetailLevelCard />
 
-        <!-- FLAVORS -->
-        <FlavorsCard />
+        <template v-if="store.doku.course != ProtocolCourse.NEF_VOR_ORT">
 
-        <!-- SETTING -->
-        <SettingCard v-if="ctx.requireSceneDetails"></SettingCard>
+          <!-- FLAVORS -->
+          <FlavorsCard v-if="ctx.requireFlavors" />
 
-        <!-- SITUATION -->
-        <SituationCard></SituationCard>
+          <!-- SETTING -->
+          <SettingCard v-if="ctx.requireSceneDetails"></SettingCard>
 
-        <!-- ABCDE -->
-        <AbcdeContainerCard></AbcdeContainerCard>
+          <!-- SITUATION -->
+          <SituationCard></SituationCard>
 
-        <!-- SAMPLE -->
-        <SampleContainerCard></SampleContainerCard>
+          <!-- ABCDE -->
+          <AbcdeContainerCard v-if="ctx.requireABCDE"></AbcdeContainerCard>
 
-        <!-- BEHANDLUNG -->
-        <TreatmentContainerCard></TreatmentContainerCard>
+          <!-- SAMPLE -->
+          <SampleContainerCard v-if="ctx.requireSampler"></SampleContainerCard>
+
+          <!-- BEHANDLUNG -->
+          <TreatmentContainerCard></TreatmentContainerCard>
+
+        </template>
 
       </div>
 
@@ -53,10 +57,9 @@ import SampleContainerCard from './dokuCards/SampleContainerCard.vue'
 import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 
 import { computed } from 'vue'
+import { ProtocolCourse } from '@/types/protocol'
 
 import { useDokuStore } from '@/store/doku'
-import { paperPlaneSharp } from 'ionicons/icons'
-import DodoSendAction from '@/components/DodoSendAction.vue'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

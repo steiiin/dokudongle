@@ -256,7 +256,11 @@ export const useDokuStore = defineStore('doku', {
     // context
     context(state): ProtocolContext {
 
-      const requireSceneDetails: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.NEF_VOR_ORT
+      const requireSceneDetails: boolean = state.doku.course == ProtocolCourse.TRANSPORT
+      const requireFlavors: boolean = state.doku.course == ProtocolCourse.TRANSPORT
+      const requireABCDE: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
+      const requireSampler: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
+      const requireRedflags: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
 
       const isPediatric: boolean = state.doku.ident.age.totalYears <= 3
 
@@ -314,6 +318,10 @@ export const useDokuStore = defineStore('doku', {
         isHigh: verbosity == ProtocolVerbosity.HIGH,
 
         requireSceneDetails,
+        requireFlavors,
+        requireABCDE,
+        requireSampler,
+        requireRedflags,
 
         isBreathing: state.doku.xAbcde.isBreathing,
         hasPulse: state.doku.xabCde.pulse.centralStrength != 'nicht',
@@ -351,39 +359,50 @@ export const useDokuStore = defineStore('doku', {
 
       // Situation
       text += breakDoku([
-        state.doku.setting.generateText(),
+        textIf(state.doku.setting.generateText(), this.context.requireSceneDetails),
         placeholder(state.doku.situation.value, 'Situation'),
       ], true)
 
-      // ABCDE
-      text += breakDoku([
-        state.doku.Xabcde.generateText(),
-        state.doku.xAbcde.generateText(),
-        state.doku.xaBcde.generateText(),
-        state.doku.xabCde.generateText(),
-        state.doku.xabcDe.generateText(),
-        state.doku.xabcdE.generateText(),
-      ], true)
 
-      // STU
-      text += textIf(breakDoku([
-        state.doku.sampler.symptoms.trauma.head.generateText(),
-        state.doku.sampler.symptoms.trauma.spine.generateText(),
-        state.doku.sampler.symptoms.trauma.thorax.generateText(),
-        state.doku.sampler.symptoms.trauma.pelvis.generateText(),
-        state.doku.sampler.symptoms.trauma.limbs.generateText(),
-      ], true), this.context.isTrauma)
+      if (this.context.requireABCDE)
+      {
 
-      // SAMPLE
-      text += breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true)
-      text += breakDoku(state.doku.sampler.allergies.generateText(), true)
-      text += breakDoku(state.doku.sampler.medication.generateText(), true)
-      text += breakDoku(state.doku.sampler.pler.generateText(), true)
-      text += breakDoku(state.doku.sampler.contacts.generateText(), true)
+        // ABCDE
+        text += breakDoku([
+          state.doku.Xabcde.generateText(),
+          state.doku.xAbcde.generateText(),
+          state.doku.xaBcde.generateText(),
+          state.doku.xabCde.generateText(),
+          state.doku.xabcDe.generateText(),
+          state.doku.xabcdE.generateText(),
+        ], true)
+
+        // STU
+        text += textIf(breakDoku([
+          state.doku.sampler.symptoms.trauma.head.generateText(),
+          state.doku.sampler.symptoms.trauma.spine.generateText(),
+          state.doku.sampler.symptoms.trauma.thorax.generateText(),
+          state.doku.sampler.symptoms.trauma.pelvis.generateText(),
+          state.doku.sampler.symptoms.trauma.limbs.generateText(),
+        ], true), this.context.isTrauma)
+
+      }
+
+      if (this.context.requireSampler)
+      {
+
+        // SAMPLE
+        text += breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true)
+        text += breakDoku(state.doku.sampler.allergies.generateText(), true)
+        text += breakDoku(state.doku.sampler.medication.generateText(), true)
+        text += breakDoku(state.doku.sampler.pler.generateText(), true)
+        text += breakDoku(state.doku.sampler.contacts.generateText(), true)
+
+      }
 
       // TREATMENT
       text += breakDoku(placeholder(state.doku.treatment.value, 'Maßnahmen'), true)
-      text += breakDoku(state.doku.redflags.getBlock(), true)
+      text += textIf(breakDoku(state.doku.redflags.getBlock(), true), this.context.requireRedflags)
       text += breakDoku(state.doku.consent.getBlock(), true)
 
       return text.trim()

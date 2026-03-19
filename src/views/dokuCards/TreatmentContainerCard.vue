@@ -7,7 +7,7 @@
 
       <TreatmentTasksCard />
       <TreatmentMedicationsCard />
-      <TreatmentInformedConsentCard />
+      <TreatmentInformedConsentCard v-if="ctx.requireRedflags" />
 
     </IonCardContent>
   </IonCard>
@@ -19,8 +19,11 @@ import TreatmentInformedConsentCard from './treatmentCards/TreatmentInformedCons
 import TreatmentMedicationsCard from './treatmentCards/TreatmentMedicationsCard.vue'
 import TreatmentTasksCard from './treatmentCards/TreatmentTasksCard.vue'
 
+import { computed } from 'vue'
+
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+const ctx = computed(() => store.context)
 
 </script>
 <style>
