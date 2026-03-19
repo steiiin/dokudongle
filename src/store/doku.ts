@@ -375,6 +375,7 @@ export const useDokuStore = defineStore('doku', {
       ], true), this.context.isTrauma)
 
       // SAMPLE
+      text += breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true)
       text += breakDoku(state.doku.sampler.allergies.generateText(), true)
       text += breakDoku(state.doku.sampler.medication.generateText(), true)
       text += breakDoku(state.doku.sampler.pler.generateText(), true)
