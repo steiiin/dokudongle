@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">dokudongle</string>
-    <string name="title_activity_main">dokudongle</string>
+    <string name="app_name">DokuDongle</string>
+    <string name="title_activity_main">DokuDongle</string>
     <string name="package_name">com.steiiin.dokudongle</string>
     <string name="custom_url_scheme">com.steiiin.dokudongle</string>
 </resources>

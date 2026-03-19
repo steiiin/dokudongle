@@ -6,8 +6,19 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   plugins: {
     SplashScreen: {
-      backgroundColor: "#000000"
-    }
+      backgroundColor: "#1e1e1e"
+    },
+    SystemBars: {
+      insetsHandling: "disable",
+    },
+    Keyboard: {
+      resizeOnFullScreen: false
+    },
+    EdgeToEdge: {
+      backgroundColor: "#1e1e1e",
+      navigationBarColor: "#1e1e1e",
+      statusBarColor: "#1e1e1e",
+    },
   }
 };
 

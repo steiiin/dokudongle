@@ -37,9 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import { IonInput } from '@ionic/vue'
-import { gainFocus } from '@/utils/input'
+
 import { computed, nextTick, ref, watch } from 'vue'
+import { gainFocus } from '@/utils/input'
 import { PatientAge } from '@/types/protocol'
 
 const props = defineProps<{

@@ -57,14 +57,12 @@
 </template>
 
 <script setup lang="ts">
-import { IonContent, IonHeader, IonButtons, IonButton, IonToggle, IonTitle, IonToolbar, IonList, IonItem, IonNote, IonSelect, IonSelectOption, IonModal, IonItemDivider, IonLabel } from '@ionic/vue'
 
 import DodoInputText from './DodoInputText.vue'
 
 import { computed, ref, watch } from 'vue'
-
-import { SstLimb, SstLimbDms } from '@/types/protocol/sample'
-import { gainFocus } from '@/utils/input';
+import { gainFocus } from '@/utils/input'
+import { SstLimb } from '@/types/protocol/sample'
 
 const props = defineProps<{
   modelValue: SstLimb

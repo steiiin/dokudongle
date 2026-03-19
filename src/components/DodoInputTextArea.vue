@@ -99,12 +99,11 @@
 
 <script setup lang="ts">
 
-import { toastController } from '@ionic/core'
+import { alertController } from '@ionic/vue'
 
 import { alertCircle, warningOutline } from 'ionicons/icons'
 import { computed, ref, watch } from 'vue'
 import { EnhanceableText } from '@/types/protocol/input'
-import { alertController } from '@ionic/vue';
 
 const props = withDefaults(defineProps<{
   modelValue: EnhanceableText
@@ -259,7 +258,6 @@ async function confirmDelete(): Promise<boolean> {
         },
       ],
     })
-
     await alert.present()
   })
 }
@@ -280,7 +278,7 @@ const clear = async () => {
 }
 
 const showEnhanceError = async () => {
-  const toast = await toastController.create({
+  const toast = await alertController.create({
     message: 'Die Verbesserung konnte nicht erstellt werden.',
     color: 'danger',
     icon: warningOutline,

@@ -31,9 +31,9 @@
 </template>
 
 <script setup lang="ts">
+
 import { eye, flask, wifi } from 'ionicons/icons'
 import { useDokuStore } from '@/store/doku'
-import { IonProgressBar } from '@ionic/vue';
 const store = useDokuStore()
 
 const cancel = () => {

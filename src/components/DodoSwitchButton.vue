@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { IonButton, IonIcon } from '@ionic/vue'
+
 import { checkmark, close } from 'ionicons/icons'
 
 const props = defineProps<{
