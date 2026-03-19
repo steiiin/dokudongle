@@ -393,17 +393,22 @@ export const useDokuStore = defineStore('doku', {
 
         // SAMPLE
         text += breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true)
-        text += breakDoku(state.doku.sampler.allergies.generateText(), true)
-        text += breakDoku(state.doku.sampler.medication.generateText(), true)
+        text += breakDoku([
+          state.doku.sampler.allergies.generateText(),
+          state.doku.sampler.medication.generateText(),
+        ], true)
         text += breakDoku(state.doku.sampler.pler.generateText(), true)
         text += breakDoku(state.doku.sampler.contacts.generateText(), true)
 
       }
 
       // TREATMENT
+      text += breakDoku([
+        state.doku.saamed.getBlock(),
+        state.doku.redflags.getConsentBlock(),
+      ], true)
       text += breakDoku(placeholder(state.doku.treatment.value, 'Maßnahmen'), true)
-      text += textIf(breakDoku(state.doku.redflags.getBlock(), true), this.context.requireRedflags)
-      text += breakDoku(state.doku.consent.getBlock(), true)
+      text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
 
       return text.trim()
 

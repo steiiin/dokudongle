@@ -2,7 +2,7 @@ import { AbcdeAirway, AbcdeBleeding, AbcdeBreathing, AbcdeCirculation, AbcdeDisa
 import { EnhanceableText } from "./protocol/input"
 import { Sampler } from "./protocol/sampler"
 import { Setting } from "./protocol/setting"
-import { TreatmentConsent } from "./protocol/treatment/treatmentConsent"
+import { TreatmentSaamed } from "./protocol/treatment/treatmentSaamed"
 import { TreatmentRedflags } from "./protocol/treatment/treatmentRedflags"
 
 export interface Protocol {
@@ -23,9 +23,9 @@ export interface Protocol {
 
   sampler: Sampler,
 
+  saamed: TreatmentSaamed,
   treatment: EnhanceableText,
   redflags: TreatmentRedflags,
-  consent: TreatmentConsent,
 
 }
 
@@ -53,9 +53,9 @@ export function resetProtocol(): Protocol {
 
     sampler: new Sampler(),
 
+    saamed: new TreatmentSaamed(),
     treatment: new EnhanceableText(),
     redflags: new TreatmentRedflags(),
-    consent: new TreatmentConsent(),
 
   }
   return result

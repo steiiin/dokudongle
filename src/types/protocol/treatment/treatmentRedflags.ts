@@ -119,28 +119,28 @@ export class TreatmentRedflags {
 
   // ##########################################################################
 
-  public getBlock(): string {
-    const shouldIncludeConsentText = this.Consent !== '' && (this.NoTransportType === '' || this.NoTransportType === 'BvO')
-    let block = ''
+  public getConsentBlock(): string
+  {
 
-    if (shouldIncludeConsentText) {
-      if (this.Consent == 'Fähig') {
-        block += 'Pat. über erforderliche invasive Maßnahmen verständlich aufgeklärt; verstanden; ausdrücklich eingewilligt.\n'
-      } else if (this.Consent == 'Unfähig') {
-        block += 'Pat. nicht einwilligungsfähig; Maßnahme im Rahmen der mutmaßlichen Einwilligung durchgeführt; \nkeine Hinweise auf entgegenstehenden Patientenwillen.\n'
-      } else {
-        block += 'Aufgrund zeitkritischer Situation verkürzte Aufklärung; \nPat. verständnisfähig; Einwilligung erteilt.\n'
-      }
+    if (this.Consent == 'Fähig') {
+      return 'Pat. über erforderliche invasive Maßnahmen verständlich aufgeklärt; verstanden; ausdrücklich eingewilligt.'
+    } else if (this.Consent == 'Unfähig') {
+      return 'Pat. nicht einwilligungsfähig; Maßnahme im Rahmen der mutmaßlichen Einwilligung durchgeführt; \nkeine Hinweise auf entgegenstehenden Patientenwillen.'
+    } else if (this.Consent == 'Zeitkritisch') {
+      return 'Aufgrund zeitkritischer Situation verkürzte Aufklärung; \nPat. verständnisfähig; Einwilligung erteilt.'
+    } else {
+      return ''
     }
+
+  }
+
+  public getRedflagBlock(): string {
 
     if (this.NoTransportType == '') {
-      return block
+      return ''
     }
 
-    if (block != '') {
-      block += '\n'
-    }
-
+    let block = ''
     const allFlags = this.dedupeRedFlags(this.fetchAllRedFlags())
       .sort((a, b) =>
         (a.IsEmergency === b.IsEmergency ? 0 : a.IsEmergency ? -1 : 1) ||

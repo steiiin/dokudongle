@@ -1,2 +1,2 @@
-export * from './treatmentConsent'
+export * from './treatmentSaamed'
 export * from './treatmentRedflags'

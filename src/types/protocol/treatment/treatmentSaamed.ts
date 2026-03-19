@@ -1,7 +1,7 @@
 import { capitalizeBegin } from "@/utils/text";
 import { SAA_MEDICATION_INDICATION, SAA_MEDICATION, ConsentMedTask } from "@/data/meds"
 
-export class TreatmentConsent {
+export class TreatmentSaamed {
 
   public medTasks: Array<ConsentMedTask>
 
