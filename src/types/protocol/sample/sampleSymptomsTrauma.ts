@@ -231,7 +231,7 @@ export class SstSpine {
 
     let _immo = ''
     if (this.isImmoYellow) {
-      if (this.usedImmo && this.usedExtrication) { _immo = ` ${this.usedImmo}/${this.usedExtrication}.` }
+      if (this.usedImmo && this.usedExtrication) { _immo = ` ${this.usedExtrication}/${this.usedImmo}.` }
       else if (this.usedImmo) { _immo = ` ${this.usedImmo}.` }
       else if (this.usedExtrication) { _immo = ` ${this.usedExtrication}.` } }
 
@@ -244,17 +244,6 @@ export class SstSpine {
     else if (this.isDueThorakoAbdominal) { return line(`ImmoAmpel Gelb - Schwere thorakoabdominelle Verletzung.${_immo}`) }
     else if (this.isDueAge) { return line(`ImmoAmpel Gelb - Älter als 65 Jahre.${_immo}`) }
     else { return onNormal(line('ImmoAmpel Grün - keine Immobilisation erforderlich.')) }
-
-    // if (this.isDueSevereInjury) { return }
-    // if (this.hasObviousSevereInjury) { return `WS: ${StuSpineImmoText.severeInjury} \n` }
-    // if (getCtx().gcs <= 12 && !isBaseline) { return `WS: ${StuSpineImmoText.gcs} \n` }
-    // if (getCtx().hasSensomotoricDeficit && !isBaseline) { return `WS: ${StuSpineImmoText.neuro} \n` }
-    // if (this.needPainTreatment) { return `WS: ${StuSpineImmoText.pain} \n` }
-    // if (getCtx().isGeriatric) { return `WS: ${StuSpineImmoText.age} \n` }
-    // if (this.hasFallFromOver3m) { return `WS: ${StuSpineImmoText.fall} \n` }
-    // if (this.hasSupraclavicularInjury) { return `WS: ${StuSpineImmoText.supraclavicular} \n` }
-    // if (this.hasSevereThoracoabdominalInjury) { return `WS: ${StuSpineImmoText.thorakoAbdominal} \n` }
-    // return onNormal(`WS: ${StuSpineImmoText.green} \n`)
 
   }
 
