@@ -1,16 +1,14 @@
 <template>
-  <IonChip
-    :color="color" :outline="isEmpty" :disabled="disabled"
-    :class="[
-      { 'DdInputChip--inactive': isEmpty, 'DdInputChip--bold': !isEmpty },
-    ]" @click="openPopover">
-
+  <IonChip :color="color" :outline="isEmpty" :disabled="disabled"
+    :class="[ {
+      'DdInputChip--inactive': isEmpty,
+      'DdInputChip--bold': !isEmpty } ]"
+    @click="openPopover">
     <IonIcon v-if="!isEmpty"
-      :icon="closeCircle" class="DdInputChip__clear"
+      :icon="closeCircle"
       @click.stop="clearValue">
     </IonIcon>
     <span>{{ displayLabel }}</span>
-
   </IonChip>
 
   <IonPopover :is-open="isPopoverOpen" :event="popoverEvent" @didDismiss="closePopover">
@@ -42,16 +40,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import {
-  IonChip,
-  IonPopover,
-  IonContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonIcon,
-  IonItemDivider,
-} from '@ionic/vue'
 import { closeCircle, checkmark } from 'ionicons/icons'
 
 type InputChipOption =

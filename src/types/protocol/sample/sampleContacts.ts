@@ -8,19 +8,27 @@ export class SampleContacts {
   }
   public generateText(): string
   {
+
+    const divider = this.contacts.length>1 ? ':' : ' -'
+
     const entries = this.contacts
       .map((contact) => {
         const name = contact.contactName?.trim()
         const telephone = contact.telephone?.trim()
-        if (name && telephone) return `${name}: ${telephone}`
+        if (name && telephone) return `${name}${divider} ${telephone}`
         if (name) return name
         if (telephone) return telephone
         return ''
       })
       .filter((entry) => entry.length > 0)
-
     if (entries.length === 0) return ''
-    return `Kontakt${entries.length>1 ? 'e' : ''}:\n${entries.join('.\n')}`
+
+    if (entries.length>1) {
+      return `Kontakte:\n- ${entries.join('\n- ')}`
+    } else {
+      return `Kontakt: ${entries[0]}.`
+    }
+
   }
 }
 

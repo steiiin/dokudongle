@@ -6,6 +6,7 @@
           <IonTitle>Eingabe</IonTitle>
           <DodoConnectionBadge></DodoConnectionBadge>
         </div>
+        <DodoSendAction></DodoSendAction>
       </IonToolbar>
     </IonHeader>
     <IonContent :fullscreen="true">
@@ -54,6 +55,8 @@ import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
+import { paperPlaneSharp } from 'ionicons/icons'
+import DodoSendAction from '@/components/DodoSendAction.vue'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

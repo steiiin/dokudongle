@@ -5,9 +5,8 @@
     </IonCardHeader>
     <IonCardContent>
 
-      <DodoInputSelect
-        v-model="store.doku.redflags.Consent"
-        label="Einwilligung"
+      <DodoInputSelect v-model="store.doku.redflags.Consent"
+        label="Einwilligung" lines="full"
         :options="[
           { value: '', label: 'Nicht Notwendig' },
           { value: 'Fähig', label: 'Einwilligungsfähig' },
@@ -37,7 +36,7 @@
 
       <template v-if="withInformedConsent">
 
-        <pb-redflag-input v-model="store.doku.redflags"></pb-redflag-input>
+        <DodoInputRedflags v-model="store.doku.redflags" />
 
       </template>
 
@@ -46,8 +45,6 @@
 </template>
 
 <script setup lang="ts">
-
-import PbRedflagInput from '@/components/pb-redflag-input.vue'
 
 import { computed, nextTick, ref, toValue, watch } from 'vue'
 

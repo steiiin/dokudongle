@@ -5,7 +5,7 @@
     </IonCardHeader>
     <IonCardContent>
 
-      <pb-saamed-input v-model="store.doku.consent.medTasks" />
+      <DodoInputSaamed v-model="store.doku.consent.medTasks" />
 
     </IonCardContent>
   </IonCard>
@@ -14,8 +14,6 @@
 <script setup lang="ts">
 
 import { watch } from 'vue'
-
-import PbSaamedInput from '@/components/pb-saamed-input.vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

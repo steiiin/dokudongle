@@ -11,7 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/DodoToggleChip copy.vue')['default']
+    copy: typeof import('./src/components/DodoConnectionBadge copy.vue')['default']
     DdConnectionBadge: typeof import('./src/components/DdConnectionBadge.vue')['default']
     DdInputAge: typeof import('./src/components/DdInputAge.vue')['default']
     DdInputSelect: typeof import('./src/components/DdInputSelect.vue')['default']
@@ -28,6 +28,8 @@ declare module 'vue' {
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
     DodoInputContacts: typeof import('./src/components/DodoInputContacts.vue')['default']
+    DodoInputRedflags: typeof import('./src/components/DodoInputRedflags.vue')['default']
+    DodoInputSaamed: typeof import('./src/components/DodoInputSaamed.vue')['default']
     DodoInputSampleLimb: typeof import('./src/components/DodoInputSampleLimb.vue')['default']
     DodoInputSelect: typeof import('./src/components/DodoInputSelect.vue')['default']
     DodoInputSelectOptional: typeof import('./src/components/DodoInputSelectOptional.vue')['default']
@@ -37,6 +39,7 @@ declare module 'vue' {
     DodoInputTreatment: typeof import('./src/components/DodoInputTreatment.vue')['default']
     DodoItemModal: typeof import('./src/components/DodoItemModal.vue')['default']
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
+    DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']
     DodoSwitchButton: typeof import('./src/components/DodoSwitchButton.vue')['default']
     DodoToggleButton: typeof import('./src/components/DodoToggleButton.vue')['default']
@@ -63,6 +66,7 @@ declare module 'vue' {
     IonModal: typeof import('@ionic/vue')['IonModal']
     IonNote: typeof import('@ionic/vue')['IonNote']
     IonPage: typeof import('@ionic/vue')['IonPage']
+    IonPopover: typeof import('@ionic/vue')['IonPopover']
     IonProgressBar: typeof import('@ionic/vue')['IonProgressBar']
     IonRadio: typeof import('@ionic/vue')['IonRadio']
     IonRadioGroup: typeof import('@ionic/vue')['IonRadioGroup']

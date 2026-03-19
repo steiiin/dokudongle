@@ -130,3 +130,17 @@ export function textToHidEvents(text: string): Array<[number, number]> {
   }
   return out
 }
+
+/**
+ * Removes diacritics while keeping German umlauts intact.
+ */
+export function stripDiacritics(input: string): string {
+  const nfd = input.normalize('NFD');
+  let out = '';
+  for (const ch of nfd) {
+    const cp = ch.codePointAt(0)!;
+    if (cp >= 0x0300 && cp <= 0x036F && cp !== 0x0308) continue;
+    out += ch;
+  }
+  return out.normalize('NFC');
+}

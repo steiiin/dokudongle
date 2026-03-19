@@ -1,15 +1,12 @@
 <template>
 
-  <IonCard class="pb-saamed-input" style="margin-bottom: 0;">
-    <IonCardContent class="pb-saamed-input-content">
+  <IonCard class="dodo-saamed-input">
+    <IonCardContent class="dodo-saamed-input-content">
       <IonList v-if="modelValue.length > 0">
         <IonReorderGroup :disabled="false" @ionItemReorder="handleReorder">
-          <IonItem
-            v-for="(item, index) in modelValue"
+          <IonItem v-for="(item, index) in modelValue"
             :key="`${item.MedId}-${item.MedIndication}-${index}`"
-            @click="editItem(index)"
-            lines="none"
-            button>
+            @click="editItem(index)" lines="none" button>
             <IonLabel>
               <h3>{{ getMedName(item) }}</h3>
               <p>{{ getIndicationName(item) }}</p>
@@ -19,9 +16,9 @@
         </IonReorderGroup>
       </IonList>
 
-      <IonButton fill="clear" @click="openSelectModal">
+      <IonButton expand="block" fill="solid" color="light" @click="openSelectModal">
         <IonIcon slot="start" :icon="addCircle"></IonIcon>
-        Medikament hinzufügen
+          Medikament hinzufügen
       </IonButton>
     </IonCardContent>
   </IonCard>
@@ -319,11 +316,15 @@ const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
 </script>
 
 <style scoped>
-.pb-saamed-input-content {
+.dodo-saamed-input {
+  --card-bg: transparent;
+  margin: .25rem;
+}
+.dodo-saamed-input-content {
   padding: 0;
 }
 
-.pb-saamed-input-dosage {
+.dodo-saamed-input-dosage {
   margin: 0.25rem 0 0 0;
   font-size: 0.9rem;
   color: var(--ion-color-medium);

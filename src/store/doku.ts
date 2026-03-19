@@ -2,8 +2,8 @@ import { BleClient, numberToUUID } from '@capacitor-community/bluetooth-le';
 import { Capacitor } from '@capacitor/core';
 import { defineStore, storeToRefs } from 'pinia';
 
-import { textToHidEvents } from '@/utils/keymap-german';
-import { Device, DeviceConnection, ServiceUUID } from '@/types/dongle';
+import { stripDiacritics, textToHidEvents } from '@/utils/keymap-german';
+import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID } from '@/types/dongle';
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol';
 import { breakDoku, multiline, placeholder } from '@/utils/text';
 import { textIf } from '@/utils/filter';
@@ -15,8 +15,8 @@ export const useDokuStore = defineStore('doku', {
     connection: {
       device: null,
       isConnecting: false,
-      isConnected: false,
-      isTransmitting: false,
+      isConnected: true,
+      isTransmitting: true,
       transmissionCurrent: 0, transmissionLength: 0,
       transmissionAbortController: null,
     } as DeviceConnection,
@@ -107,6 +107,141 @@ export const useDokuStore = defineStore('doku', {
         console.warn(e)
       }
     },
+
+    // protocol
+    newProtocol() {
+      this.doku = resetProtocol()
+    },
+    async sendProtocol() {
+
+      const protocolText = this.generatedProtocol
+      const signal = this.connection.transmissionAbortController?.signal
+
+      console.log('Protokoll gesendet:')
+      console.log(protocolText)
+
+      const controller = new AbortController()
+      this.connection.transmissionAbortController = controller
+
+      try
+      {
+
+        // cancel if not connected
+        await this.checkConnection()
+        if (!this.isDongleConnected || signal?.aborted) { return false }
+        this.connection.isTransmitting = true
+
+        // set transmission info
+        this.connection.transmissionLength = protocolText.length
+        this.connection.transmissionCurrent = 0
+        const abortError = new Error('Send Cancelled')
+        abortError.name = 'AbortError'
+        const throwIfAborted = () => {
+          if (signal?.aborted) { throw abortError }
+        }
+
+        let notificationsStarted = false
+        try
+        {
+
+          // register acknowledge system
+          let resolveAck: (() => void) | null = null
+          const waitForAck = async (ackPromise: Promise<void>) => {
+            if (!signal) {
+              await ackPromise
+              return }
+            if (signal.aborted) { throw abortError }
+
+            await new Promise<void>((resolve, reject) => {
+              const onAbort = () => {
+                signal.removeEventListener('abort', onAbort)
+                reject(abortError)
+              }
+              ackPromise.then(() => {
+                signal.removeEventListener('abort', onAbort)
+                resolve()
+              }).catch((error) => {
+                signal.removeEventListener('abort', onAbort)
+                reject(error)
+              })
+              signal.addEventListener('abort', onAbort, { once: true })
+            })
+          }
+
+          await BleClient.startNotifications(this.connection.device!.id, ServiceUUID, SendAckUUID, () => {
+            resolveAck?.()
+          })
+          notificationsStarted = true
+
+          // send chunks
+          const events = textToHidEvents(stripDiacritics(protocolText));
+          const MTU_PAYLOAD = 20;
+          const EVENTS_PER_PKT = MTU_PAYLOAD / 2;
+
+          for (let i = 0; i < events.length; i += EVENTS_PER_PKT) {
+            throwIfAborted()
+            const slice = events.slice(i, i + EVENTS_PER_PKT)
+
+            // pack into a single ArrayBuffer
+            const buf = new ArrayBuffer(slice.length * 2)
+            const dv  = new DataView(buf)
+            slice.forEach(([key, mod], idx) => {
+              dv.setUint8(idx * 2 + 0, key)
+              dv.setUint8(idx * 2 + 1, mod)
+            })
+
+            const ackPromise = new Promise<void>(r => { resolveAck = r })
+            await BleClient.write(this.connection.device!.id, ServiceUUID, SendTextUUID, dv)
+            await waitForAck(ackPromise)
+            this.connection.transmissionCurrent += slice.length
+
+          }
+          throwIfAborted()
+
+          // send EOD
+          await BleClient.write(this.connection.device!.id, ServiceUUID, SendTextUUID, new DataView(new Uint8Array([0x00,0x00]).buffer))
+
+          return true
+
+        }
+        catch (error)
+        {
+          if ((error as Error).name === 'AbortError') {
+            console.info('sendText aborted')
+          } else {
+            console.warn(error)
+          }
+          return false
+        }
+        finally
+        {
+          if (notificationsStarted) {
+            try {
+              await BleClient.stopNotifications(this.connection.device!.id, ServiceUUID, SendAckUUID)
+            } catch (error) {
+              console.warn(error)
+            }
+          }
+
+          this.connection.isTransmitting = false
+          this.connection.transmissionCurrent = 0
+          this.connection.transmissionLength = 0
+
+        }
+
+      }
+      finally
+      {
+        this.connection.transmissionAbortController = null
+      }
+
+    },
+    async cancelSend() {
+      if (this.connection.transmissionAbortController) {
+        this.connection.transmissionAbortController.abort()
+        this.connection.transmissionAbortController = null
+      }
+    }
 
   },
   getters: {
@@ -240,7 +375,6 @@ export const useDokuStore = defineStore('doku', {
       ], true), this.context.isTrauma)
 
       // SAMPLE
-      debugger
       text += breakDoku([
         state.doku.sampler.allergies.generateText(),
         state.doku.sampler.medication.generateText(),

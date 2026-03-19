@@ -59,3 +59,7 @@ ion-card-content.card-in-card .dd-input-textarea {
   margin: .5rem .5rem .5rem .5rem;
   width: calc(100% - 1rem);
 }
+
+ion-header ion-buttons {
+  padding-inline: .5rem;
+}

@@ -6,20 +6,20 @@
       <div class="chip-container" v-if="hasCases">
         <IonChip color="success" v-for="redcase in modelValue.RedCases" :key="redcase.id" @click="removeCase(redcase)">
           <IonLabel>{{ redcase.Name }}</IonLabel>
-          <IonIcon :icon="close"></IonIcon>
+          <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
       <div class="chip-container" v-if="hasDiagnoses">
         <IonChip color="warning" v-for="reddiagnose in modelValue.RedDiagnoses" :key="reddiagnose.id"
           @click="removeDiagnose(reddiagnose)">
           <IonLabel>{{ reddiagnose.Name }}</IonLabel>
-          <IonIcon :icon="close"></IonIcon>
+          <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
       <div class="chip-container" v-if="hasFlags">
         <IonChip color="danger" v-for="redflag in modelValue.RedFlags" :key="redflag.id" @click="removeFlag(redflag)">
           <IonLabel>{{ redflag.Name }}</IonLabel>
-          <IonIcon :icon="close"></IonIcon>
+          <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
 
@@ -27,7 +27,7 @@
   </IonCard>
   <IonCard class="pb-redflag-input" style="margin-bottom:0">
     <IonCardContent class="pb-redflag-input-content pb-redflag-input-actions">
-      <IonButton fill="clear" @click="showRedModal">
+      <IonButton fill="solid" color="light" @click="showRedModal">
         <IonIcon slot="start" :icon="addCircle"></IonIcon>
         RedFlags hinzufügen
       </IonButton>
@@ -81,7 +81,7 @@
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
 
-import { addCircle, close } from 'ionicons/icons';
+import { addCircle, closeCircle } from 'ionicons/icons';
 
 import { getAllRedCases, getAllRedDiagnoses, getAllRedFlags, RedCase, RedDiagnose, RedFlag } from '@/data/redflags';
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags';
@@ -282,11 +282,13 @@ const fuzzyMatch = (search: string, target: string): boolean => {
 </script>
 
 <style scoped>
-.pb-redflag-input-content {
-  padding: 0;
+.pb-redflag-input {
+  --card-bg: transparent;
+  margin: 0;
 }
 .pb-redflag-input-content {
-  margin: 0;
+  padding: 0;
+  margin: .25rem;
 }
 
 .chip-container {
