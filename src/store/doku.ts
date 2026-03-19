@@ -270,7 +270,7 @@ export const useDokuStore = defineStore('doku', {
         // TODO: STU
       )
 
-      const gcs: number = state.doku.xabcDe.gcs.score
+      const gcs: number = state.doku.xabcDe.gcsScore
       const isBaseline: boolean = state.doku.xabcDe.psychBaseline
 
       const isTrauma: boolean = requireSceneDetails && (state.doku.flavors.trauma)

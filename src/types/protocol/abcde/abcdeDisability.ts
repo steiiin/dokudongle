@@ -379,9 +379,9 @@ export class AbcdeDisability {
           textIf(this.zops.pediatricText, !isNonVerbal && isPediatric),
           textIf(this.zops.adultText, !isNonVerbal && !isPediatric),
         ],
-        this.gcs.score == 15
+        this.gcsScore == 15
           ? onHigh('GCS 15')
-          : onNormal(`GCS ${this.gcs.score}`),
+          : onNormal(`GCS ${this.gcsScore}`),
         textIf('Aphasie', this.aphasia),
         textIf(headache, !isNonVerbal),
         textIf(this.dizzinessText, !isNonVerbal),

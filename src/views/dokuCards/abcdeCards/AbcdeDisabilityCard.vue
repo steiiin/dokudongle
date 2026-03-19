@@ -101,7 +101,7 @@
 
         <DodoItemModal
           label="GCS" modal-label="GCS"
-          :state="store.doku.xabcDe.gcs.score.toString()">
+          :state="store.doku.xabcDe.gcsScore.toString()">
 
           <DodoInputSelect v-model="store.doku.xabcDe.gcs.a"
             label="Augen öffnen" lines="full"
