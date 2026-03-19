@@ -300,7 +300,6 @@ defineExpose({
 <style scoped>
 .dd-input-textarea {
   width: 100%;
-  justify-items: center;
 }
 
 .dd-input-textarea .preview {
