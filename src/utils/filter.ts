@@ -39,6 +39,13 @@ export function noneIf(expr: boolean): string {
 }
 
 /**
+ * return true if string not empty, otherwise false
+ */
+export function notEmpty(text: string): boolean {
+  return text?.trim().length>0
+}
+
+/**
  * return given text if verbosity == HIGH
  */
 export function onHigh(text: string): string {

@@ -18,7 +18,6 @@ const props = withDefaults(
   defineProps<{
     modelValue: boolean
     color?: string
-    bold?: boolean
     disabled?: boolean
   }>(),
   {

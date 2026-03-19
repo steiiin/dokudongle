@@ -1,6 +1,6 @@
 <template>
 
-  <IonCard class="dd-med-input" style="margin-bottom: 0;">
+  <IonCard class="dd-med-input">
     <IonCardContent class="dd-med-input-content">
 
       <IonList v-if="modelValue.length>0">
@@ -11,14 +11,14 @@
         </IonItem>
       </IonList>
 
-      <IonButton fill="clear" @click="addNew">
+      <IonButton fill="solid" color="light" @click="addNew">
         <IonIcon slot="start" :icon="addCircle"></IonIcon>
-        Medikament hinzufügen
+        Exakte Angabe
       </IonButton>
       <br>
-      <IonButton fill="clear" @click="addFuzzyNew">
+      <IonButton fill="solid" color="light" @click="addFuzzyNew">
         <IonIcon slot="start" :icon="addCircle"></IonIcon>
-        Ungefähr hinzufügen
+        Ungefähr
       </IonButton>
 
     </IonCardContent>
@@ -64,7 +64,7 @@
           </IonItem>
           <IonItem lines="none" v-if="currentItem.isRegularly">
             <IonSelect interface="popover" :multiple="true" v-model="currentItem.Times"
-              label="Einnahmezeiten" placeholder="Wann?">
+              label="Einnahmezeiten:" placeholder="Wann?">
               <IonSelectOption value="morgens">Morgens</IonSelectOption>
               <IonSelectOption value="mittags">Mittags</IonSelectOption>
               <IonSelectOption value="abends">Abends</IonSelectOption>
@@ -198,6 +198,11 @@ watch(() => currentItem.value.isRegularly, (v) => {
 </script>
 
 <style scoped>
+.dd-med-input {
+  --card-bg: transparent;
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .dd-med-input-content {
   padding: 0;
 }

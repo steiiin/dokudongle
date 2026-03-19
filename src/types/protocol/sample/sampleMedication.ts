@@ -1,12 +1,16 @@
 
 import { useDokuStore } from "@/store/doku"
-import { onNormal } from "@/utils/filter"
+import { notEmpty, onNormal } from "@/utils/filter"
 function getCtx() { return useDokuStore().context }
 
 export class SampleMedication {
 
   public level: '' | 'unknown' | 'minor' | 'major'
-  public Flags: Array<'OAK'|'TAH'|'Insulin'>
+  public Flags: {
+    oak: string,
+    tah: string,
+    insulin: boolean,
+  }
   public isPlanAvailable: boolean
   public PlanMedication: Array<SampleMedicationItem>
   public MinormedDescription: string
@@ -15,7 +19,7 @@ export class SampleMedication {
   constructor()
   {
     this.level = ''
-    this.Flags = []
+    this.Flags = { oak: '', tah: '', insulin: false}
     this.isPlanAvailable = false
     this.PlanMedication = []
     this.MinormedDescription = ''
@@ -41,11 +45,16 @@ export class SampleMedication {
     else if (this.level == 'major') {
 
       const flags: string[] = []
-      if (this.Flags.includes('OAK') && this.Flags.includes('TAH')) { flags.push('Nimmt OAK+TAH ein.') }
-      else if (this.Flags.includes('OAK') && !this.Flags.includes('TAH')) { flags.push('Nimmt OAK ein.') }
-      else if (this.Flags.includes('TAH') && !this.Flags.includes('OAK')) { flags.push('Nimmt Aggregationshemmer ein.') }
-      else { flags.push(onNormal('Keine Blutverdünner.')) }
-      if (this.Flags.includes('Insulin')) { flags.push('Insulinpflichtig.')}
+      const oakFlag = notEmpty(this.Flags.oak)
+      const tahFlag = notEmpty(this.Flags.tah)
+
+      if (oakFlag && tahFlag) { flags.push(`Nimmt ${this.Flags.oak}+${this.Flags.tah} ein.`) }
+      else if (tahFlag && this.Flags.tah == 'TAH') { flags.push('Nimmt Aggregationshemmer (kein OAK) ein.') }
+      else if (tahFlag) { flags.push(`Nimmt ${this.Flags.tah} ein.`) }
+      else if (oakFlag) { flags.push(`Nimmt ${this.Flags.oak} ein.`) }
+      else { flags.push('Keine Blutverdünner.') }
+
+      if (this.Flags.insulin) { flags.push('Insulinpflichtig.')}
       const flagsText = flags.filter(e=>e).join(' ')
 
       const planMedicationtext = (this.isPlanAvailable

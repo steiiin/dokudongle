@@ -24,20 +24,47 @@
           </IonSelect>
         </IonItem>
 
-        <IonItem lines="full" v-if="sampleMedOnMajor">
-          <DodoToggleChip
+        <IonItem lines="full" v-if="sampleMedOnMajor" class="med-flags">
+
+          <DodoInputChip v-model="store.doku.sampler.medication.Flags.oak"
+            placeholder="OAK" color="danger"
+            :options="[
+              { value: 'Apixaban', label: 'Eliquis/Apixaban' },
+              { value: 'Rivaroxaban', label: 'Xarelto/Rivaroxaban' },
+              { value: 'Dabigatran', label: 'Pradaxa/Dabigatran' },
+              { value: 'Edoxaban', label: 'Lixiana/Edoxaban' },
+              { value: 'VKA', label: 'Marcumar/Falithrom/Warfarin' },
+            ]">
+          </DodoInputChip>
+
+          <DodoInputChip v-model="store.doku.sampler.medication.Flags.tah"
+            placeholder="TAH" color="warning"
+            :options="[
+              { value: 'ASS', label: 'Aspirin/ASS' },
+              { value: 'Clopidogrel', label: 'Plavix/Clopidogrel' },
+              { value: 'Ticagrelor', label: 'Brilique/Ticagrelor' },
+              { value: 'Prasugrel', label: 'Prasugrel' },
+              { value: 'Dipyridamol', label: 'Asasantin/Dipyridamol' },
+            ]">
+          </DodoInputChip>
+
+          <DodoToggleChip v-model="store.doku.sampler.medication.Flags.insulin"
+            color="primary">
+            Insulinpflichtig
+          </DodoToggleChip>
+
+          <!-- <DodoToggleChip
             v-for="flag in sampleMedFlags"
             :key="flag.name"
             :color="flag.color"
             :model-value="isActiveFlag(flag.name)"
-            bold
             @update:modelValue="setMedFlag(flag.name, $event)"
           >
             {{ flag.name }}
-          </DodoToggleChip>
+          </DodoToggleChip> -->
         </IonItem>
 
-        <IonItem v-if="sampleMedOnMajor">
+        <IonItem v-if="sampleMedOnMajor" :lines="noneIf(store.doku.sampler.medication.isPlanAvailable)">
           <IonToggle v-model="store.doku.sampler.medication.isPlanAvailable" label-placement="end">MedPlan vorhanden?</IonToggle>
         </IonItem>
         <DodoMedInput v-if="sampleMedOnMajor && !store.doku.sampler.medication.isPlanAvailable" lines="none" v-model="store.doku.sampler.medication.PlanMedication">
@@ -62,6 +89,7 @@ import { computed, ref, watch } from 'vue'
 import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
+import { fullIf, noneIf } from '@/utils/filter'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -81,30 +109,6 @@ watch(() => store.doku.sampler.medication.level, async (newV, oldV) => {
 const sampleMedOnMinor = computed(() => store.doku.sampler.medication.level == 'minor')
 const sampleMedOnMajor = computed(() => store.doku.sampler.medication.level == 'major')
 
-type MedFlagTypes = 'OAK' | 'TAH' | 'Insulin'
-
-const sampleMedFlags: Array<{ name: MedFlagTypes; color: string }> = [
-  { name: 'OAK', color: 'danger' },
-  { name: 'TAH', color: 'warning' },
-  { name: 'Insulin', color: 'primary' },
-]
-
-const isActiveFlag = (flag: MedFlagTypes) => {
-  return store.doku.sampler.medication.Flags.includes(flag)
-}
-
-const setMedFlag = (flag: MedFlagTypes, enabled: boolean) => {
-  const flags = store.doku.sampler.medication.Flags
-  const index = flags.indexOf(flag)
-  if (enabled && index === -1) {
-    flags.push(flag)
-    return
-  }
-  if (!enabled && index >= 0) {
-    flags.splice(index, 1)
-  }
-}
-
 watch(() => ctx.value.isTrauma, () => {
   store.doku.sampler.medication.TetanusStatus = ''
 })
@@ -113,5 +117,8 @@ watch(() => ctx.value.isTrauma, () => {
 <style scoped>
 ion-card {
   --card-bg: #308744;
+}
+.med-flags::part(container) {
+  flex-wrap: wrap;
 }
 </style>

@@ -33,6 +33,7 @@
 import { ref, computed, watch } from 'vue'
 
 import { closeOutline, pulseOutline } from 'ionicons/icons'
+import { notEmpty } from '@/utils/filter';
 
 const props = defineProps<{
   modelValue: string
@@ -46,7 +47,7 @@ const emit = defineEmits<{
 
 const hasTreatment = ref(false)
 const treatInput = ref<any|null>(null)
-const hasTreatmentInput = computed(() => hasTreatment.value && treatmentValue.value.length>0)
+const hasTreatmentInput = computed(() => hasTreatment.value && notEmpty(treatmentValue.value))
 
 const addTreatment = () => {
   hasTreatment.value = true
