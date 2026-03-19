@@ -17,7 +17,7 @@
 
         <IonButton v-if="!store.isDongleConnected"
           :disabled="store.isDongleConnecting"
-          @click="store.connectDongle"
+          @click="connect"
           >Dongle suchen
         </IonButton>
 
@@ -31,9 +31,10 @@
 
 import { ellipsisHorizontalCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
-import { computed } from 'vue';
+import { computed, nextTick } from 'vue';
 
 import { useDokuStore } from '@/store/doku';
+import router from '@/router';
 const store = useDokuStore();
 
 interface StateText {
@@ -65,6 +66,13 @@ const stateText = computed(() => {
   }
 
 })
+
+const connect = async () => {
+  await store.connectDongle
+  if (store.isDongleConnected) {
+    setTimeout(() => router.push('/tabs/doku'), 1000)
+  }
+}
 
 </script>
 <style lang="scss" scoped>
