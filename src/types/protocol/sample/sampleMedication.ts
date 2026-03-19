@@ -37,10 +37,10 @@ export class SampleMedication {
     }
 
     if (this.level == 'unknown') {
-      return onNormal(`Medikamenteneinnahme unklar (kein Plan/keine Angaben). ${tetanusSeg} \n`)
+      return onNormal(`Medikamenteneinnahme unklar (kein Plan/keine Angaben). ${tetanusSeg}`)
     }
     else if (this.level == 'minor') {
-      return `${this.MinormedDescription}, sonst keine Dauermedikation. ${tetanusSeg} \n`
+      return `${this.MinormedDescription}, sonst keine Dauermedikation. ${tetanusSeg}`
     }
     else if (this.level == 'major') {
 
@@ -68,7 +68,7 @@ export class SampleMedication {
 
     }
     else {
-      return onNormal(`Keine Medikamenteneinnahme. ${tetanusSeg} \n`)
+      return onNormal(`Keine Medikamenteneinnahme. ${tetanusSeg}`)
     }
 
   }

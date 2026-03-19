@@ -14,16 +14,16 @@ export class SampleAllergies {
   public generateText(): string
   {
     if (this.level == 'unknown') {
-      return onNormal(`Allergien unklar (keine Angaben). \n`)
+      return onNormal(`Allergien unklar (keine Angaben).`)
     }
     else if (this.level == '') {
-      return onNormal('Keine Allergien. \n')
+      return onNormal('Keine Allergien.')
     }
     else if (this.level == 'minor') {
-      return `Allergie: ${this.description}, sonst keine Med.-Unverträglichkeiten. \n`
+      return `Allergie: ${this.description}, sonst keine Med.-Unverträglichkeiten.`
     }
     else {
-      return `Allergie: ${this.description}. \n`
+      return `Allergie: ${this.description}.`
     }
   }
 

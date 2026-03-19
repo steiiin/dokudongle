@@ -375,19 +375,15 @@ export const useDokuStore = defineStore('doku', {
       ], true), this.context.isTrauma)
 
       // SAMPLE
-      text += breakDoku([
-        state.doku.sampler.allergies.generateText(),
-        state.doku.sampler.medication.generateText(),
-        state.doku.sampler.pler.generateText(),
-        state.doku.sampler.contacts.generateText(),
-      ], true)
+      text += breakDoku(state.doku.sampler.allergies.generateText(), true)
+      text += breakDoku(state.doku.sampler.medication.generateText(), true)
+      text += breakDoku(state.doku.sampler.pler.generateText(), true)
+      text += breakDoku(state.doku.sampler.contacts.generateText(), true)
 
       // TREATMENT
-      text += breakDoku([
-        state.doku.treatment.value,
-        state.doku.redflags.getBlock(),
-        state.doku.consent.getBlock(),
-      ], true)
+      text += breakDoku(state.doku.treatment.value, true)
+      text += breakDoku(state.doku.redflags.getBlock(), true)
+      text += breakDoku(state.doku.consent.getBlock(), true)
 
       return text.trim()
 

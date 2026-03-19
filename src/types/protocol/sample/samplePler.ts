@@ -8,6 +8,6 @@ export class SamplePler {
     this.PLER = new EnhanceableText('')
   }
   public generateText(): string {
-    return `${this.PLER.value} \n`
+    return `${this.PLER.value}`
   }
 }
