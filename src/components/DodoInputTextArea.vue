@@ -85,10 +85,9 @@
             </IonButton>
           </div>
           <IonButton
-              size="normal" color="danger" fill="outline"
+              size="small" color="danger" fill="outline"
               :disabled="modelValue.isEmpty"
-              @click="clear"
-            >
+              @click="clear" style="margin-top:-0.25rem">
               Eingaben löschen
             </IonButton>
         </div>
