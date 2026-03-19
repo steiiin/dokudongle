@@ -17,7 +17,7 @@
 
         <IonButton v-if="!store.isDongleConnected"
           :disabled="store.isDongleConnecting"
-          @click="connect"
+          @click="connectDongle"
           >Dongle suchen
         </IonButton>
 
@@ -67,8 +67,8 @@ const stateText = computed(() => {
 
 })
 
-const connect = async () => {
-  await store.connectDongle
+const connectDongle = async () => {
+  await store.connectDongle()
   if (store.isDongleConnected) {
     setTimeout(() => router.push('/tabs/doku'), 1000)
   }
