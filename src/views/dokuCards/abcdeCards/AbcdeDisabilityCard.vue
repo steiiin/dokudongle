@@ -151,7 +151,7 @@
 
         <IonItem v-if="!ctx.isNonVerbal" lines="full">
           <IonToggle v-model="store.doku.xabcDe.aphasia" label-placement="end">
-            Aphasie?
+            Dysarthrie/Aphasie?
           </IonToggle>
         </IonItem>
 
