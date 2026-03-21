@@ -382,7 +382,7 @@ export class AbcdeDisability {
         this.gcsScore == 15
           ? onHigh('GCS 15')
           : onNormal(`GCS ${this.gcsScore}`),
-        textIf('Aphasie', this.aphasia),
+        textIf('Dysarthrie', this.aphasia),
         textIf(headache, !isNonVerbal),
         textIf(this.dizzinessText, !isNonVerbal),
         this.paresisText,
