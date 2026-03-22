@@ -7,7 +7,7 @@
 
       <TreatmentTasksCard />
       <TreatmentMedicationsCard />
-      <TreatmentInformedConsentCard v-if="ctx.requireRedflags" />
+      <TreatmentRedflagsCard v-if="ctx.requireRedflags" />
 
     </IonCardContent>
   </IonCard>
@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 
-import TreatmentInformedConsentCard from './treatmentCards/TreatmentInformedConsentCard.vue'
+import TreatmentRedflagsCard from './treatmentCards/TreatmentRedflagsCard.vue'
 import TreatmentMedicationsCard from './treatmentCards/TreatmentMedicationsCard.vue'
 import TreatmentTasksCard from './treatmentCards/TreatmentTasksCard.vue'
 

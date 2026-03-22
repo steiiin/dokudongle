@@ -1,10 +1,11 @@
 export type RedflagCategory = 'trauma' | 'neuro'
-export type RedflagApplication = 'refusal' | 'bvo'
+export type RedflagApplication = 'Verweigerung' | 'BvO'
 
 export class RedflagScenario {
   constructor(
     public id: string,
     public name: string,
+    public requirements: string,
     public application: RedflagApplication,
     public category: RedflagCategory,
     public majorSignals: string[],
@@ -19,13 +20,15 @@ export class RedflagScenario {
 export const Scenarios: Record<string, RedflagScenario> = createScenarios([
 
   defSc(
-    'Sturz/Verletzung (leicht)', 'bvo', 'trauma',
+    'Sturz/Verletzung (leicht)', 'Keine Fehlstellung, DMS intakt',
+    'BvO', 'trauma',
     [ ],
     [ ],
   ),
 
   defSc(
-    'Platz-/Schnittwunde (leicht)', 'bvo', 'trauma',
+    'Platz-/Schnittwunde (leicht)', 'Blutung gestillt, DMS intakt',
+    'BvO', 'trauma',
     [ ],
     [ ],
   ),
@@ -56,10 +59,11 @@ export const Signals: Record<string, RedflagSignal> = createSignals([
 
 // ######################################################################################
 
-const genKey = (cat: string, name: string) => cat + name.replace(/[\/(]/g, '_').replace(/[ \-)]/gi, '')
+function genKey(cat: string, name: string) { return cat + name.replace(/[\/(]/g, '_').replace(/[ \-)]/gi, '') }
 
 function defSc(
   name: string,
+  requirements: string,
   application: RedflagApplication,
   category: RedflagCategory,
   majorSignals: string[],
@@ -69,6 +73,7 @@ function defSc(
 ) {
   return {
     name,
+    requirements,
     application,
     category,
     majorSignals,
@@ -89,6 +94,7 @@ function createScenarios(
         new RedflagScenario(
           key,
           sc.name,
+          sc.requirements,
           sc.application,
           sc.category,
           sc.majorSignals,

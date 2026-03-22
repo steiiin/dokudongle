@@ -1,46 +1,38 @@
 <template>
 
-  <IonCard class="pb-redflag-input" v-if="hasAny">
-    <IonCardContent class="pb-redflag-input-content">
-
-      <div class="chip-container" v-if="hasCases">
-        <IonChip color="success" v-for="redcase in modelValue.RedCases" :key="redcase.id" @click="removeCase(redcase)">
-          <IonLabel>{{ redcase.Name }}</IonLabel>
+  <IonCard class="dodo-redflag-input" v-if="hasAny">
+    <IonCardContent class="dodo-redflag-input-content">
+      <div class="chip-container" v-if="hasScenarios">
+        <IonChip color="success" v-for="scenario in modelValue.choosenScenarios" :key="scenario.id" @click="removeScenario(scenario)">
+          <IonLabel>{{ scenario.name }}</IonLabel>
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
-      <div class="chip-container" v-if="hasDiagnoses">
-        <IonChip color="warning" v-for="reddiagnose in modelValue.RedDiagnoses" :key="reddiagnose.id"
-          @click="removeDiagnose(reddiagnose)">
-          <IonLabel>{{ reddiagnose.Name }}</IonLabel>
-          <IonIcon :icon="closeCircle"></IonIcon>
-        </IonChip>
-      </div>
-      <div class="chip-container" v-if="hasFlags">
-        <IonChip color="danger" v-for="redflag in modelValue.RedFlags" :key="redflag.id" @click="removeFlag(redflag)">
-          <IonLabel>{{ redflag.Name }}</IonLabel>
+      <div class="chip-container" v-if="hasSignals">
+        <IonChip color="danger" v-for="signal in modelValue.choosenSignals" :key="signal.id" @click="removeSignal(signal)">
+          <IonLabel>{{ signal.name }}</IonLabel>
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
 
     </IonCardContent>
   </IonCard>
-  <IonCard class="pb-redflag-input" style="margin-bottom:0">
-    <IonCardContent class="pb-redflag-input-content pb-redflag-input-actions">
-      <IonButton fill="solid" color="light" @click="showRedModal">
+  <IonCard class="dodo-redflag-input" style="margin-bottom:0">
+    <IonCardContent class="dodo-redflag-input-content dodo-redflag-input-actions">
+      <IonButton fill="solid" color="light" @click="showModal" >
         <IonIcon slot="start" :icon="addCircle"></IonIcon>
         RedFlags hinzufügen
       </IonButton>
     </IonCardContent>
   </IonCard>
-  <IonModal :is-open="isRedModalOpen" @did-present="focusRedSearchbar">
+  <IonModal :is-open="isModalOpen" @did-present="focusRedSearchbar" @did-dismiss="closeModal">
     <IonHeader>
       <IonToolbar>
-        <IonTitle type="ios">RedFlags, Diagnosen & Fälle hinzufügen</IonTitle>
+        <IonTitle type="ios">RedFlag-Szenarien & Warnzeichen hinzufügen</IonTitle>
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
-          <IonButton @click="closeRedModal">Zurück</IonButton>
+          <IonButton @click="closeModal">Zurück</IonButton>
         </IonButtons>
       </IonToolbar>
     </IonHeader>
@@ -48,10 +40,10 @@
       <IonList>
         <IonSearchbar
           ref="redSearchbar"
-          v-model="redModalSearch"
+          v-model="currentSearchQuery"
           placeholder="z.B. Synkope, ACS, Kopfschmerzen"></IonSearchbar>
-        <template v-if="redModalSections.length > 0">
-          <template v-for="section in redModalSections" :key="section.type">
+        <template v-if="currentModalSections.length > 0">
+          <template v-for="section in currentModalSections" :key="section.type">
             <IonItemDivider class="type-divider">
               <IonLabel>{{ section.label }}</IonLabel>
             </IonItemDivider>
@@ -60,8 +52,8 @@
                 <IonLabel>{{ category.name }}</IonLabel>
               </IonItemDivider>
               <IonItem v-for="entry in category.items" :key="entry.key" lines="full" button
-                @click="addRedEntry(entry)">
-                <IonLabel>{{ entry.name }}</IonLabel>
+                @click="addEntry(entry)">
+                <IonLabel v-if="entry.">{{ entry.name }}</IonLabel>
               </IonItem>
             </template>
           </template>
@@ -83,34 +75,31 @@ import type { UnwrapRef } from 'vue'
 
 import { addCircle, closeCircle } from 'ionicons/icons';
 
-import { getAllRedCases, getAllRedDiagnoses, getAllRedFlags, RedCase, RedDiagnose, RedFlag } from '@/data/redflags';
+import { RedflagApplication, RedflagScenario, RedflagSignal, Scenarios, Signals } from '@/data/redflags';
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags';
 
-type InformedConsentModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
+type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
 
-const props = defineProps<{ modelValue: InformedConsentModel }>()
+const props = defineProps<{ modelValue: TreatmentRedflagsModel }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: InformedConsentModel): void
+  (e: 'update:modelValue', value: TreatmentRedflagsModel): void
 }>()
 
-const allRedFlags = getAllRedFlags()
-const allRedDiagnoses = getAllRedDiagnoses()
-const allRedCases = getAllRedCases()
+const allScenarios = Object.values(Scenarios)
+const allSignals = Object.values(Signals)
 
-const cloneModelValue = (): InformedConsentModel => {
+const cloneModelValue = (): TreatmentRedflagsModel => {
   const clone = Object.assign(new TreatmentRedflags(), props.modelValue)
-  clone.RedFlags = [...props.modelValue.RedFlags]
-  clone.RedDiagnoses = [...props.modelValue.RedDiagnoses]
-  clone.RedCases = [...props.modelValue.RedCases]
+  clone.choosenScenarios = [...props.modelValue.choosenScenarios]
+  clone.choosenSignals = [...props.modelValue.choosenSignals]
   return clone
 }
 
-const hasFlags = computed(() => props.modelValue.RedFlags.length > 0)
-const hasDiagnoses = computed(() => props.modelValue.RedDiagnoses.length > 0)
-const hasCases = computed(() => props.modelValue.RedCases.length > 0)
-const hasAny = computed(() => hasFlags.value || hasDiagnoses.value || hasCases.value)
+const hasScenarios = computed(() => props.modelValue.choosenScenarios.length > 0)
+const hasSignals = computed(() => props.modelValue.choosenSignals.length > 0)
+const hasAny = computed(() => hasScenarios.value || hasSignals.value)
 
-type RedEntryType = 'case' | 'diagnose' | 'flag'
+type RedEntryType = 'scenario' | 'signal'
 
 type RedEntry = {
   key: string
@@ -131,8 +120,8 @@ type RedSection = {
   categories: RedSectionCategory[]
 }
 
-const isRedModalOpen = ref(false)
-const redModalSearch = ref('')
+const isModalOpen = ref(false)
+const currentSearchQuery = ref('')
 const redSearchbar = ref<any | null>(null)
 
 const focusRedSearchbar = async () => {
@@ -140,49 +129,44 @@ const focusRedSearchbar = async () => {
 }
 
 const typeLabels: Record<RedEntryType, string> = {
-  case: 'Fälle',
-  diagnose: 'Diagnosen',
-  flag: 'RedFlags'
+  scenario: 'Szenarien',
+  signal: 'Warnzeichen'
 }
 
 const typeSortOrder: Record<RedEntryType, number> = {
-  case: 1,
-  diagnose: 2,
-  flag: 3
+  scenario: 1,
+  signal: 2
 }
 
-const buildRedEntries = (): RedEntry[] => [
-  ...allRedCases.map((entry) => ({
-    key: `case-${entry.id}`,
+const buildEntries = (): RedEntry[] => [
+  ...allScenarios.map((entry) => ({
+    key: `scenario-${entry.id}`,
     id: entry.id,
-    name: entry.Name,
-    groupName: entry.Group.Name,
-    type: 'case' as const
+    name: entry.name,
+    groupName: entry.category,
+    type: 'scenario' as const,
   })),
-  ...allRedDiagnoses.map((entry) => ({
-    key: `diagnose-${entry.id}`,
+  ...allSignals.map((entry) => ({
+    key: `signal-${entry.id}`,
     id: entry.id,
-    name: entry.Name,
-    groupName: entry.Group.Name,
-    type: 'diagnose' as const
-  })),
-  ...allRedFlags.map((entry) => ({
-    key: `flag-${entry.id}`,
-    id: entry.id,
-    name: entry.Name,
-    groupName: entry.Group.Name,
-    type: 'flag' as const
+    name: entry.name,
+    groupName: entry.category,
+    type: 'signal' as const,
   }))
 ]
 
-const redEntries = computed(() => buildRedEntries())
+const currentEntries = computed(() => buildEntries())
+const currentModalSections = computed<RedSection[]>(() => {
 
-const redModalSections = computed<RedSection[]>(() => {
-  const search = redModalSearch.value
-  const visibleEntries = redEntries.value.filter((entry) => {
-    if (entry.type === 'case' && !filterExisting(entry.id, props.modelValue.RedCases)) return false
-    if (entry.type === 'diagnose' && !filterExisting(entry.id, props.modelValue.RedDiagnoses)) return false
-    if (entry.type === 'flag' && !filterExisting(entry.id, props.modelValue.RedFlags)) return false
+  const currentApplication: RedflagApplication = props.modelValue.noTransportType === 'BvO' ? 'BvO' : 'Verweigerung'
+  const search = currentSearchQuery.value
+  const visibleEntries = currentEntries.value.filter((entry) => {
+    if (entry.type === 'scenario') {
+      const scenario = allScenarios.find((candidate) => candidate.id === entry.id)
+      if (!scenario || scenario.application !== currentApplication) return false
+      if (!filterExisting(entry.id, props.modelValue.choosenScenarios)) return false
+    }
+    if (entry.type === 'signal' && !filterExisting(entry.id, props.modelValue.choosenSignals)) return false
     return fuzzyMatch(search, `${entry.name} ${entry.groupName}`)
   })
 
@@ -208,57 +192,46 @@ const redModalSections = computed<RedSection[]>(() => {
     }))
 })
 
-const showRedModal = () => {
-  redModalSearch.value = ''
-  isRedModalOpen.value = true
+const showModal = () => {
+  currentSearchQuery.value = ''
+  isModalOpen.value = true
 }
 
-const closeRedModal = () => {
-  isRedModalOpen.value = false
+const closeModal = () => {
+  isModalOpen.value = false
 }
 
-const addRedEntry = (entry: RedEntry) => {
-  closeRedModal()
+const addEntry = (entry: RedEntry) => {
+  closeModal()
   const updated = cloneModelValue()
-  if (entry.type === 'flag') {
-    const flag = allRedFlags.find((item) => item.id === entry.id)
-    if (flag) updated.RedFlags = [...updated.RedFlags, flag]
+  if (entry.type === 'scenario') {
+    const scenario = allScenarios.find((item) => item.id === entry.id)
+    if (scenario) updated.choosenScenarios = [...updated.choosenScenarios, scenario]
   }
-  if (entry.type === 'diagnose') {
-    const diagnose = allRedDiagnoses.find((item) => item.id === entry.id)
-    if (diagnose) updated.RedDiagnoses = [...updated.RedDiagnoses, diagnose]
-  }
-  if (entry.type === 'case') {
-    const redcase = allRedCases.find((item) => item.id === entry.id)
-    if (redcase) updated.RedCases = [...updated.RedCases, redcase]
+  if (entry.type === 'signal') {
+    const signal = allSignals.find((item) => item.id === entry.id)
+    if (signal) updated.choosenSignals = [...updated.choosenSignals, signal]
   }
   emit('update:modelValue', updated)
 }
 
-const removeFlag = (redflag: RedFlag) => {
-  closeRedModal()
+const removeSignal = (signal: RedflagSignal) => {
+  closeModal()
   const updated = cloneModelValue()
-  updated.RedFlags = updated.RedFlags.filter(e => e.id !== redflag.id)
+  updated.choosenSignals = updated.choosenSignals.filter(e => e.id !== signal.id)
   emit('update:modelValue', updated)
 }
 
-const removeDiagnose = (diagnose: RedDiagnose) => {
-  closeRedModal()
+const removeScenario = (scenario: RedflagScenario) => {
+  closeModal()
   const updated = cloneModelValue()
-  updated.RedDiagnoses = updated.RedDiagnoses.filter(e => e.id !== diagnose.id)
-  emit('update:modelValue', updated)
-}
-
-const removeCase = (redcase: RedCase) => {
-  closeRedModal()
-  const updated = cloneModelValue()
-  updated.RedCases = updated.RedCases.filter(e => e.id !== redcase.id)
+  updated.choosenScenarios = updated.choosenScenarios.filter(e => e.id !== scenario.id)
   emit('update:modelValue', updated)
 }
 
 // #region Filters
 
-const filterExisting = (search: string, source: Array<RedFlag | RedCase | RedDiagnose>) => {
+const filterExisting = (search: string, source: Array<{ id: string }>) => {
   return !source.some(i => i.id === search)
 }
 
@@ -282,11 +255,11 @@ const fuzzyMatch = (search: string, target: string): boolean => {
 </script>
 
 <style scoped>
-.pb-redflag-input {
+.dodo-redflag-input {
   --card-bg: transparent;
   margin: 0;
 }
-.pb-redflag-input-content {
+.dodo-redflag-input-content {
   padding: 0;
   margin: .25rem;
 }
@@ -295,7 +268,7 @@ const fuzzyMatch = (search: string, target: string): boolean => {
   padding: .5rem;
 }
 
-.pb-redflag-input-actions {
+.dodo-redflag-input-actions {
   display: flex;
   justify-content: flex-start;
 }
