@@ -42,14 +42,12 @@
           ref="redSearchbar"
           v-model="currentSearchQuery"
           placeholder="z.B. Synkope, ACS, Kopfschmerzen"></IonSearchbar>
-        <div style="padding: 8px 8px 8px 8px">
-          <DodoToggleChip v-model="isScenarioVisible">Hallo</DodoToggleChip>
-        </div>
+        <DodoToggleGroup v-model="currentFilter" style="margin:0 8px 8px 8px">
+          <DodoToggleButton value="scenario">Szenarien</DodoToggleButton>
+          <DodoToggleButton value="signal">Redflags</DodoToggleButton>
+        </DodoToggleGroup>
         <template v-if="currentModalSections.length > 0">
           <template v-for="section in currentModalSections" :key="section.type">
-            <IonItemDivider class="type-divider">
-              <IonLabel>{{ section.label }}</IonLabel>
-            </IonItemDivider>
             <template v-for="category in section.categories" :key="category.name">
               <IonItemDivider class="category-divider">
                 <IonLabel>{{ category.name }}</IonLabel>
@@ -84,6 +82,8 @@ import { addCircle, closeCircle } from 'ionicons/icons';
 import { RedflagApplication, RedflagScenario, RedflagSignal, Scenarios, Signals } from '@/data/redflags';
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags';
 import DodoToggleChip from './DodoToggleChip.vue';
+import DodoToggleGroup from './DodoToggleGroup.vue';
+import DodoToggleButton from './DodoToggleButton.vue';
 
 type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
 
@@ -108,9 +108,6 @@ const hasAny = computed(() => hasScenarios.value || hasSignals.value)
 
 type RedEntryType = 'scenario' | 'signal'
 
-const isScenarioVisible = ref(false)
-const isSignalVisible = ref(false)
-
 type RedEntry = {
   key: string
   id: string
@@ -133,6 +130,7 @@ type RedSection = {
 
 const isModalOpen = ref(false)
 const currentSearchQuery = ref('')
+const currentFilter = ref<RedEntryType>('scenario')
 const redSearchbar = ref<any | null>(null)
 
 const focusRedSearchbar = async () => {
@@ -175,11 +173,16 @@ const currentModalSections = computed<RedSection[]>(() => {
   const search = currentSearchQuery.value
   const visibleEntries = currentEntries.value.filter((entry) => {
     if (entry.type === 'scenario') {
+      if (currentFilter.value != 'scenario') { return false }
       const scenario = allScenarios.find((candidate) => candidate.id === entry.id)
-      if (!scenario || scenario.application !== currentApplication) return false
-      if (!filterExisting(entry.id, props.modelValue.choosenScenarios)) return false
+      if (!scenario || scenario.application !== currentApplication) { return false }
+      if (!filterExisting(entry.id, props.modelValue.choosenScenarios)) { return false }
     }
-    if (entry.type === 'signal' && !filterExisting(entry.id, props.modelValue.choosenSignals)) return false
+    if (entry.type === 'signal') {
+      if (currentFilter.value != 'signal') { return false }
+      if (!filterExisting(entry.id, props.modelValue.choosenSignals)) { return false }
+    }
+
     return fuzzyMatch(search, `${entry.name} ${entry.groupName}`)
   })
 
