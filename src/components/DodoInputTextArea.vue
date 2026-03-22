@@ -7,7 +7,7 @@
 
     <IonButton :color="isMissingField ? 'danger' : (inheritStyle ? 'dark' : '')"
       :fill="inheritStyle ? 'clear' : 'outline'" expand="block"
-      size="small" :disabled="modelValue.isEnhancing" :class="{ inheritStyle }"
+      size="default" :disabled="modelValue.isEnhancing" :class="{ inheritStyle }"
       @click="openModal">
       <IonIcon slot="start" :src="alertCircle" v-if="isMissingField"></IonIcon>
       {{ title }} {{ modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten' }}
