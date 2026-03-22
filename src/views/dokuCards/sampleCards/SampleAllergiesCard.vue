@@ -54,6 +54,6 @@ const placeholder = computed(() => {
 </script>
 <style scoped>
 ion-card {
-  --card-bg: #7f7e43;
+  --card-bg: #865830;
 }
 </style>

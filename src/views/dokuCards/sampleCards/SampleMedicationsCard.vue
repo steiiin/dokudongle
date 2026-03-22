@@ -116,7 +116,7 @@ watch(() => ctx.value.isTrauma, () => {
 </script>
 <style scoped>
 ion-card {
-  --card-bg: #308744;
+  --card-bg: #707c28;
 }
 .med-flags::part(container) {
   flex-wrap: wrap;

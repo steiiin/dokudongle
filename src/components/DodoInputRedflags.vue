@@ -77,13 +77,10 @@
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
 
-import { addCircle, closeCircle } from 'ionicons/icons';
+import { addCircle, closeCircle } from 'ionicons/icons'
 
-import { RedflagApplication, RedflagScenario, RedflagSignal, Scenarios, Signals } from '@/data/redflags';
-import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags';
-import DodoToggleChip from './DodoToggleChip.vue';
-import DodoToggleGroup from './DodoToggleGroup.vue';
-import DodoToggleButton from './DodoToggleButton.vue';
+import { RedflagApplication, RedflagScenario, RedflagSignal, Scenarios, Signals } from '@/data/redflags'
+import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags'
 
 type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
 
@@ -92,8 +89,8 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: TreatmentRedflagsModel): void
 }>()
 
-const allScenarios = Object.values(Scenarios)
-const allSignals = Object.values(Signals)
+const allScenarios = Scenarios
+const allSignals = Signals
 
 const cloneModelValue = (): TreatmentRedflagsModel => {
   const clone = Object.assign(new TreatmentRedflags(), props.modelValue)
@@ -160,8 +157,8 @@ const buildEntries = (): RedEntry[] => [
     key: `signal-${entry.id}`,
     id: entry.id,
     name: entry.name,
-    subtitle: '',
-    groupName: entry.category,
+    subtitle: entry.subtitle,
+    groupName: '',
     type: 'signal' as const,
   }))
 ]

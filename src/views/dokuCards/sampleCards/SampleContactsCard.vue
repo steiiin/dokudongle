@@ -17,6 +17,11 @@ const store = useDokuStore()
 </script>
 
 <style scoped>
+
+  ion-card {
+    --card-bg: #51287e;
+  }
+
   ion-card-content {
     margin: 0;
     padding: 0 0 10px 0;

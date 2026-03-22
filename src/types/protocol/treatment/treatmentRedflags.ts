@@ -1,6 +1,10 @@
 import { RedflagScenario, RedflagSignal, RedflagApplication, Scenarios, Signals } from "@/data/redflags"
 import { OptionalValue } from "../input"
 
+type WithArrayProp<T> = {
+  [K in keyof T]: T[K] extends (infer U)[] | undefined ? K : never
+}[keyof T]
+
 export class TreatmentRedflags {
 
   public noTransportType: '' | RedflagApplication
@@ -30,6 +34,34 @@ export class TreatmentRedflags {
     return Array.from(new Map(list.map((entry) => [entry.id, entry])).values())
   }
 
+  private getInterleavedEntries<T, K extends WithArrayProp<T>>(items: T[], key: K): T[K] extends (infer U)[] | undefined ? U[] : never {
+    const result: unknown[] = []
+    const seen = new Set<unknown>()
+    const maxLength = Math.max(
+      ...items.map(item => ((item[key] as unknown[] | undefined)?.length ?? 0))
+    )
+    for (let i = 0; i < maxLength; i++) {
+      for (const item of items) {
+        const arr = item[key] as unknown[] | undefined;
+        const value = arr?.[i];
+
+        if (value !== undefined && !seen.has(value)) {
+          seen.add(value);
+          result.push(value);
+        }
+      }
+    }
+    return result as any
+  }
+
+  private getConcatText(list: Array<string>): string {
+    if (list.length <= 1) { return list.pop() ?? '' }
+    else {
+      const lastEntry = list.pop()
+      return `${list.join(', ')} oder ${lastEntry}`
+    }
+  }
+
   // ##########################################################################
 
   public getConsentBlock(): string
@@ -56,32 +88,42 @@ export class TreatmentRedflags {
     const scenarios = this.dedupeById(this.choosenScenarios)
     const signals = this.dedupeById(this.choosenSignals)
 
-    if (scenarios.length > 0) {
-      block += `Aufklärung bzgl. ${scenarios.map((s) => s.name).join('/')}. \n`
+    // create intro
+    const diagnoses = this.getInterleavedEntries(scenarios, 'diagnoses')
+    if (diagnoses.length > 0) {
+      block += `Aufklärung bzgl. ${diagnoses.map((d) => d).join('; ')}. \n`
     }
 
-    const signalMap = new Map(signals.map((signal) => [signal.id, signal]))
-    const emergencyTexts: string[] = []
-    const nonEmergencyTexts: string[] = []
-    scenarios.forEach((scenario) => {
-      const majorMatches = scenario.majorSignals
-        .map((id) => signalMap.get(id)?.text)
-        .filter((text): text is string => !!text)
-      const minorMatches = scenario.minorSignals
-        .map((id) => signalMap.get(id)?.text)
-        .filter((text): text is string => !!text)
+    // create signals text
+    const majorTexts: string[] = this.getInterleavedEntries(scenarios, 'majorSignals')
+    const minorTexts: string[] = this.getInterleavedEntries(scenarios, 'minorSignals')
+    const customSignals = signals.map(e => e.text)
 
-      emergencyTexts.push(...majorMatches)
-      if (minorMatches.length >= 2) {
-        nonEmergencyTexts.push(...minorMatches)
+    if (majorTexts.length>0 || customSignals.length>0) {
+      block += `Bei ${this.getConcatText([ ...majorTexts, ...customSignals ])} erneut Notruf/Vorstellung NFA. \n`
+    }
+    if (minorTexts.length>0) {
+      block += `Bei ${this.getConcatText(minorTexts)} Rücksprache Haus-/Facharzt. \n`
+    }
+
+    // create information text
+    if (this.noTransportType == 'Verweigerung')
+    {
+      block += 'Transport nicht gewünscht. Auch nach Verdeutlichung mgl. Konsequenzen'
+      const consequences = scenarios.map(e => e.consequences)
+      if (consequences.length>0) {
+        block += `, wie ${this.getConcatText(consequences)}`
+      } else {
+        block += ' (bleibende Schäden/Tod)'
       }
-    })
-
-    if (emergencyTexts.length > 0) {
-      block += `Bei ${emergencyTexts.join(', ')} Vorstellung NFA/RD. \n`
+      block += ', weiterhin Transport/Behandlung verweigert. \n'
+      block += 'Pat. einsichtsfähig (versteht Bedeutung/Tragweite/Risiken) & steuerungsfähig (kann eigenes Urteil bilden/umsetzen). \nEntscheidung eigenverantwortlich getroffen.'
     }
-    if (nonEmergencyTexts.length > 0) {
-      block += `Bei ${nonEmergencyTexts.join(', ')} Rücksprache HA/KV. \n`
+    else if (this.noTransportType == 'BvO')
+    {
+      if (this.attendant.isActive) { block += `${this.attendant.value} (Vormund/Betreuer) anwesend. \nA` }
+      else { block += 'Pat. a' }
+      block += 'ufgeklärt über mögliche Verschlechterungszeichen; entscheidungsfähig und einverstanden mit weiteren Vorgehen. \n'
     }
 
     return block

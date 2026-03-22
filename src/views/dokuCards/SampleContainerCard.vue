@@ -46,7 +46,7 @@ const ctx = computed(() => store.context)
 <style scoped>
 
 .sample-symptoms {
-  --card-bg: rgb(65, 48, 109);
+  --card-bg: #214e83;
 }
 
 </style>
