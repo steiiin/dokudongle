@@ -42,10 +42,10 @@ ion-chip {
   margin-left: 0;
 }
 .DdToggleChip--inactive {
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .DdToggleChip--bold {
-  font-weight: bold;
+  border: 1px solid var(--ion-color-shade);
 }
 </style>

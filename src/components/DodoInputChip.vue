@@ -129,7 +129,7 @@ ion-chip {
 }
 
 .DdInputChip--bold {
-  font-weight: bold;
+  border: 1px solid var(--ion-color-shade);
 }
 
 .DdInputChip__clear {

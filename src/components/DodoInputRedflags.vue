@@ -42,6 +42,9 @@
           ref="redSearchbar"
           v-model="currentSearchQuery"
           placeholder="z.B. Synkope, ACS, Kopfschmerzen"></IonSearchbar>
+        <div style="padding: 8px 8px 8px 8px">
+          <DodoToggleChip v-model="isScenarioVisible">Hallo</DodoToggleChip>
+        </div>
         <template v-if="currentModalSections.length > 0">
           <template v-for="section in currentModalSections" :key="section.type">
             <IonItemDivider class="type-divider">
@@ -53,7 +56,10 @@
               </IonItemDivider>
               <IonItem v-for="entry in category.items" :key="entry.key" lines="full" button
                 @click="addEntry(entry)">
-                <IonLabel v-if="entry.">{{ entry.name }}</IonLabel>
+                <IonLabel>
+                  <h3>{{ entry.name }}</h3>
+                  <p v-if="entry.subtitle">{{ entry.subtitle }}</p>
+                </IonLabel>
               </IonItem>
             </template>
           </template>
@@ -77,6 +83,7 @@ import { addCircle, closeCircle } from 'ionicons/icons';
 
 import { RedflagApplication, RedflagScenario, RedflagSignal, Scenarios, Signals } from '@/data/redflags';
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags';
+import DodoToggleChip from './DodoToggleChip.vue';
 
 type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
 
@@ -101,10 +108,14 @@ const hasAny = computed(() => hasScenarios.value || hasSignals.value)
 
 type RedEntryType = 'scenario' | 'signal'
 
+const isScenarioVisible = ref(false)
+const isSignalVisible = ref(false)
+
 type RedEntry = {
   key: string
   id: string
   name: string
+  subtitle: string
   groupName: string
   type: RedEntryType
 }
@@ -143,6 +154,7 @@ const buildEntries = (): RedEntry[] => [
     key: `scenario-${entry.id}`,
     id: entry.id,
     name: entry.name,
+    subtitle: entry.requirements,
     groupName: entry.category,
     type: 'scenario' as const,
   })),
@@ -150,6 +162,7 @@ const buildEntries = (): RedEntry[] => [
     key: `signal-${entry.id}`,
     id: entry.id,
     name: entry.name,
+    subtitle: '',
     groupName: entry.category,
     type: 'signal' as const,
   }))
