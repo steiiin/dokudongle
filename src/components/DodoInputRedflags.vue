@@ -10,7 +10,7 @@
       </div>
       <div class="chip-container" v-if="hasSignals">
         <IonChip color="danger" v-for="signal in modelValue.choosenSignals" :key="signal.id" @click="removeSignal(signal)">
-          <IonLabel>{{ signal.name }}</IonLabel>
+          <IonLabel>{{ signal.text }}</IonLabel>
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
@@ -156,8 +156,8 @@ const buildEntries = (): RedEntry[] => [
   ...allSignals.map((entry) => ({
     key: `signal-${entry.id}`,
     id: entry.id,
-    name: entry.name,
-    subtitle: entry.subtitle,
+    name: entry.text,
+    subtitle: '',
     groupName: '',
     type: 'signal' as const,
   }))

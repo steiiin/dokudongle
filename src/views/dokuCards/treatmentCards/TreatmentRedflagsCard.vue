@@ -55,6 +55,22 @@ const ctx = computed(() => store.context)
 const isModeNormal = computed(() => store.doku.redflags.noTransportType == '')
 const isModeBvO = computed(() => store.doku.redflags.noTransportType == 'BvO')
 
+watch(() => [
+  store.doku.redflags.choosenScenarios.length,
+  store.doku.redflags.choosenSignals.length,
+  store.doku.redflags.noTransportType,
+  store.doku.redflags.attendant.active
+], (v) => {
+  setTimeout(tryScrollingToBottom, 100)
+})
+
+const tryScrollingToBottom = () => {
+  const ionContents = document.getElementsByTagName('ion-content')
+  if (ionContents.length>0) {
+    ionContents[0].scrollToBottom?.(200)
+  }
+}
+
 </script>
 <style scoped>
 

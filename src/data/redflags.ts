@@ -10,8 +10,6 @@ type SignalId = typeof Signals[number]['id']
 export class RedflagSignal {
   constructor(
     public id: string,
-    public name: string,
-    public subtitle: string,
     public text: string,
   ) { }
 }
@@ -22,178 +20,187 @@ export class RedflagSignal {
 export const _SignalDefs = [
 
   defSg(
-    'allgemein-ausschlag-ausbreitung-allgemein',
-    'Ausschlag (Ausbreitung)',
-    'Ausbreitung von Ausschlag'),
+    'atmung-auswurfRuss',
+    'rußiger Auswurf'),
 
   defSg(
-    'allgemein-fieber-allgemein',
-    'Fieber (allgemein)',
-    'Fieber'),
-
-  defSg(
-    'allgemein-infektzeichen-allgemein',
-    'Infektzeichen (allgemein)',
-    'Infektzeichen'),
-
-  defSg(
-    'allgemein-therapieversagen-bedarf-allgemein',
-    'Therapieversagen (bedarf)',
-    'fehlenden Wirkung der Bedarfsmedikation'),
-
-  defSg(
-    'atmung-atemproblem-neu-allgemein',
-    'Atemproblem (neu)',
-    'neuem Atemproblem (Luftnot/Stridor/Heiserkeit/Schluckbeschwerden)'),
-
-  defSg(
-    'atmung-atemproblem-zunehmend-allgemein',
-    'Atemproblem (zunehmend)',
-    'zunehmendem Atemproblem (Schwellung/Luftnot/Schluckbeschwerden)'),
-
-  defSg(
-    'atmung-luftnot-allgemein',
-    'Luftnot (allgemein)',
+    'atmung-luftnot',
     'Luftnot'),
 
   defSg(
-    'atmung-luftnot-anhaltend-allgemein',
-    'Luftnot (anhaltend)',
+    'atmung-luftnot-neu',
+    'Atembeschwerden (Luftnot/Stridor/Heiserkeit/Schluckbeschwerden)'),
+
+  defSg(
+    'atmung-luftnot-zunehmend',
+    'zunehmenden Atembeschwerden (Schwellung/Luftnot/Schluckbeschwerden)'),
+
+  defSg(
+    'atmung-luftnotSchwaeche-anhaltend',
     'anhaltender Luftnot/Schwäche >24h'),
 
   defSg(
-    'atmung-luftnot-zunehmend-allgemein',
-    'Luftnot (zunehmend)',
+    'atmung-luftnot-rezidiv-zunehmend',
     'erneuter/zunehmender Luftnot'),
 
   defSg(
-    'atmung-sprechdyspnoe-allgemein',
-    'Sprechdyspnoe (allgemein)',
+    'atmung-schleimhautreizung-anhaltend',
+    'anhaltenden Halschmerzen/Reizhusten'),
+
+  defSg(
+    'atmung-sprechdyspnoe',
     'Sprechdyspnoe'),
 
   defSg(
-    'atmung-thoraxschmerz-atemabhaengig-anhaltend',
-    'Thoraxschmerz (anhaltend / atemabhängig)',
+    'atmung-atemabhaengigerSchmerz-anhaltend',
     'anhaltenden Schmerzen bei Husten/tiefer Inspiration>48h'),
 
   defSg(
-    'atmung-thoraxschmerz-atemabhaengig-zunehmend',
-    'Thoraxschmerz (zunehmend / atemabhängig)',
+    'atmung-atemabhaengigerSchmerz-zunehmend',
     'zunehmenden atemabhängigen Thoraxschmerzen'),
 
   defSg(
-    'bewegung-fehlstellung-allgemein',
-    'Fehlstellung (allgemein)',
+    'bewegung-fehlstellung',
     'Fehlstellung'),
 
   defSg(
-    'bewegung-funktionseinschraenkung-allgemein',
-    'Funktionseinschränkung (allgemein)',
+    'bewegung-funktionseinschraenkung',
     'funktioneller Einschränkung'),
 
   defSg(
-    'entzuendung-zeichen-zunehmend-allgemein',
-    'Entzündung (zunehmend)',
-    'zunehmender Entzündung (Schmerz/Rötung/Überwärmung/eitrige Sekretion)'),
+    'gastro-erbrechen-neu',
+    'anhaltendem Erbrechen'),
 
   defSg(
-    'gastrointestinal-beschwerden-anhaltend-allgemein',
-    'Gastrointestinale Beschwerden (anhaltend)',
+    'gastro-beschwerden-anhaltend',
     'anhaltenden gastrointestinalen Beschwerden (Übelkeit/Erbrechen/Schmerzen)'),
 
   defSg(
-    'gastrointestinal-beschwerden-neu-allgemein',
-    'Gastrointestinale Beschwerden (neu)',
-    'neuen gastrointestinalen Beschwerden (Übelkeit/Schmerzen)'),
+    'gastro-beschwerden-neu',
+    'Magen-Darm-Beschwerden (Übelkeit/Schmerzen)'),
 
   defSg(
-    'haut-nekrose-allgemein',
-    'Hautnekrose (allgemein)',
+    'haut-ausschlag-zunehmend',
+    'Ausbreitung von Ausschlag'),
+
+  defSg(
+    'haut-entzuendungzeichen-zunehmend',
+    'zunehmender Entzündung (Schmerz/Rötung/Überwärmung/eitrige Sekretion)'),
+
+  defSg(
+    'haut-nekrose',
     'Hautnekrosen'),
 
   defSg(
-    'haut-reaktion-anhaltend-allgemein',
-    'Hautreaktion (anhaltend)',
+    'haut-ausschlagJuckreiz-anhaltend',
     'anhaltender Hautreaktion/Juckreiz >24h'),
 
   defSg(
-    'kreislauf-probleme-allgemein',
-    'Kreislaufprobleme (allgemein)',
+    'haut-verbrennung-zunehmend',
+    'Ausdehnung der Rötung'),
+
+  defSg(
+    'haut-blasenbildung-neu',
+    'Blasenbildung'),
+
+  defSg(
+    'infekt-fieber',
+    'Fieber'),
+
+  defSg(
+    'infekt-infektzeichen',
+    'Infektzeichen'),
+
+  defSg(
+    'kreislauf-probleme',
     'Kreislaufproblemen'),
 
   defSg(
-    'kreislauf-probleme-neu-allgemein',
-    'Kreislaufprobleme (neu)',
-    'neuen Kreislaufproblemen (Schwindel/Herzrasen/Schwäche)'),
+    'kreislauf-probleme-neu',
+    'Kreislaufbeschwerden (Schwindel/Herzrasen/Schwäche)'),
 
   defSg(
-    'kreislauf-probleme-zunehmend-allgemein',
-    'Kreislaufprobleme (zunehmend)',
-    'zunehmenden Kreislaufproblemen (Schwindel/Schwäche)'),
+    'kreislauf-probleme-zunehmend',
+    'zunehmenden Kreislaufbeschwerden (Schwindel/Schwäche)'),
 
   defSg(
-    'neurologisch-dms-stoerung-neu-allgemein',
-    'DMS-Störung (neu)',
-    'neuer DMS-Störung (Taubheit/Blässe/Kälte/Schwäche)'),
+    'neuro-dms-neu',
+    'einer DMS-Störung (Taubheit/Blässe/Kälte/Schwäche)'),
 
   defSg(
-    'neurologisch-vigilanzminderung-allgemein',
-    'Vigilanzminderung (neu)',
-    'Bewusstseinseintrübung'),
-
-  defSg(
-    'peripherie-dms-stoerung-zunehmend-allgemein',
-    'DMS-Störung (zunehmend)',
+    'neuro-dms-zunehmend',
     'zunehmender DMS-Störung (Taubheit/Blässe/Kälte/Schwäche)'),
 
   defSg(
-    'schmerz-anhaltend-allgemein',
-    'Schmerzen (anhaltend)',
+    'neuro-ausfall-neu',
+    'neurol. Ausfällen (Taubheit/Blässe/Kälte/Schwäche)'),
+
+  defSg(
+    'neuro-kopfschmerz-neu',
+    'Kopfschmerzen'),
+
+  defSg(
+    'neuro-kopfschmerz-zunehmend',
+    'zunehmende Kopfschmerzen'),
+
+  defSg(
+    'neuro-schwindel',
+    'Schwindel'),
+
+  defSg(
+    'neuro-kopfschmerzSchwindel-anhaltend',
+    'anhaltenden Kopfschmerzen/Schwindel >12h'),
+
+  defSg(
+    'neuro-muedigkeit-anhaltend',
+    'anhaltender Müdigkeit >48h'),
+
+  defSg(
+    'neuro-vigilanzminderung',
+    'Bewusstseinseintrübung'),
+
+  defSg(
+    'schmerzRoetung-anhaltend',
     'anhaltenden Schmerzen/Rötung >48h'),
 
   defSg(
-    'schmerz-anhaltend-belastung',
-    'Schmerzen (anhaltend / belastung)',
+    'schmerzBelastung-anhaltend',
     'anhaltenden Belastungs-/Bewegungsschmerzen >48h'),
 
   defSg(
-    'schmerz-passive-dehnung-allgemein',
-    'Schmerzen (passive Dehnung)',
-    'Schmerz bei passiver Dehnung'),
-
-  defSg(
-    'schmerz-zunehmend-allgemein',
-    'Schmerzen (zunehmend)',
+    'schmerzStark-zunehmend',
     'zunehmenden starken Schmerzen'),
 
   defSg(
-    'schmerz-zunehmend-belastung',
-    'Schmerzen (zunehmend / belastung)',
+    'schmerzBelastung-zunehmend',
     'zunehmender Belastungs-/Bewegungsschmerzen'),
 
   defSg(
-    'schmerz-zunehmend-ruhe',
-    'Schmerzen (zunehmend / ruhe)',
+    'schmerzRuhigstellung-zunehmend',
     'zunehmenden Schmerzen trotz Ruhigstellung'),
 
   defSg(
-    'schwellung-haematom-anhaltend',
-    'Schwellung/Hämatom (anhaltend)',
+    'schmerzAnalgesie-zunehmend',
+    'zunehmenden Schmerzen trotz Analgesie'),
+
+  defSg(
+    'haut-schwellungHaematom-anhaltend',
     'anhaltender Schwellung/Hämatom'),
 
   defSg(
-    'schwellung-zunehmend-allgemein',
-    'Schwellung (zunehmend)',
+    'haut-schwellungSpannung-zunehmend',
     'zunehmender Schwellung/Spannung'),
 
   defSg(
-    'wunde-heilung-verzoegert-allgemein',
-    'Wundheilung (verzögert)',
+    'sonstige-bedarfsmedOhneWirkung',
+    'fehlenden Wirkung der Bedarfsmedikation'),
+
+  defSg(
+    'wunde-heilverzoegerung',
     'verzögerter Wundheilung'),
 
   defSg(
-    'wunde-nachblutung-allgemein',
-    'Nachblutung (allgemein)',
+    'wunde-nachblutung',
     'Nachblutung/Durchbluten des Verbandes'),
 
 ] as const
@@ -203,7 +210,7 @@ export const _SignalTextsById: Record<SignalId, string> = Object.fromEntries(
 ) as Record<SignalId, string>
 
 export const Signals: RedflagSignal[] = _SignalDefs.map(
-  s => new RedflagSignal(s.id, s.name, s.subtitle, s.text)
+  s => new RedflagSignal(s.id, s.text)
 )
 // ######################################################################################
 
@@ -233,44 +240,40 @@ export const Scenarios: Array<RedflagScenario> = [
     'Extremitätenverletzung (leicht)', 'Keine Fehlstellung, DMS intakt',
     'BvO', 'trauma',
     [
-      'schmerz-zunehmend-ruhe',
-      'neurologisch-dms-stoerung-neu-allgemein',
-      'schwellung-zunehmend-allgemein',
-      'bewegung-fehlstellung-allgemein'
+      'schmerzRuhigstellung-zunehmend',
+      'neuro-dms-neu',
+      'haut-schwellungSpannung-zunehmend',
+      'bewegung-fehlstellung'
     ],
     [
-      'schmerz-anhaltend-belastung',
-      'schwellung-haematom-anhaltend',
-      'bewegung-funktionseinschraenkung-allgemein',
+      'schmerzBelastung-anhaltend',
+      'haut-schwellungHaematom-anhaltend',
+      'bewegung-funktionseinschraenkung',
     ],
     [
-      'okkulter Fraktur',
-      'Band-/Sehnenverletzung',
-      'neurovaskulärer Komplikation/Kompartmentsyndrom',
+      'okkulter Fraktur', 'Band-/Sehnenverletzung',
+      'Weichteilverletzung/Blutung', 'Kompartmentsyndrom',
     ],
   ),
   defSc(
     'Extremitätenverletzung (schwer)', 'Fehlstellung, DMS gestört',
     'Verweigerung', 'trauma',
     [
-      'peripherie-dms-stoerung-zunehmend-allgemein',
-      'schmerz-zunehmend-allgemein',
-      'schmerz-zunehmend-belastung',
-      'haut-nekrose-allgemein',
-      'kreislauf-probleme-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'neuro-dms-zunehmend',
+      'schmerzStark-zunehmend',
+      'schmerzBelastung-zunehmend',
+      'haut-nekrose',
+      'kreislauf-probleme',
+      'neuro-vigilanzminderung',
     ],
     [
-      'schmerz-anhaltend-belastung',
-      'schwellung-haematom-anhaltend',
-      'bewegung-funktionseinschraenkung-allgemein',
+      'schmerzBelastung-anhaltend',
+      'haut-schwellungHaematom-anhaltend',
+      'bewegung-funktionseinschraenkung',
     ],
     [
-      'Fraktur',
-      'Kompartmentsyndrom',
-      'Gefäßläsion',
-      'Luxation',
-      'Weichteilverletzung/Blutung',
+      'Fraktur', 'Luxation',
+      'Weichteilverletzung/Blutung', 'Kompartmentsyndrom',
     ],
     'irreversiblen Nerv- und Gefäßschäden bis hin zu Extremitätenverlust oder lebensbedrohlicher Blutung'
   ),
@@ -279,37 +282,38 @@ export const Scenarios: Array<RedflagScenario> = [
     'Offene Wunde (leicht)', 'Blutung gestillt, DMS intakt',
     'BvO', 'trauma',
     [
-      'wunde-nachblutung-allgemein',
-      'neurologisch-dms-stoerung-neu-allgemein',
-      'entzuendung-zeichen-zunehmend-allgemein',
-      'allgemein-fieber-allgemein',
+      'wunde-nachblutung',
+      'neuro-dms-neu',
+      'haut-entzuendungzeichen-zunehmend',
+      'infekt-fieber',
     ],
     [
-      'schmerz-anhaltend-allgemein',
-      'wunde-heilung-verzoegert-allgemein',
+      'schmerzRoetung-anhaltend',
+      'wunde-heilverzoegerung',
+    ],
+    [
+      'Wundinfektion',
     ],
   ),
   defSc(
     'Offene Wunde (schwer)', 'Naht nötig, Durchblutung, DMS gestört',
     'Verweigerung', 'trauma',
     [
-      'peripherie-dms-stoerung-zunehmend-allgemein',
-      'schmerz-anhaltend-belastung',
-      'schwellung-zunehmend-allgemein',
-      'allgemein-fieber-allgemein',
-      'kreislauf-probleme-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'neuro-dms-zunehmend',
+      'schmerzBelastung-anhaltend',
+      'haut-schwellungSpannung-zunehmend',
+      'infekt-fieber',
+      'kreislauf-probleme',
+      'neuro-vigilanzminderung',
     ],
     [
-      'schmerz-anhaltend-allgemein',
-      'wunde-heilung-verzoegert-allgemein',
+      'schmerzRoetung-anhaltend',
+      'wunde-heilverzoegerung',
     ],
     [
-      'tiefer Weichteilverletzung',
-      'Gefäßläsion',
-      'Kompartmentsyndrom',
-      'Wundinfektion',
       'Fraktur',
+      'tiefer Weichteilverletzung', 'Kompartmentsyndrom',
+      'Wundinfektion',
     ],
     'schwerer Infektionen oder irreversibler Gefäß-/Nervenschäden bis hin zu Extremitätsverlust'
   ),
@@ -318,70 +322,149 @@ export const Scenarios: Array<RedflagScenario> = [
     'Thoraxprellung (leicht)', 'Bagatelltrauma, kein Luftnot',
     'BvO', 'trauma',
     [
-      'atmung-luftnot-allgemein',
-      'atmung-sprechdyspnoe-allgemein',
-      'kreislauf-probleme-neu-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'atmung-luftnot',
+      'atmung-sprechdyspnoe',
+      'kreislauf-probleme-neu',
+      'neuro-vigilanzminderung',
     ],
     [
-      'atmung-thoraxschmerz-atemabhaengig-zunehmend',
-      'atmung-thoraxschmerz-atemabhaengig-anhaltend',
+      'atmung-atemabhaengigerSchmerz-zunehmend',
+      'atmung-atemabhaengigerSchmerz-anhaltend',
+    ],
+    [
+      'Rippenverletzung',
     ],
   ),
   defSc(
     'Thoraxtrauma (schwer)', 'Luftnot, zunehmende Schmerzen',
     'Verweigerung', 'trauma',
     [
-      'atmung-luftnot-zunehmend-allgemein',
-      'atmung-sprechdyspnoe-allgemein',
-      'kreislauf-probleme-zunehmend-allgemein'
+      'atmung-luftnot-rezidiv-zunehmend',
+      'atmung-sprechdyspnoe',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
     ],
-    [],
+    [
+      'schmerzRuhigstellung-zunehmend',
+      'atmung-luftnotSchwaeche-anhaltend',
+    ],
+    [
+      'Pneumothorax', 'Lungenkonstusion', 'Rippenfraktur'
+    ],
+    'einer unerkannten Verletzung mit möglicher rascher respiratorischer Dekompensation',
   ),
 
   defSc(
     'Verbrennung/Verbrühung (leicht)', 'Grad I, nicht an Hand/Fuß/Gesicht, kein Rauchgas',
     'BvO', 'trauma',
-    [],
-    [],
+    [
+      'schmerzAnalgesie-zunehmend',
+      'haut-verbrennung-zunehmend',
+      'haut-blasenbildung-neu',
+      'kreislauf-probleme-neu',
+    ],
+    [
+      'schmerzRoetung-anhaltend',
+      'infekt-infektzeichen',
+      'wunde-heilverzoegerung',
+    ],
+    [
+      'Verbrennung', 'Wundinfektion',
+    ],
   ),
   defSc(
     'Verbrennung/Verbrühung (schwer)', 'Grad > I, flächig',
     'Verweigerung', 'trauma',
-    [],
-    [],
-    [],
-    '',
+    [
+      'kreislauf-probleme-zunehmend',
+      'atmung-luftnot-zunehmend',
+      'haut-schwellungSpannung-zunehmend',
+      'neuro-dms-neu',
+    ],
+    [
+      'schmerzAnalgesie-zunehmend',
+      'infekt-infektzeichen',
+      'bewegung-funktionseinschraenkung',
+    ],
+    [
+      'Verbrennung', 'Dehydratation', 'Inhalationstrauma', 'Wundinfektion'
+    ],
+    'irreparablen Weichteilverletzungen oder Entwicklung eines Schocks mit vitaler Gefährdung innerhalb weniger Stunden',
   ),
 
   defSc(
     'Rauchgasexposition (leicht)', 'kurzzeitige Exposition, keinerlei Symptome',
     'BvO', 'trauma',
-    [],
-    [],
+    [
+      'atmung-luftnot-neu',
+      'neuro-vigilanzminderung',
+      'neuro-kopfschmerz-neu',
+      'neuro-schwindel',
+      'atmung-auswurfRuss',
+    ],
+    [
+      'atmung-schleimhautreizung-anhaltend',
+    ],
+    [
+      'CO-Vergiftung', 'Atemwegsschädigung',
+    ],
   ),
   defSc(
     'Rauchgasinhalation (schwer)', 'Ruß an Nase, Luftnot',
     'Verweigerung', 'trauma',
-    [],
-    [],
-    [],
-    '',
+    [
+      'atmung-luftnot-zunehmend',
+      'neuro-vigilanzminderung',
+      'neuro-kopfschmerz-zunehmend',
+      'neuro-schwindel',
+      'gastro-erbrechen-neu',
+    ],
+    [
+      'atmung-schleimhautreizung-anhaltend',
+    ],
+    [
+      'CO-Vergiftung', 'Atemwegsschädigung',
+      'verzögertem Schleimhautödem', 'Cyanidvergiftung',
+    ],
+    'rascher Atemwegsschwellung bis zur Erstickung oder vergiftungsbedingter Hypoxie bis hin zum Tod',
   ),
 
   defSc(
     'Kopfverletzung (leicht)', 'keine SHT-Zeichen, Überwachung möglich',
     'BvO', 'trauma',
-    [],
-    [],
+    [
+      'neuro-vigilanzminderung',
+      'gastro-erbrechen-neu',
+      'neuro-ausfall-neu',
+      'neuro-kopfschmerz-zunehmend',
+    ],
+    [
+      'neuro-kopfschmerzSchwindel-anhaltend',
+      'neuro-muedigkeit-anhaltend',
+    ],
+    [
+      'SHT', 'Hirnblutung',
+      'HWS-Distorsion',
+    ],
   ),
   defSc(
     'Kopfverletzung (schwer)', 'SHT-Zeichen, OAK/TAH',
     'Verweigerung', 'trauma',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-vigilanzminderung',
+      'gastro-erbrechen-neu',
+      'neuro-ausfall-neu',
+      'neuro-kopfschmerz-zunehmend',
+    ],
+    [
+      'neuro-kopfschmerzSchwindel-anhaltend',
+      'neuro-muedigkeit-anhaltend',
+    ],
+    [
+      'SHT', 'Hirnblutung',
+      'HWS-Distorsion',
+    ],
+    'unerkannte intrakranielle Blutung mit bleibenden Schäden bis hin zum Tod',
   ),
 
   /////////////////////////////////////////////////////////
@@ -392,26 +475,29 @@ export const Scenarios: Array<RedflagScenario> = [
     'Asthma/COPD (leicht)', 'Therapieerfolg, Pat. wach, kein C-Problem',
     'BvO', 'atmung',
     [
-      'atmung-luftnot-zunehmend-allgemein',
-      'atmung-sprechdyspnoe-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'atmung-luftnot-rezidiv-zunehmend',
+      'atmung-sprechdyspnoe',
+      'neuro-vigilanzminderung',
     ],
     [
-      'allgemein-infektzeichen-allgemein',
-      'allgemein-therapieversagen-bedarf-allgemein',
+      'infekt-infektzeichen',
+      'sonstige-bedarfsmedOhneWirkung',
     ],
+    [
+      'Exazerbation', 'Pneumonie', 'Pneumothorax', 'LAE'
+    ]
   ),
   defSc(
     'Asthma/COPD (schwer)', 'fehlende Besserung, Erschöpfung',
     'Verweigerung', 'atmung',
     [
-      'atmung-luftnot-zunehmend-allgemein',
-      'kreislauf-probleme-zunehmend-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'atmung-luftnot-rezidiv-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
     ],
     [
-      'atmung-luftnot-anhaltend-allgemein',
-      'allgemein-therapieversagen-bedarf-allgemein',
+      'atmung-luftnotSchwaeche-anhaltend',
+      'sonstige-bedarfsmedOhneWirkung',
     ],
     [
       'Exazerbation', 'Resp. Erschöpfung', 'Pneumonie', 'Pneumothorax', 'LAE'
@@ -423,30 +509,33 @@ export const Scenarios: Array<RedflagScenario> = [
     'Allergische Reaktion (leicht)', 'Stadium I, nur Hautreaktion, kein A/B/C-Problem',
     'BvO', 'atmung',
     [
-      'atmung-atemproblem-neu-allgemein',
-      'kreislauf-probleme-neu-allgemein',
-      'allgemein-ausschlag-ausbreitung-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'atmung-luftnot-neu',
+      'kreislauf-probleme-neu',
+      'haut-ausschlag-zunehmend',
+      'neuro-vigilanzminderung',
     ],
     [
-      'haut-reaktion-anhaltend-allgemein',
-      'gastrointestinal-beschwerden-neu-allgemein',
+      'haut-ausschlagJuckreiz-anhaltend',
+      'gastro-beschwerden-neu',
     ],
+    [
+      'Anaphylaxie', 'Larynxödem', 'verzögerte systemische Reaktion',
+    ]
   ),
   defSc(
     'Anaphylaxie (schwer)', 'Stadium > I, A/B/C-Problem, Rückfallgefahr',
     'Verweigerung', 'atmung',
     [
-      'atmung-atemproblem-zunehmend-allgemein',
-      'kreislauf-probleme-zunehmend-allgemein',
-      'neurologisch-vigilanzminderung-allgemein',
+      'atmung-luftnot-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
     ],
     [
-      'haut-reaktion-anhaltend-allgemein',
-      'gastrointestinal-beschwerden-anhaltend-allgemein',
+      'haut-ausschlagJuckreiz-anhaltend',
+      'gastro-beschwerden-anhaltend',
     ],
     [
-      'Anaphylaxie', 'Schock', 'Larynxödem', 'verzögerte Systemische Reaktion',
+      'Anaphylaxie', 'Schock', 'Larynxödem', 'verzögerte systemische Reaktion',
     ],
     'erneuter/zunehmender anaphylaktischer Reaktion mit Atemwegsverlegung oder Schock bis zum Kreislaufversagen',
   ),
@@ -458,46 +547,112 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Thoraxschmerz, nicht-traumatisch (leicht)', 'klar reproduzierbar, keine Luftnot, lokal',
     'BvO', 'kreislauf',
-    [],
-    [],
+    [
+      'atmung-luftnot',
+      'kreislauf-ap-neu',
+      'kreislauf-vegetative-neu',
+      'kreislauf-herzrhythmus-neu',
+    ],
+    [
+      'schmerz-thoraxschmerzLokal-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Interkostalneuralgie', 'Muskelzerrung',
+      'ACS',
+      'Pleuritis', 'Pneumonie', 'Reflux',
+    ],
   ),
   defSc(
     'Thoraxschmerz, nicht-traumatisch (schwer)', 'nicht reproduzierbar, Luftnot, Ausstrahlung',
     'Verweigerung', 'kreislauf',
-    [],
-    [],
-    [],
-    '',
+    [
+      'kreislauf-ap-zunehmend',
+      'atmung-luftnot-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'AP', 'ACS', 'LAE', 'Aortendissektion',
+    ],
+    'einer weiteren Verschlechterung, bleibenden Schäden bis hin zum Kreislaufstillstand',
   ),
 
   defSc(
     'Palpitationen/Herzrasen (leicht)', 'kein Brustschmerz/Luftnot/Kreislaufproblem',
     'BvO', 'kreislauf',
-    [],
-    [],
+    [
+      'atmung-luftnot',
+      'kreislauf-ap-neu',
+      'kreislauf-probleme-neu',
+      'neuro-vigilanzminderungSynkope',
+      'kreislauf-tachykardie-rezidiv',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+      'kreislauf-tachykardie-anhaltend',
+    ],
+    [
+      'Tachykardien', 'Extrasystolen', 'Elektrolytstörungen', 'Exogene Ursachen'
+    ],
   ),
   defSc(
     'Palpitationen/Herzrasen (schwer)', 'Brustschmerz/Luftnot, Schwindel, Fieber',
     'Verweigerung', 'kreislauf',
-    [],
-    [],
-    [],
-    '',
+    [
+      'atmung-luftnot-zunehmend',
+      'kreislauf-ap-zunehmend',
+      'neuro-vigilanzminderung',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'kreislauf-tachykardie-anhaltend',
+    ],
+    [
+      'Tachykardien', 'ACS', 'Myokarditis', 'LAE', 'Sepsis',
+    ],
+    'lebensbedrohl. Rhythmusstörungen bis hin zum Kreislaufstillstand',
   ),
 
   defSc(
     'Blutdruckstörung (leicht)', 'kein Brustschmerz/Luftnot/Kreislaufproblem',
     'BvO', 'kreislauf',
-    [],
-    [],
+    [
+      'kreislauf-ap-neu',
+      'atmung-luftnot',
+      'kreislauf-probleme-neu',
+      'neuro-ausfall-neu',
+    ],
+    [
+      'kreislauf-tachykardie-anhaltend',
+      'kreislauf-rr-anhaltend',
+    ],
+    [
+      'Blutdruckentgleisung',
+      'kardiale/orthost./neurol./vasovagale Ursachen',
+    ],
   ),
   defSc(
     'Hypertensive Krise (schwer)', 'Zeichen Organschaden',
     'Verweigerung', 'kreislauf',
-    [],
-    [],
-    [],
-    '',
+    [
+      'kreislauf-ap-zunehmend',
+      'atmung-luftnot-zunehmend',
+      'neuro-vigilanzminderung',
+      'neuro-kopfschmerz-zunehmend',
+    ],
+    [
+      'kreislauf-rr-anhaltend',
+      'kreislauf-tachykardie-anhaltend',
+    ],
+    [
+      'hypertensiven Notfall',
+      'ACS', 'Lungenödem', 'ICB', 'Aortendissektion',
+    ],
+    'hohem Risiko für Schlaganfall, Herzversagen oder tödlichen Komplikationen innerhalb kurzer Zeit',
   ),
 
   /////////////////////////////////////////////////////////
@@ -518,6 +673,7 @@ export const Scenarios: Array<RedflagScenario> = [
     'BvO', 'neuro',
     [],
     [],
+    [],
   ),
   defSc(
     'Rückenschmerz, nicht-traumatisch (schwer)', 'beidseitige neurol. Ausfälle, Entleerungsstörung',
@@ -531,6 +687,7 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Schwindel (leicht)', 'Lageabhängig, keine neurol. Ausfälle',
     'BvO', 'neuro',
+    [],
     [],
     [],
   ),
@@ -557,6 +714,7 @@ export const Scenarios: Array<RedflagScenario> = [
     'BvO', 'neuro',
     [],
     [],
+    [],
   ),
   defSc(
     'Hypoglykämie (schwer)', 'fehlende Besserung, keine sichere Selbstkontrolle',
@@ -570,6 +728,7 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Krampfanfall (bekanntes Muster)', 'bek. Epilepsie, bek. Muster, vollständige Erholung',
     'BvO', 'neuro',
+    [],
     [],
     [],
   ),
@@ -617,6 +776,7 @@ export const Scenarios: Array<RedflagScenario> = [
     'BvO', 'intox',
     [],
     [],
+    [],
   ),
   defSc(
     'Alkoholintoxikation (schwer)', 'Vigilanzminderung, Eigen-/Fremdgefährdung',
@@ -645,6 +805,7 @@ export const Scenarios: Array<RedflagScenario> = [
     'BvO', 'gastro',
     [],
     [],
+    [],
   ),
   defSc(
     'Gastroenteritis (schwer)', 'Blutbeimengung, Schwindel/Kollaps, Dehydratation',
@@ -658,6 +819,7 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Bauchschmerzen (leicht)', 'leichte Schmerzen, keine GIB, keine Abwehrspannung',
     'BvO', 'gastro',
+    [],
     [],
     [],
   ),
@@ -688,6 +850,7 @@ export const Scenarios: Array<RedflagScenario> = [
     'BvO', 'infekt',
     [],
     [],
+    [],
   ),
   defSc(
     'Fieber/Infekt/Sepsis', 'Luftnot, Verwirrtheit, Dehydratation',
@@ -705,6 +868,7 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Nasenbluten (leicht)', 'Blutung gestillt, kreislaufstabil',
     'BvO', 'hno',
+    [],
     [],
     [],
   ),
@@ -726,6 +890,7 @@ export const Scenarios: Array<RedflagScenario> = [
     'BvO', 'psych',
     [],
     [],
+    [],
   ),
 
   /////////////////////////////////////////////////////////
@@ -735,6 +900,7 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Vaginale Blutung (leicht)', 'keine Kreislaufprobleme, keine/leichte Schmerzen',
     'BvO', 'gyn',
+    [],
     [],
     [],
   ),
@@ -809,13 +975,10 @@ function defSc(
 
 function defSg<const Id extends string>(
   id: Id,
-  name: string,
   text: string
 ) {
   return {
     id,
-    name,
-    subtitle: text,
     text,
   } as const
 }
