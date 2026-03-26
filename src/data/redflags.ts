@@ -20,6 +20,14 @@ export class RedflagSignal {
 export const _SignalDefs = [
 
   defSg(
+    'omw-immobilitaet-zunehmend',
+    'zunehmenden Immobilität'),
+
+  defSg(
+    'omw-beschwerden-anhaltend',
+    'anhaltenden Beschwerden'),
+
+  defSg(
     'atmung-auswurfRuss',
     'rußiger Auswurf'),
 
@@ -72,12 +80,36 @@ export const _SignalDefs = [
     'anhaltendem Erbrechen'),
 
   defSg(
+    'gastro-dehydratation',
+    'Dehydratation'),
+
+  defSg(
+    'gastro-dehydratation-zunehmend',
+    'zunehmender Dehydratation'),
+
+  defSg(
     'gastro-beschwerden-anhaltend',
     'anhaltenden gastrointestinalen Beschwerden (Übelkeit/Erbrechen/Schmerzen)'),
 
   defSg(
     'gastro-beschwerden-neu',
     'Magen-Darm-Beschwerden (Übelkeit/Schmerzen)'),
+
+  defSg(
+    'gastro-beschwerden-zunehmend',
+    'zunehmenden Magen-Darm-Beschwerden (Übelkeit/Schmerzen)'),
+
+  defSg(
+    'gastro-gib',
+    'Blut in Erbrochenem/Stuhl'),
+
+  defSg(
+    'gastro-gib-zunehmend',
+    'zunehmenden Blutbeimengungen in Erbrochenem/Stuhl'),
+
+  defSg(
+    'gastro-bauchschmerzen-anhaltend',
+    'anhaltenden Bauchschmerzen >48h'),
 
   defSg(
     'haut-ausschlag-zunehmend',
@@ -109,7 +141,11 @@ export const _SignalDefs = [
 
   defSg(
     'infekt-infektzeichen',
-    'Infektzeichen'),
+    'Infektzeichen/red. AZ'),
+
+  defSg(
+    'infekt-infektzeichen-anhaltend',
+    'anhaltenden Infektzeichen/red. AZ'),
 
   defSg(
     'kreislauf-probleme',
@@ -124,6 +160,42 @@ export const _SignalDefs = [
     'zunehmenden Kreislaufbeschwerden (Schwindel/Schwäche)'),
 
   defSg(
+    'kreislauf-ap-neu',
+    'zunehmenden, nicht mehr reproduzierbaren Brustschmerzen oder Ausstrahlung in Arm, Rücken oder Kiefer'),
+
+  defSg(
+    'kreislauf-ap-zunehmend',
+    'zunehmenden Brustenge/-schmerzen oder Ausstrahlung in Arm, Rücken oder Kiefer'),
+
+  defSg(
+    'kreislauf-herzrhythmus-neu',
+    'Herzstolpern/Herzrasen'),
+
+  defSg(
+    'kreislauf-vegetative-neu',
+    'Schwindel/Erbrechen/Kaltschweißigkeit/Schwäche'),
+
+  defSg(
+    'kreislauf-vegetative-rezidiv',
+    'erneuter Schwindel/Erbrechen/Kaltschweißigkeit/Schwäche'),
+
+  defSg(
+    'kreislauf-tachykardie-rezidiv',
+    'erneutem Herzrasen'),
+
+  defSg(
+    'kreislauf-belastungsSchwaeche-anhaltend',
+    'anhaltender Schwäche'),
+
+  defSg(
+    'kreislauf-tachykardie-anhaltend',
+    'anhaltenden Palpitationen über Stunden'),
+
+  defSg(
+    'kreislauf-rr-anhaltend',
+    'erhöhten RR-Werte trotz Ruhe >48h'),
+
+  defSg(
     'neuro-dms-neu',
     'einer DMS-Störung (Taubheit/Blässe/Kälte/Schwäche)'),
 
@@ -132,8 +204,60 @@ export const _SignalDefs = [
     'zunehmender DMS-Störung (Taubheit/Blässe/Kälte/Schwäche)'),
 
   defSg(
+    'neuro-empfindung-anhaltend',
+    'anhaltender Empfindungsstörungen'),
+
+  defSg(
     'neuro-ausfall-neu',
     'neurol. Ausfällen (Taubheit/Blässe/Kälte/Schwäche)'),
+
+  defSg(
+    'neuro-ausfall-zunehmend',
+    'zunehmenden neurol. Ausfällen (Taubheit/Blässe/Kälte/Schwäche)'),
+
+  defSg(
+    'neuro-sehstoerung-neu',
+    'Sehstörungen'),
+
+  defSg(
+    'neuro-sehstoerung-zunehmend',
+    'zunehmender Sehverschlechterung'),
+
+  defSg(
+    'neuro-sehstoerung-anhaltend',
+    'anhaltenden Sehstörungen/flüchtige Visusverluste'),
+
+  defSg(
+    'neuro-glaukom',
+    'Augenschmerz/Augenrötung/Übelkeit/Erbrechen'),
+
+  defSg(
+    'neuro-untereParese-neu',
+    'neuen/zunehmenden Paresen/Gangunsicherheit'),
+
+  defSg(
+    'neuro-untereParese-zunehmend',
+    'zunehmenden Paresen/Gehunfähigkeit'),
+
+  defSg(
+    'neuro-gangunsicherheit-anhaltend',
+    'anhaltender Gangunsicherheit'),
+
+  defSg(
+    'neuro-entleerung-neu',
+    'Blasen-/Mastdarmstörung'),
+
+  defSg(
+    'neuro-entleerung-zunehmend',
+    'zunehmender Blasen-/Mastdarmstörung'),
+
+  defSg(
+    'neuro-sattelanaesthesie-neu',
+    'Taubheit Genital-/Gesäß-/Oberschenkelregion'),
+
+  defSg(
+    'neuro-sattelanaesthesie-zunehmend',
+    'zunehmender Taubheit Genital-/Gesäß-/Oberschenkelregion'),
 
   defSg(
     'neuro-kopfschmerz-neu',
@@ -152,12 +276,72 @@ export const _SignalDefs = [
     'anhaltenden Kopfschmerzen/Schwindel >12h'),
 
   defSg(
+    'neuro-schwindelGerichtet-zunehmend',
+    'zunehmenden Schwindel trotz Schonung'),
+
+  defSg(
+    'neuro-fallneigung-anhaltend',
+    'anhaltenden Beschwerden mit Fallneigung'),
+
+  defSg(
+    'neuro-krampfanfall-neu',
+    'Krampfanfall'),
+
+  defSg(
+    'neuro-krampfanfall-rezidiv',
+    'erneuter Krampfanfall/Serienanfälle in kurzer Zeit'),
+
+  defSg(
+    'neuro-krampfanfallMuster',
+    'ungewöhnlichem Verlauf (länger/fehlende Erholung)'),
+
+  defSg(
     'neuro-muedigkeit-anhaltend',
     'anhaltender Müdigkeit >48h'),
 
   defSg(
+    'neuro-sensibilitaet-anhaltend',
+    'anhaltender Empfindungsstörungen'),
+
+  defSg(
     'neuro-vigilanzminderung',
     'Bewusstseinseintrübung'),
+
+  defSg(
+    'neuro-vigilanzminderungSynkope',
+    'Bewusstseinsverlust/-eintrübung'),
+
+  defSg(
+    'neuro-synkope-rezidiv',
+    'erneutem/zunehmender Bewusstseinsverlust/-eintrübung'),
+
+  defSg(
+    'neuro-schluckstoerung',
+    'vermehrtem Verschlucken'),
+
+  defSg(
+    'neuro-hypoglyk-rezidiv',
+    'erneutem BZ-Abfall < 60mg/ml bzw. 3,3mmol/l'),
+
+  defSg(
+    'neuro-hypoglyk-anhaltend',
+    'fehlender Normoglykämie im Verlauf'),
+
+  defSg(
+    'neuro-hypoglykDiscl',
+    'fehlende eigenständige Nahrungsaufnahme'),
+
+  defSg(
+    'psych-unruhe-zunehmend',
+    'zunehmende Unruhe'),
+
+  defSg(
+    'psych-halluzination',
+    'Halluzinationen'),
+
+  defSg(
+    'psych-desorientierung-anhaltend',
+    'anhaltenden Desorientierung'),
 
   defSg(
     'schmerzRoetung-anhaltend',
@@ -180,12 +364,20 @@ export const _SignalDefs = [
     'zunehmenden Schmerzen trotz Ruhigstellung'),
 
   defSg(
+    'untereSchmerzAnalgesie-zunehmend',
+    'zunehmenden starken Schmerzen mit Ausbreitung in beide Beine'),
+
+  defSg(
     'schmerzAnalgesie-zunehmend',
     'zunehmenden Schmerzen trotz Analgesie'),
 
   defSg(
     'haut-schwellungHaematom-anhaltend',
     'anhaltender Schwellung/Hämatom'),
+
+  defSg(
+    'schmerz-thoraxschmerzLokal-anhaltend',
+    'anhaltende lokale Schmerzen >24h'),
 
   defSg(
     'haut-schwellungSpannung-zunehmend',
@@ -596,7 +788,7 @@ export const Scenarios: Array<RedflagScenario> = [
       'kreislauf-tachykardie-anhaltend',
     ],
     [
-      'Tachykardien', 'Extrasystolen', 'Elektrolytstörungen', 'Exogene Ursachen'
+      'Tachykardie', 'Extrasystole', 'Elektrolytstörung', 'Exogene Ursache'
     ],
   ),
   defSc(
@@ -612,7 +804,7 @@ export const Scenarios: Array<RedflagScenario> = [
       'kreislauf-tachykardie-anhaltend',
     ],
     [
-      'Tachykardien', 'ACS', 'Myokarditis', 'LAE', 'Sepsis',
+      'Tachykardie', 'ACS', 'Myokarditis', 'LAE', 'Sepsis',
     ],
     'lebensbedrohl. Rhythmusstörungen bis hin zum Kreislaufstillstand',
   ),
@@ -632,7 +824,7 @@ export const Scenarios: Array<RedflagScenario> = [
     ],
     [
       'Blutdruckentgleisung',
-      'kardiale/orthost./neurol./vasovagale Ursachen',
+      'kardiale/orthost./neurol./vasovagale Ursache',
     ],
   ),
   defSc(
@@ -662,109 +854,237 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Akute Verwirrtheit/Delir', '',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-vigilanzminderungSynkope',
+      'neuro-ausfall-neu',
+      'neuro-krampfanfall-neu',
+      'psych-unruhe-zunehmend',
+      'psych-halluzination',
+      'infekt-fieber',
+    ],
+    [
+      'psych-desorientierung-anhaltend',
+    ],
+    [
+      'Delir', 'Schlaganfall', 'Hirndruck',
+      'metab. Entgleisung', 'Intoxikationen',
+    ],
+    'Verschlechterung einer unentdeckter lebensbedrohl. Ursache wie Schlaganfall oder Sepsis mit bleibenden Schäden oder Tod',
   ),
 
   defSc(
     'Rückenschmerz, nicht-traumatisch (leicht)', 'ohne Parese, keine Entleerungsstörung',
     'BvO', 'neuro',
-    [],
-    [],
-    [],
+    [
+      'neuro-untereParese-neu',
+      'neuro-entleerung-neu',
+      'neuro-sattelanaesthesie-neu',
+      'schmerzStark-zunehmend',
+      'infekt-infektzeichen',
+    ],
+    [
+      'schmerzAnalgesie-zunehmend',
+    ],
+    [
+      'Lumbalgie/Verspannung', 'ISG-Blockierung',
+      'Bandscheibenprotrusion/-prolaps',
+      'Spinalkanal',
+    ],
   ),
   defSc(
     'Rückenschmerz, nicht-traumatisch (schwer)', 'beidseitige neurol. Ausfälle, Entleerungsstörung',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-untereParese-zunehmend',
+      'neuro-entleerung-zunehmend',
+      'neuro-sattelanaesthesie-zunehmend',
+      'untereSchmerzAnalgesie-zunehmend',
+      'infekt-infektzeichen',
+    ],
+    [
+      'omw-immobilitaet-zunehmend',
+      'neuro-empfindung-anhaltend',
+    ],
+    [
+      'Bandscheibenvorfall', 'Kauda-equina',
+      'anderer Nervenwurzel-/Rückenmarkskompression',
+    ],
+    'dauerhafte Lähmungen, sowie irreversibler Verlust der Blasen-/Darmkontrolle',
   ),
 
   defSc(
     'Schwindel (leicht)', 'Lageabhängig, keine neurol. Ausfälle',
     'BvO', 'neuro',
-    [],
-    [],
-    [],
+    [
+      'neuro-ausfall-neu',
+      'neuro-untereParese-neu',
+      'neuro-sehstoerung-neu',
+      'neuro-kopfschmerz-neu',
+      'neuro-vigilanzminderung',
+    ],
+    [
+      'neuro-schwindelGerichtet-zunehmend',
+      'neuro-fallneigung-anhaltend',
+    ],
+    [
+      'Lagerungs- oder vestibul. Schwindel',
+      'Kreislaufdysregulation',
+      'TIA',
+    ],
   ),
   defSc(
     'Schwindel (schwer)', 'neurol. Ausfälle',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-ausfall-zunehmend',
+      'neuro-vigilanzminderung',
+      'neuro-untereParese-zunehmend',
+      'neuro-kopfschmerz-zunehmend',
+    ],
+    [
+      'neuro-schwindelGerichtet-zunehmend',
+      'neuro-fallneigung-anhaltend',
+    ],
+    [
+      'TIA/Schlaganfall', 'Hirnblutung',
+      'Vestibul. Schwindel',
+    ],
+    'einer raschen Verschlechterung mit bleibenden neurol. Schäden bis hin zum Tod',
   ),
 
   defSc(
     'Synkope', 'unklare Genese/erstmalig',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-synkope-rezidiv',
+      'neuro-ausfall-neu',
+      'kreislauf-probleme-zunehmend',
+      'neuro-kopfschmerz-zunehmend',
+    ],
+    [
+      'neuro-fallneigung-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Arrhythmie', 'vasovagal./orthost. Ursache',
+      'Klappenfehler',
+      'TIA', 'Krampfanfall', 'metab. Erkrankung',
+    ],
+    'erneuten Synkopen mit Stürzen+Verletzungen oder unerkannter pot. lebensbedrohl. Ursachen mit bleibenden Schäden oder Herztod',
   ),
 
   defSc(
     'Hypoglykämie (leicht)', 'nach Therapie orientiert, Selbstkontrolle möglich',
     'BvO', 'neuro',
-    [],
-    [],
-    [],
+    [
+      'neuro-synkope-rezidiv',
+      'neuro-ausfall-neu',
+      'kreislauf-vegetative-rezidiv',
+      'neuro-hypoglyk-rezidiv',
+      'neuro-hypoglykDiscl',
+      'gastro-erbrechen-neu',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Hypoglykämie', 'Diabetes',
+    ],
   ),
   defSc(
     'Hypoglykämie (schwer)', 'fehlende Besserung, keine sichere Selbstkontrolle',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-synkope-rezidiv',
+      'neuro-ausfall-neu',
+      'kreislauf-vegetative-rezidiv',
+      'neuro-hypoglyk-anhaltend',
+      'neuro-hypoglykDiscl',
+      'gastro-erbrechen-neu',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Hypoglykämie', 'Diabetes'
+    ],
+    'schweren Unterzuckerung mit Krampfanfall, Bewusstlosigkeit, bleibendem Hirnschaden bis hin zum Tod',
   ),
 
   defSc(
     'Krampfanfall (bekanntes Muster)', 'bek. Epilepsie, bek. Muster, vollständige Erholung',
     'BvO', 'neuro',
-    [],
-    [],
-    [],
+    [
+      'neuro-krampfanfall-rezidiv',
+      'neuro-synkope-rezidiv',
+      'neuro-ausfall-neu',
+      'atmung-luftnot-neu',
+      'neuro-krampfanfallMuster',
+    ],
+    [
+      'psych-desorientierung-anhaltend',
+    ],
+    [
+      'Epilepsie', 'Durchbruchsanfall', 'Infekt/Schlafmangel/Stress/Elekrolyte'
+    ],
   ),
   defSc(
-    'Krampfanfall (neues Muster)', 'prolongiert, fehlende Erholung, Serienanfall',
+    'Krampfanfall (neues Muster/erstmalig)', 'prolongiert, fehlende Erholung, Serienanfall',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
-  ),
-  defSc(
-    'Krampfanfall (unklar/erstmalig)', 'Status, erstmaliges Auftreten',
-    'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-krampfanfall-rezidiv',
+      'neuro-synkope-rezidiv',
+      'neuro-ausfall-neu',
+      'atmung-luftnot-neu',
+    ],
+    [
+      'psych-desorientierung-anhaltend',
+    ],
+    [
+      'Epilepsie', 'Durchbruchsanfall',
+      'Schlaganfall', 'ZNS-Erkrankung',
+    ],
+    'prolongierten Krampfanfällen bis zum Status epilepticus mit bleibenden Schäder oder Tod',
   ),
 
   defSc(
     'Schlaganfall/TIA', '',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-ausfall-zunehmend',
+      'neuro-vigilanzminderungSynkope',
+      'neuro-schluckstoerung',
+      'neuro-sehstoerung-neu',
+      'neuro-kopfschmerz-zunehmend',
+    ],
+    [
+      'neuro-fallneigung-anhaltend',
+    ],
+    [
+      'Schlaganfall', 'TIA', 'Hirnblutung',
+    ],
+    'rascher neurol. Verschlechterung mit bleibenden Schäden oder Tod',
   ),
 
   defSc(
     'Akute Sehstörung', '',
     'Verweigerung', 'neuro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-sehstoerung-zunehmend',
+      'neuro-ausfall-neu',
+      'neuro-kopfschmerz-zunehmend',
+      'neuro-glaukom',
+    ],
+    [
+      'neuro-sehstoerung-anhaltend',
+    ],
+    [
+      'Gefäßverschluss',
+      'Schlaganfall',
+      'Glaukom',
+      'Netzhautablösung',
+    ],
+    'bleibendem Sehverlust oder bleibenden neurol. Schäden',
   ),
 
   /////////////////////////////////////////////////////////
@@ -774,27 +1094,36 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Alkoholintoxikation (leicht)', 'Anruf durch Dritte, keine Eigengefährdung',
     'BvO', 'intox',
-    [],
-    [],
-    [],
+    [
+      'neuro-synkope-rezidiv',
+      'gastro-erbrechen-neu',
+      'neuro-krampfanfall-neu',
+      'atmung-luftnot-neu',
+    ],
+    [
+      'omw-beschwerden-anhaltend',
+    ],
+    [
+      'C2-Intox', 'Misch-Intox',
+      'SHT/unbeob. Sturz',
+      'Exsikkose', 'Elektrolytstörung',
+    ],
   ),
   defSc(
-    'Alkoholintoxikation (schwer)', 'Vigilanzminderung, Eigen-/Fremdgefährdung',
+    'Intoxikation (unklar)', 'Spätfolgen nicht ausschließbar',
     'Verweigerung', 'intox',
+    [
+      'neuro-vigilanzminderungSynkope',
+      'atmung-luftnot-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-untereParese-neu',
+    ],
     [],
-    [],
-    [],
-    '',
+    [
+      'Medikamente', 'Misch-Intox',
+    ],
+    'verzögert einsetzender lebensbedrohlicher Komplikationen mit bleibenden Schäden bis hin zum Atem-/Kreislaufstillstand',
   ),
-  defSc(
-    'Intoxikation (unklar)', 'Vigilanzminderung, A/B/C-Problem',
-    'Verweigerung', 'intox',
-    [],
-    [],
-    [],
-    '',
-  ),
-
 
   /////////////////////////////////////////////////////////
   // Gastro
@@ -803,42 +1132,101 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Gastroenteritis (leicht)', 'keine/leichte Schmerzen, keine GIB, keine Dehydratation',
     'BvO', 'gastro',
-    [],
-    [],
-    [],
+    [
+      'gastro-erbrechen-neu',
+      'gastro-dehydratation',
+      'gastro-beschwerden-zunehmend',
+      'gastro-gib',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'gastro-beschwerden-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Gastroenteritis',
+      'Lebensmittelvergiftung',
+      'Dehydratation',
+    ],
   ),
   defSc(
     'Gastroenteritis (schwer)', 'Blutbeimengung, Schwindel/Kollaps, Dehydratation',
     'Verweigerung', 'gastro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'kreislauf-probleme-zunehmend',
+      'schmerzStark-zunehmend',
+      'gastro-beschwerden-zunehmend',
+      'gastro-dehydratation-zunehmend',
+      'gastro-gib',
+    ],
+    [
+      'gastro-beschwerden-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Gastroenteritis',
+      'Lebensmittelvergiftung',
+      'Dehydratation',
+      'Gastroblutung',
+      'akutes Abdomen',
+    ],
+    'Flüssigkeits-/Blutverlust mit Organversagen und Tod',
   ),
 
   defSc(
     'Bauchschmerzen (leicht)', 'leichte Schmerzen, keine GIB, keine Abwehrspannung',
     'BvO', 'gastro',
-    [],
-    [],
-    [],
+    [
+      'gastro-beschwerden-zunehmend',
+      'gastro-gib',
+      'gastro-erbrechen-neu',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'infekt-infektzeichen-anhaltend',
+      'gastro-bauchschmerzen-anhaltend',
+    ],
+    [
+      'Gastroenteritis', 'Obstipation', 'Reizdarm',
+      'Appendizitis', 'Harnwegsinfekt',
+    ],
   ),
   defSc(
     'Bauchschmerzen (schwer)', 'Blutbeimengung, Schwindel/Kollaps, akute/starke Schmerzen',
     'Verweigerung', 'gastro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'gastro-beschwerden-zunehmend',
+      'gastro-gib',
+      'gastro-erbrechen-neu',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'infekt-infektzeichen-anhaltend',
+      'gastro-bauchschmerzen-anhaltend',
+    ],
+    [
+      'GIB', 'akutes Abdomen', 'Ileus',
+      'Pankreatits', 'Aneurysma', 'Mesenterialinfarkt'
+    ],
+    'Bauchfellentzündung, Perforation und inneren Blutungen bis zum Kreislaufversagen',
   ),
 
   defSc(
     'Gastrointestinale Blutung', '',
     'Verweigerung', 'gastro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'kreislauf-probleme-zunehmend',
+      'gastro-gib-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'GIB', 'Gastroenteritis'
+    ],
+    'fortschreitenden Blutverlust bis hin zum Organversagen und Tod',
   ),
 
   /////////////////////////////////////////////////////////

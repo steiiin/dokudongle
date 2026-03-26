@@ -115,13 +115,14 @@ export const useDokuStore = defineStore('doku', {
     async sendProtocol() {
 
       const protocolText = this.generatedProtocol
-      const signal = this.connection.transmissionAbortController?.signal
 
       console.log('Protokoll gesendet:')
       console.log(protocolText)
+      console.log(textToHidEvents(stripDiacritics(protocolText)))
 
       const controller = new AbortController()
       this.connection.transmissionAbortController = controller
+      const signal = controller.signal
 
       try
       {

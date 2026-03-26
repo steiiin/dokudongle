@@ -14,6 +14,7 @@ export const MOD_LITERAL = 0x80;   // Your flag: Arduino converts dead key → l
 
 // ---- HID Keyboard/Keypad usages (USB page 0x07) ----
 const U = {
+
   // Letters (US positions)
   A:0x04,B:0x05,C:0x06,D:0x07,E:0x08,F:0x09,G:0x0A,H:0x0B,I:0x0C,J:0x0D,
   K:0x0E,L:0x0F,M:0x10,N:0x11,O:0x12,P:0x13,Q:0x14,R:0x15,S:0x16,T:0x17,
@@ -36,10 +37,12 @@ const U = {
   GRAVE:0x35,      // DE: ^ (dead) / ° (Shift)
   COMMA:0x36, DOT:0x37, SLASH:0x38, // DE: - / _ on SLASH
   NONUS:0x64       // ISO extra key: < > | (left of right shift)
+
 };
 
 // ---- Full DE (Germany) character → [usage, modifier] map ----
 export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
+
   // Controls / whitespace
   '\n': [U.ENTER], '\t': [U.TAB], '\b': [U.BKSP], '\x1B': [U.ESC],
   ' ':  [U.SPACE],
