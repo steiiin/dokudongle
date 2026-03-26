@@ -1236,17 +1236,38 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Fieberhafter Infekt (leicht)', 'kreislaufstabil, keine Luftnot, orientiert',
     'BvO', 'infekt',
-    [],
-    [],
-    [],
+    [
+      'atmung-luftnot-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderungSynkope',
+      'neuro-meningismus',
+    ],
+    [
+      'infekt-fieber-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Infekt', 'Pneumonie', 'Sepsis',
+    ],
   ),
   defSc(
     'Fieber/Infekt/Sepsis', 'Luftnot, Verwirrtheit, Dehydratation',
     'Verweigerung', 'infekt',
-    [],
-    [],
-    [],
-    '',
+    [
+      'atmung-luftnot-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderungSynkope',
+      'neuro-meningismus',
+      'gastro-dehydratation',
+    ],
+    [
+      'infekt-fieber-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Sepsis', 'Pneumonie', 'Exsikkose',
+    ],
+    'systemischer Infektion bis zum Multiorganversagen und Tod',
   ),
 
   /////////////////////////////////////////////////////////

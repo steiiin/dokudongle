@@ -2,7 +2,7 @@ import { BleClient, numberToUUID } from '@capacitor-community/bluetooth-le';
 import { Capacitor } from '@capacitor/core';
 import { defineStore, storeToRefs } from 'pinia';
 
-import { stripDiacritics, textToHidEvents } from '@/utils/keymap-german';
+import { stripNotSupported, textToHidEvents } from '@/utils/keymap-german';
 import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID } from '@/types/dongle';
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol';
 import { breakDoku, multiline, placeholder } from '@/utils/text';
@@ -117,8 +117,8 @@ export const useDokuStore = defineStore('doku', {
       const protocolText = this.generatedProtocol
 
       console.log('Protokoll gesendet:')
-      console.log(protocolText)
-      console.log(textToHidEvents(stripDiacritics(protocolText)))
+      console.log(stripNotSupported(protocolText))
+      console.log(textToHidEvents(stripNotSupported(protocolText)))
 
       const controller = new AbortController()
       this.connection.transmissionAbortController = controller
@@ -175,7 +175,7 @@ export const useDokuStore = defineStore('doku', {
           notificationsStarted = true
 
           // send chunks
-          const events = textToHidEvents(stripDiacritics(protocolText));
+          const events = textToHidEvents(stripNotSupported(protocolText));
           const MTU_PAYLOAD = 20;
           const EVENTS_PER_PKT = MTU_PAYLOAD / 2;
 
