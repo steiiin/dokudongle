@@ -8,6 +8,7 @@ import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProt
 import { breakDoku, multiline, placeholder } from '@/utils/text';
 import { textIf } from '@/utils/filter';
 import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persistence';
+import { toRaw } from 'vue';
 
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -172,7 +173,7 @@ export const useDokuStore = defineStore('doku', {
       await saveDokuState({
         schemaVersion: DOKU_SCHEMA_VERSION,
         updatedAt: new Date().toISOString(),
-        doku: this.doku,
+        doku: toRaw(this.doku),
       })
     },
     async sendProtocol() {

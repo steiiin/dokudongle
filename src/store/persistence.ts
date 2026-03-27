@@ -1,4 +1,4 @@
-import { Storage } from '@ionic/storage';
+import { Storage } from '@ionic/storage'
 
 export const DOKU_STORAGE_KEY = 'doku_state';
 export const DOKU_SCHEMA_VERSION = 1;
@@ -6,7 +6,7 @@ export const DOKU_SCHEMA_VERSION = 1;
 export interface PersistedDokuState {
   schemaVersion?: number
   updatedAt?: string
-  doku?: unknown
+  doku?: any
 }
 
 let storageInstance: Storage | null = null;
@@ -33,11 +33,9 @@ export async function initStorage(): Promise<void> {
 export async function loadDokuState(): Promise<PersistedDokuState | null> {
   const storage = await getStorage();
   const raw = await storage.get(DOKU_STORAGE_KEY);
-
   if (!raw || typeof raw !== 'object') {
     return null;
   }
-
   return raw as PersistedDokuState;
 }
 
