@@ -1,16 +1,12 @@
 // german-hid-map.ts
+//
 // Character → [HID usage (page 0x07), modifier]
 // Works with mbed USBKeyboard.key_code_raw(usage, modifier) on Nano 33 BLE Rev2
 
 // ---- Modifiers (match your Arduino) ----
-export const MOD_CTRL    = 0x01;
 export const MOD_SHIFT   = 0x02;
-export const MOD_ALT     = 0x04;   // (left Alt; typically unused for DE symbols)
-export const MOD_META    = 0x08;   // (Super/GUI; not used here)
-export const MOD_RCTRL   = 0x10;
-export const MOD_RSHIFT  = 0x20;
 export const MOD_ALTGR   = 0x40;   // Right-Alt (AltGr)
-export const MOD_LITERAL = 0x80;   // Your flag: Arduino converts dead key → literal via "dead + Space"
+export const MOD_LITERAL = 0x80;   // Custom flag: Arduino converts dead key → literal via "dead + Space"
 
 // ---- HID Keyboard/Keypad usages (USB page 0x07) ----
 const U = {

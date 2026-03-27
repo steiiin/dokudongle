@@ -6,6 +6,7 @@
           <IonTitle>Vorschau</IonTitle>
           <DodoConnectionBadge></DodoConnectionBadge>
         </div>
+        <DodoSendAction></DodoSendAction>
       </IonToolbar>
     </IonHeader>
 

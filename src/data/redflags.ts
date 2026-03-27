@@ -16,7 +16,6 @@ export class RedflagSignal {
 
 // ######################################################################################
 
-// TODO: add _SignalDefs
 export const _SignalDefs = [
 
   defSg(
@@ -56,6 +55,10 @@ export const _SignalDefs = [
     'anhaltenden Halschmerzen/Reizhusten'),
 
   defSg(
+    'atmung-aspiration',
+    'Aspirationsverdacht (Husten/brodelnde Atmung)'),
+
+  defSg(
     'atmung-sprechdyspnoe',
     'Sprechdyspnoe'),
 
@@ -66,6 +69,10 @@ export const _SignalDefs = [
   defSg(
     'atmung-atemabhaengigerSchmerz-zunehmend',
     'zunehmenden atemabhängigen Thoraxschmerzen'),
+
+  defSg(
+    'atmung-hyperventilation-anhaltend',
+    'wiederkehrenden Hyperventilationen im Verlauf'),
 
   defSg(
     'bewegung-fehlstellung',
@@ -111,6 +118,38 @@ export const _SignalDefs = [
     'gastro-bauchschmerzen-anhaltend',
     'anhaltenden Bauchschmerzen >48h'),
 
+     defSg(
+    'gastro-bauchschmerzen-zunehmend',
+    'zunehmenden Bauchschmerzen'),
+
+  defSg(
+    'gyn-blutung-neu',
+    'vaginaler Blutung'),
+
+  defSg(
+    'gyn-blutung-zunehmend',
+    'zunehmender vaginaler Blutung (mehrere Binden/h)'),
+
+  defSg(
+    'gyn-fruchtwasser',
+    'Fruchtwasserabgang'),
+
+  defSg(
+    'gyn-blutung-anhaltend',
+    'anhaltender vaginaler Blutung über Tage ohne Besserung'),
+
+  defSg(
+    'gyn-kindsbewegung-anhaltend',
+    'anhaltend fehlender/deutlich verminderter Kindsbewegungen über Stunden'),
+
+  defSg(
+    'gyn-kindsbewegung-unsicher',
+    'zunehmende Unsicherheit bzgl. fetaler Aktivität'),
+
+  defSg(
+    'gastro-unterBauchschmerzen-zunehmend',
+    'zunehmenden Unterbauchschmerzen'),
+
   defSg(
     'haut-ausschlag-zunehmend',
     'Ausbreitung von Ausschlag'),
@@ -138,6 +177,10 @@ export const _SignalDefs = [
   defSg(
     'infekt-fieber',
     'Fieber'),
+
+  defSg(
+    'infekt-fieber-anhaltend',
+    'anhaltendem Fieber >48h'),
 
   defSg(
     'infekt-infektzeichen',
@@ -320,6 +363,10 @@ export const _SignalDefs = [
     'vermehrtem Verschlucken'),
 
   defSg(
+    'neuro-meningismus',
+    'Meningismus (Nackensteife/Kopfschmerz/Erbrechen/Lichtempfindlichkeit)'),
+
+  defSg(
     'neuro-hypoglyk-rezidiv',
     'erneutem BZ-Abfall < 60mg/ml bzw. 3,3mmol/l'),
 
@@ -394,6 +441,14 @@ export const _SignalDefs = [
   defSg(
     'wunde-nachblutung',
     'Nachblutung/Durchbluten des Verbandes'),
+
+  defSg(
+    'wunde-epistaxis-rezidiv',
+    'erneutem starkem anhaltendem Nasenbuten trotz Kompression'),
+
+  defSg(
+    'wunde-epistaxis-anhaltend',
+    'wiederkehrendem Nasenbluten trotz Schonung'),
 
 ] as const
 
@@ -1277,17 +1332,37 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Nasenbluten (leicht)', 'Blutung gestillt, kreislaufstabil',
     'BvO', 'hno',
-    [],
-    [],
-    [],
+    [
+      'wunde-epistaxis-rezidiv',
+      'atmung-aspiration',
+      'kreislauf-probleme-neu',
+    ],
+    [
+      'wunde-epistaxis-anhaltend',
+    ],
+    [
+      'Epistaxis', 'Infekt', 'Hypertonie',
+      'Gerinnungsstörung',
+    ],
   ),
   defSc(
     'Nasenbluten (schwer)', 'anhaltend/starke Blutung, Kreislaufproblem, Traumaassoziiert',
     'Verweigerung', 'hno',
-    [],
-    [],
-    [],
-    '',
+    [
+      'wunde-epistaxis-rezidiv',
+      'kreislauf-probleme-zunehmend',
+      'atmung-aspiration',
+      'neuro-vigilanzminderung',
+    ],
+    [
+      'wunde-epistaxis-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Epistaxis', 'Infekt', 'Hypertonie',
+      'Gerinnungsstörung',
+    ],
+    'relevantem Blutverlust bis hin zum hämorrhagischen Schock und Tod',
   ),
 
   /////////////////////////////////////////////////////////
@@ -1297,9 +1372,19 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Panikattacke/Hyperventilation (leicht)', 'Besserung nach Beruhigung/Atemanleitung',
     'BvO', 'psych',
-    [],
-    [],
-    [],
+    [
+      'atmung-luftnot-zunehmend',
+      'kreislauf-vegetative-neu',
+      'neuro-ausfall-neu',
+      'atmung-atemabhaengigerSchmerz-zunehmend',
+    ],
+    [
+      'atmung-hyperventilation-anhaltend',
+    ],
+    [
+      'Panikattacke', 'Belastungsreaktion',
+      'kardiale/respirat./metabol. Ursachen',
+    ],
   ),
 
   /////////////////////////////////////////////////////////
@@ -1309,42 +1394,89 @@ export const Scenarios: Array<RedflagScenario> = [
   defSc(
     'Vaginale Blutung (leicht)', 'keine Kreislaufprobleme, keine/leichte Schmerzen',
     'BvO', 'gyn',
-    [],
-    [],
+    [
+      'gyn-blutung-zunehmend',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'kreislauf-probleme-neu',
+      'infekt-fieber',
+    ],
+    [
+      'gyn-blutung-anhaltend',
+    ],
     [],
   ),
   defSc(
     'Vaginale Blutung (schwer)', 'Kreislaufprobleme, starke Schmerzen',
     'Verweigerung', 'gyn',
+    [
+      'gyn-blutung-zunehmend',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
+    ],
+    [
+      'gyn-blutung-anhaltend',
+    ],
     [],
-    [],
-    [],
-    '',
+    'fortschreitender Blutverlust bis hin zum Kreislaufversagen, Schock und Tod',
   ),
 
   defSc(
     'Schwangerschaftsblutung', '',
     'Verweigerung', 'gyn',
-    [],
-    [],
-    [],
-    '',
+    [
+      'gyn-blutung-zunehmend',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
+      'gyn-fruchtwasser',
+    ],
+    [
+      'gyn-blutung-anhaltend',
+    ],
+    [
+      'Abort', 'Plazentakomplikationen',
+    ],
+    'schweren Schwangerschaftskomplikationen mit lebensbedrohlichen Blutungen bis hin zum Tod',
   ),
   defSc(
     'Fehlende Kindsbewegungen', '',
     'Verweigerung', 'gyn',
-    [],
-    [],
-    [],
-    '',
+    [
+      'gyn-kindsbewegung-anhaltend',
+      'gyn-blutung-neu',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'infekt-infektzeichen',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'gyn-kindsbewegung-unsicher'
+    ],
+    [
+      'fetale Notlage', 'Plazentaablösung',
+      'Infektion', 'Abort',
+    ],
+    'einer unentdeckten Komplikation und dem Tod des Kindes bis hin zu lebensbedrohl. Komplikationen für den Patienten selbst',
   ),
   defSc(
     'Präeklampsie-Warnzeichen', 'Bluthochdruck, Sehstörung, Erbrechen, Ödeme',
     'Verweigerung', 'gyn',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-kopfschmerz-zunehmend',
+      'neuro-ausfall-neu',
+      'atmung-luftnot-neu',
+      'gastro-bauchschmerzen-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderungSynkope',
+    ],
+    [
+      'gastro-erbrechen-neu',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Präeklampsie', 'HELLP', 'Hypertonie', 'Lungenödem',
+    ],
+    'eines Krampfanfalls oder lebensbedrohl. Gefährdung für Mutter und Kind',
   ),
 
 
