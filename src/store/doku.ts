@@ -7,6 +7,44 @@ import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID } from
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol';
 import { breakDoku, multiline, placeholder } from '@/utils/text';
 import { textIf } from '@/utils/filter';
+import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persistence';
+
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function hydrateLikeTemplate<T>(template: T, input: unknown): T {
+  if (Array.isArray(template)) {
+    return Array.isArray(input) ? input as T : template
+  }
+
+  if (isRecord(template)) {
+    if (!isRecord(input)) {
+      return template
+    }
+
+    for (const key of Object.keys(template)) {
+      const typedKey = key as keyof T
+      ;(template as Record<string, unknown>)[key] = hydrateLikeTemplate(
+        template[typedKey],
+        input[key],
+      ) as T[keyof T]
+    }
+
+    return template
+  }
+
+  return input === undefined ? template : input as T
+}
+
+function hydrateProtocol(input: unknown): Protocol | null {
+  if (!isRecord(input)) {
+    return null
+  }
+
+  return hydrateLikeTemplate(resetProtocol(), input)
+}
 
 export const useDokuStore = defineStore('doku', {
   state: () => ({
@@ -111,6 +149,31 @@ export const useDokuStore = defineStore('doku', {
     // protocol
     newProtocol() {
       this.doku = resetProtocol()
+      void this.persistToStorage()
+    },
+    async hydrateFromStorage() {
+      const persistedState = await loadDokuState()
+      if (!persistedState || persistedState.schemaVersion !== DOKU_SCHEMA_VERSION) {
+        this.doku = resetProtocol()
+        await this.persistToStorage()
+        return
+      }
+
+      const hydratedProtocol = hydrateProtocol(persistedState.doku)
+      if (!hydratedProtocol) {
+        this.doku = resetProtocol()
+        await this.persistToStorage()
+        return
+      }
+
+      this.doku = hydratedProtocol
+    },
+    async persistToStorage() {
+      await saveDokuState({
+        schemaVersion: DOKU_SCHEMA_VERSION,
+        updatedAt: new Date().toISOString(),
+        doku: this.doku,
+      })
     },
     async sendProtocol() {
 

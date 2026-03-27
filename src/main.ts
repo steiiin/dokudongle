@@ -6,6 +6,9 @@ import { IonicVue } from '@ionic/vue'
 
 /* Pinia */
 import { createPinia } from 'pinia'
+import { App as CapacitorApp } from '@capacitor/app'
+import { useDokuStore } from '@/store/doku'
+import { initStorage } from '@/store/persistence'
 const pinia = createPinia()
 
 /* Core CSS required for Ionic components to work properly */
@@ -50,7 +53,32 @@ const app = createApp(App)
   .use(router)
   .use(pinia);
 
+const PERSISTENCE_DEBOUNCE_MS = 500
+let persistTimer: ReturnType<typeof setTimeout> | null = null
+
+async function setupDokuPersistence() {
+  await initStorage()
+
+  const dokuStore = useDokuStore(pinia)
+  await dokuStore.hydrateFromStorage()
+
+  dokuStore.$subscribe((_mutation) => {
+    if (persistTimer) {
+      clearTimeout(persistTimer)
+    }
+
+    persistTimer = setTimeout(() => {
+      void dokuStore.persistToStorage()
+    }, PERSISTENCE_DEBOUNCE_MS)
+  }, { detached: true })
+
+  await CapacitorApp.addListener('resume', async () => {
+    await dokuStore.hydrateFromStorage()
+  })
+}
+
 router.isReady().then(async () => {
+  await setupDokuPersistence()
   app.mount('#app');
   await setupEdgeToEdge();
 });
