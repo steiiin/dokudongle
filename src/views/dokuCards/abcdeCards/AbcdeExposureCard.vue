@@ -7,14 +7,9 @@
       <IonList>
 
         <IonItem lines="full">
-          <IonInput
-            v-model="store.doku.xabcdE.bodyTemperature"
-            label="Temperatur"
-            type="number"
-            placeholder="°C"
-            :min="20"
-            :max="42"
-          ></IonInput>
+          <DodoInputTemperature
+            v-model="store.doku.xabcdE.bodyTemperature">
+          </DodoInputTemperature>
         </IonItem>
 
         <IonItem :lines="store.doku.xabcdE.hasAssessedExcretions ? 'inset' : 'full'">
@@ -193,6 +188,7 @@ import { computed, ref, watch } from 'vue'
 import { useDokuStore } from '@/store/doku'
 import { basicCap } from '@/utils/autocorrect/basic'
 import { insetIf } from '@/utils/filter'
+import DodoInputTemperature from '@/components/DodoInputTemperature.vue'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    copy: typeof import('./src/components/DodoInputText copy.vue')['default']
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
@@ -20,6 +21,7 @@ declare module 'vue' {
     DodoInputSampleLimb: typeof import('./src/components/DodoInputSampleLimb.vue')['default']
     DodoInputSelect: typeof import('./src/components/DodoInputSelect.vue')['default']
     DodoInputSelectOptional: typeof import('./src/components/DodoInputSelectOptional.vue')['default']
+    DodoInputTemperature: typeof import('./src/components/DodoInputTemperature.vue')['default']
     DodoInputText: typeof import('./src/components/DodoInputText.vue')['default']
     DodoInputTextArea: typeof import('./src/components/DodoInputTextArea.vue')['default']
     DodoInputTextOptional: typeof import('./src/components/DodoInputTextOptional.vue')['default']
