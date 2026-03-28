@@ -49,12 +49,10 @@
           type="indeterminate"
         />
       </IonHeader>
-
       <IonContent class="dd-modal-content ion-padding">
-        <div class="hint" v-if="$slots.default">
+        <div class="dd-modal-hint" v-if="$slots.default">
           <slot />
         </div>
-
         <div class="dd-modal-data">
           <IonTextarea ref="inputTextarea"
             class="dd-modal-textarea"
@@ -64,34 +62,25 @@
             @ionFocus="handleFocus"
             @ionBlur="handleBlur"
           />
-
-          <div class="dd-actions">
-            <IonButton
-              size="small"
-              fill="outline"
-              :disabled="modelValue.isEnhancing || !modelValue.canUndo"
-              @click="undo"
-            >
-              Undo
-            </IonButton>
-
-            <IonButton
-              size="small"
-              fill="outline"
-              :disabled="modelValue.isEnhancing || !modelValue.canRedo"
-              @click="redo"
-            >
-              Redo
-            </IonButton>
-          </div>
-          <IonButton
-              size="small" color="danger" fill="outline"
-              :disabled="modelValue.isEmpty"
-              @click="clear" style="margin-top:-0.25rem">
-              Eingaben löschen
-            </IonButton>
         </div>
       </IonContent>
+      <IonFooter>
+        <IonToolbar class="dd-modal-toolbar" v-if="!modelValue.isEnhancing">
+          <IonButtons slot="start">
+            <IonButton @click="undo" >
+              <IonIcon :src="arrowUndo" slot="icon-only"></IonIcon>
+            </IonButton>
+            <IonButton @click="redo">
+              <IonIcon :src="arrowRedo" slot="icon-only"></IonIcon>
+            </IonButton>
+          </IonButtons>
+          <IonButtons slot="end">
+            <IonButton @click="clear" v-if="!modelValue.isEmpty">
+              <IonIcon :src="trashBin" color="danger" slot="icon-only"></IonIcon>
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonFooter>
     </IonModal>
   </div>
 </template>
@@ -101,7 +90,7 @@
 import { alertController } from '@ionic/vue'
 import { toastController } from '@ionic/vue'
 
-import { alertCircle, warningOutline } from 'ionicons/icons'
+import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
 import { computed, ref, watch } from 'vue'
 import { EnhanceableText } from '@/types/protocol/input'
 
@@ -318,7 +307,7 @@ defineExpose({
   position: relative;
 }
 
-.dd-modal-content .hint {
+.dd-modal-content .dd-modal-hint {
   font-size: 0.9em;
   padding: 0.5rem 0.5rem 0.5rem 0.75rem;
   border-left: 2px solid white;
@@ -330,6 +319,13 @@ defineExpose({
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.dd-modal-toolbar {
+  margin-inline: -16px;
+  width: calc(100% + 2*16px);
+  padding-inline: 16px;
+  margin-top: 16px;
 }
 
 .dd-modal-textarea {

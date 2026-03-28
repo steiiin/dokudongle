@@ -43,6 +43,7 @@ declare module 'vue' {
     IonCardTitle: typeof import('@ionic/vue')['IonCardTitle']
     IonChip: typeof import('@ionic/vue')['IonChip']
     IonContent: typeof import('@ionic/vue')['IonContent']
+    IonFooter: typeof import('@ionic/vue')['IonFooter']
     IonHeader: typeof import('@ionic/vue')['IonHeader']
     IonIcon: typeof import('@ionic/vue')['IonIcon']
     IonInput: typeof import('@ionic/vue')['IonInput']
