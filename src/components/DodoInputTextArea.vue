@@ -41,12 +41,13 @@
             v-model="draft" :placeholder="placeholder"
             :auto-grow="true" :disabled="modelValue.isEnhancing"
             @ionFocus="handleFocus"
-            @ionBlur="handleBlur">
+            @ionBlur="handleBlur"
+            @ionInput="handleInput">
           </IonTextarea>
           <div class="dd-placeholder-buttons" v-if="resolvedPlaceholders.length > 0">
             <IonButton
               v-for="placeholderTemplate in resolvedPlaceholders" :key="placeholderTemplate.key"
-              fill="outline" size="small" @click="openPlaceholderDialog(placeholderTemplate)">
+              fill="solid" @click="openPlaceholderDialog(placeholderTemplate)">
               {{ placeholderTemplate.label }}
             </IonButton>
           </div>
@@ -122,7 +123,7 @@ import { alertController } from '@ionic/vue'
 import { toastController } from '@ionic/vue'
 
 import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { EnhanceableText } from '@/types/protocol/input'
 import { INPUT_TEXTAREA_PLACEHOLDERS, type PlaceholderTemplate } from '@/data/placeholders'
 
@@ -143,6 +144,8 @@ const emit = defineEmits<{
 const isModalOpen = ref(false)
 const draft = ref('')
 const isEditing = ref(false)
+const TYPING_SNAPSHOT_DELAY_MS = 500
+let typingSnapshotTimeout: ReturnType<typeof setTimeout> | null = null
 const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
 const isPlaceholderModalOpen = ref(false)
@@ -256,6 +259,48 @@ const rememberCursorPosition = async () => {
   lastCursorEnd.value = textarea.selectionEnd ?? draft.value.length
 }
 
+const clearTypingSnapshotTimeout = () => {
+  if (!typingSnapshotTimeout) {
+    return
+  }
+
+  clearTimeout(typingSnapshotTimeout)
+  typingSnapshotTimeout = null
+}
+
+const createTypingSnapshot = () => {
+  if (!isEditing.value) {
+    return
+  }
+
+  const updated = cloneModelValue()
+  updated.commitEdit(draft.value)
+  updated.beginEdit()
+  emitUpdated(updated)
+
+  draft.value = updated.value
+}
+
+const scheduleTypingSnapshot = () => {
+  if (!isEditing.value) {
+    return
+  }
+
+  clearTypingSnapshotTimeout()
+  typingSnapshotTimeout = setTimeout(() => {
+    typingSnapshotTimeout = null
+    createTypingSnapshot()
+  }, TYPING_SNAPSHOT_DELAY_MS)
+}
+
+const handleInput = () => {
+  if (!isEditing.value) {
+    return
+  }
+
+  scheduleTypingSnapshot()
+}
+
 const handleFocus = () => {
   isEditing.value = true
 
@@ -266,17 +311,20 @@ const handleFocus = () => {
 }
 
 const handleBlur = () => {
+  clearTypingSnapshotTimeout()
   rememberCursorPosition()
   isEditing.value = false
 
   const updated = cloneModelValue()
-  updated.commitEdit(draft.value)
+  updated.setText(draft.value)
   emitUpdated(updated)
 
   draft.value = updated.value
 }
 
 const commitOpenEditIfNeeded = () => {
+  clearTypingSnapshotTimeout()
+
   if (!isEditing.value) {
     return
   }
@@ -284,7 +332,7 @@ const commitOpenEditIfNeeded = () => {
   isEditing.value = false
 
   const updated = cloneModelValue()
-  updated.commitEdit(draft.value)
+  updated.setText(draft.value)
   emitUpdated(updated)
 
   draft.value = updated.value
@@ -401,6 +449,8 @@ const acceptPlaceholderDialog = async () => {
     return
   }
 
+  commitOpenEditIfNeeded()
+
   const insertedText = placeholderPreviewText.value
   const selectionStart = lastCursorStart.value
   const selectionEnd = lastCursorEnd.value
@@ -411,7 +461,7 @@ const acceptPlaceholderDialog = async () => {
   closePlaceholderDialog()
 
   const updated = cloneModelValue()
-  updated.commitEdit(draft.value)
+  updated.setText(draft.value)
   emitUpdated(updated)
 
   await setTextareaFocus()
@@ -428,6 +478,10 @@ const showEnhanceError = async () => {
 
   await toast.present()
 }
+
+onBeforeUnmount(() => {
+  clearTypingSnapshotTimeout()
+})
 
 defineExpose({
   openModal
@@ -499,6 +553,9 @@ defineExpose({
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+.dd-placeholder-buttons ion-button {
+  flex: 0;
 }
 
 .dd-placeholder-preview {
