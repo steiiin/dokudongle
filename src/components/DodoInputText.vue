@@ -5,6 +5,7 @@
     :label="label"
     :placeholder="placeholder ?? 'Text eingeben ...'"
     :inputmode="inputmode"
+    :style="inputStyle"
     @ionBlur="handleBlur">
   </IonInput>
 </template>
@@ -17,6 +18,7 @@ const props = defineProps<{
   modelValue: string,
   label?: string,
   placeholder?: string,
+  labelColor?: string,
   autocorrectFn?: (draft: string) => string,
   inputmode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'search' | 'email' | 'url',
 }>()
@@ -35,6 +37,28 @@ const inputValue = computed({
   },
 })
 
+const resolvedLabelColor = computed(() => {
+  if (!props.labelColor || props.labelColor.trim().length === 0) {
+    return undefined
+  }
+
+  const color = props.labelColor.trim()
+  if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || color.startsWith('var(')) {
+    return color
+  }
+
+  return `var(--ion-color-${color})`
+})
+
+const inputStyle = computed(() => {
+  if (!resolvedLabelColor.value) {
+    return undefined
+  }
+  return {
+    '--dd-label-color': resolvedLabelColor.value,
+  }
+})
+
 const handleBlur = () => {
 
   const value = props.modelValue?.trim() ?? ''
@@ -42,7 +66,7 @@ const handleBlur = () => {
 
   if (!props.autocorrectFn) { return }
 
-  const corrected =  props.autocorrectFn(props.modelValue);
+  const corrected =  props.autocorrectFn(props.modelValue)
   if (corrected !== props.modelValue) {
     emit('update:modelValue', corrected)
   }
@@ -66,6 +90,10 @@ defineExpose({
 
 ion-input.dd-input-text .native-input {
   text-align: right !important;
+}
+
+ion-input.dd-input-text .label-text-wrapper {
+  color: var(--dd-label-color, inherit);
 }
 
 </style>

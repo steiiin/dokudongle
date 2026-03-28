@@ -1,6 +1,6 @@
 <template>
   <IonItem :lines="isCustomMode ? 'none' : lines">
-    <IonSelect :label="label" interface="popover" v-model="selectValue">
+    <IonSelect :label="label" interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
       <IonSelectOption v-if="emptyLabel" value="">
         {{ emptyLabel }}
       </IonSelectOption>
@@ -24,6 +24,7 @@
       v-model="customText"
       :label="'↳ ' + customLabel"
       :placeholder="customPlaceholder"
+      :label-color="labelColor"
       :autocorrectFn="autocorrectFn"
       @leaved-empty="handleEmpty"
     />
@@ -45,6 +46,7 @@ export type OptionInput = SelectValue | SelectOption
 const props = defineProps<{
   modelValue: SelectValue
   label: string
+  labelColor?: string
   options: OptionInput[]
   emptyLabel?: string
   allowCustom?: boolean
@@ -72,6 +74,28 @@ const normalizedOptions = computed<SelectOption[]>(() => {
     }
     return opt
   })
+})
+
+const resolvedLabelColor = computed(() => {
+  if (!props.labelColor || props.labelColor.trim().length === 0) {
+    return undefined
+  }
+
+  const color = props.labelColor.trim()
+  if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || color.startsWith('var(')) {
+    return color
+  }
+
+  return `var(--ion-color-${color})`
+})
+
+const selectStyle = computed(() => {
+  if (!resolvedLabelColor.value) {
+    return undefined
+  }
+  return {
+    '--dd-label-color': resolvedLabelColor.value,
+  }
 })
 
 function isKnownOption(value: SelectValue): boolean {
@@ -134,3 +158,9 @@ watch(
 )
 
 </script>
+
+<style>
+ion-select.dd-input-select::part(label) {
+  color: var(--dd-label-color, inherit);
+}
+</style>

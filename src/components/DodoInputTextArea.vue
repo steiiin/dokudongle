@@ -55,10 +55,10 @@
       <IonFooter>
         <IonToolbar class="dd-modal-toolbar" v-if="!modelValue.isEnhancing">
           <IonButtons slot="start">
-            <IonButton @click="undo" >
+            <IonButton @click="undo" :disabled="!modelValue.canUndo">
               <IonIcon :src="arrowUndo" slot="icon-only"></IonIcon>
             </IonButton>
-            <IonButton @click="redo">
+            <IonButton @click="redo" :disabled="!modelValue.canRedo">
               <IonIcon :src="arrowRedo" slot="icon-only"></IonIcon>
             </IonButton>
           </IonButtons>
@@ -83,7 +83,7 @@
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
-            <IonButton color="primary" @click="acceptPlaceholderDialog">
+            <IonButton color="primary" :disabled="containsEmptyPlaceholders" @click="acceptPlaceholderDialog">
               Einfügen
             </IonButton>
           </IonButtons>
@@ -93,16 +93,19 @@
         <div class="dd-placeholder-preview" v-if="activePlaceholder" v-html="placeholderPreviewText">
         </div>
         <IonList v-if="activePlaceholder">
-          <template v-for="field in activePlaceholder.fields" :key="field.key">
+          <template v-for="(field, index) in activePlaceholder.fields" :key="field.key">
 
             <DodoInputSelect v-model="placeholderValues[field.key]" v-if="field.allowOptions"
-              :label="field.label" :options="field.options"
-              :allow-custom="field.allowCustom" :custom-label="field.customLabel" :custom-placeholder="field.customPlaceholder">
+              :label="field.key" :options="field.options"
+              :allow-custom="field.allowCustom" :custom-label="field.customLabel" :custom-placeholder="field.customPlaceholder"
+              :label-color="field.color" :lines="isLastPlaceholderField(index) ? 'none' : 'full'"
+              :autocorrect-fn="field.autocorrectFn">
             </DodoInputSelect>
 
-            <IonItem v-else>
+            <IonItem v-else :lines="isLastPlaceholderField(index) ? 'none' : 'full'">
               <DodoInputText v-model="placeholderValues[field.key]"
-                :label="field.label" :placeholder="field.customPlaceholder">
+                :label="field.key" :placeholder="field.customPlaceholder" :label-color="field.color"
+                :autocorrect-fn="field.autocorrectFn">
               </DodoInputText>
             </IonItem>
 
@@ -155,11 +158,42 @@ const resolvedPlaceholders = computed(() => {
     .map((placeholderKey) => INPUT_TEXTAREA_PLACEHOLDERS[placeholderKey.toLowerCase().trim()])
     .filter((placeholder): placeholder is PlaceholderTemplate => Boolean(placeholder))
 })
+const resolveColor = (color?: string): string | undefined => {
+  if (!color || color.trim().length === 0) {
+    return undefined
+  }
+
+  const trimmedColor = color.trim()
+  if (trimmedColor.startsWith('#') || trimmedColor.startsWith('rgb') || trimmedColor.startsWith('hsl') || trimmedColor.startsWith('var(')) {
+    return trimmedColor
+  }
+
+  return `var(--ion-color-${trimmedColor})`
+}
+const escapeHtml = (value: string): string => {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+const isLastPlaceholderField = (index: number): boolean => {
+  const placeholder = activePlaceholder.value
+  if (!placeholder) {
+    return false
+  }
+  return index === placeholder.fields.length - 1
+}
 const placeholderPreviewText = computed(() => {
   if (!activePlaceholder.value) { return '' }
   return activePlaceholder.value.fields.reduce((text, field) => {
     const value = placeholderValues.value[field.key]?.trim()
-    const replacement = value && value.length > 0 ? value : `<dodo-tag>${field.key}</dodo-tag>`
+    const color = resolveColor(field.color)
+    const fallbackTag = color
+      ? `<dodo-tag style="--dd-tag-color: ${escapeHtml(color)};">${field.key}</dodo-tag>`
+      : `<dodo-tag>${field.key}</dodo-tag>`
+    const replacement = value && value.length > 0 ? value : fallbackTag
     return text.replaceAll(`<${field.key}>`, replacement)
   }, activePlaceholder.value.template)
 })
@@ -337,6 +371,8 @@ const clear = async () => {
   isModalOpen.value = false
 }
 
+const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
+
 const openPlaceholderDialog = async (placeholderTemplate: PlaceholderTemplate) => {
   await rememberCursorPosition()
   activePlaceholder.value = placeholderTemplate
@@ -492,9 +528,11 @@ defineExpose({
 </style>
 <style>
 dodo-tag {
-  color: var(--ion-color-primary);
+  color: var(--dd-tag-color, var(--ion-color-primary));
   font-family: monospace;
   font-size: 1.3em;
+  font-weight: bold;
+  letter-spacing: -1px;
 }
 dodo-tag::before { content: '#'; }
 </style>
