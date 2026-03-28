@@ -7,7 +7,8 @@
 
       <DodoInputTextArea v-model="store.doku.situation"
         title="Situation" placeholder="Beschreibe ..."
-        :enhance-fn="enhanceGeneral" mandatory>
+        :enhance-fn="enhanceGeneral" mandatory
+        :placeholders="placeholders">
         Beschreibe die <b>Situation</b> vor Ort. <br>
         <template v-if="ctx.isTrauma">
           Denke an den <b>Unfallzeitpunkt</b>.
@@ -23,9 +24,16 @@
 
 import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
+import { PH_VERLEGUNG } from '@/data/placeholders'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+const placeholders = computed(() => {
+  const list: Array<string> = []
+  if (ctx.value.isCourseVerlegung) { list.push(PH_VERLEGUNG) }
+  return list
+})
 
 </script>

@@ -142,6 +142,9 @@ export interface ProtocolContext {
   requireSampler: boolean,
   requireRedflags: boolean,
 
+  isCourseVerlegung: boolean,
+  isCourseEinweisung: boolean,
+
   isBreathing: boolean,
   hasPulse: boolean,
   isNonVerbal: boolean,

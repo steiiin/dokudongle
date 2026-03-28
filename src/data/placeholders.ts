@@ -1,6 +1,8 @@
 import { OptionInput } from "@/components/DodoInputSelect.vue"
 import { basicCap } from "@/utils/autocorrect/basic"
 
+export const PH_VERLEGUNG = 'verlegung'
+
 export type PlaceholderTemplateField = {
   key: string, color?: string,
   allowOptions?: boolean, allowCustom?: boolean,
@@ -17,8 +19,8 @@ export type PlaceholderTemplate = {
 }
 
 export const INPUT_TEXTAREA_PLACEHOLDERS: Record<string, PlaceholderTemplate> = {
-  verlegung: {
-    key: 'verlegung',
+  [PH_VERLEGUNG]: {
+    key: PH_VERLEGUNG,
     label: 'Verlegung',
     template: 'Verlegung von <START> nach <ZIEL>.',
     fields: [

@@ -375,6 +375,8 @@ export const useDokuStore = defineStore('doku', {
       const requireSampler: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
       const requireRedflags: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
 
+      const isCourseVerlegung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
+      const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
       const isPediatric: boolean = state.doku.ident.age.totalYears <= 3
 
       const nothingToTreat: boolean = (
@@ -435,6 +437,9 @@ export const useDokuStore = defineStore('doku', {
         requireABCDE,
         requireSampler,
         requireRedflags,
+
+        isCourseVerlegung,
+        isCourseEinweisung,
 
         isBreathing: state.doku.xAbcde.isBreathing,
         hasPulse: state.doku.xabCde.pulse.centralStrength != 'nicht',
