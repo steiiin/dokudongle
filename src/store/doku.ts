@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { defineStore, storeToRefs } from 'pinia';
 
 import { stripNotSupported, textToHidEvents } from '@/utils/keymap-german';
-import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID } from '@/types/dongle';
+import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle';
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol';
 import { breakDoku, multiline, placeholder } from '@/utils/text';
 import { textIf } from '@/utils/filter';
@@ -56,6 +56,7 @@ export const useDokuStore = defineStore('doku', {
       isConnecting: false,
       isConnected: false,
       isTransmitting: false,
+      isRenaming: false,
       transmissionCurrent: 0, transmissionLength: 0,
       transmissionAbortController: null,
     } as DeviceConnection,
@@ -145,6 +146,53 @@ export const useDokuStore = defineStore('doku', {
         console.warn('Bluetooth not available')
         console.warn(e)
       }
+    },
+    async renameDongle(newName: string) {
+
+      try
+      {
+
+        // cancel if not connected
+        await this.checkConnection()
+        if (!this.isDongleConnected) { return false }
+        this.connection.isRenaming = true
+
+        // max length must match firmware
+        if (newName.length > 20) {
+          throw new Error("Name too long (max 20 chars)");
+        }
+
+        // convert string → bytes
+        const encoder = new TextEncoder();
+        const data = encoder.encode(newName);
+        const view = new DataView(
+          data.buffer,
+          data.byteOffset,
+          data.byteLength
+        )
+
+        await BleClient.write(
+          this.connection.device!.id,
+          ServiceUUID,
+          SetNameUUID,
+          view,
+        )
+
+        await new Promise(r => setTimeout(r, 500));
+        await BleClient.disconnect(this.connection.device!.id);
+
+        this.initialized = false
+        this.connection.device = null
+
+        await new Promise(r => setTimeout(r, 2000));
+
+      }
+      finally
+      {
+        this.connection.isRenaming = false
+        this.connectDongle()
+      }
+
     },
 
     // protocol

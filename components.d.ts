@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
+    DodoConnectionRename: typeof import('./src/components/DodoConnectionRename.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
     DodoInputContacts: typeof import('./src/components/DodoInputContacts.vue')['default']

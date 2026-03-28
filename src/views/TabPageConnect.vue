@@ -21,6 +21,8 @@
           >Dongle suchen
         </IonButton>
 
+        <DodoConnectionRename></DodoConnectionRename>
+
       </div>
 
     </IonContent>
@@ -29,13 +31,12 @@
 
 <script setup lang="ts">
 
-import { ellipsisHorizontalCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { computed, ref } from 'vue'
+import router from '@/router'
 
-import { computed, nextTick } from 'vue';
-
-import { useDokuStore } from '@/store/doku';
-import router from '@/router';
-const store = useDokuStore();
+import { useDokuStore } from '@/store/doku'
+import DodoConnectionRename from '@/components/DodoConnectionRename.vue';
+const store = useDokuStore()
 
 interface StateText {
   title: string;
@@ -70,7 +71,7 @@ const stateText = computed(() => {
 const connectDongle = async () => {
   await store.connectDongle()
   if (store.isDongleConnected) {
-    setTimeout(() => router.push('/tabs/doku'), 1000)
+    setTimeout(() => router.push('/tabs/doku'), 300)
   }
 }
 
@@ -109,7 +110,5 @@ const connectDongle = async () => {
   }
 
 }
-
-
 
 </style>
