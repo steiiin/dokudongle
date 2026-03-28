@@ -28,14 +28,7 @@
 <script setup lang="ts">
 
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
-import DodoInputSelect from './DodoInputSelect.vue'
-
-export type SelectOption = {
-  value: SelectValue
-  label: string
-}
-type OptionInput = SelectValue | SelectOption
-type SelectValue = string | number
+import DodoInputSelect, { OptionInput, SelectValue } from './DodoInputSelect.vue'
 
 const props = withDefaults(defineProps<{
 

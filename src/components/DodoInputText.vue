@@ -3,7 +3,7 @@
     ref="inputRef"
     v-model="inputValue"
     :label="label"
-    :placeholder="placeholder"
+    :placeholder="placeholder ?? 'Text eingeben ...'"
     :inputmode="inputmode"
     @ionBlur="handleBlur">
   </IonInput>

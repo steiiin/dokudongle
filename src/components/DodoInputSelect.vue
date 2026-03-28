@@ -34,16 +34,13 @@
 
 import { computed, ref, watch } from 'vue'
 
-import DodoInputText from './DodoInputText.vue'
-
 const CUSTOM_VALUE = '__custom'
 
+export type SelectValue = string | number
 export type SelectOption = {
   value: SelectValue
-  label: string
-}
-type OptionInput = SelectValue | SelectOption
-type SelectValue = string | number
+  label: string }
+export type OptionInput = SelectValue | SelectOption
 
 const props = defineProps<{
   modelValue: SelectValue
