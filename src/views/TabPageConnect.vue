@@ -4,6 +4,7 @@
       <IonToolbar>
         <IonTitle>Verbindung</IonTitle>
         <IonProgressBar v-if="store.isDongleTransmitting" type="indeterminate"></IonProgressBar>
+        <DodoConnectionRename></DodoConnectionRename>
       </IonToolbar>
     </IonHeader>
     <IonContent :fullscreen="true">
@@ -21,8 +22,6 @@
           >Dongle suchen
         </IonButton>
 
-        <DodoConnectionRename></DodoConnectionRename>
-
       </div>
 
     </IonContent>
@@ -35,7 +34,6 @@ import { computed, ref } from 'vue'
 import router from '@/router'
 
 import { useDokuStore } from '@/store/doku'
-import DodoConnectionRename from '@/components/DodoConnectionRename.vue';
 const store = useDokuStore()
 
 interface StateText {

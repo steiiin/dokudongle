@@ -1,12 +1,16 @@
 <template>
 
-  <IonButton v-if="store.isDongleConnected" @click="openRenameDialog">Dongle umbenennen
-  </IonButton>
+  <IonButtons slot="primary">
+    <IonButton v-if="store.isDongleConnected" @click="openRenameDialog" size="large">
+      <IonIcon :icon="cog" slot="icon-only"></IonIcon>
+    </IonButton>
+  </IonButtons>
+
 
   <IonModal :is-open="isModalOpen || isRenaming" :can-dismiss="!isRenaming">
     <IonHeader>
       <IonToolbar>
-        <IonTitle type="ios">Dongle umbenennen</IonTitle>
+        <IonTitle type="ios">Dongle-Einstellungen</IonTitle>
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
@@ -36,6 +40,7 @@ import { computed, ref } from 'vue'
 import { gainFocus } from '@/utils/input'
 
 import { useDokuStore } from '@/store/doku'
+import { cog } from 'ionicons/icons'
 const store = useDokuStore()
 
 
