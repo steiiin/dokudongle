@@ -1,7 +1,16 @@
 import { OptionInput } from "@/components/DodoInputSelect.vue"
 import { basicCap } from "@/utils/autocorrect/basic"
+import { correctHospital } from "@/utils/autocorrect/locations"
+
+// ############################################################################
 
 export const PH_VERLEGUNG = 'verlegung'
+
+// ############################################################################
+
+export const OP_HOSPITALS = [ 'KH Radebeul', 'KH Meißen', 'KH Riesa' ]
+
+// ############################################################################
 
 export type PlaceholderTemplateField = {
   key: string, color?: string,
@@ -18,6 +27,8 @@ export type PlaceholderTemplate = {
   fields: PlaceholderTemplateField[]
 }
 
+// ############################################################################
+
 export const INPUT_TEXTAREA_PLACEHOLDERS: Record<string, PlaceholderTemplate> = {
   [PH_VERLEGUNG]: {
     key: PH_VERLEGUNG,
@@ -27,12 +38,16 @@ export const INPUT_TEXTAREA_PLACEHOLDERS: Record<string, PlaceholderTemplate> = 
       {
         key: 'START', color: 'warning',
         allowOptions: true, allowCustom: true,
-        options: [ 'KH Radebeul', 'KH Meißen' ],
+        options: OP_HOSPITALS,
         customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
+        autocorrectFn: correctHospital
       },
       {
         key: 'ZIEL', color: 'success',
-        autocorrectFn: basicCap,
+        allowOptions: true, allowCustom: true,
+        options: OP_HOSPITALS,
+        customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
+        autocorrectFn: correctHospital
       },
     ],
   },
