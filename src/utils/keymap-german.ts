@@ -6,7 +6,6 @@
 // ---- Modifiers (match your Arduino) ----
 export const MOD_SHIFT   = 0x02;
 export const MOD_ALTGR   = 0x40;   // Right-Alt (AltGr)
-export const MOD_LITERAL = 0x80;   // Custom flag: Arduino converts dead key → literal via "dead + Space"
 
 // ---- HID Keyboard/Keypad usages (USB page 0x07) ----
 const U = {
@@ -20,19 +19,19 @@ const U = {
   D1:0x1E,D2:0x1F,D3:0x20,D4:0x21,D5:0x22,D6:0x23,D7:0x24,D8:0x25,D9:0x26,D0:0x27,
 
   // Controls & space
-  ENTER:0x28, ESC:0x29, BKSP:0x2A, TAB:0x2B, SPACE:0x2C,
+  ENTER:0x28, SPACE:0x2C,
 
-  // Punctuation (US physical keys; remapped by DE layout)
-  MINUS:0x2D,      // DE: ß / ?
-  EQUAL:0x2E,      // DE: ´ (dead) / ` (dead+Shift)
-  LBRACKET:0x2F,   // DE: ü / Ü
-  RBRACKET:0x30,   // DE: + / *
-  BACKSLASH:0x31,  // DE: # / '
-  SEMICOLON:0x33,  // DE: ö / Ö
-  APOSTROPHE:0x34, // DE: ä / Ä
-  GRAVE:0x35,      // DE: ^ (dead) / ° (Shift)
-  COMMA:0x36, DOT:0x37, SLASH:0x38, // DE: - / _ on SLASH
-  NONUS:0x64       // ISO extra key: < > | (left of right shift)
+  // Punctuation (US physical keys)
+  MINUS:0x2D,
+  EQUAL:0x2E,
+  LBRACKET:0x2F,
+  RBRACKET:0x30,
+  BACKSLASH:0x31,
+  SEMICOLON:0x33,
+  APOSTROPHE:0x34,
+  GRAVE:0x35,
+  COMMA:0x36, DOT:0x37, SLASH:0x38,
+  NONUS:0x64
 
 };
 
@@ -40,13 +39,13 @@ const U = {
 export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
 
   // Controls / whitespace
-  '\n': [U.ENTER], '\t': [U.TAB], '\b': [U.BKSP], '\x1B': [U.ESC],
+  '\n': [U.ENTER],
   ' ':  [U.SPACE],
 
   // Top row (digits & shifted symbols)
   '1':[U.D1], '!':[U.D1, MOD_SHIFT],
-  '2':[U.D2], '"':[U.D2, MOD_SHIFT], '²':[U.D2, MOD_ALTGR],
-  '3':[U.D3], '§':[U.D3, MOD_SHIFT], '³':[U.D3, MOD_ALTGR],
+  '2':[U.D2], '"':[U.D2, MOD_SHIFT],
+  '3':[U.D3], '§':[U.D3, MOD_SHIFT],
   '4':[U.D4], '$':[U.D4, MOD_SHIFT],
   '5':[U.D5], '%':[U.D5, MOD_SHIFT],
   '6':[U.D6], '&':[U.D6, MOD_SHIFT],
@@ -55,11 +54,7 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   '9':[U.D9], ')':[U.D9, MOD_SHIFT], ']':[U.D9, MOD_ALTGR],
   '0':[U.D0], '=':[U.D0, MOD_SHIFT], '}':[U.D0, MOD_ALTGR],
 
-  'ß':[U.MINUS], '?':[U.MINUS, MOD_SHIFT], '\\':[U.MINUS, MOD_ALTGR],
-
-  // Dead keys (acute/grave) → mark as literal so Arduino sends "dead + Space"
-  '´':[U.EQUAL, MOD_LITERAL],      // acute as literal
-  '`':[U.EQUAL, MOD_SHIFT | MOD_LITERAL], // grave as literal (on DE via Shift+´ dead)
+  'ß':[U.MINUS], '?':[U.MINUS, MOD_SHIFT],
 
   // QWERTZ row + AltGr (€, @)
   'q':[U.Q], 'Q':[U.Q, MOD_SHIFT], '@':[U.Q, MOD_ALTGR],
@@ -67,9 +62,7 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   'e':[U.E], 'E':[U.E, MOD_SHIFT], '€':[U.E, MOD_ALTGR],
   'r':[U.R], 'R':[U.R, MOD_SHIFT],
   't':[U.T], 'T':[U.T, MOD_SHIFT],
-
-  // y/z swap (DE layout)
-  'z':[U.Y], 'Z':[U.Y, MOD_SHIFT],  // 'z' lives on US 'Y' usage
+  'z':[U.Y], 'Z':[U.Y, MOD_SHIFT],
   'u':[U.U], 'U':[U.U, MOD_SHIFT],
   'i':[U.I], 'I':[U.I, MOD_SHIFT],
   'o':[U.O], 'O':[U.O, MOD_SHIFT],
@@ -94,9 +87,8 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   '#':[U.BACKSLASH],  '\'':[U.BACKSLASH, MOD_SHIFT],
 
   // Bottom row + ISO key
-  '<':[U.NONUS], '>':[U.NONUS, MOD_SHIFT], '|':[U.NONUS, MOD_ALTGR],
+  '<':[U.NONUS], '>':[U.NONUS, MOD_SHIFT],
 
-  // y on DE lives on US Z
   'y':[U.Z], 'Y':[U.Z, MOD_SHIFT],
   'x':[U.X], 'X':[U.X, MOD_SHIFT],
   'c':[U.C], 'C':[U.C, MOD_SHIFT],
@@ -108,10 +100,11 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
 
   ',':[U.COMMA], ';':[U.COMMA, MOD_SHIFT],
   '.':[U.DOT],   ':':[U.DOT,   MOD_SHIFT],
-  '-':[U.SLASH], '_':[U.SLASH, MOD_SHIFT],   // DE: '-' on US SLASH
-  // Caret (dead) and Degree
-  '^':[U.GRAVE, MOD_LITERAL],     // caret literal (dead ^ + Space)
+  '-':[U.SLASH], '_':[U.SLASH, MOD_SHIFT],
+
+  // Degree
   '°':[U.GRAVE, MOD_SHIFT]
+
 };
 
 // pack a string to [key,mod] pairs
@@ -130,7 +123,7 @@ export function textToHidEvents(text: string): Array<[number, number]> {
   return out
 }
 
-const SUPPORTED_INPUT_REGEX = /[^a-zA-Z0-9.,_/*"':;!?@#€%&\-+()~|}{\][=°$\\<>üöäÜÖÄß]/g;
+const SUPPORTED_INPUT_REGEX = /[^\n a-zA-Z0-9.,_/*"':;!?@#€%&\-+()~|}{\][=°$\\<>üöäÜÖÄß]/g;
 
 /**
  * Removes diacritics while keeping German umlauts intact.

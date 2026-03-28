@@ -176,17 +176,12 @@ export const useDokuStore = defineStore('doku', {
         doku: toRaw(this.doku),
       })
     },
-    async sendProtocol(debug: boolean = false) {
+    async sendProtocol() {
 
       const protocolText = this.generatedProtocol
 
-      if (debug)
-      {
-        console.log(textToHidEvents(stripNotSupported(protocolText)))
-        return
-      }
-
       console.log('Protokoll gesendet:')
+      console.log(stripNotSupported(protocolText))
       console.log(stripNotSupported(protocolText))
 
       const controller = new AbortController()
