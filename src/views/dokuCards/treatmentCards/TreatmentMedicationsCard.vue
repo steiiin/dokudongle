@@ -19,8 +19,8 @@ import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 
 watch(() => store.doku.saamed.medTasks.length, (length) => {
-  if (length > 0 && store.doku.redflags.Consent === '') {
-    store.doku.redflags.Consent = 'Fähig'
+  if (length > 0 && store.doku.redflags.consent === '') {
+    store.doku.redflags.consent = 'Fähig'
   }
 })
 
