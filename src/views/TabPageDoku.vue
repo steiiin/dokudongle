@@ -16,27 +16,27 @@
         <IdentifikationCard></IdentifikationCard>
         <DetailLevelCard />
 
-        <template v-if="store.doku.course != ProtocolCourse.NEF_VOR_ORT">
+        <div v-show="store.doku.course != ProtocolCourse.NEF_VOR_ORT">
 
           <!-- FLAVORS -->
-          <FlavorsCard v-if="ctx.requireFlavors" />
+          <FlavorsCard v-show="ctx.requireFlavors" />
 
           <!-- SETTING -->
-          <SettingCard v-if="ctx.requireSceneDetails"></SettingCard>
+          <SettingCard v-show="ctx.requireSceneDetails"></SettingCard>
 
           <!-- SITUATION -->
           <SituationCard></SituationCard>
 
           <!-- ABCDE -->
-          <AbcdeContainerCard v-if="ctx.requireABCDE"></AbcdeContainerCard>
+          <AbcdeContainerCard v-show="ctx.requireABCDE"></AbcdeContainerCard>
 
           <!-- SAMPLE -->
-          <SampleContainerCard v-if="ctx.requireSampler"></SampleContainerCard>
+          <SampleContainerCard v-show="ctx.requireSampler"></SampleContainerCard>
 
           <!-- BEHANDLUNG -->
           <TreatmentContainerCard></TreatmentContainerCard>
 
-        </template>
+        </div>
 
       </div>
 

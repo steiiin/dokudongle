@@ -7,7 +7,7 @@
 
       <TreatmentTasksCard />
       <TreatmentMedicationsCard />
-      <TreatmentRedflagsCard v-if="ctx.requireRedflags" />
+      <TreatmentRedflagsCard v-show="ctx.requireRedflags" />
 
     </IonCardContent>
   </IonCard>

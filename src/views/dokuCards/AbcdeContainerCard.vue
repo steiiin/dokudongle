@@ -5,7 +5,7 @@
     </IonCardHeader>
     <IonCardContent class="card-in-card">
 
-      <AbcdeBleedingCard v-if="ctx.isTrauma" />
+      <AbcdeBleedingCard v-show="ctx.isTrauma" />
       <AbcdeAirwayCard />
       <AbcdeBreathingCard />
       <AbcdeCirculationCard />

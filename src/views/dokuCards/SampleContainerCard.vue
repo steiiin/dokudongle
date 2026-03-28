@@ -11,7 +11,7 @@
             </IonCardHeader>
             <IonCardContent class="card-in-card">
 
-              <SampleSymptomsTrauma v-if="ctx.isTrauma" />
+              <SampleSymptomsTrauma v-show="ctx.isTrauma" />
               <SampleSymptomsCard />
 
             </IonCardContent>
@@ -38,7 +38,6 @@ import SampleContactsCard from './sampleCards/SampleContactsCard.vue'
 import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
-import SampleSymptoms from './sampleCards/SampleSymptomsCard.vue'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

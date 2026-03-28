@@ -1,5 +1,5 @@
 <template>
-  <IonCard v-if="ctx.requireSceneDetails">
+  <IonCard v-show="ctx.requireSceneDetails">
     <IonCardHeader>
       <IonCardTitle>Umgebung</IonCardTitle>
     </IonCardHeader>
