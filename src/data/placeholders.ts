@@ -24,6 +24,7 @@ export type PlaceholderTemplate = {
   key: string
   label: string
   template: string
+  avoidDuplicates?: boolean
   fields: PlaceholderTemplateField[]
 }
 
@@ -34,6 +35,7 @@ export const INPUT_TEXTAREA_PLACEHOLDERS: Record<string, PlaceholderTemplate> = 
     key: PH_VERLEGUNG,
     label: 'Verlegung',
     template: 'Verlegung von <START> nach <ZIEL>.',
+    avoidDuplicates: true,
     fields: [
       {
         key: 'START', color: 'warning',

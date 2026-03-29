@@ -37,7 +37,7 @@ const reset = async () => {
         handler: async () => {
           store.newProtocol()
           await nextTick()
-          tryScrollingToTop()
+          setTimeout(tryScrollingToTop, 200)
         }
       }
     ]
@@ -73,14 +73,14 @@ const send = async () => {
     store.sendProtocol()
   }
 
-  tryScrollingToTop()
+  setTimeout(tryScrollingToTop, 200)
 
 }
 
 const tryScrollingToTop = () => {
   const ionContents = document.getElementsByTagName('ion-content')
   if (ionContents.length>0) {
-    ionContents[0].scrollToTop?.()
+    ionContents[0].scrollToTop?.(200)
   }
 }
 

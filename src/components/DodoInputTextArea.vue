@@ -45,7 +45,7 @@
             @ionInput="handleInput">
           </IonTextarea>
           <div class="dd-placeholder-buttons" v-if="resolvedPlaceholders.length > 0">
-            <IonButton
+            <IonButton :disabled="containsDuplicate(placeholderTemplate.key)"
               v-for="placeholderTemplate in resolvedPlaceholders" :key="placeholderTemplate.key"
               fill="solid" @click="openPlaceholderDialog(placeholderTemplate)">
               {{ placeholderTemplate.label }}
@@ -64,7 +64,7 @@
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
-            <IonButton @click="clear" v-if="!modelValue.isEmpty">
+            <IonButton @click="deleteText" v-if="!modelValue.isEmpty">
               <IonIcon :src="trashBin" color="danger" slot="icon-only"></IonIcon>
             </IonButton>
           </IonButtons>
@@ -84,7 +84,10 @@
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
-            <IonButton color="primary" :disabled="containsEmptyPlaceholders" @click="acceptPlaceholderDialog">
+            <IonButton
+              color="primary"
+              :disabled="containsEmptyPlaceholders"
+              @click="acceptPlaceholderDialog">
               Einfügen
             </IonButton>
           </IonButtons>
@@ -144,13 +147,17 @@ const emit = defineEmits<{
 const isModalOpen = ref(false)
 const draft = ref('')
 const isEditing = ref(false)
+
 const TYPING_SNAPSHOT_DELAY_MS = 500
 let typingSnapshotTimeout: ReturnType<typeof setTimeout> | null = null
+
 const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
+
 const isPlaceholderModalOpen = ref(false)
 const activePlaceholder = ref<PlaceholderTemplate | null>(null)
 const placeholderValues = ref<Record<string, string>>({})
+const insertedPlaceholderBlocks = ref<Record<string, string[]>>({})
 
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
 const resolvedPlaceholders = computed(() => {
@@ -338,6 +345,8 @@ const commitOpenEditIfNeeded = () => {
   draft.value = updated.value
 }
 
+//#region Toolbar
+
 const undo = () => {
   commitOpenEditIfNeeded()
 
@@ -357,6 +366,102 @@ const redo = () => {
 
   draft.value = updated.value
 }
+
+const deleteText = async () => {
+
+  const confirmDelete = (): Promise<boolean> => {
+    return new Promise(async (resolve) => {
+    const alert = await alertController.create({
+      header: 'Eingaben löschen',
+      message: 'Möchtest du die Eingaben wirklich löschen?',
+      buttons: [
+        {
+          text: 'Abbrechen',
+          role: 'cancel',
+          handler: () => resolve(false),
+        },
+        {
+          text: 'Ja, Löschen',
+          role: 'destructive',
+          handler: () => resolve(true),
+        },
+      ],
+    })
+    await alert.present()
+  })
+  }
+
+  const confirmed = await confirmDelete()
+  if (!confirmed) return
+
+  const updated = cloneModelValue()
+  updated.commitEdit('')
+
+  emitUpdated(updated)
+
+  draft.value = ''
+  isEditing.value = false
+
+  isModalOpen.value = false
+}
+
+//#endregion
+
+//#region Placeholders
+
+const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
+const containsDuplicate = (key: string) => INPUT_TEXTAREA_PLACEHOLDERS[key].avoidDuplicates && insertedPlaceholderBlocks.value[key]?.length>0
+
+const openPlaceholderDialog = async (placeholderTemplate: PlaceholderTemplate) => {
+  await rememberCursorPosition()
+  activePlaceholder.value = placeholderTemplate
+  placeholderValues.value = placeholderTemplate.fields.reduce((collector, field) => {
+    collector[field.key] = ''
+    return collector
+  }, {} as Record<string, string>)
+  isPlaceholderModalOpen.value = true
+}
+
+const closePlaceholderDialog = () => {
+  isPlaceholderModalOpen.value = false
+  activePlaceholder.value = null
+}
+
+const acceptPlaceholderDialog = async () => {
+  if (!activePlaceholder.value) { return }
+
+  commitOpenEditIfNeeded()
+
+  const placeholderKey = activePlaceholder.value.key
+  const insertedText = placeholderPreviewText.value
+  const selectionStart = lastCursorStart.value
+  const selectionEnd = lastCursorEnd.value
+  const before = draft.value.slice(0, selectionStart)
+  const after = draft.value.slice(selectionEnd)
+
+  draft.value = `${before}${insertedText}${after}`
+  closePlaceholderDialog()
+
+  const updated = cloneModelValue()
+  updated.setText(draft.value)
+  emitUpdated(updated)
+
+  const trackedBlocks = insertedPlaceholderBlocks.value[placeholderKey] ?? []
+  if(!trackedBlocks.includes(insertedText)) {
+    insertedPlaceholderBlocks.value = {
+      ...insertedPlaceholderBlocks.value,
+      [placeholderKey]: [ ...trackedBlocks, insertedText ],
+    }
+  }
+
+  console.log(insertedPlaceholderBlocks.value)
+
+  await setTextareaFocus()
+}
+
+//#endregion
+
+//#region Enhancement
 
 const enhance = async () => {
   commitOpenEditIfNeeded()
@@ -382,91 +487,6 @@ const enhance = async () => {
   draft.value = updated.value
 }
 
-async function confirmDelete(): Promise<boolean> {
-  return new Promise(async (resolve) => {
-    const alert = await alertController.create({
-      header: 'Eingaben löschen',
-      message: 'Möchtest du die Eingaben wirklich löschen?',
-      buttons: [
-        {
-          text: 'Abbrechen',
-          role: 'cancel',
-          handler: () => resolve(false),
-        },
-        {
-          text: 'Ja, Löschen',
-          role: 'destructive',
-          handler: () => resolve(true),
-        },
-      ],
-    })
-    await alert.present()
-  })
-}
-
-const clear = async () => {
-  const confirmed = await confirmDelete()
-  if (!confirmed) return
-
-  const updated = cloneModelValue()
-  updated.commitEdit('')
-
-  emitUpdated(updated)
-
-  draft.value = ''
-  isEditing.value = false
-
-  isModalOpen.value = false
-}
-
-const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
-
-const openPlaceholderDialog = async (placeholderTemplate: PlaceholderTemplate) => {
-  await rememberCursorPosition()
-  activePlaceholder.value = placeholderTemplate
-  placeholderValues.value = placeholderTemplate.fields.reduce((collector, field) => {
-    collector[field.key] = ''
-    return collector
-  }, {} as Record<string, string>)
-  isPlaceholderModalOpen.value = true
-}
-
-const closePlaceholderDialog = () => {
-  isPlaceholderModalOpen.value = false
-  activePlaceholder.value = null
-}
-
-const updatePlaceholderField = (fieldKey: string, event: CustomEvent) => {
-  const value = (event.detail?.value ?? '').toString()
-  placeholderValues.value = {
-    ...placeholderValues.value,
-    [fieldKey]: value,
-  }
-}
-
-const acceptPlaceholderDialog = async () => {
-  if (!activePlaceholder.value) {
-    return
-  }
-
-  commitOpenEditIfNeeded()
-
-  const insertedText = placeholderPreviewText.value
-  const selectionStart = lastCursorStart.value
-  const selectionEnd = lastCursorEnd.value
-  const before = draft.value.slice(0, selectionStart)
-  const after = draft.value.slice(selectionEnd)
-
-  draft.value = `${before}${insertedText}${after}`
-  closePlaceholderDialog()
-
-  const updated = cloneModelValue()
-  updated.setText(draft.value)
-  emitUpdated(updated)
-
-  await setTextareaFocus()
-}
-
 const showEnhanceError = async () => {
   const toast = await toastController.create({
     message: 'Die Verbesserung konnte nicht erstellt werden.',
@@ -478,6 +498,8 @@ const showEnhanceError = async () => {
 
   await toast.present()
 }
+
+//#endregion
 
 onBeforeUnmount(() => {
   clearTypingSnapshotTimeout()

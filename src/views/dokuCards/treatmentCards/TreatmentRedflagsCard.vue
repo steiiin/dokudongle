@@ -61,7 +61,7 @@ watch(() => [
   store.doku.redflags.noTransportType,
   store.doku.redflags.attendant.active
 ], (v) => {
-  setTimeout(tryScrollingToBottom, 100)
+  setTimeout(tryScrollingToBottom, 200)
 })
 
 const tryScrollingToBottom = () => {
