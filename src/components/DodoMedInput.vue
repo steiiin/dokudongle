@@ -49,7 +49,7 @@
           <DodoInputText ref="inputName"
             v-model="currentItem.Name"
             label="" placeholder="z.B. ASS"
-            :autocorrect-fn="basicCap">
+            :autocorrect-fn="correctMedName">
           </DodoInputText>
 
         </IonItem>
@@ -100,7 +100,7 @@ import { addCircle } from 'ionicons/icons';
 
 import { SampleMedicationItem } from '@/types/protocol/sample'
 
-import { basicCap } from '@/utils/autocorrect/basic';
+import { correctMedName } from '@/utils/autocorrect/medications'
 
 const props = defineProps<{ modelValue: Array<SampleMedicationItem> }>()
 const emit = defineEmits<{
@@ -137,8 +137,6 @@ const editItem = (item: SampleMedicationItem) => {
 
 const saveItem = () => {
   if (!modalValid.value) { return }
-
-  currentItem.value.Name = basicCap(currentItem.value.Name)
 
   if (currentNew.value) {
     emit('update:modelValue', [...props.modelValue, currentItem.value])

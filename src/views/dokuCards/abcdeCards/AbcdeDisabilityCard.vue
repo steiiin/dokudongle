@@ -140,13 +140,13 @@
         <DodoInputTextOptional :lines="(ctx.isNonVerbal || store.doku.xabcDe.paresis.active) ? 'full' : 'inset'"
           toggle-label="Paresen?" v-model:toggle="store.doku.xabcDe.paresis.active"
           text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresis.value"
-          :autocorrect-fn="basicCap">
+          :autocorrect-fn="correctAnatomy">
         </DodoInputTextOptional>
 
         <DodoInputTextOptional v-if="!ctx.isNonVerbal" :lines="(store.doku.xabcDe.paresthesia.active) ? 'full' : 'inset'"
           toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.paresthesia.active"
           text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresthesia.value"
-          :autocorrect-fn="basicCap">
+          :autocorrect-fn="correctAnatomy">
         </DodoInputTextOptional>
 
         <IonItem v-if="!ctx.isNonVerbal" lines="full">
@@ -280,11 +280,7 @@ import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
-import { basicCap } from '@/utils/autocorrect/basic'
-import DodoToggleButton from '@/components/DodoToggleButton.vue'
-import DodoToggleChip from '@/components/DodoToggleChip.vue'
-import DodoToggleGroup from '@/components/DodoToggleGroup.vue'
-import { IonChip, IonLabel } from '@ionic/vue'
+import { correctAnatomy } from '@/utils/autocorrect/anatomy'
 
 const rassDescription = computed(() => {
   if (store.doku.xabcDe.psychRass === 'streitsüchtig') {

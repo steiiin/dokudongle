@@ -67,14 +67,14 @@
         <IonItem v-if="sampleMedOnMajor" :lines="noneIf(store.doku.sampler.medication.isPlanAvailable)">
           <IonToggle v-model="store.doku.sampler.medication.isPlanAvailable" label-placement="end">MedPlan vorhanden?</IonToggle>
         </IonItem>
-        <DodoMedInput v-if="sampleMedOnMajor && !store.doku.sampler.medication.isPlanAvailable" lines="none" v-model="store.doku.sampler.medication.PlanMedication">
+        <DodoMedInput v-if="sampleMedOnMajor && !store.doku.sampler.medication.isPlanAvailable" v-model="store.doku.sampler.medication.PlanMedication">
         </DodoMedInput>
 
         <IonItem lines="none" v-if="sampleMedOnMinor">
           <DodoInputText ref="inputMinormedDescription"
             v-model="store.doku.sampler.medication.MinormedDescription"
             label="Einnahme von:" placeholder="z.B. Pille"
-            :beautify-fn="basicCap">
+            :autocorrect-fn="correctMedName">
           </DodoInputText>
         </IonItem>
 
@@ -86,10 +86,10 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
-import { fullIf, noneIf } from '@/utils/filter'
+import { noneIf } from '@/utils/filter'
+import { correctMedName } from '@/utils/autocorrect/medications'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

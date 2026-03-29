@@ -19,7 +19,7 @@
           <DodoInputText ref="inputAllergiesDescription"
             v-model="store.doku.sampler.allergies.description"
             label="↳ Welche:" :placeholder="placeholder"
-            :beautify-fn="basicCap">
+            :autocorrect-fn="basicCap">
           </DodoInputText>
         </IonItem>
 

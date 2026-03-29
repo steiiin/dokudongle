@@ -187,8 +187,7 @@ import { computed, ref, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 import { basicCap } from '@/utils/autocorrect/basic'
-import { insetIf } from '@/utils/filter'
-import DodoInputTemperature from '@/components/DodoInputTemperature.vue'
+
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

@@ -16,13 +16,12 @@ export function capitalizeWords(text: string): string {
 /**
  * Capitalises only the first non-space character of the input string.
  */
-export function capitalizeBegin(text: string): string {
+export function capitalizeBegin(text: string, ignoreLength?: number): string {
   const trimmed = text.trimStart()
-  const firstLetterIndex = trimmed.search(/\p{L}/u)
-  if (firstLetterIndex === -1) return trimmed
-  return trimmed.slice(0, firstLetterIndex)
-    + trimmed.charAt(firstLetterIndex).toUpperCase()
-    + trimmed.slice(firstLetterIndex + 1)
+  if (trimmed.length === 0) return trimmed
+  if (!!ignoreLength && trimmed.length<=ignoreLength) { return trimmed }
+  return trimmed.charAt(0).toUpperCase()
+    + trimmed.slice(1)
 }
 
 /**
