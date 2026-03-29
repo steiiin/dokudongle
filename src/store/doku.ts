@@ -376,7 +376,7 @@ export const useDokuStore = defineStore('doku', {
       const requireRedflags: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
 
       const isCourseVerlegung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
-      const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
+      const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.EINWEISUNG
       const isPediatric: boolean = state.doku.ident.age.totalYears <= 3
 
       const nothingToTreat: boolean = (

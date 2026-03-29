@@ -24,7 +24,7 @@
 
 import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
-import { PH_VERLEGUNG } from '@/data/placeholders'
+import { PH_Einweisung, PH_Verlegung } from '@/data/placeholders'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -32,7 +32,8 @@ const ctx = computed(() => store.context)
 
 const placeholders = computed(() => {
   const list: Array<string> = []
-  if (ctx.value.isCourseVerlegung) { list.push(PH_VERLEGUNG) }
+  if (ctx.value.isCourseVerlegung) { list.push(PH_Verlegung) }
+  if (ctx.value.isCourseEinweisung) { list.push(PH_Einweisung) }
   return list
 })
 

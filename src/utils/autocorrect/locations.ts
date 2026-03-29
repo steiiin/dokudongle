@@ -24,3 +24,24 @@ export const correctHospital = (draft: string): string => {
     .map(capitalizeBegin)
     .join(" ");
 }
+
+export const correctDoc = (draft: string): string => {
+  let text = draft.trim();
+
+  // Normalize to lowercase first
+  text = text.toLowerCase();
+
+  // Apply replacements (order matters: fkh before kh)
+  const replacements: Array<[RegExp, string]> = [
+    [/\bha\b/gi, "HA"],
+    [/\bfa\b/gi, "FA"],
+    [/\bhno\b/gi, "HNO"],
+  ]
+  for (const [pattern, replacement] of replacements) {
+    text = text.replace(pattern, replacement);
+  }
+  return text
+    .split(/\s+/)
+    .map(capitalizeBegin)
+    .join(" ");
+}
