@@ -432,13 +432,13 @@ const deleteText = async () => {
 
 const containsDuplicate = (key: string) => {
   const placeholderDefinition = INPUT_TEXTAREA_PLACEHOLDERS[key]
-  const trackedText = insertedPlaceholderBlocks.value[key]
-
-  if (!placeholderDefinition?.avoidDuplicates || !trackedText) {
+  if (!placeholderDefinition?.avoidDuplicates) {
     return false
   }
-
-  return draft.value.includes(trackedText)
+  const templatePattern = placeholderDefinition.fields.reduce((pattern, field) => {
+    return pattern.replaceAll(`<${field.key}>`, '(.+?)')
+  }, placeholderDefinition.template.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  return new RegExp(templatePattern, 'm').test(draft.value)
 }
 
 const openPlaceholderDialog = async (placeholderTemplate: PlaceholderTemplate) => {
@@ -461,7 +461,6 @@ const acceptPlaceholderDialog = async () => {
 
   commitOpenEditIfNeeded()
 
-  const placeholderKey = activePlaceholder.value.key
   const insertedText = placeholderPreviewText.value
   const selectionStart = lastCursorStart.value
   const selectionEnd = lastCursorEnd.value
@@ -475,11 +474,6 @@ const acceptPlaceholderDialog = async () => {
   const updated = cloneModelValue()
   updated.setText(draft.value)
   emitUpdated(updated)
-
-  insertedPlaceholderBlocks.value = {
-    ...insertedPlaceholderBlocks.value,
-    [placeholderKey]: insertedText,
-  }
 
   gainFocus(inputTextarea)
   await setCursorPosition(insertedTextEnd)
