@@ -4,7 +4,8 @@
 
   <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
     title="Symptome" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral">
-    Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden.
+    Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
+    Infos bezüglich <b>OPQRST</b> ergänzen.
   </DodoInputTextArea>
 
 </template>

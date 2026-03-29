@@ -3,6 +3,7 @@ import { AssessedValue, OptionalValue, ProtocolStateValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
+import { prefixIntox, prefixParaesthesis, prefixParesis } from "@/utils/prefix/disability"
 function getCtx() { return useDokuStore().context }
 
 type ZopsKey = 'Z' | 'O' | 'P' | 'S';
@@ -351,11 +352,11 @@ export class AbcdeDisability {
     return concatDoku([
       !this.paresis.active
         ? onNormal('keine Paresen')
-        : prefix('Parese: ', this.paresis.value), //TODO prefixParesis
+        : prefixParesis(this.paresis.value),
       textIf(
         !this.paresthesia.active
           ? onNormal('keine Parästhesien')
-          : prefix('Parästhesie:', this.paresthesia.value),
+          : prefixParaesthesis(this.paresthesia.value),
         !isNonVerbal
       ),
     ])
@@ -392,7 +393,7 @@ export class AbcdeDisability {
           this.psychBaseline
         ),
         textIf(`BZ ${this.bloodGlucose}`, this.bloodGlucose != ''),
-        textIf(prefix('Intox:', this.intoxication.value), this.intoxication.active),
+        textIf(prefixIntox(this.intoxication.value), this.intoxication.active),
       ]))))
 
       const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)

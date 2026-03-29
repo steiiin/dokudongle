@@ -4,6 +4,7 @@ import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { PSV, ProtocolStateValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
+import { prefixChestpainRadiation } from "@/utils/prefix/circulation"
 function getCtx() { return useDokuStore().context }
 
 export interface CirculationPulse {
@@ -172,7 +173,7 @@ export class AbcdeCirculation {
 
     const _strength = `${this.chest.pain} Brustschmerzen`
     const _radiation = this.chest.radiation.isAssessed
-      ? prefix('strahlen aus: ', this.chest.radiation.value) // TODO: prefixChestpainRadiation
+      ? prefixChestpainRadiation(this.chest.radiation.value)
       : onHigh('strahlen nicht aus')
 
     return PSV(concatDoku([

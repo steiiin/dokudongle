@@ -3,6 +3,7 @@ import { OptionalValue } from "../input"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { ProtocolContext } from "@/types/protocol"
+import { prefixAbdominalPain, prefixAbdominalPeristalsis, prefixDefecation } from "@/utils/prefix/exposure"
 
 function getCtx(): ProtocolContext { return useDokuStore().context }
 function isNonVerbal(): boolean { return getCtx().isNonVerbal }
@@ -150,7 +151,7 @@ export class AbcdeExposure {
     const urinarySegment = this.urinary.text
 
     let bowelSegment = (this.bowelAbnormalities.active)
-      ? prefix('Stuhlgang:', this.bowelAbnormalities.value)
+      ? prefixDefecation(this.bowelAbnormalities.value)
       : 'Stuhlgang o.B.'
 
 
@@ -202,7 +203,7 @@ export class AbcdeExposure {
     if (!isNonVerbal())
     {
       if (this.abdominal.pain.active) {
-        parts.push(prefix('Abdomen:', this.abdominal.pain.value))
+        parts.push(prefixAbdominalPain(this.abdominal.pain.value))
       } else {
         parts.push('schmerzfrei')
       }
@@ -220,7 +221,7 @@ export class AbcdeExposure {
 
     // Peristalsis
     if (this.abdominal.peristalsis.active) {
-      parts.push(prefix('Peristaltik:', this.abdominal.peristalsis.value))
+      parts.push(prefixAbdominalPeristalsis(this.abdominal.peristalsis.value))
     }
 
     return `Abdomen ${parts.join('; ')}`

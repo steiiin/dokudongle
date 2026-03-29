@@ -30,7 +30,7 @@
           </IonButtons>
           <IonButtons slot="end">
             <IonButton color="success" :disabled="isEnhanceDisabled" @click="enhance">
-              Verbessern
+              Korrigieren
             </IonButton>
           </IonButtons>
         </IonToolbar>
