@@ -3,7 +3,7 @@
     <IonHeader>
       <IonToolbar>
         <div class="with-badge">
-          <IonTitle @click="store.sendProtocol">Eingabe</IonTitle>
+          <IonTitle>Eingabe</IonTitle>
           <DodoConnectionBadge></DodoConnectionBadge>
         </div>
         <DodoSendAction></DodoSendAction>
