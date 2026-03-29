@@ -129,6 +129,7 @@ import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ion
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { EnhanceableText } from '@/types/protocol/input'
 import { INPUT_TEXTAREA_PLACEHOLDERS, type PlaceholderTemplate } from '@/data/placeholders'
+import { gainFocus } from '@/utils/input'
 
 const props = withDefaults(defineProps<{
   modelValue: EnhanceableText
@@ -232,7 +233,7 @@ const isEnhanceDisabled = computed(() => {
 const openModal = () => {
   draft.value = props.modelValue.value
   isModalOpen.value = true
-  setTimeout(() => setTextareaFocus(), 300)
+  gainFocus(inputTextarea)
 }
 
 const closeModal = () => {
@@ -243,24 +244,15 @@ const closeModal = () => {
 const inputTextarea = ref<any|null>(null)
 const getNativeTextarea = async (): Promise<HTMLTextAreaElement | null> => {
   const element = inputTextarea.value?.$el
-
   if (!element || typeof element.getInputElement !== 'function') {
     return null
   }
-
   return (await element.getInputElement()) as HTMLTextAreaElement
 }
-const setTextareaFocus = async () => {
-  const element = inputTextarea.value?.$el
-  if (element && typeof element.setFocus === 'function') {
-    await element.setFocus()
-  }
-}
+
 const rememberCursorPosition = async () => {
   const textarea = await getNativeTextarea()
-  if (!textarea) {
-    return
-  }
+  if (!textarea) { return }
 
   lastCursorStart.value = textarea.selectionStart ?? draft.value.length
   lastCursorEnd.value = textarea.selectionEnd ?? draft.value.length
@@ -460,7 +452,8 @@ const acceptPlaceholderDialog = async () => {
     [placeholderKey]: insertedText,
   }
 
-  await setTextareaFocus()
+  gainFocus(inputTextarea)
+
 }
 
 //#endregion
