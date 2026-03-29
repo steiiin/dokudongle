@@ -1,4 +1,4 @@
-import { unref } from "vue"
+import { nextTick, unref } from "vue"
 
 export function gainFocus(inputVal: any|null, selectAll: boolean = false)
 {
@@ -27,5 +27,28 @@ export function gainFocus(inputVal: any|null, selectAll: boolean = false)
 
     }
 
+  }, 300)
+}
+
+export async function tryScrollingToTop()
+{
+  await nextTick()
+  setTimeout(() => {
+    const ionContents = document.getElementsByTagName('ion-content')
+    if (ionContents.length>0) {
+      ionContents[0].scrollToBottom?.()
+      ionContents[0].scrollToTop?.(200)
+    }
+  }, 300)
+}
+
+export async function tryScrollingToBottom()
+{
+  await nextTick()
+  setTimeout(() => {
+    const ionContents = document.getElementsByTagName('ion-content')
+    if (ionContents.length>0) {
+      ionContents[0].scrollToBottom?.(200)
+    }
   }, 300)
 }

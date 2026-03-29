@@ -18,6 +18,7 @@ import { computed, nextTick } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 import { alertController } from '@ionic/core'
+import { tryScrollingToTop } from '@/utils/input'
 const store = useDokuStore()
 
 const isAvailable = computed(() => store.connection.isConnected)
@@ -36,8 +37,7 @@ const reset = async () => {
         text: 'Ja',
         handler: async () => {
           store.newProtocol()
-          await nextTick()
-          setTimeout(tryScrollingToTop, 200)
+          await tryScrollingToTop()
         }
       }
     ]
@@ -73,15 +73,8 @@ const send = async () => {
     store.sendProtocol()
   }
 
-  setTimeout(tryScrollingToTop, 200)
+  await tryScrollingToTop()
 
-}
-
-const tryScrollingToTop = () => {
-  const ionContents = document.getElementsByTagName('ion-content')
-  if (ionContents.length>0) {
-    ionContents[0].scrollToTop?.(200)
-  }
 }
 
 </script>

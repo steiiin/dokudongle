@@ -49,6 +49,7 @@
 import { computed, nextTick, ref, toValue, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
+import { tryScrollingToBottom } from '@/utils/input'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -60,16 +61,9 @@ watch(() => [
   store.doku.redflags.choosenSignals.length,
   store.doku.redflags.noTransportType,
   store.doku.redflags.attendant.active
-], (v) => {
-  setTimeout(tryScrollingToBottom, 200)
+], async (v) => {
+  await tryScrollingToBottom()
 })
-
-const tryScrollingToBottom = () => {
-  const ionContents = document.getElementsByTagName('ion-content')
-  if (ionContents.length>0) {
-    ionContents[0].scrollToBottom?.(200)
-  }
-}
 
 </script>
 <style scoped>
