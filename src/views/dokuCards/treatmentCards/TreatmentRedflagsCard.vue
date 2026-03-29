@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 
-import { computed, nextTick, ref, toValue, watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 import { tryScrollingToBottom } from '@/utils/input'
@@ -61,8 +61,12 @@ watch(() => [
   store.doku.redflags.choosenSignals.length,
   store.doku.redflags.noTransportType,
   store.doku.redflags.attendant.active
-], async (v) => {
+], async (oldV, newV) => {
+
+  const changed = oldV.toString() != newV.toString()
+  if (!changed) { return }
   await tryScrollingToBottom()
+
 })
 
 </script>

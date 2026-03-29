@@ -248,14 +248,14 @@
 
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
 import { basicCap } from '@/utils/autocorrect/basic'
-import { fullIf, insetIf } from '@/utils/filter'
+import { fullIf } from '@/utils/filter'
 
 /////////////////////////////////////////////////
 

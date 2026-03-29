@@ -1066,6 +1066,8 @@ export const Scenarios: Array<RedflagScenario> = [
     'schweren Unterzuckerung mit Krampfanfall, Bewusstlosigkeit, bleibendem Hirnschaden bis hin zum Tod',
   ),
 
+  // TODO: Hyperglykämie (leicht/schwer)
+
   defSc(
     'Krampfanfall (bekanntes Muster)', 'bek. Epilepsie, bek. Muster, vollständige Erholung',
     'BvO', 'neuro',
@@ -1266,6 +1268,11 @@ export const Scenarios: Array<RedflagScenario> = [
     'Bauchfellentzündung, Perforation und inneren Blutungen bis zum Kreislaufversagen',
   ),
 
+  // TODO: Nierenkolik (leicht/schwer)
+  // TODO: Harnverhalt (leicht/schwer)
+
+  // TODO: Urosepsis
+
   defSc(
     'Gastrointestinale Blutung', '',
     'Verweigerung', 'gastro',
@@ -1324,6 +1331,8 @@ export const Scenarios: Array<RedflagScenario> = [
     ],
     'systemischer Infektion bis zum Multiorganversagen und Tod',
   ),
+
+  // TODO: Kindlicher Infekt
 
   /////////////////////////////////////////////////////////
   // HNO

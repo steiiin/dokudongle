@@ -11,8 +11,6 @@
 
 <script setup lang="ts">
 
-import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
-
 const props = withDefaults(defineProps<{
   title?: string
   description?: string
