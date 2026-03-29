@@ -142,7 +142,7 @@
 import { alertController, toastController } from '@ionic/vue'
 
 import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { EnhanceableText } from '@/types/protocol/input'
 import { INPUT_TEXTAREA_PLACEHOLDERS, type PlaceholderTemplate } from '@/data/placeholders'
 import { gainFocus } from '@/utils/input'
@@ -275,6 +275,17 @@ const rememberCursorPosition = async () => {
 
   lastCursorStart.value = textarea.selectionStart ?? draft.value.length
   lastCursorEnd.value = textarea.selectionEnd ?? draft.value.length
+}
+
+const setCursorPosition = async (position: number) => {
+  await nextTick()
+  const textarea = await getNativeTextarea()
+  if (!textarea) { return }
+
+  const boundedPosition = Math.max(0, Math.min(position, draft.value.length))
+  textarea.setSelectionRange(boundedPosition, boundedPosition)
+  lastCursorStart.value = boundedPosition
+  lastCursorEnd.value = boundedPosition
 }
 
 const clearTypingSnapshotTimeout = () => {
@@ -456,6 +467,7 @@ const acceptPlaceholderDialog = async () => {
   const selectionEnd = lastCursorEnd.value
   const before = draft.value.slice(0, selectionStart)
   const after = draft.value.slice(selectionEnd)
+  const insertedTextEnd = before.length + insertedText.length
 
   draft.value = `${before}${insertedText}${after}`
   closePlaceholderDialog()
@@ -470,6 +482,7 @@ const acceptPlaceholderDialog = async () => {
   }
 
   gainFocus(inputTextarea)
+  await setCursorPosition(insertedTextEnd)
 }
 
 //#endregion
