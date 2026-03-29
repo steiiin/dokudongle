@@ -157,7 +157,7 @@ const lastCursorEnd = ref(0)
 const isPlaceholderModalOpen = ref(false)
 const activePlaceholder = ref<PlaceholderTemplate | null>(null)
 const placeholderValues = ref<Record<string, string>>({})
-const insertedPlaceholderBlocks = ref<Record<string, string[]>>({})
+const insertedPlaceholderBlocks = ref<Record<string, string>>({})
 
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
 const resolvedPlaceholders = computed(() => {
@@ -410,7 +410,16 @@ const deleteText = async () => {
 //#region Placeholders
 
 const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
-const containsDuplicate = (key: string) => INPUT_TEXTAREA_PLACEHOLDERS[key].avoidDuplicates && insertedPlaceholderBlocks.value[key]?.length>0
+const containsDuplicate = (key: string) => {
+  const placeholderDefinition = INPUT_TEXTAREA_PLACEHOLDERS[key]
+  const trackedText = insertedPlaceholderBlocks.value[key]
+
+  if (!placeholderDefinition?.avoidDuplicates || !trackedText) {
+    return false
+  }
+
+  return draft.value.includes(trackedText)
+}
 
 const openPlaceholderDialog = async (placeholderTemplate: PlaceholderTemplate) => {
   await rememberCursorPosition()
@@ -446,15 +455,10 @@ const acceptPlaceholderDialog = async () => {
   updated.setText(draft.value)
   emitUpdated(updated)
 
-  const trackedBlocks = insertedPlaceholderBlocks.value[placeholderKey] ?? []
-  if(!trackedBlocks.includes(insertedText)) {
-    insertedPlaceholderBlocks.value = {
-      ...insertedPlaceholderBlocks.value,
-      [placeholderKey]: [ ...trackedBlocks, insertedText ],
-    }
+  insertedPlaceholderBlocks.value = {
+    ...insertedPlaceholderBlocks.value,
+    [placeholderKey]: insertedText,
   }
-
-  console.log(insertedPlaceholderBlocks.value)
 
   await setTextareaFocus()
 }
