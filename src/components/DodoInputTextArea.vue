@@ -1,16 +1,20 @@
 <template>
   <div class="dd-input-textarea">
-
-    <div class="preview" v-if="!modelValue.isEmpty">
+    <div v-if="!modelValue.isEmpty" class="preview">
       {{ modelValue.value }}
     </div>
 
-    <IonButton :color="isMissingField ? 'danger' : (inheritStyle ? 'dark' : '')"
-      :fill="inheritStyle ? 'clear' : 'outline'" expand="block"
-      size="default" :disabled="modelValue.isEnhancing" :class="{ inheritStyle }"
-      @click="openModal">
-      <IonIcon slot="start" :src="alertCircle" v-if="isMissingField"></IonIcon>
-      {{ title }} {{ modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten' }}
+    <IonButton
+      :color="triggerColor"
+      :fill="triggerFill"
+      expand="block"
+      size="default"
+      :disabled="modelValue.isEnhancing"
+      :class="{ inheritStyle }"
+      @click="openModal"
+    >
+      <IonIcon v-if="isMissingField" slot="start" :src="alertCircle" />
+      {{ title }} {{ triggerActionLabel }}
     </IonButton>
 
     <IonModal :is-open="isModalOpen" class="dd-input-modal" :class="{ 'is-enhancing': modelValue.isEnhancing }">
@@ -37,17 +41,25 @@
           <slot />
         </div>
         <div class="dd-modal-data">
-          <IonTextarea ref="inputTextarea" class="dd-modal-textarea"
-            v-model="draft" :placeholder="placeholder"
-            :auto-grow="true" :disabled="modelValue.isEnhancing"
+          <IonTextarea
+            ref="inputTextarea"
+            v-model="draft"
+            class="dd-modal-textarea"
+            :placeholder="placeholder"
+            :auto-grow="true"
+            :disabled="modelValue.isEnhancing"
             @ionFocus="handleFocus"
             @ionBlur="handleBlur"
-            @ionInput="handleInput">
-          </IonTextarea>
+            @ionInput="handleInput"
+          />
           <div class="dd-placeholder-buttons" v-if="resolvedPlaceholders.length > 0">
-            <IonButton :disabled="containsDuplicate(placeholderTemplate.key)"
-              v-for="placeholderTemplate in resolvedPlaceholders" :key="placeholderTemplate.key"
-              fill="solid" @click="openPlaceholderDialog(placeholderTemplate)">
+            <IonButton
+              v-for="placeholderTemplate in resolvedPlaceholders"
+              :key="placeholderTemplate.key"
+              :disabled="containsDuplicate(placeholderTemplate.key)"
+              fill="solid"
+              @click="openPlaceholderDialog(placeholderTemplate)"
+            >
               {{ placeholderTemplate.label }}
             </IonButton>
           </div>
@@ -94,25 +106,30 @@
         </IonToolbar>
       </IonHeader>
       <IonContent class="ion-padding">
-        <div class="dd-placeholder-preview" v-if="activePlaceholder" v-html="placeholderPreviewText">
-        </div>
+        <div v-if="activePlaceholder" class="dd-placeholder-preview" v-html="placeholderPreviewText" />
         <IonList v-if="activePlaceholder">
           <template v-for="(field, index) in activePlaceholder.fields" :key="field.key">
-
-            <DodoInputSelect v-model="placeholderValues[field.key]" v-if="field.allowOptions"
-              :label="field.key" :options="field.options"
-              :allow-custom="field.allowCustom" :custom-label="field.customLabel" :custom-placeholder="field.customPlaceholder"
-              :label-color="field.color" :lines="isLastPlaceholderField(index) ? 'none' : 'full'"
-              :autocorrect-fn="field.autocorrectFn">
-            </DodoInputSelect>
-
+            <DodoInputSelect
+              v-if="field.allowOptions"
+              v-model="placeholderValues[field.key]"
+              :label="field.key"
+              :options="field.options"
+              :allow-custom="field.allowCustom"
+              :custom-label="field.customLabel"
+              :custom-placeholder="field.customPlaceholder"
+              :label-color="field.color"
+              :lines="isLastPlaceholderField(index) ? 'none' : 'full'"
+              :autocorrect-fn="field.autocorrectFn"
+            />
             <IonItem v-else :lines="isLastPlaceholderField(index) ? 'none' : 'full'">
-              <DodoInputText v-model="placeholderValues[field.key]"
-                :label="field.key" :placeholder="field.customPlaceholder" :label-color="field.color"
-                :autocorrect-fn="field.autocorrectFn">
-              </DodoInputText>
+              <DodoInputText
+                v-model="placeholderValues[field.key]"
+                :label="field.key"
+                :placeholder="field.customPlaceholder"
+                :label-color="field.color"
+                :autocorrect-fn="field.autocorrectFn"
+              />
             </IonItem>
-
           </template>
         </IonList>
       </IonContent>
@@ -122,8 +139,7 @@
 
 <script setup lang="ts">
 
-import { alertController } from '@ionic/vue'
-import { toastController } from '@ionic/vue'
+import { alertController, toastController } from '@ionic/vue'
 
 import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
@@ -131,7 +147,7 @@ import { EnhanceableText } from '@/types/protocol/input'
 import { INPUT_TEXTAREA_PLACEHOLDERS, type PlaceholderTemplate } from '@/data/placeholders'
 import { gainFocus } from '@/utils/input'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   modelValue: EnhanceableText
   title: string
   placeholder?: string
@@ -139,7 +155,7 @@ const props = withDefaults(defineProps<{
   inheritStyle?: boolean
   placeholders?: string[]
   enhanceFn: (draft: string) => Promise<string | null>
-}>(), {})
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: EnhanceableText): void
@@ -159,8 +175,18 @@ const isPlaceholderModalOpen = ref(false)
 const activePlaceholder = ref<PlaceholderTemplate | null>(null)
 const placeholderValues = ref<Record<string, string>>({})
 const insertedPlaceholderBlocks = ref<Record<string, string>>({})
+const inputTextarea = ref<any | null>(null)
 
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
+const triggerActionLabel = computed(() => props.modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten')
+const triggerColor = computed(() => {
+  if (isMissingField.value) return 'danger'
+  return props.inheritStyle ? 'dark' : ''
+})
+const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'outline')
+const isEnhanceDisabled = computed(() => props.modelValue.isEnhancing || draft.value.trim().length === 0)
+const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
+
 const resolvedPlaceholders = computed(() => {
   if (!props.placeholders || props.placeholders.length === 0) {
     return []
@@ -181,6 +207,7 @@ const resolveColor = (color?: string): string | undefined => {
 
   return `var(--ion-color-${trimmedColor})`
 }
+
 const escapeHtml = (value: string): string => {
   return value
     .replaceAll('&', '&amp;')
@@ -189,6 +216,7 @@ const escapeHtml = (value: string): string => {
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#39;')
 }
+
 const isLastPlaceholderField = (index: number): boolean => {
   const placeholder = activePlaceholder.value
   if (!placeholder) {
@@ -196,6 +224,7 @@ const isLastPlaceholderField = (index: number): boolean => {
   }
   return index === placeholder.fields.length - 1
 }
+
 const placeholderPreviewText = computed(() => {
   if (!activePlaceholder.value) { return '' }
   return activePlaceholder.value.fields.reduce((text, field) => {
@@ -209,13 +238,8 @@ const placeholderPreviewText = computed(() => {
   }, activePlaceholder.value.template)
 })
 
-const cloneModelValue = (): EnhanceableText => {
-  return props.modelValue.clone()
-}
-
-const emitUpdated = (updated: EnhanceableText) => {
-  emit('update:modelValue', updated)
-}
+const cloneModelValue = (): EnhanceableText => props.modelValue.clone()
+const emitUpdated = (updated: EnhanceableText) => emit('update:modelValue', updated)
 
 watch(
   () => props.modelValue.value,
@@ -225,10 +249,6 @@ watch(
     }
   }
 )
-
-const isEnhanceDisabled = computed(() => {
-  return props.modelValue.isEnhancing || draft.value.trim().length === 0
-})
 
 const openModal = () => {
   draft.value = props.modelValue.value
@@ -241,7 +261,6 @@ const closeModal = () => {
   isModalOpen.value = false
 }
 
-const inputTextarea = ref<any|null>(null)
 const getNativeTextarea = async (): Promise<HTMLTextAreaElement | null> => {
   const element = inputTextarea.value?.$el
   if (!element || typeof element.getInputElement !== 'function') {
@@ -360,9 +379,7 @@ const redo = () => {
 }
 
 const deleteText = async () => {
-
-  const confirmDelete = (): Promise<boolean> => {
-    return new Promise(async (resolve) => {
+  const confirmDelete = (): Promise<boolean> => new Promise(async (resolve) => {
     const alert = await alertController.create({
       header: 'Eingaben löschen',
       message: 'Möchtest du die Eingaben wirklich löschen?',
@@ -381,10 +398,11 @@ const deleteText = async () => {
     })
     await alert.present()
   })
-  }
 
   const confirmed = await confirmDelete()
-  if (!confirmed) return
+  if (!confirmed) {
+    return
+  }
 
   const updated = cloneModelValue()
   updated.commitEdit('')
@@ -401,7 +419,6 @@ const deleteText = async () => {
 
 //#region Placeholders
 
-const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
 const containsDuplicate = (key: string) => {
   const placeholderDefinition = INPUT_TEXTAREA_PLACEHOLDERS[key]
   const trackedText = insertedPlaceholderBlocks.value[key]
@@ -453,7 +470,6 @@ const acceptPlaceholderDialog = async () => {
   }
 
   gainFocus(inputTextarea)
-
 }
 
 //#endregion
@@ -503,7 +519,7 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
-  openModal
+  openModal,
 })
 
 </script>

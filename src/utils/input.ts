@@ -30,25 +30,41 @@ export function gainFocus(inputVal: any|null, selectAll: boolean = false)
   }, 300)
 }
 
+var currentlyScrolling: boolean = false
+const Scroll_Top = 'top'
+const Scroll_Bottom = 'bottom'
+const Scroll_Delay = 300
+
 export async function tryScrollingToTop()
 {
+
+  if (currentlyScrolling) { return }
+  currentlyScrolling = true
   await nextTick()
+
   setTimeout(() => {
     const ionContents = document.getElementsByTagName('ion-content')
     if (ionContents.length>0) {
-      ionContents[0].scrollToBottom?.()
-      ionContents[0].scrollToTop?.(200)
+      ionContents[0].scrollToTop?.(Scroll_Delay)
+      setTimeout(() => currentlyScrolling = false, Scroll_Delay)
     }
-  }, 300)
+  }, Scroll_Delay)
+
 }
 
 export async function tryScrollingToBottom()
 {
+
+  if (currentlyScrolling) { return }
+  currentlyScrolling = true
   await nextTick()
+
   setTimeout(() => {
     const ionContents = document.getElementsByTagName('ion-content')
     if (ionContents.length>0) {
-      ionContents[0].scrollToBottom?.(200)
+      ionContents[0].scrollToBottom?.(Scroll_Delay)
+      setTimeout(() => currentlyScrolling = false, Scroll_Delay)
     }
-  }, 300)
+  }, Scroll_Delay)
+
 }
