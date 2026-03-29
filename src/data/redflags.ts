@@ -368,7 +368,7 @@ export const _SignalDefs = [
 
   defSg(
     'neuro-hypoglyk-rezidiv',
-    'erneutem BZ-Abfall < 60mg/ml bzw. 3,3mmol/l'),
+    'erneutem BZ-Abfall < 60mg/dl bzw. 3,3mmol/l'),
 
   defSg(
     'neuro-hypoglyk-anhaltend',
