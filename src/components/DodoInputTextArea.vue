@@ -170,11 +170,11 @@ let typingSnapshotTimeout: ReturnType<typeof setTimeout> | null = null
 
 const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
+const pendingCursorPosition = ref<number|null>(null)
 
 const isPlaceholderModalOpen = ref(false)
 const activePlaceholder = ref<PlaceholderTemplate | null>(null)
 const placeholderValues = ref<Record<string, string>>({})
-const insertedPlaceholderBlocks = ref<Record<string, string>>({})
 const inputTextarea = ref<any | null>(null)
 
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
@@ -278,14 +278,20 @@ const rememberCursorPosition = async () => {
 }
 
 const setCursorPosition = async (position: number) => {
-  await nextTick()
-  const textarea = await getNativeTextarea()
-  if (!textarea) { return }
-
   const boundedPosition = Math.max(0, Math.min(position, draft.value.length))
-  textarea.setSelectionRange(boundedPosition, boundedPosition)
-  lastCursorStart.value = boundedPosition
-  lastCursorEnd.value = boundedPosition
+  pendingCursorPosition.value = boundedPosition
+  await nextTick()
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const textarea = await getNativeTextarea()
+    if (textarea && document.activeElement === textarea) {
+      textarea.setSelectionRange(boundedPosition, boundedPosition)
+      lastCursorStart.value = boundedPosition
+      lastCursorEnd.value = boundedPosition
+      pendingCursorPosition.value = null
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 60))
+  }
 }
 
 const clearTypingSnapshotTimeout = () => {
@@ -476,6 +482,7 @@ const acceptPlaceholderDialog = async () => {
   emitUpdated(updated)
 
   gainFocus(inputTextarea)
+  pendingCursorPosition.value = insertedTextEnd
   await setCursorPosition(insertedTextEnd)
 }
 

@@ -35,36 +35,53 @@ const Scroll_Top = 'top'
 const Scroll_Bottom = 'bottom'
 const Scroll_Delay = 300
 
-export async function tryScrollingToTop()
+function getActiveIonContent(): HTMLElement | null
+{
+  const ionContents = document.querySelectorAll('ion-content')
+  if (ionContents.length <= 0) { return null }
+
+  for (let i = ionContents.length - 1; i >= 0; i--)
+  {
+    const ionContent = ionContents[i] as HTMLElement
+    const rect = ionContent.getBoundingClientRect()
+    const isVisible = rect.height > 0 && rect.width > 0
+    if (isVisible) { return ionContent }
+  }
+
+  return ionContents[ionContents.length - 1] as HTMLElement
+}
+
+async function tryScrolling(where: string)
 {
 
   if (currentlyScrolling) { return }
   currentlyScrolling = true
-  await nextTick()
 
-  setTimeout(() => {
-    const ionContents = document.getElementsByTagName('ion-content')
-    if (ionContents.length>0) {
-      ionContents[0].scrollToTop?.(Scroll_Delay)
-      setTimeout(() => currentlyScrolling = false, Scroll_Delay)
-    }
-  }, Scroll_Delay)
+  try
+  {
+    await nextTick()
+    await customElements.whenDefined('ion-content')
+    setTimeout(async () => {
+      const ionContent = getActiveIonContent() as any | null
+      if (!ionContent) { return }
 
+      if (where === Scroll_Top) { await ionContent.scrollToTop?.(Scroll_Delay) }
+      else if (where === Scroll_Bottom) { await ionContent.scrollToBottom?.(Scroll_Delay) }
+    }, Scroll_Delay)
+  }
+  finally
+  {
+    setTimeout(() => currentlyScrolling = false, Scroll_Delay * 2)
+  }
+
+}
+
+export async function tryScrollingToTop()
+{
+  await tryScrolling(Scroll_Top)
 }
 
 export async function tryScrollingToBottom()
 {
-
-  if (currentlyScrolling) { return }
-  currentlyScrolling = true
-  await nextTick()
-
-  setTimeout(() => {
-    const ionContents = document.getElementsByTagName('ion-content')
-    if (ionContents.length>0) {
-      ionContents[0].scrollToBottom?.(Scroll_Delay)
-      setTimeout(() => currentlyScrolling = false, Scroll_Delay)
-    }
-  }, Scroll_Delay)
-
+  await tryScrolling(Scroll_Bottom)
 }
