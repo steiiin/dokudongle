@@ -2,7 +2,7 @@ import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { prefixAbdominalPain, prefixAbdominalPeristalsis, prefixDefecation } from "@/utils/prefix/exposure"
 import { ProtocolContext } from "@/types/protocol"
-import { OptionalValue } from "../input"
+import { AssessedValue, OptionalValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 function getCtx(): ProtocolContext { return useDokuStore().context }
@@ -29,6 +29,13 @@ export class ExposureEmisis {
   {
     if (!this.needTreatment) { return onHigh('kein Erbrechen') }
     return this.incidences + (this.abnormalities != '' ? ` (${this.abnormalities})` : '')
+  }
+
+  get state(): string
+  {
+    return this.needTreatment
+      ? this.text
+      : 'kein Erbrechen'
   }
 
 }
@@ -78,14 +85,53 @@ export class ExposureUrinary {
 export class ExposureAbdominal {
 
   public guarding: '' | 'leichte' | 'starke'
-  public pain: OptionalValue<string>
-  public peristalsis: OptionalValue<string>
+  public pain: 'keine' | 'leichte' | '' | 'starke'
+  public peristalsis: '' | 'spärlich'|'fehlend'|'hochgestellt'
 
   constructor()
   {
     this.guarding = ''
-    this.pain = OptionalValue.inactive('')
-    this.peristalsis = OptionalValue.inactive('')
+    this.pain = 'keine'
+    this.peristalsis = ''
+  }
+
+  get text(): string {
+
+    const parts: string[] = []
+
+    // Abdomen iO
+    if (this.guarding == ''
+      && this.pain == 'keine'
+      && this.peristalsis == '')
+    { return `Abdomen weich${isNonVerbal() ? '' : '/schmerzfrei'}` }
+
+    // Schmerzen
+    if (!isNonVerbal())
+    {
+      if (this.pain != 'keine') {
+        parts.push(`${this.pain} Schmerzen`)
+      } else {
+        parts.push('schmerzfrei')
+      }
+    }
+
+    // Abwehrspannung
+    if (this.guarding != '')
+    {
+      parts.push(`${this.guarding} Abwehrspannung`)
+    }
+    else
+    {
+      parts.push('weich')
+    }
+
+    // Peristaltik
+    if (this.peristalsis != '') {
+      parts.push(`DG ${this.peristalsis}`)
+    }
+
+    return `Abdomen ${parts.map(e=>e.trim()).filter(e=>e).join('; ')}`
+
   }
 
 }
@@ -104,7 +150,7 @@ export class AbcdeExposure {
   public urinary: ExposureUrinary
   public urinaryIncontinence: boolean
 
-  public abdominal: ExposureAbdominal
+  public abdominal: AssessedValue<ExposureAbdominal>
 
   public treatment: string
 
@@ -119,7 +165,7 @@ export class AbcdeExposure {
     this.bowelAbnormalities = OptionalValue.inactive('')
     this.urinary = new ExposureUrinary()
     this.urinaryIncontinence = false
-    this.abdominal = new ExposureAbdominal()
+    this.abdominal = AssessedValue.unassessed(new ExposureAbdominal())
     this.treatment = ''
   }
 
@@ -150,85 +196,55 @@ export class AbcdeExposure {
   get excretionsText(): string
   {
 
-    const catheterSegment = this.urinary.catheterText
-    const incontinenceSegment = textIf('eingenässt', this.urinaryIncontinence)
-    const urinarySegment = this.urinary.text
+    const _catheter = this.urinary.catheterText
+    const _incontinence = textIf('eingenässt', this.urinaryIncontinence)
+    const _urinary = this.urinary.text
 
-    let bowelSegment = (this.bowelAbnormalities.active)
+    let _bowel = (this.bowelAbnormalities.active)
       ? prefixDefecation(this.bowelAbnormalities.value)
       : 'Stuhlgang o.B.'
 
-
-    const hasCatheter = catheterSegment.length > 0;
-    const hasIncontinence = incontinenceSegment.length > 0;
-    const hasUrinarySegment = urinarySegment.length > 0;
-    const isBowelNormal = bowelSegment === 'Stuhlgang o.B.';
+    const hasCatheter = _catheter.length > 0;
+    const hasIncontinence = _incontinence.length > 0;
+    const hasUrinary = _urinary.length > 0;
+    const isBowelNormal = _bowel === 'Stuhlgang o.B.';
 
     // 1) all good
-    if (!hasCatheter && !hasIncontinence && !hasUrinarySegment && isBowelNormal) {
+    if (!hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
       return 'Wasserlassen/Stuhlgang o.B.'
     }
 
     // 2) only incontinence, else good
-    if (!hasCatheter && hasIncontinence && !hasUrinarySegment && isBowelNormal) {
+    if (!hasCatheter && hasIncontinence && !hasUrinary && isBowelNormal) {
       return 'eingenässt, sonst Wasserlassen/Stuhlgang o.B.'
     }
 
     // 3) all good, but with catheter
-    if (hasCatheter && !hasIncontinence && !hasUrinarySegment && isBowelNormal) {
-      return concatDoku([catheterSegment, (this.urinary.catheterIssues != '' ? 'sonst ' : '') + 'Wasserlassen/Stuhlgang o.B.'])
+    if (hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
+      return concatDoku([_catheter, (this.urinary.catheterIssues != '' ? 'sonst ' : '') + 'Wasserlassen/Stuhlgang o.B.'])
     }
 
     // --- generic cases ---
     return concatDoku([
-      catheterSegment,
-      incontinenceSegment,
+      _catheter,
+      _incontinence,
       this.urinary.text,
-      bowelSegment,
+      _bowel,
     ]);
+
+  }
+
+  get abdominalState(): string {
+
+    if (!this.abdominal.isAssessed) { return 'nicht untersucht' }
+    else { return this.abdominalText }
 
   }
 
   get abdominalText(): string {
 
-    const parts: string[] = [];
-
-    // All Good
-    if (
-      this.abdominal.guarding == ''
-      && !this.abdominal.pain.active
-      && !this.abdominal.peristalsis.active
-    ) {
-      if (getCtx().isLow) { return '' }
-      else { return `Abdomen weich${isNonVerbal() ? '' : '/schmerzfrei'}` }
-    }
-
-    // Pain
-    if (!isNonVerbal())
-    {
-      if (this.abdominal.pain.active) {
-        parts.push(prefixAbdominalPain(this.abdominal.pain.value))
-      } else {
-        parts.push('schmerzfrei')
-      }
-    }
-
-    // Guarding
-    if (this.abdominal.guarding != '')
-    {
-      parts.push(`${this.abdominal.guarding} Abwehrspannung`)
-    }
-    else
-    {
-      onNormal('weich')
-    }
-
-    // Peristalsis
-    if (this.abdominal.peristalsis.active) {
-      parts.push(prefixAbdominalPeristalsis(this.abdominal.peristalsis.value))
-    }
-
-    return `Abdomen ${parts.join('; ')}`
+    if (!this.abdominal.isAssessed) { return '' }
+    else { return this.abdominal.value.text }
 
   }
 

@@ -163,7 +163,7 @@ export class AbcdeCirculation {
   ///////////////////////////////////////////////
 
   get edemaText(): string {
-    if (this.edema.grade == 'keine Ödeme') { onHigh(this.edema.grade) }
+    if (this.edema.grade == 'keine Ödeme') { return onHigh(this.edema.grade) }
     if (this.edema.variation == '') { return this.edema.grade }
     return `${this.edema.grade} (${this.edema.variation})`
   }

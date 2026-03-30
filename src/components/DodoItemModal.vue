@@ -53,7 +53,7 @@ const props = withDefaults(defineProps<{
 const isModalOpen = ref(false)
 
 const stateText = computed(() => props.state ?? '')
-const useStackedLayout = computed(() => stateText.value.length > 25)
+const useStackedLayout = computed(() => stateText.value.length > 22)
 
 </script>
 <style scoped>

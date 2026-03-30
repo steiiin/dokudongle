@@ -96,13 +96,11 @@
           </IonToggle>
         </IonItem>
 
-        <DodoItemModal
-          label="Erbrechen" modal-label="Erbrechen"
-          :state="store.doku.xabcdE.emesis.text" lines="full">
+        <DodoItemModal label="Erbrechen" modal-label="Erbrechen"
+          :state="store.doku.xabcdE.emesis.state" lines="full">
 
-          <DodoInputSelect
-            v-model="store.doku.xabcdE.emesis.incidences"
-            label="Erbrechen" lines="full"
+          <DodoInputSelect v-model="store.doku.xabcdE.emesis.incidences"
+            label="Erbrechen" :lines="store.doku.xabcdE.emesis.incidences == '' ? 'none' : 'full'"
             :options="[
               { value: '', label: 'Nein' },
               { value: 'einmalig erbrochen', label: 'Einmalig' },
@@ -136,37 +134,58 @@
             </IonRadioGroup>
 
           </template>
+
         </DodoItemModal>
 
         <DodoItemModal
           label="Bauchbefund" modal-label="Bauchbefund"
-          :state="store.doku.xabcdE.abdominalText" lines="none">
+          :state="store.doku.xabcdE.abdominalState" lines="none">
 
-          <DodoInputSelect
-            v-model="store.doku.xabcdE.abdominal.guarding"
-            label="Abwehrspannung" lines="full"
-            :options="[
-              { value: '', label: 'Keine' },
-              { value: 'leichte', label: 'Leicht' },
-              { value: 'starke', label: 'Stark' },
-            ]">
-          </DodoInputSelect>
+          <IonItem :lines="store.doku.xabcdE.abdominal.assessed ? 'full' : 'none'">
+            <IonToggle v-model="store.doku.xabcdE.abdominal.assessed" label-placement="end">
+              Bauch untersucht?
+            </IonToggle>
+          </IonItem>
 
-          <template v-if="!ctx.isNonVerbal">
+          <template v-if="store.doku.xabcdE.abdominal.assessed">
 
-            <DodoInputTextOptional
-              toggle-label="Bauchschmerzen vorhanden?" v-model:toggle="store.doku.xabcdE.abdominal.pain.active"
-              text-label="Beschreibung:" text-placeholder="z.B. UB-Schmerz re." v-model:text="store.doku.xabcdE.abdominal.pain.value"
-              :autocorrect-fn="basicCap">
-            </DodoInputTextOptional>
+            <DodoInputSelect
+              v-model="store.doku.xabcdE.abdominal.value.guarding"
+              label="Abwehrspannung" lines="full"
+              :options="[
+                { value: '', label: 'Keine' },
+                { value: 'leichte', label: 'Leicht' },
+                { value: 'starke', label: 'Stark' },
+              ]">
+            </DodoInputSelect>
+
+            <template v-if="!ctx.isNonVerbal">
+
+              <DodoInputSelect
+                v-model="store.doku.xabcdE.abdominal.value.pain"
+                label="Bauchschmerzen" lines="inset"
+                :options="[
+                  { value: 'keine', label: 'Keine' },
+                  { value: 'leichte', label: 'Leicht' },
+                  { value: '', label: 'Mittel' },
+                  { value: 'starke', label: 'Stark' },
+                ]">
+              </DodoInputSelect>
+
+            </template>
+
+            <DodoInputSelect
+              v-model="store.doku.xabcdE.abdominal.value.peristalsis"
+              label="Peristaltik" lines="none"
+              :options="[
+                { value: '', label: 'Unauffällig' },
+                { value: 'spärlich', label: 'Vermindert' },
+                { value: 'fehlend', label: 'Fehlend' },
+                { value: 'hochgestellt', label: 'Hochgestellt' },
+              ]">
+            </DodoInputSelect>
 
           </template>
-
-          <DodoInputTextOptional
-            toggle-label="Peristaltik gestört?" v-model:toggle="store.doku.xabcdE.abdominal.peristalsis.active"
-            text-label="Beschreibung:" text-placeholder="z.B. li/unten verstummt" v-model:text="store.doku.xabcdE.abdominal.peristalsis.value"
-            :autocorrect-fn="basicCap">
-          </DodoInputTextOptional>
 
         </DodoItemModal>
 
@@ -199,15 +218,15 @@ watch(() => store.doku.xabcdE.urinary.catheterType, (v) => {
   }
 })
 
-watch(() => store.doku.xabcdE.abdominal.guarding, (v) => {
-  if (v != '' && !store.doku.xabcdE.abdominal.pain.active) {
-    store.doku.xabcdE.abdominal.pain.active = true
+watch(() => store.doku.xabcdE.abdominal.value.guarding, (v) => {
+  if (v != '' && store.doku.xabcdE.abdominal.value.pain == 'keine') {
+    store.doku.xabcdE.abdominal.value.pain = ''
   }
 })
 
 watch(() => ctx.value.isNonVerbal, (v) => {
-  if (v && store.doku.xabcdE.abdominal.pain.active) {
-    store.doku.xabcdE.abdominal.pain.active = false
+  if (v && store.doku.xabcdE.abdominal.value.pain != 'keine') {
+    store.doku.xabcdE.abdominal.value.pain = 'keine'
   }
 })
 

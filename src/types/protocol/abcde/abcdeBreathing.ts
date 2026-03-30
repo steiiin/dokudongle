@@ -156,7 +156,7 @@ export class AbcdeBreathing {
 
   get auscultationPSV(): ProtocolStateValue {
 
-    if (!this.auscultation.isAssessed) { return PSV('Nicht Abgehört', '') }
+    if (!this.auscultation.isAssessed) { return PSV('nicht abgehört', '') }
 
     if (this.auscultation.value.wheezing == ''
         && this.auscultation.value.crackles == ''
