@@ -92,20 +92,20 @@
 
 <script setup lang="ts">
 
-import DodoInputText from './DodoInputText.vue'
-
 import { computed, ref, watch } from 'vue'
-
-import { addCircle } from 'ionicons/icons';
+import { addCircle } from 'ionicons/icons'
 
 import { SampleMedicationItem } from '@/types/protocol/sample'
-
 import { correctMedName } from '@/utils/autocorrect/medications'
+
+// ############################################################################
 
 const props = defineProps<{ modelValue: Array<SampleMedicationItem> }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Array<SampleMedicationItem>): void
 }>()
+
+// ############################################################################
 
 const isModalOpen = ref(false)
 
@@ -182,8 +182,10 @@ const modalValid = computed(() => {
 })
 const modalSaveLabel = computed(() => currentNew.value ? 'Hinzufügen' : 'Speichern')
 
-const inputName = ref<any|null>(null)
-const inputCustom = ref<any|null>(null)
+const inputName = ref<any | null>(null)
+const inputCustom = ref<any | null>(null)
+
+// ############################################################################
 
 watch(() => currentItem.value.isRegularly, (v) => {
   currentItem.value.TimesCustom = ''
@@ -195,12 +197,14 @@ watch(() => currentItem.value.isRegularly, (v) => {
 </script>
 
 <style scoped>
-.dd-med-input {
-  --card-bg: transparent;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.dd-med-input-content {
-  padding: 0;
-}
+
+  .dd-med-input {
+    --card-bg: transparent;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .dd-med-input-content {
+    padding: 0;
+  }
+
 </style>

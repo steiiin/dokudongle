@@ -34,6 +34,8 @@
 
 import { computed, ref } from 'vue'
 
+// ############################################################################
+
 const props = withDefaults(defineProps<{
   label: string
   modalLabel: string
@@ -46,6 +48,8 @@ const props = withDefaults(defineProps<{
   lines: 'full'
 })
 
+// ############################################################################
+
 const isModalOpen = ref(false)
 
 const stateText = computed(() => props.state ?? '')
@@ -53,8 +57,10 @@ const useStackedLayout = computed(() => stateText.value.length > 25)
 
 </script>
 <style scoped>
+
   ion-label p {
     font-size: 0.8em;
     line-height: 1;
   }
+
 </style>

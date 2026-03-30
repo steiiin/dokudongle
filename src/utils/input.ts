@@ -1,10 +1,12 @@
 import { nextTick, unref } from "vue"
 
-export function gainFocus(inputVal: any|null, selectAll: boolean = false)
+// ############################################################################
+
+export function gainFocus(inputRef: any|null, selectAll: boolean = false)
 {
   setTimeout(() => {
 
-    const inputCmp = unref(inputVal)
+    const inputCmp = unref(inputRef)
 
     if (!inputCmp) { return }
     if (!inputCmp.$el) { return }
@@ -30,6 +32,14 @@ export function gainFocus(inputVal: any|null, selectAll: boolean = false)
   }, 300)
 }
 
+export function setNativeValue(inputRef: any|null, value: string) {
+  const inputCmp = inputRef?.value
+  if (!inputCmp?.$el) { return }
+  inputCmp.$el.value = value
+}
+
+// ############################################################################
+
 var currentlyScrolling: boolean = false
 const Scroll_Top = 'top'
 const Scroll_Bottom = 'bottom'
@@ -50,7 +60,6 @@ function getActiveIonContent(): HTMLElement | null
 
   return ionContents[ionContents.length - 1] as HTMLElement
 }
-
 async function tryScrolling(where: string)
 {
 
@@ -80,7 +89,6 @@ export async function tryScrollingToTop()
 {
   await tryScrolling(Scroll_Top)
 }
-
 export async function tryScrollingToBottom()
 {
   await tryScrolling(Scroll_Bottom)

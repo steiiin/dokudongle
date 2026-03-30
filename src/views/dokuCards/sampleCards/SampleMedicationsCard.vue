@@ -86,12 +86,14 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-
-import { useDokuStore } from '@/store/doku'
 import { noneIf } from '@/utils/filter'
 import { correctMedName } from '@/utils/autocorrect/medications'
+
+import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+// ############################################################################
 
 const inputMinormedDescription = ref<any | null>(null)
 
@@ -115,10 +117,12 @@ watch(() => ctx.value.isTrauma, () => {
 
 </script>
 <style scoped>
-ion-card {
-  --card-bg: #707c28;
-}
-.med-flags::part(container) {
-  flex-wrap: wrap;
-}
+
+  ion-card {
+    --card-bg: #707c28;
+  }
+  .med-flags::part(container) {
+    flex-wrap: wrap;
+  }
+
 </style>

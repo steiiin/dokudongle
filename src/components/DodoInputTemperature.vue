@@ -13,12 +13,17 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref, watch } from 'vue'
 import { gainFocus } from '@/utils/input'
+
+// ############################################################################
 
 const DEFAULT_TEMP = 36.5
 const MIN_TEMP = 20
 const MAX_TEMP = 42
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue: number
@@ -29,8 +34,12 @@ const emit = defineEmits<{
   (e: 'leaved-empty'): void
 }>()
 
+// ############################################################################
+
 const inputRef = ref<any | null>(null)
 const displayValue = ref('')
+
+// ############################################################################
 
 const syncInputElement = (value: string) => {
   displayValue.value = value
@@ -139,6 +148,8 @@ function handleBlur() {
   emit('update:modelValue', n)
 }
 
+// ############################################################################
+
 watch(
   () => props.modelValue,
   (value) => {
@@ -150,6 +161,8 @@ watch(
   { immediate: true }
 )
 
+// ############################################################################
+
 const setFocus = () => {
   gainFocus(inputRef, true)
 }
@@ -158,13 +171,18 @@ const selectAll = () => {
   setFocus()
 }
 
+// ############################################################################
+
 defineExpose({
   setFocus,
 })
+
 </script>
 
 <style>
-ion-input.dd-input-temp .native-input {
-  text-align: right !important;
-}
+
+  ion-input.dd-input-temp .native-input {
+    text-align: right !important;
+  }
+
 </style>

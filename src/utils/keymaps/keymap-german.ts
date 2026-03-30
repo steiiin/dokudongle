@@ -1,13 +1,18 @@
-// german-hid-map.ts
-//
-// Character → [HID usage (page 0x07), modifier]
-// Works with mbed USBKeyboard.key_code_raw(usage, modifier) on Nano 33 BLE Rev2
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// keymap-german.ts
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-// ---- Modifiers (match your Arduino) ----
+// ##########################
+// Modifiers
+// ##########################
+
 export const MOD_SHIFT   = 0x02;
 export const MOD_ALTGR   = 0x40;   // Right-Alt (AltGr)
 
-// ---- HID Keyboard/Keypad usages (USB page 0x07) ----
+// ##########################
+// HID keyboard codes
+// ##########################
+
 const U = {
 
   // Letters (US positions)
@@ -35,7 +40,10 @@ const U = {
 
 };
 
-// ---- Full DE (Germany) character → [usage, modifier] map ----
+// ##########################
+// Keymapping: DE -> US
+// ##########################
+
 export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
 
   // Controls / whitespace
@@ -105,36 +113,29 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   // Degree
   '°':[U.GRAVE, MOD_SHIFT]
 
-};
+}
 
-// pack a string to [key,mod] pairs
-/**
- * Converts a string to an array of HID usage/modifier pairs compatible with the DE layout.
- */
+// ##########################
+// Mapping Functions
+// ##########################
+
 export function textToHidEvents(text: string): Array<[number, number]> {
-  const out: Array<[number, number]> = [];
+  const out: Array<[number, number]> = []
   for (const ch of text) {
-    const pair = DE_CHAR_TO_HID[ch];
-    if (pair)
-    {
-      out.push([ pair[0], pair[1] ?? 0x00 ]);
-    }
+    const pair = DE_CHAR_TO_HID[ch]
+    if (pair) { out.push([ pair[0], pair[1] ?? 0x00 ]) }
   }
   return out
 }
 
 const SUPPORTED_INPUT_REGEX = /[^\n a-zA-Z0-9.,_/*"':;!?@#€%&\-+()~|}{\][=°$\\<>üöäÜÖÄß]/g;
-
-/**
- * Removes diacritics while keeping German umlauts intact.
- */
 export function stripNotSupported(input: string): string {
-  const nfd = input.normalize('NFD');
-  let out = '';
+  const nfd = input.normalize('NFD')
+  let out = ''
   for (const ch of nfd) {
-    const cp = ch.codePointAt(0)!;
-    if (cp >= 0x0300 && cp <= 0x036F && cp !== 0x0308) continue;
-    out += ch;
+    const cp = ch.codePointAt(0)!
+    if (cp >= 0x0300 && cp <= 0x036F && cp !== 0x0308) { continue }
+    out += ch
   }
-  return out.normalize('NFC').replace(SUPPORTED_INPUT_REGEX, '');
+  return out.normalize('NFC').replace(SUPPORTED_INPUT_REGEX, '')
 }

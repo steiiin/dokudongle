@@ -14,7 +14,6 @@
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
-
     </IonCardContent>
   </IonCard>
   <IonCard class="dodo-redflag-input" style="margin-bottom:0">
@@ -38,10 +37,9 @@
     </IonHeader>
     <IonContent>
       <IonList>
-        <IonSearchbar
-          ref="redSearchbar"
-          v-model="currentSearchQuery"
-          placeholder="z.B. Synkope, ACS, Kopfschmerzen"></IonSearchbar>
+        <IonSearchbar v-model="currentSearchQuery"
+          ref="redSearchbar" placeholder="z.B. Synkope, ACS, Kopfschmerzen">
+        </IonSearchbar>
         <DodoToggleGroup v-model="currentFilter" style="margin:0 8px 8px 8px">
           <DodoToggleButton value="scenario">Szenarien</DodoToggleButton>
           <DodoToggleButton value="signal">Redflags</DodoToggleButton>
@@ -79,7 +77,7 @@ import type { UnwrapRef } from 'vue'
 
 import { addCircle, closeCircle } from 'ionicons/icons'
 
-import { RedflagApplication, RedflagScenario, RedflagSignal, Scenarios, Signals } from '@/data/redflags'
+import { RedflagApplication, RedflagScenario, RedflagSignal, DATA_Scenarios, DATA_Signals } from '@/data/redflags'
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags'
 
 type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
@@ -89,8 +87,8 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: TreatmentRedflagsModel): void
 }>()
 
-const allScenarios = Scenarios
-const allSignals = Signals
+const allScenarios = DATA_Scenarios
+const allSignals = DATA_Signals
 
 const cloneModelValue = (): TreatmentRedflagsModel => {
   const clone = Object.assign(new TreatmentRedflags(), props.modelValue)
@@ -268,36 +266,38 @@ const fuzzyMatch = (search: string, target: string): boolean => {
 </script>
 
 <style scoped>
-.dodo-redflag-input {
-  --card-bg: transparent;
-  margin: 0;
-}
-.dodo-redflag-input-content {
-  padding: 0;
-  margin: .25rem;
-}
 
-.chip-container {
-  padding: .5rem;
-}
+  .dodo-redflag-input {
+    --card-bg: transparent;
+    margin: 0;
+  }
+  .dodo-redflag-input-content {
+    padding: 0;
+    margin: .25rem;
+  }
 
-.dodo-redflag-input-actions {
-  display: flex;
-  justify-content: flex-start;
-}
+  .chip-container {
+    padding: .5rem;
+  }
 
-.type-divider {
-  --background: var(--ion-color-primary-contrast);
-  --color: var(--ion-color-secondary);
-  font-size: 1.2em;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
+  .dodo-redflag-input-actions {
+    display: flex;
+    justify-content: flex-start;
+  }
 
-.category-divider {
-  --background: var(--ion-background-color, #fff);
-  font-size: 0.85rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
+  .type-divider {
+    --background: var(--ion-color-primary-contrast);
+    --color: var(--ion-color-secondary);
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .category-divider {
+    --background: var(--ion-background-color, #fff);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
 </style>

@@ -1,10 +1,12 @@
-import { onHigh, onNormal, textIf } from "@/utils/filter"
-import { AssessedValue, OptionalValue, ProtocolStateValue } from "../input"
-
-import { useDokuStore } from "@/store/doku"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { prefixIntox, prefixParaesthesis, prefixParesis } from "@/utils/prefix/disability"
+import { onHigh, onNormal, textIf } from "@/utils/filter"
+import { OptionalValue } from "../input"
+
+import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }
+
+// ############################################################################
 
 type ZopsKey = 'Z' | 'O' | 'P' | 'S';
 type ZopsValue = 'ja' | 'teilweise' | 'nein';
@@ -193,6 +195,8 @@ export class DisabilityGcs {
   }
 
 }
+
+// ############################################################################
 
 export class AbcdeDisability {
 

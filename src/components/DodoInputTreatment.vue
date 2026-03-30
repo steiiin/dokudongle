@@ -30,10 +30,12 @@
 
 <script setup lang="ts">
 
-import { ref, computed, watch } from 'vue'
-
+import { computed, ref } from 'vue'
 import { closeOutline, pulseOutline } from 'ionicons/icons'
-import { notEmpty } from '@/utils/filter';
+
+import { notEmpty } from '@/utils/filter'
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue: string
@@ -45,8 +47,10 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 
+// ############################################################################
+
 const hasTreatment = ref(false)
-const treatInput = ref<any|null>(null)
+const treatInput = ref<any | null>(null)
 const hasTreatmentInput = computed(() => hasTreatment.value && notEmpty(treatmentValue.value))
 
 const addTreatment = () => {
@@ -58,8 +62,6 @@ const clearTreatment = () => {
   treatmentValue.value = ''
 }
 
-const textInput = ref<any|null>(null)
-
 const treatmentValue = computed({
   get: () => props.modelValue,
   set: (value: string) => {
@@ -70,22 +72,22 @@ const treatmentValue = computed({
 </script>
 <style scoped>
 
-ion-list {
-  padding-top:0
-}
+  ion-list {
+    padding-top:0
+  }
 
-hr {
+  hr {
 
-  margin: 0;
-  padding: 0;
-  padding-top: .25rem;
-  border-top: 1px solid var(--card-bg);
+    margin: 0;
+    padding: 0;
+    padding-top: .25rem;
+    border-top: 1px solid var(--card-bg);
 
-}
+  }
 
-.add-treatment {
-  margin: .25rem .5rem 0 .5rem;
-  background-color: var(--card-bg);
-}
+  .add-treatment {
+    margin: .25rem .5rem 0 .5rem;
+    background-color: var(--card-bg);
+  }
 
 </style>

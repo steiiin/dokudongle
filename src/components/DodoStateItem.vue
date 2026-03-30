@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<{
 </script>
 <style scoped>
 
-h3 { margin: 0; padding: 0; }
-p { margin: 0; padding: 0; }
+  h3 { margin: 0; padding: 0; }
+  p { margin: 0; padding: 0; }
 
 </style>

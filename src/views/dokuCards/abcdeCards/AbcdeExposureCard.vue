@@ -183,13 +183,15 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 
-import { useDokuStore } from '@/store/doku'
 import { basicCap } from '@/utils/autocorrect/basic'
 
+import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+// ############################################################################
 
 watch(() => store.doku.xabcdE.urinary.catheterType, (v) => {
   if (v === '') {
@@ -212,8 +214,8 @@ watch(() => ctx.value.isNonVerbal, (v) => {
 </script>
 <style scoped>
 
-ion-card {
-  --card-bg: #FFFF3380;
-}
+  ion-card {
+    --card-bg: #FFFF3380;
+  }
 
 </style>

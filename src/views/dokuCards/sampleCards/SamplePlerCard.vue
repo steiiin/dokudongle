@@ -40,4 +40,5 @@ const store = useDokuStore()
   p { margin:0; }
   p b { font-family: monospace; font-size: 1.3em; }
   ul { margin:0; padding-left: 3rem; }
+
 </style>

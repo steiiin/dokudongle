@@ -13,6 +13,9 @@
 <script setup lang="ts">
 
 import { computed, ref } from 'vue'
+import { gainFocus } from '@/utils/input'
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue: string,
@@ -28,7 +31,9 @@ const emit = defineEmits<{
   (e: 'leaved-empty'): void,
 }>()
 
-const inputRef = ref<any|null>(null)
+// ############################################################################
+
+const inputRef = ref<any | null>(null)
 
 const inputValue = computed({
   get: () => props.modelValue,
@@ -36,6 +41,8 @@ const inputValue = computed({
     emit('update:modelValue', value ?? '')
   },
 })
+
+// ############################################################################
 
 const resolvedLabelColor = computed(() => {
   if (!props.labelColor || props.labelColor.trim().length === 0) {
@@ -59,6 +66,8 @@ const inputStyle = computed(() => {
   }
 })
 
+// ############################################################################
+
 const handleBlur = () => {
 
   const value = props.modelValue?.trim() ?? ''
@@ -73,12 +82,9 @@ const handleBlur = () => {
 
 }
 
-const setFocus = async () => {
-  const element = inputRef.value?.$el
-  if (element && typeof element.setFocus === 'function') {
-    await element.setFocus()
-  }
-}
+const setFocus = async () => { gainFocus(inputRef) }
+
+// ############################################################################
 
 defineExpose({
   setFocus,

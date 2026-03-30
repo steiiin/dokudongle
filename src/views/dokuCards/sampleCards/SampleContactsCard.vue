@@ -30,4 +30,5 @@ const store = useDokuStore()
   ion-card-content ion-item {
     --background: transparent;
   }
+
 </style>

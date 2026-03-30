@@ -48,13 +48,17 @@
 
 import { computed, watch } from 'vue'
 
-import { useDokuStore } from '@/store/doku'
 import { tryScrollingToBottom } from '@/utils/input'
+
+import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-const ctx = computed(() => store.context)
+
+// ############################################################################
 
 const isModeNormal = computed(() => store.doku.redflags.noTransportType == '')
 const isModeBvO = computed(() => store.doku.redflags.noTransportType == 'BvO')
+
+// ############################################################################
 
 watch(() => [
   store.doku.redflags.choosenScenarios.length,
@@ -70,6 +74,3 @@ watch(() => [
 })
 
 </script>
-<style scoped>
-
-</style>

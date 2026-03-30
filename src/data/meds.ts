@@ -30,7 +30,7 @@ const INDICATION_SEDIERUNG = 'sedierung'
 const INDICATION_SCHMERZ = 'schmerzen'
 const INDICATION_TACHYKARDESVORHOFFLIMMERN = 'tachykardesvorhofflimmern'
 
-export const SAA_MEDICATION_INDICATION: Record<string, ConsentMedsIndication> = {
+export const DATA_SaamedIndications: Record<string, ConsentMedsIndication> = {
   [INDICATION_ACS]: new ConsentMedsIndication(INDICATION_ACS, 'ACS'),
   [INDICATION_ANAPHYLAXIE]: new ConsentMedsIndication(INDICATION_ANAPHYLAXIE, 'Anaphylaxie'),
   [INDICATION_ARTERIELLERVERSCHLUSS]: new ConsentMedsIndication(INDICATION_ARTERIELLERVERSCHLUSS, 'Arterieller Verschluss'),
@@ -94,7 +94,7 @@ export class ConsentMedTask {
 
 // ######################################################################################
 
-export const SAA_MEDICATION: Record<string, ConsentMed> = {
+export const DATA_SaamedMeta: Record<string, ConsentMed> = {
 
   adrenalin: new ConsentMed('adrenalin',
     'Adrenalin', new Set([
@@ -304,18 +304,16 @@ export const SAA_MEDICATION: Record<string, ConsentMed> = {
 
 }
 
-export function get_SAA_MEDICATION(): Array<ConsentMed> { return Object.values(SAA_MEDICATION) }
-
 export type ConsentMedOption = {
   med: ConsentMed,
   indication: ConsentMedsIndication,
 }
 
-export function get_SAA_MEDICATION_OPTIONS(): Array<ConsentMedOption> {
+export function DATA_SaamedOptions(): Array<ConsentMedOption> {
   const options: Array<ConsentMedOption> = []
-  for (const med of get_SAA_MEDICATION()) {
+  for (const med of Object.values(DATA_SaamedMeta)) {
     for (const indicationId of med.Indications) {
-      const indication = SAA_MEDICATION_INDICATION[indicationId] ?? new ConsentMedsIndication(indicationId, indicationId)
+      const indication = DATA_SaamedIndications[indicationId] ?? new ConsentMedsIndication(indicationId, indicationId)
       options.push({ med, indication })
     }
   }

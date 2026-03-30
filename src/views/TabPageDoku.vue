@@ -56,6 +56,8 @@ import AbcdeContainerCard from './dokuCards/AbcdeContainerCard.vue'
 import SampleContainerCard from './dokuCards/SampleContainerCard.vue'
 import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 
+// ############################################################################
+
 import { computed } from 'vue'
 import { ProtocolCourse } from '@/types/protocol'
 
@@ -66,8 +68,8 @@ const ctx = computed(() => store.context)
 </script>
 <style lang="scss" scoped>
 
-#container {
-  position: relative;
-}
+  #container {
+    position: relative;
+  }
 
 </style>

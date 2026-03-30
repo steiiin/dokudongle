@@ -274,13 +274,15 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
+
+import { correctAnatomy } from '@/utils/autocorrect/anatomy'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
-import { correctAnatomy } from '@/utils/autocorrect/anatomy'
+// ############################################################################
 
 const rassDescription = computed(() => {
   if (store.doku.xabcDe.psychRass === 'streitsüchtig') {
@@ -306,6 +308,8 @@ const disorderDescription = computed(() => {
   }
 })
 
+// ############################################################################
+
 const setZopsNo = () => {
   store.doku.xabcDe.zops.Z = 'nein'
   store.doku.xabcDe.zops.O = 'nein'
@@ -320,6 +324,8 @@ const setZopsYes = () => {
   store.doku.xabcDe.zops.S = 'ja'
 }
 
+// ############################################################################
+
 watch(() => ctx.value.isNonVerbal, (v) => {
   store.doku.xabcDe.headache = false
 })
@@ -331,14 +337,14 @@ watch(() => store.doku.xabcDe.couldBeBaseline, (v) => {
 </script>
 <style scoped>
 
-ion-card {
-  --card-bg: #FF7F0080;
-}
+  ion-card {
+    --card-bg: #FF7F0080;
+  }
 
-.quicktoggle {
-  margin-top: .5rem;
-  padding-inline: .5rem;
-  text-align: right;
-}
+  .quicktoggle {
+    margin-top: .5rem;
+    padding-inline: .5rem;
+    text-align: right;
+  }
 
 </style>

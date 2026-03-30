@@ -1,11 +1,14 @@
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { EnhanceableText } from "../input"
 import { onNormal, textIf } from "@/utils/filter"
+
+// ############################################################################
 
 export interface AirwayMucosa {
   m: 'feucht' | 'trocken'
   e: 'rosig' | 'blass' | 'gerötet' | 'bläulich'
 }
+
+// ############################################################################
 
 export class AbcdeAirway {
 

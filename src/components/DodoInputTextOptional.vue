@@ -29,6 +29,8 @@
 
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 
+// ############################################################################
+
 const props = withDefaults(defineProps<{
   toggleLabel: string
   toggle: boolean
@@ -48,7 +50,9 @@ const emit = defineEmits<{
   (e: 'update:text', value: string): void
 }>()
 
-const textInput = ref<any|null>(null)
+// ############################################################################
+
+const textInput = ref<any | null>(null)
 let focusTimeout: ReturnType<typeof setTimeout> | null = null
 const toggleChanging = ref(false)
 
@@ -58,6 +62,8 @@ const clearFocusTimeout = () => {
     focusTimeout = null
   }
 }
+
+// ############################################################################
 
 const onToggleChange = (value: boolean | null | undefined) => {
   emit('update:toggle', !!value)
@@ -71,6 +77,14 @@ const onTogglePointerDown = () => {
   toggleChanging.value = true
   setTimeout(() => toggleChanging.value = false, 200)
 }
+
+const handleEmpty = () => {
+  console.log('handleEmpty + ' + toggleChanging.value)
+  if (toggleChanging.value) { return }
+  emit('update:toggle', false)
+}
+
+// ############################################################################
 
 watch(
   () => props.toggle,
@@ -87,13 +101,10 @@ watch(
   }
 )
 
-const handleEmpty = () => {
-  console.log('handleEmpty + ' + toggleChanging.value)
-  if (toggleChanging.value) { return }
-  emit('update:toggle', false)
-}
+// ############################################################################
 
 onBeforeUnmount(() => {
   clearFocusTimeout()
 })
+
 </script>

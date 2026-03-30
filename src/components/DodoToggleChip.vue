@@ -30,6 +30,8 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
 }>()
 
+// ############################################################################
+
 const toggle = () => {
   if (props.disabled) return
   emit('update:modelValue', !props.modelValue)
@@ -38,14 +40,15 @@ const toggle = () => {
 </script>
 
 <style scoped>
-ion-chip {
-  margin-left: 0;
-}
-.DdToggleChip--inactive {
-  opacity: 0.8;
-}
 
-.DdToggleChip--bold {
-  border: 1px solid var(--ion-color-shade);
-}
+  ion-chip {
+    margin-left: 0;
+  }
+  .DdToggleChip--inactive {
+    opacity: 0.8;
+  }
+  .DdToggleChip--bold {
+    border: 1px solid var(--ion-color-shade);
+  }
+
 </style>

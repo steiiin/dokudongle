@@ -14,15 +14,17 @@
 
 import { computed } from 'vue'
 
+import { enhanceGeneral } from '@/utils/gpt/general'
+
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
-import { enhanceGeneral } from '@/utils/gpt/general'
-
 </script>
 <style scoped>
-hr {
-  border-top: 1px solid var(--card-bg);
-}
+
+  hr {
+    border-top: 1px solid var(--card-bg);
+  }
+
 </style>

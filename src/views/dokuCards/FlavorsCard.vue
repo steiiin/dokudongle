@@ -48,11 +48,15 @@ import { computed, watch } from 'vue'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 
+// ############################################################################
+
 type FlavorKey = keyof typeof store.doku.flavors
 
 const setFlavor = (key: FlavorKey, enabled: boolean) => {
   store.doku.flavors[key] = enabled
 }
+
+// ############################################################################
 
 const anyNonSimpleSelected = computed(() =>
   Object.entries(store.doku.flavors)
@@ -92,12 +96,14 @@ watch(() => store.doku.flavors.reanimation, (v) => {
 </script>
 
 <style scoped>
-.flavor-row {
-  --min-height: unset;
-  --inner-padding-end: 0;
-  --padding-start: 0;
-  --padding-end: 0;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+
+  .flavor-row {
+    --min-height: unset;
+    --inner-padding-end: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
 </style>

@@ -167,7 +167,8 @@ import { computed, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-const ctx = computed(() => store.context)
+
+// ############################################################################
 
 const hasPattern = computed(() => store.doku.xaBcde.mechanics.pattern != '')
 
@@ -187,8 +188,8 @@ watch(() => hasAusculated.value, (v) => {
 </script>
 <style scoped>
 
-ion-card {
-  --card-bg: #4DAF4A80;
-}
+  ion-card {
+    --card-bg: #4DAF4A80;
+  }
 
 </style>

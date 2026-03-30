@@ -1,10 +1,11 @@
-import { ProtocolVerbosity } from "@/types/protocol"
+import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
+import { onHigh, onNormal, textDef, textIf } from "@/utils/filter"
 import { AssessedValue, ProtocolStateValue, PSV } from "../input"
 
 import { useDokuStore } from "@/store/doku"
-import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { onHigh, onNormal, textDef, textIf } from "@/utils/filter"
 function getCtx() { return useDokuStore().context }
+
+// ############################################################################
 
 export interface BreathingMech {
   frequency: '' | 'Bradypnoe' | 'Tachypnoe'
@@ -17,6 +18,8 @@ export interface BreathingAuscultation {
   crackles: '' | 'bds.' | 're.' | 'li.'
   dimished: '' | 'bds.' | 're.' | 'li.'
 }
+
+// ############################################################################
 
 export class AbcdeBreathing {
 

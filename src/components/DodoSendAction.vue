@@ -12,14 +12,16 @@
 
 <script setup lang="ts">
 
-import { paperPlaneSharp, powerSharp } from 'ionicons/icons'
+import { computed } from 'vue'
+import { paperPlaneSharp } from 'ionicons/icons'
+import { alertController } from '@ionic/core'
 
-import { computed, nextTick } from 'vue'
+import { tryScrollingToTop } from '@/utils/input'
 
 import { useDokuStore } from '@/store/doku'
-import { alertController } from '@ionic/core'
-import { tryScrollingToTop } from '@/utils/input'
 const store = useDokuStore()
+
+// ############################################################################
 
 const isAvailable = computed(() => store.connection.isConnected)
 

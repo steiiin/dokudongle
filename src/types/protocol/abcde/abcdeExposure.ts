@@ -1,12 +1,14 @@
-import { useDokuStore } from "@/store/doku"
-import { OptionalValue } from "../input"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { ProtocolContext } from "@/types/protocol"
 import { prefixAbdominalPain, prefixAbdominalPeristalsis, prefixDefecation } from "@/utils/prefix/exposure"
+import { ProtocolContext } from "@/types/protocol"
+import { OptionalValue } from "../input"
 
+import { useDokuStore } from "@/store/doku"
 function getCtx(): ProtocolContext { return useDokuStore().context }
 function isNonVerbal(): boolean { return getCtx().isNonVerbal }
+
+// ############################################################################
 
 export class ExposureEmisis {
 
@@ -87,6 +89,8 @@ export class ExposureAbdominal {
   }
 
 }
+
+// ############################################################################
 
 export class AbcdeExposure {
 

@@ -33,8 +33,11 @@
 <script setup lang="ts">
 
 import { eye, flask, wifi } from 'ionicons/icons'
+
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+
+// ############################################################################
 
 const cancel = () => {
   store.cancelSend()
@@ -42,24 +45,26 @@ const cancel = () => {
 
 </script>
 <style lang="scss" scoped>
-.blurry {
-  filter: blur(4px);
-}
-.transmission {
 
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  background-color: #00000053;
+  .blurry {
+    filter: blur(4px);
+  }
+  .transmission {
 
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    background-color: #00000053;
 
-  & .progress {
-    margin-inline: -1rem;
-    width: calc(100% + 2rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    & .progress {
+      margin-inline: -1rem;
+      width: calc(100% + 2rem);
+    }
+
   }
 
-}
 </style>

@@ -1,11 +1,12 @@
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { AssessedValue } from "../input"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
-import { PSV, ProtocolStateValue } from "../input"
+import { prefixChestpainRadiation } from "@/utils/prefix/circulation"
+import { PSV, ProtocolStateValue, AssessedValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
-import { prefixChestpainRadiation } from "@/utils/prefix/circulation"
 function getCtx() { return useDokuStore().context }
+
+// ############################################################################
 
 export interface CirculationPulse {
   rate: 'normofrequent' | 'bradykard' | 'tachykard'
@@ -34,6 +35,8 @@ export interface CirculationEdema {
   grade: 'keine Ödeme' | 'Knöchelödeme' | 'Unterschenkelödeme' | 'ausgeprägte abhängige Ödeme'
   variation: 'neu aufgetreten' | 'zunehmend' | 'unverändert' | 'rückläufig' | ''
 }
+
+// ############################################################################
 
 export class AbcdeCirculation {
 

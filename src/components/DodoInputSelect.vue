@@ -1,4 +1,5 @@
 <template>
+
   <IonItem :lines="isCustomMode ? 'none' : lines">
     <IonSelect :label="label" interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
       <IonSelectOption v-if="emptyLabel" value="">
@@ -29,19 +30,22 @@
       @leaved-empty="handleEmpty"
     />
   </IonItem>
+
 </template>
 
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
 
-const CUSTOM_VALUE = '__custom'
+// ############################################################################
 
 export type SelectValue = string | number
 export type SelectOption = {
   value: SelectValue
   label: string }
 export type OptionInput = SelectValue | SelectOption
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue: SelectValue
@@ -60,9 +64,15 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: SelectValue): void
 }>()
 
+// ############################################################################
+
+const CUSTOM_VALUE = '__custom'
+
 const customInput = ref<any|null>(null)
 const customText = ref('')
 const isCustomMode = ref(false)
+
+// ############################################################################
 
 const normalizedOptions = computed<SelectOption[]>(() => {
   return props.options.map((opt) => {
@@ -98,14 +108,6 @@ const selectStyle = computed(() => {
   }
 })
 
-function isKnownOption(value: SelectValue): boolean {
-  return normalizedOptions.value.some((opt) => opt.value === value)
-}
-
-function isEmptyOption(value: SelectValue): boolean {
-  return value === ''
-}
-
 const selectValue = computed({
   get(): SelectValue {
     if (isCustomMode.value) {
@@ -126,9 +128,23 @@ const selectValue = computed({
   },
 })
 
+// ############################################################################
+
+function isKnownOption(value: SelectValue): boolean {
+  return normalizedOptions.value.some((opt) => opt.value === value)
+}
+
+function isEmptyOption(value: SelectValue): boolean {
+  return value === ''
+}
+
+// ############################################################################
+
 const handleEmpty = () => {
   selectValue.value = !props.emptyLabel ? normalizedOptions.value[0].value : ''
 }
+
+// ############################################################################
 
 watch(customText, (value) => {
   if (isCustomMode.value) {
@@ -160,7 +176,9 @@ watch(
 </script>
 
 <style>
-ion-select.dd-input-select::part(label) {
-  color: var(--dd-label-color, inherit);
-}
+
+  ion-select.dd-input-select::part(label) {
+    color: var(--dd-label-color, inherit);
+  }
+
 </style>

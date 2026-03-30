@@ -1,7 +1,9 @@
+import { notEmpty, onNormal } from "@/utils/filter"
 
 import { useDokuStore } from "@/store/doku"
-import { notEmpty, onNormal } from "@/utils/filter"
 function getCtx() { return useDokuStore().context }
+
+// ############################################################################
 
 export class SampleMedication {
 

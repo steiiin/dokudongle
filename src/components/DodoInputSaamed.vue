@@ -15,7 +15,6 @@
           </IonItem>
         </IonReorderGroup>
       </IonList>
-
       <IonButton expand="block" fill="solid" color="light" @click="openSelectModal">
         <IonIcon slot="start" :icon="addCircle"></IonIcon>
           Medikament hinzufügen
@@ -23,7 +22,7 @@
     </IonCardContent>
   </IonCard>
 
-  <IonModal :is-open="isSelectModalOpen" @did-present="focusSelectSearchbar">
+  <IonModal :is-open="isSelectModalOpen" @did-present="gainFocus(selectSearchbar)">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">Medikament auswählen</IonTitle>
@@ -35,20 +34,16 @@
       </IonToolbar>
     </IonHeader>
     <IonContent>
-      <IonSearchbar
-        ref="selectSearchbar"
-        v-model="searchQuery"
-        placeholder="Medikament suchen"></IonSearchbar>
+      <IonSearchbar v-model="searchQuery"
+        ref="selectSearchbar" placeholder="Medikament suchen">
+      </IonSearchbar>
       <IonList>
         <template v-for="group in groupedOptions" :key="group.indication.Id">
           <IonItemDivider>
             <IonLabel class="saamed-indication">{{ group.indication.Name }}</IonLabel>
           </IonItemDivider>
-          <IonItem
-            v-for="option in group.options"
-            :key="`${group.indication.Id}-${option.med.id}`"
-            lines="none"
-            button
+          <IonItem v-for="option in group.options" :key="`${group.indication.Id}-${option.med.id}`"
+            lines="none" button
             @click="selectOption(option)">
             <IonLabel>{{ option.med.Name }}</IonLabel>
           </IonItem>
@@ -84,8 +79,7 @@
           <IonLabel>Dosierung</IonLabel>
         </IonItemDivider>
         <IonItem lines="none">
-          <DodoInputText
-            v-model="currentTask.dosageText"
+          <DodoInputText v-model="currentTask.dosageText"
             label="Dosierung" placeholder="z.B. 1g KI">
           </DodoInputText>
         </IonItem>
@@ -100,22 +94,11 @@
             </IonToggle>
           </IonItem>
           <IonItem v-if="currentTask.contraOk === false" lines="none">
-            <DodoInputText
-              v-model="currentTask.contraText"
+            <DodoInputText v-model="currentTask.contraText"
               label="Kontraindikationen" placeholder="z.B. Schwangerschaft">
             </DodoInputText>
           </IonItem>
         </template>
-
-        <!-- <IonItemDivider>
-          <IonLabel>Notiz</IonLabel>
-        </IonItemDivider>
-        <IonItem lines="none">
-          <DodoInputText
-            v-model="currentTask.noteText"
-            label="Notiz" placeholder="z.B. geringe Wirkung">
-          </DodoInputText>
-        </IonItem> -->
 
       </IonList>
 
@@ -129,51 +112,29 @@
 
 <script setup lang="ts">
 
-import type { ItemReorderEventDetail } from '@ionic/core'
-
-import { computed, nextTick, ref } from 'vue'
-
+import { computed, ref } from 'vue'
 import { addCircle } from 'ionicons/icons'
 
-import { ConsentMedOption, ConsentMedTask, get_SAA_MEDICATION, get_SAA_MEDICATION_OPTIONS } from '@/data/meds'
+import type { ItemReorderEventDetail } from '@ionic/core'
+import { ConsentMedOption, ConsentMedTask, DATA_SaamedOptions } from '@/data/meds'
+import { gainFocus } from '@/utils/input';
+
+// ############################################################################
 
 const props = defineProps<{ modelValue: Array<ConsentMedTask> }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Array<ConsentMedTask>): void
 }>()
 
+// ############################################################################
+
 const isSelectModalOpen = ref(false)
 const isEditModalOpen = ref(false)
+
 const searchQuery = ref('')
 const selectSearchbar = ref<any | null>(null)
 
-const focusSelectSearchbar = async () => {
-  setTimeout(() => { selectSearchbar.value?.$el?.setFocus() }, 300)
-}
-
-const openSelectModal = () => {
-  searchQuery.value = ''
-  isSelectModalOpen.value = true
-}
-
-const closeSelectModal = () => {
-  isSelectModalOpen.value = false
-}
-
-const fuzzyMatch = (search: string, target: string): boolean => {
-  const normalizedSearch = search.trim().toLowerCase()
-  if (!normalizedSearch) return true
-  const normalizedTarget = target.toLowerCase()
-  if (normalizedTarget.includes(normalizedSearch)) return true
-  let searchIndex = 0
-  for (let i = 0; i < normalizedTarget.length; i += 1) {
-    if (normalizedTarget[i] === normalizedSearch[searchIndex]) {
-      searchIndex += 1
-    }
-    if (searchIndex === normalizedSearch.length) return true
-  }
-  return false
-}
+// ############################################################################
 
 const isSelectedOption = (option: ConsentMedOption): boolean => {
   return props.modelValue.some((task) => (
@@ -183,7 +144,7 @@ const isSelectedOption = (option: ConsentMedOption): boolean => {
 
 const groupedOptions = computed(() => {
   const search = searchQuery.value
-  const options = get_SAA_MEDICATION_OPTIONS().filter((option) => (
+  const options = DATA_SaamedOptions().filter((option) => (
     !isSelectedOption(option) && fuzzyMatch(
       search,
       `${option.med.Name} ${option.med.alternativeName ?? ''}`
@@ -198,6 +159,40 @@ const groupedOptions = computed(() => {
   }
   return Array.from(groups.values())
 })
+
+const modalTitle = computed(() => {
+  if (!currentOption.value) {
+    return 'Medikament'
+  }
+  return currentOption.value.med.Name
+})
+
+const currentOptionLabel = computed(() => {
+  if (!currentOption.value) {
+    return ''
+  }
+  return `${currentOption.value.indication.Name} · ${currentOption.value.med.Name}`
+})
+
+const requiresContraCheck = computed(() => {
+  if (!currentOption.value) {
+    return false
+  }
+  return currentOption.value.med.requiresContraCheck?.has(currentOption.value.indication.Id) ?? false
+})
+
+// ############################################################################
+
+const openSelectModal = () => {
+  searchQuery.value = ''
+  isSelectModalOpen.value = true
+}
+
+const closeSelectModal = () => {
+  isSelectModalOpen.value = false
+}
+
+// ############################################################################
 
 const currentNew = ref(false)
 const currentTask = ref<ConsentMedTask>(new ConsentMedTask('', '', '', true, '', ''))
@@ -274,8 +269,25 @@ const deleteItem = () => {
   isEditModalOpen.value = false
 }
 
+// ############################################################################
+
+const fuzzyMatch = (search: string, target: string): boolean => {
+  const normalizedSearch = search.trim().toLowerCase()
+  if (!normalizedSearch) return true
+  const normalizedTarget = target.toLowerCase()
+  if (normalizedTarget.includes(normalizedSearch)) return true
+  let searchIndex = 0
+  for (let i = 0; i < normalizedTarget.length; i += 1) {
+    if (normalizedTarget[i] === normalizedSearch[searchIndex]) {
+      searchIndex += 1
+    }
+    if (searchIndex === normalizedSearch.length) return true
+  }
+  return false
+}
+
 const findOption = (medId: string, indicationId: string): ConsentMedOption | null => {
-  return get_SAA_MEDICATION_OPTIONS().find(option => option.med.id === medId && option.indication.Id === indicationId) ?? null
+  return DATA_SaamedOptions().find(option => option.med.id === medId && option.indication.Id === indicationId) ?? null
 }
 
 const getMedName = (task: ConsentMedTask): string => {
@@ -286,33 +298,13 @@ const getIndicationName = (task: ConsentMedTask): string => {
   return findOption(task.MedId, task.MedIndication)?.indication.Name ?? task.MedIndication
 }
 
-const modalTitle = computed(() => {
-  if (!currentOption.value) {
-    return 'Medikament'
-  }
-  return currentOption.value.med.Name
-})
-
-const currentOptionLabel = computed(() => {
-  if (!currentOption.value) {
-    return ''
-  }
-  return `${currentOption.value.indication.Name} · ${currentOption.value.med.Name}`
-})
-
-const requiresContraCheck = computed(() => {
-  if (!currentOption.value) {
-    return false
-  }
-  return currentOption.value.med.requiresContraCheck?.has(currentOption.value.indication.Id) ?? false
-})
-
 const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
   const updated = event.detail.complete([...props.modelValue]) as Array<ConsentMedTask>
   if (updated) {
     emit('update:modelValue', updated)
   }
 }
+
 </script>
 
 <style scoped>

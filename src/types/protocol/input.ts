@@ -141,6 +141,8 @@ export class EnhanceableText {
   }
 }
 
+// ############################################################################
+
 export class AssessedValue<T> {
   constructor(
     public assessed: boolean,
@@ -195,6 +197,8 @@ export class OptionalValue<T> {
   }
 }
 
+// ############################################################################
+
 export type ProtocolStateValue = {
   modalState: string
   protocolText: string
@@ -205,6 +209,8 @@ export function PSV(state: string, text?: string): ProtocolStateValue {
     protocolText: text ?? state,
   }
 }
+
+// ############################################################################
 
 export type StateItemValue = {
   title: string,

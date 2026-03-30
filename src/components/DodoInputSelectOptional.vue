@@ -1,10 +1,9 @@
 <template>
+
   <IonItem :lines="props.toggle ? 'none' : props.lines">
-    <IonToggle
-      :model-value="props.toggle"
+    <IonToggle :model-value="props.toggle"
       label-placement="end"
-      @update:model-value="onToggleChange"
-    >
+      @update:model-value="onToggleChange">
       {{ props.toggleLabel }}
     </IonToggle>
   </IonItem>
@@ -29,6 +28,8 @@
 
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import DodoInputSelect, { OptionInput, SelectValue } from './DodoInputSelect.vue'
+
+// ############################################################################
 
 const props = withDefaults(defineProps<{
 
@@ -57,15 +58,21 @@ const emit = defineEmits<{
   (e: 'update:text', value: SelectValue): void
 }>()
 
-const textSelect = ref<InstanceType<typeof DodoInputSelect> | null>(null)
-let focusTimeout: ReturnType<typeof setTimeout> | null = null
+// ############################################################################
 
+const textSelect = ref<InstanceType<typeof DodoInputSelect> | null>(null)
+
+// ############################################################################
+
+let focusTimeout: ReturnType<typeof setTimeout> | null = null
 const clearFocusTimeout = () => {
   if (focusTimeout) {
     clearTimeout(focusTimeout)
     focusTimeout = null
   }
 }
+
+// ############################################################################
 
 const onToggleChange = (value: boolean | null | undefined) => {
   emit('update:toggle', !!value)
@@ -74,6 +81,12 @@ const onToggleChange = (value: boolean | null | undefined) => {
 const onTextChange = (value: SelectValue) => {
   emit('update:text', value ?? '')
 }
+
+const handleEmpty = () => {
+  emit('update:toggle', false)
+}
+
+// ############################################################################
 
 watch(
   () => props.toggle,
@@ -90,11 +103,10 @@ watch(
   }
 )
 
-const handleEmpty = () => {
-  emit('update:toggle', false)
-}
+// ############################################################################
 
 onBeforeUnmount(() => {
   clearFocusTimeout()
 })
+
 </script>

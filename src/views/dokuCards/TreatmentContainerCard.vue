@@ -26,6 +26,3 @@ const store = useDokuStore()
 const ctx = computed(() => store.context)
 
 </script>
-<style>
-
-</style>

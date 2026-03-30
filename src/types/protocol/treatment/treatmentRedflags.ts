@@ -1,4 +1,4 @@
-import { RedflagScenario, RedflagSignal, RedflagApplication, Scenarios, Signals } from "@/data/redflags"
+import { RedflagScenario, RedflagSignal, RedflagApplication } from "@/data/redflags"
 import { OptionalValue } from "../input"
 
 type WithArrayProp<T> = {

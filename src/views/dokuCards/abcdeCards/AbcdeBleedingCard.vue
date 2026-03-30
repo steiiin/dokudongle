@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { enhanceBleeding } from '@/utils/gpt/bleeding'
 
 import { useDokuStore } from '@/store/doku'
@@ -32,8 +32,8 @@ const ctx = computed(() => store.context)
 
 <style scoped>
 
-ion-card {
-  --card-bg: #e41a1d71;
-}
+  ion-card {
+    --card-bg: #e41a1d71;
+  }
 
 </style>

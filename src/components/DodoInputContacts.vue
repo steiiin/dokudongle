@@ -42,8 +42,7 @@
         <ion-item lines="none">
           <DodoInputText ref="inputName"
             v-model="currentContact.contactName"
-            label=""
-            placeholder="z.B. Ehepartner"
+            label="" placeholder="z.B. Ehepartner"
             :beautify-fn="basicCap">
           </DodoInputText>
         </ion-item>
@@ -53,11 +52,9 @@
         <ion-item lines="none">
           <DodoInputText
             v-model="currentContact.telephone"
-            label=""
-            placeholder="z.B. 0151 23456789"
-            inputmode="tel"
-            :beautify-fn="correctPhone"
-            type="tel">
+            label="" placeholder="z.B. 0151 23456789"
+            inputmode="tel" type="tel"
+            :beautify-fn="correctPhone">
           </DodoInputText>
         </ion-item>
       </ion-list>

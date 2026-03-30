@@ -254,15 +254,17 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import { AssessedValue } from '@/types/protocol/input'
-
-import { useDokuStore } from '@/store/doku'
 import { insetIf } from '@/utils/filter'
 import { correctAnatomy } from '@/utils/autocorrect/anatomy'
+
+import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+// ############################################################################
 
 watch(() => store.doku.xabCde.pulse.centralStrength, (v) => {
   if (v == 'schlecht' && store.doku.xabCde.pulse.peripheralStrength == 'gut') {
@@ -295,8 +297,8 @@ watch(() => store.doku.xabCde.edema.grade, (v) => {
 </script>
 <style scoped>
 
-ion-card {
-  --card-bg: #984EA380;
-}
+  ion-card {
+    --card-bg: #984EA380;
+  }
 
 </style>

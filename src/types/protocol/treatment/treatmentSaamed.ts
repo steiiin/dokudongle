@@ -1,5 +1,5 @@
 import { capitalizeBegin } from "@/utils/text";
-import { SAA_MEDICATION_INDICATION, SAA_MEDICATION, ConsentMedTask } from "@/data/meds"
+import { DATA_SaamedIndications, DATA_SaamedMeta, ConsentMedTask } from "@/data/meds"
 
 export class TreatmentSaamed {
 
@@ -10,10 +10,10 @@ export class TreatmentSaamed {
   }
 
   private getMedName(medId: string): string {
-    return SAA_MEDICATION[medId]?.Name ?? capitalizeBegin(medId)
+    return DATA_SaamedMeta[medId]?.Name ?? capitalizeBegin(medId)
   }
   private getIndicationName(indicationid: string): string {
-    return SAA_MEDICATION_INDICATION[indicationid]?.Name ?? capitalizeBegin(indicationid)
+    return DATA_SaamedIndications[indicationid]?.Name ?? capitalizeBegin(indicationid)
   }
 
   public getBlock(): string {
@@ -73,7 +73,7 @@ export class TreatmentSaamed {
     // 4) Global KI line
     const allContraOk = tasks.every(t => t.contraOk === true);
     const shouldCheckContra = tasks.some(t =>
-      SAA_MEDICATION[t.MedId]?.requiresContraCheck?.has(t.MedIndication)
+      DATA_SaamedMeta[t.MedId]?.requiresContraCheck?.has(t.MedIndication)
     );
     const kiLine = allContraOk
       ? (shouldCheckContra ? "keine Unverträglichkeit; kein Hinweis auf relevante KI:" : "")
@@ -98,8 +98,8 @@ export class TreatmentSaamed {
         const noteSuffix = note.length > 0 ? `, ${note}` : "";
 
         // If dosageText is empty, fall back to med default dosage (optional convenience)
-        const finalDose = dose.length > 0 ? dose : (SAA_MEDICATION[t.MedId]?.defaultDosage ?? "");
-        const defaultHint = SAA_MEDICATION[t.MedId]?.defaultHint ?? "";
+        const finalDose = dose.length > 0 ? dose : (DATA_SaamedMeta[t.MedId]?.defaultDosage ?? "");
+        const defaultHint = DATA_SaamedMeta[t.MedId]?.defaultHint ?? "";
         const hintSuffix = defaultHint.length > 0 ? `\n${defaultHint}` : "";
 
         parts.push(`${medName} ${finalDose}${indSuffix}${noteSuffix}${hintSuffix}`);

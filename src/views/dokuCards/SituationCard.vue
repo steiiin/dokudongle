@@ -30,6 +30,8 @@ import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
+// ############################################################################
+
 const placeholders = computed(() => {
   const list: Array<string> = []
   if (ctx.value.isCourseVerlegung) { list.push(PH_Verlegung) }

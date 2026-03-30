@@ -1,8 +1,11 @@
-import { useDokuStore } from "@/store/doku"
 import { onHigh, onNormal } from "@/utils/filter"
 import { concatDoku } from "@/utils/text"
-import { AssessedValue, OptionalValue, ProtocolStateValue, PSV, SIV, StateItemValue } from "../input"
+import { ProtocolStateValue, PSV, SIV, StateItemValue } from "../input"
+
+import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }
+
+// ############################################################################
 
 export class SampleSymptomsTrauma {
 

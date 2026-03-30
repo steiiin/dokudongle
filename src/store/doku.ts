@@ -1,15 +1,17 @@
-import { BleClient, numberToUUID } from '@capacitor-community/bluetooth-le';
-import { Capacitor } from '@capacitor/core';
-import { defineStore, storeToRefs } from 'pinia';
+import { BleClient } from '@capacitor-community/bluetooth-le'
+import { Capacitor } from '@capacitor/core'
+import { defineStore } from 'pinia'
 
-import { stripNotSupported, textToHidEvents } from '@/utils/keymap-german';
-import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle';
-import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol';
-import { breakDoku, multiline, placeholder } from '@/utils/text';
-import { textIf } from '@/utils/filter';
-import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persistence';
-import { toRaw } from 'vue';
+import { toRaw } from 'vue'
+import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persistence'
+import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
+import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
+import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 
+import { breakDoku, multiline, placeholder } from '@/utils/text'
+import { textIf } from '@/utils/filter'
+
+// ############################################################################
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -46,6 +48,8 @@ function hydrateProtocol(input: unknown): Protocol | null {
 
   return hydrateLikeTemplate(resetProtocol(), input)
 }
+
+// ############################################################################
 
 export const useDokuStore = defineStore('doku', {
   state: () => ({
@@ -377,7 +381,7 @@ export const useDokuStore = defineStore('doku', {
 
       const isCourseVerlegung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
       const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.EINWEISUNG
-      const isPediatric: boolean = state.doku.ident.age.totalYears <= 3
+      const isPediatric: boolean = state.doku.ident.age?.totalYears <= 3
 
       const nothingToTreat: boolean = (
         !state.doku.Xabcde.hasCriticalBleeding
@@ -457,7 +461,7 @@ export const useDokuStore = defineStore('doku', {
 
         isTrauma,
         isPediatric,
-        isGeriatric: state.doku.ident.age.totalYears >= 65,
+        isGeriatric: state.doku.ident.age?.totalYears >= 65,
 
       } as ProtocolContext
     },

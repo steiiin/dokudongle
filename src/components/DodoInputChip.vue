@@ -1,8 +1,10 @@
 <template>
+
   <IonChip :color="color" :outline="isEmpty" :disabled="disabled"
-    :class="[ {
+    :class="[{
       'DdInputChip--inactive': isEmpty,
-      'DdInputChip--bold': !isEmpty } ]"
+      'DdInputChip--bold': !isEmpty
+    }]"
     @click="openPopover">
     <IonIcon v-if="!isEmpty"
       :icon="closeCircle"
@@ -39,15 +41,17 @@
 </template>
 
 <script setup lang="ts">
+
 import { computed, ref } from 'vue'
 import { closeCircle, checkmark } from 'ionicons/icons'
 
+// ############################################################################
+
 type InputChipOption =
   | string
-  | {
-      value: string
-      label: string
-    }
+  | { value: string, label: string }
+
+// ############################################################################
 
 const props = withDefaults(
   defineProps<{
@@ -67,8 +71,12 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string | null): void
 }>()
 
+// ############################################################################
+
 const isPopoverOpen = ref(false)
 const popoverEvent = ref<Event | undefined>(undefined)
+
+// ############################################################################
 
 const normalizedOptions = computed(() =>
   props.options.map((opt) =>
@@ -77,6 +85,8 @@ const normalizedOptions = computed(() =>
       : { value: opt.value, label: opt.label },
   ),
 )
+
+// ############################################################################
 
 const isEmpty = computed(() => !props.modelValue)
 
@@ -89,6 +99,8 @@ const displayLabel = computed(() => {
   return selectedOption.value?.label ?? props.modelValue
 })
 
+// ############################################################################
+
 const openPopover = (ev: Event) => {
   if (props.disabled) return
   popoverEvent.value = ev
@@ -99,6 +111,8 @@ const closePopover = () => {
   isPopoverOpen.value = false
   popoverEvent.value = undefined
 }
+
+// ############################################################################
 
 const selectOption = (opt: { value: string; label: string }) => {
   emit('update:modelValue', opt.value)
@@ -115,26 +129,31 @@ const clearValue = () => {
   emit('update:modelValue', null)
 }
 
+// ############################################################################
+
 const getOptionKey = (opt: { value: string; label: string }) => opt.value
+
 </script>
 
 <style scoped>
-ion-chip {
-  margin-left: 0;
-  cursor: pointer;
-}
 
-.DdInputChip--inactive {
-  opacity: 0.9;
-}
+  ion-chip {
+    margin-left: 0;
+    cursor: pointer;
+  }
 
-.DdInputChip--bold {
-  border: 1px solid var(--ion-color-shade);
-}
+  .DdInputChip--inactive {
+    opacity: 0.9;
+  }
 
-.DdInputChip__clear {
-  margin-right: 0.35rem;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
+  .DdInputChip--bold {
+    border: 1px solid var(--ion-color-shade);
+  }
+
+  .DdInputChip__clear {
+    margin-right: 0.35rem;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
 </style>

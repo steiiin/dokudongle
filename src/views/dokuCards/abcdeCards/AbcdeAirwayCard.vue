@@ -12,8 +12,8 @@
           </IonToggle>
         </IonItem>
 
-        <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction" lines="inset"
-          empty-label="Keine"
+        <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction"
+          lines="inset" empty-label="Keine"
           :options="[
             'Fremdkörper',
             'Schwellung',
@@ -83,12 +83,13 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
+import { watch } from 'vue'
 import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-const ctx = computed(() => store.context)
+
+// ############################################################################
 
 watch(() => store.doku.xAbcde.isBreathing, (v) => {
 
@@ -118,8 +119,8 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
 </script>
 <style scoped>
 
-ion-card {
-  --card-bg: #377eb849;
-}
+  ion-card {
+    --card-bg: #377eb849;
+  }
 
 </style>

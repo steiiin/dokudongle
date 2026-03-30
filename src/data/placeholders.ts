@@ -31,7 +31,7 @@ export type PlaceholderTemplate = {
 
 // ############################################################################
 
-export const INPUT_TEXTAREA_PLACEHOLDERS: Record<string, PlaceholderTemplate> = {
+export const DATA_Placeholders: Record<string, PlaceholderTemplate> = {
   [PH_Verlegung]: {
     key: PH_Verlegung, label: 'Verlegung',
     template: 'Verlegung von <START> nach <ZIEL>.\n',

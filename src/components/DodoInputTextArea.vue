@@ -139,13 +139,15 @@
 
 <script setup lang="ts">
 
-import { alertController, toastController } from '@ionic/vue'
-
-import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
+import { alertController, toastController } from '@ionic/core'
+
+import { DATA_Placeholders, type PlaceholderTemplate } from '@/data/placeholders'
 import { EnhanceableText } from '@/types/protocol/input'
-import { INPUT_TEXTAREA_PLACEHOLDERS, type PlaceholderTemplate } from '@/data/placeholders'
 import { gainFocus } from '@/utils/input'
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue: EnhanceableText
@@ -160,6 +162,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: EnhanceableText): void
 }>()
+
+// ############################################################################
 
 const isModalOpen = ref(false)
 const draft = ref('')
@@ -192,7 +196,7 @@ const resolvedPlaceholders = computed(() => {
     return []
   }
   return props.placeholders
-    .map((placeholderKey) => INPUT_TEXTAREA_PLACEHOLDERS[placeholderKey.toLowerCase().trim()])
+    .map((placeholderKey) => DATA_Placeholders[placeholderKey.toLowerCase().trim()])
     .filter((placeholder): placeholder is PlaceholderTemplate => Boolean(placeholder))
 })
 const resolveColor = (color?: string): string | undefined => {
@@ -437,7 +441,7 @@ const deleteText = async () => {
 //#region Placeholders
 
 const containsDuplicate = (key: string) => {
-  const placeholderDefinition = INPUT_TEXTAREA_PLACEHOLDERS[key]
+  const placeholderDefinition = DATA_Placeholders[key]
   if (!placeholderDefinition?.avoidDuplicates) {
     return false
   }

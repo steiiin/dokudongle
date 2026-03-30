@@ -36,6 +36,8 @@ import router from '@/router'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 
+// ############################################################################
+
 interface StateText {
   title: string;
   description: string;
@@ -66,6 +68,8 @@ const stateText = computed(() => {
 
 })
 
+// ############################################################################
+
 const connectDongle = async () => {
   await store.connectDongle()
   if (store.isDongleConnected) {
@@ -76,37 +80,37 @@ const connectDongle = async () => {
 </script>
 <style lang="scss" scoped>
 
-#container
-{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+  #container
+  {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 
-  & .symbol {
-    font-size: 5em;
+    & .symbol {
+      font-size: 5em;
+    }
+
+    & h1 {
+      font-size: 1.25em;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      margin: .5rem 0 0 0;
+      padding: 0;
+    }
+
+    & p {
+      max-width: 60%; text-align: center;
+      margin: 0 0 .5rem 0; padding: 0;
+    }
+
+    & ion-button {
+      flex: unset;
+    }
+
   }
-
-  & h1 {
-    font-size: 1.25em;
-    font-weight: bold;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    text-align: center;
-    margin: .5rem 0 0 0;
-    padding: 0;
-  }
-
-  & p {
-    max-width: 60%; text-align: center;
-    margin: 0 0 .5rem 0; padding: 0;
-  }
-
-  & ion-button {
-    flex: unset;
-  }
-
-}
 
 </style>

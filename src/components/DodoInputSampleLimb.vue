@@ -1,4 +1,5 @@
 <template>
+
   <ion-item button :detail="true" @click="isOpen = true" :lines="lines">
     <ion-label>{{ label }}</ion-label>
     <ion-note slot="end">{{ model.text }}</ion-note>
@@ -31,11 +32,8 @@
           </ion-item-divider>
 
           <ion-item lines="none">
-            <ion-select
-              label="Typ"
-              interface="popover"
-              v-model="model.dms.state"
-            >
+            <ion-select v-model="model.dms.state"
+              label="Typ" interface="popover">
               <ion-select-option value="">Nicht Anwendbar</ion-select-option>
               <ion-select-option value="iO">In Ordnung</ion-select-option>
               <ion-select-option value="gestoert">Gestört</ion-select-option>
@@ -54,15 +52,17 @@
       </ion-list>
     </ion-content>
   </ion-modal>
+
 </template>
 
 <script setup lang="ts">
 
-import DodoInputText from './DodoInputText.vue'
-
 import { computed, ref, watch } from 'vue'
+
 import { gainFocus } from '@/utils/input'
 import { SstLimb } from '@/types/protocol/sample'
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue: SstLimb
@@ -74,19 +74,20 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: SstLimb): void
 }>()
 
-// two-way binding helper
+// ############################################################################
+
+const isOpen = ref(false)
+const inputRef = ref<any | null>(null)
+
 const model = computed<SstLimb>({
   get: () => props.modelValue,
   set: (v) => emit('update:modelValue', v),
 })
 
-// local UI state
-const isOpen = ref(false)
-const inputRef = ref<any | null>(null)
+// ############################################################################
 
-// watchers mimic original behavior
 watch(() => model.value.isInjured, () => {
-    model.value.dms.state = 'iO'
+  model.value.dms.state = 'iO'
 })
 watch(() => model.value.dms.state, (v) => {
   model.value.dms.deficit = ''
@@ -94,7 +95,3 @@ watch(() => model.value.dms.state, (v) => {
 })
 
 </script>
-
-<style scoped>
-/* optional: tighten spacing if desired */
-</style>

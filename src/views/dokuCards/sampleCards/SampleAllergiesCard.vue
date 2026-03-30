@@ -36,6 +36,8 @@ import { basicCap } from '@/utils/autocorrect/basic'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 
+// ############################################################################
+
 const inputAllergiesDescription = ref<any|null>(null)
 
 watch(() => store.doku.sampler.allergies.level, async (v) => {
@@ -53,7 +55,9 @@ const placeholder = computed(() => {
 
 </script>
 <style scoped>
-ion-card {
-  --card-bg: #865830;
-}
+
+  ion-card {
+    --card-bg: #865830;
+  }
+
 </style>

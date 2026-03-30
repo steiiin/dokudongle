@@ -250,31 +250,19 @@
 
 import { computed } from 'vue'
 
+import { basicCap } from '@/utils/autocorrect/basic'
+import { fullIf } from '@/utils/filter'
+
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
-import { basicCap } from '@/utils/autocorrect/basic'
-import { fullIf } from '@/utils/filter'
-
-/////////////////////////////////////////////////
+// ############################################################################
 
 const stepline = (expr: boolean) => expr ? 'full' : 'inset'
 
-/////////////////////////////////////////////////
+// ############################################################################
 
 const isSHTStateVisible = computed(() => !!store.doku.sampler.symptoms.trauma.head.headState.title)
-
-// watch(() => store.doku.stu.Pelvis.hasHemodynamicInstability, () => {
-//   store.doku.stu.Pelvis.hasHighEnergyMechanism = false
-//   store.doku.stu.Pelvis.hasObviousInjuries = false
-//   store.doku.stu.Pelvis.PelvisPainOccurence = ''
-// })
-
-// watch(() => botStore.isNonVerbal, (v) => {
-//   if (v && store.doku.stu.Pelvis.PelvisPainOccurence != '') {
-//     store.doku.stu.Pelvis.PelvisPainOccurence = ''
-//   }
-// })
 
 </script>

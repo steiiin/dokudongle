@@ -1,46 +1,40 @@
 <template>
   <div class="ns-age-input">
-    <IonInput
-      v-model="internalYears"
+
+    <IonInput v-model="internalYears"
       label="Alter"
-      class="ns-age-input--part"
-      :class="{ error: internalYears === '' }"
-      fill="outline"
-      labelPlacement="stacked"
-      inputmode="numeric"
-      :maxlength="3"
+      class="ns-age-input--part" :class="{ error: internalYears === '' }"
+      fill="outline" labelPlacement="stacked"
+      inputmode="numeric" :maxlength="3"
       ref="internalYearEl"
       @ionInput="onYearInput"
       @ionBlur="onYearBlur"
-      @ion-focus="selectYear"
-    >
+      @ion-focus="selectYear">
       <span slot="end" class="year-suffix">{{ yearsSuffix }}</span>
     </IonInput>
 
-    <IonInput
-      v-if="showMonthInput"
-      v-model="internalMonths"
+    <IonInput v-if="showMonthInput" v-model="internalMonths"
       label="Monate"
-      class="ns-age-input--part"
-      :class="{ error: internalMonths === '' }"
-      fill="outline"
-      labelPlacement="stacked"
-      inputmode="numeric"
-      :maxlength="2"
+      class="ns-age-input--part" :class="{ error: internalMonths === '' }"
+      fill="outline" labelPlacement="stacked"
+      inputmode="numeric" :maxlength="2"
       ref="internalMonthEl"
       @ionInput="onMonthInput"
-      @keydown="onMonthKeydown"
-    >
+      @keydown="onMonthKeydown">
       <span slot="end" class="year-suffix">{{ monthsSuffix }}</span>
     </IonInput>
+
   </div>
 </template>
 
 <script setup lang="ts">
 
 import { computed, nextTick, ref, watch } from 'vue'
-import { gainFocus } from '@/utils/input'
+
+import { gainFocus, setNativeValue } from '@/utils/input'
 import { PatientAge } from '@/types/protocol'
+
+// ############################################################################
 
 const props = defineProps<{
   modelValue?: PatientAge | null
@@ -50,6 +44,8 @@ const emit = defineEmits<{
   (event: 'update:modelValue', value: PatientAge | null): void
 }>()
 
+// ############################################################################
+
 const internalYears = ref<string>('')
 const internalMonths = ref<string>('')
 
@@ -58,41 +54,42 @@ const internalMonthEl = ref<any | null>(null)
 
 const lastValidValue = ref<PatientAge | null>(null)
 
+// ############################################################################
+
 const showMonthInput = computed(() => internalYears.value === '0')
 
-const yearsSuffix = computed(() =>
-  internalYears.value !== '' && internalYears.value === '1' ? 'Jahr' : 'Jahre'
-)
+const yearsSuffix = computed(() => internalYears.value !== '' && internalYears.value === '1'
+  ? 'Jahr'
+  : 'Jahre')
 
-const monthsSuffix = computed(() =>
-  internalMonths.value !== '' && internalMonths.value === '1' ? 'Monat' : 'Monate'
-)
+const monthsSuffix = computed(() => internalMonths.value !== '' && internalMonths.value === '1'
+  ? 'Monat'
+  : 'Monate')
+
+// ############################################################################
 
 const cloneAge = (value: PatientAge | null): PatientAge | null => {
-  if (!value) return null
+  if (!value) { return null }
   return new PatientAge(value.timespan, value.unit)
 }
 
 const syncFromModel = (value: PatientAge | null | undefined) => {
-  if (!value) {
-    return
-  }
+  if (!value) { return }
 
-  if (value.unit === 'months') {
+  if (value.unit === 'months')
+  {
     internalYears.value = '0'
     internalMonths.value = String(value.timespan)
-    return
+  }
+  else
+  {
+    internalYears.value = String(value.timespan)
+    internalMonths.value = ''
   }
 
-  internalYears.value = String(value.timespan)
-  internalMonths.value = ''
 }
 
-const setNativeValue = (inputRef: any, value: string) => {
-  const inputCmp = inputRef?.value
-  if (!inputCmp?.$el) return
-  inputCmp.$el.value = value
-}
+// ############################################################################
 
 const updateDisplayedValues = () => {
   setNativeValue(internalYearEl, internalYears.value)
@@ -100,14 +97,16 @@ const updateDisplayedValues = () => {
 }
 
 const emitModel = () => {
-  if (internalYears.value === '') {
+
+  if (internalYears.value === '')
+  {
     emit('update:modelValue', null)
     return
   }
 
   const years = Number(internalYears.value)
-
-  if (years > 0) {
+  if (years > 0)
+  {
     const value = new PatientAge(years, 'years')
     lastValidValue.value = cloneAge(value)
     emit('update:modelValue', value)
@@ -124,7 +123,10 @@ const emitModel = () => {
   const value = new PatientAge(months, 'months')
   lastValidValue.value = cloneAge(value)
   emit('update:modelValue', value)
+
 }
+
+// ############################################################################
 
 const onYearInput = (event: CustomEvent) => {
   let years = String(event.detail.value ?? '').replace(/\D+/g, '')
@@ -212,6 +214,8 @@ const selectYear = () => {
   gainFocus(internalYearEl, true)
 }
 
+// ############################################################################
+
 watch(
   () => props.modelValue,
   (v) => {
@@ -234,33 +238,37 @@ watch(
     }
   }
 )
+
 </script>
 
-<style scoped>
-.ns-age-input {
-  display: flex;
-  gap: 0.5rem;
-}
+<style lang="scss" scoped>
+
+  .ns-age-input {
+
+    display: flex;
+    gap: 0.5rem;
+
+    &--part {
+      border-radius: 4px;
+      max-width: 7rem;
+      text-align: center;
+    }
+
+    &--part:hover {
+      --border-color: var(--highlight-color);
+      background: var(--ns-ion-primary-fade);
+    }
+
+    &--part.error {
+      --border-color: #f00;
+    }
+
+  }
 
 .ns-age-estimate,
 .ns-age-input--part {
   --border-width: var(--highlight-height);
   --border-color: var(--highlight-color);
-}
-
-.ns-age-input--part {
-  border-radius: 4px;
-  max-width: 7rem;
-  text-align: center;
-}
-
-.ns-age-input--part:hover {
-  --border-color: var(--highlight-color);
-  background: var(--ns-ion-primary-fade);
-}
-
-.ns-age-input--part.error {
-  --border-color: #f00;
 }
 
 .year-suffix {
@@ -269,4 +277,5 @@ watch(
   cursor: text;
   font-size: 0.9em;
 }
+
 </style>

@@ -3,7 +3,7 @@ export type RedflagApplication = 'Verweigerung' | 'BvO'
 
 // ######################################################################################
 
-type SignalId = typeof Signals[number]['id']
+type SignalId = typeof DATA_Signals[number]['id']
 
 // ######################################################################################
 
@@ -456,7 +456,7 @@ export const _SignalTextsById: Record<SignalId, string> = Object.fromEntries(
   _SignalDefs.map(s => [s.id, s.text])
 ) as Record<SignalId, string>
 
-export const Signals: RedflagSignal[] = _SignalDefs.map(
+export const DATA_Signals: RedflagSignal[] = _SignalDefs.map(
   s => new RedflagSignal(s.id, s.text)
 )
 // ######################################################################################
@@ -477,7 +477,7 @@ export class RedflagScenario {
 
 // ######################################################################################
 
-export const Scenarios: Array<RedflagScenario> = [
+export const DATA_Scenarios: Array<RedflagScenario> = [
 
   /////////////////////////////////////////////////////////
   // Verletzungen
@@ -1271,6 +1271,7 @@ export const Scenarios: Array<RedflagScenario> = [
   // TODO: Nierenkolik (leicht/schwer)
   // TODO: Harnverhalt (leicht/schwer)
 
+  // TODO: Harnwegsinfekt
   // TODO: Urosepsis
 
   defSc(

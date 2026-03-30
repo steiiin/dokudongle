@@ -1,7 +1,11 @@
 import { Storage } from '@ionic/storage'
 
+// ############################################################################
+
 export const DOKU_STORAGE_KEY = 'doku_state';
 export const DOKU_SCHEMA_VERSION = 1;
+
+// ############################################################################
 
 export interface PersistedDokuState {
   schemaVersion?: number
@@ -25,6 +29,8 @@ async function getStorage(): Promise<Storage> {
   storageInstance = await storageInitPromise;
   return storageInstance;
 }
+
+// ############################################################################
 
 export async function initStorage(): Promise<void> {
   await getStorage();
