@@ -47,7 +47,7 @@ export class QuickieTemplate extends Quickie
     const templatePattern = this.fields.reduce((pattern, field) => {
       return pattern.replaceAll(`<${field.key}>`, '(.+?)')
     }, this.template.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    return new RegExp(templatePattern, 'm').test(text)
+    return !(new RegExp(templatePattern, 'm').test(text))
   }
 }
 
