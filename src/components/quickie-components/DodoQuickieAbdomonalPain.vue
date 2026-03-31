@@ -6,28 +6,19 @@
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
-          <IonButton @click="handleCancel">
-            Abbrechen
-          </IonButton>
+          <IonButton @click="handleCancel">Abbrechen</IonButton>
         </IonButtons>
         <IonButtons slot="end">
-          <IonButton
-            color="primary"
-            :disabled="containsEmptyPlaceholders"
-            @click="handleAccept"
-          >
-            Einfügen
-          </IonButton>
+          <IonButton color="primary" :disabled="containsEmptyText" @click="handleAccept">Einfügen</IonButton>
         </IonButtons>
       </IonToolbar>
     </IonHeader>
 
     <IonContent class="ion-padding">
-      <div
-        v-if="quickie"
-        class="dd-placeholder-preview"
-        v-html="placeholderPreviewText"
-      />
+
+      <div v-if="quickie" class="dd-placeholder-preview"
+        v-html="placeholderPreviewText">
+      </div>
 
       <IonList v-if="quickie">
         <template
@@ -65,7 +56,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue'
-import { QuickieTemplate } from '@/data/placeholders'
+import { QuickieTemplate } from '@/data/quickies'
 import DodoInputText from '@/components/DodoInputText.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 
@@ -124,7 +115,7 @@ const escapeHtml = (value: string): string => {
     .replaceAll("'", '&#39;')
 }
 
-const containsEmptyPlaceholders = computed(() => {
+const containsEmptyText = computed(() => {
   return placeholderPreviewText.value.includes('dodo-tag')
 })
 

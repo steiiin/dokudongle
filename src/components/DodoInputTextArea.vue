@@ -54,9 +54,11 @@
           />
 
           <div class="dd-placeholder-buttons" v-if="resolvedQuickies.length > 0">
-            <IonButton v-for="quickie in resolvedQuickies" :key="quickie.key" fill="solid"
-              @click="openQuickie(quickie)">
-              {{ quickie.label }}
+            <IonButton v-for="quickie in resolvedQuickies"
+              :key="quickie.entry.key" fill="solid"
+              :disabled="quickie.isDisabled"
+              @click="openQuickie(quickie.entry)">
+              {{ quickie.entry.label }}
             </IonButton>
           </div>
 
@@ -98,10 +100,9 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
 import { alertController, toastController } from '@ionic/core'
 
-import { DATA_Placeholders, QuickieTemplate, type Quickie } from '@/data/placeholders'
+import { DATA_Quickies, QuickieTemplate, type Quickie } from '@/data/quickies'
 import { EnhanceableText } from '@/types/protocol/input'
 import { gainFocus } from '@/utils/input'
-import DodoQuickieTemplate from './placeholder-fields/DodoQuickieTemplate.vue'
 
 // ############################################################################
 
@@ -111,7 +112,7 @@ const props = defineProps<{
   placeholder?: string
   mandatory?: boolean
   inheritStyle?: boolean
-  placeholders?: string[]
+  quickieKeys?: string[]
   enhanceFn: (draft: string) => Promise<string | null>
 }>()
 
@@ -143,7 +144,6 @@ const activeQuickie = ref<Quickie | null>(null)
 
 // ############################################################################
 
-
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
 const triggerActionLabel = computed(() => props.modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten')
 const triggerColor = computed(() => {
@@ -154,15 +154,15 @@ const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'outline')
 const isEnhanceDisabled = computed(() => props.modelValue.isEnhancing || draft.value.trim().length === 0)
 
 const resolvedQuickies = computed(() => {
-  if (!props.placeholders || props.placeholders.length === 0) {
-    return []
-  }
-  return props.placeholders
-    .map((quickieKey) => DATA_Placeholders[quickieKey.toLowerCase().trim()])
+  if (!props.quickieKeys || props.quickieKeys.length === 0) { return [] }
+  return props.quickieKeys
+    .map((quickieKey) => DATA_Quickies[quickieKey.toLowerCase().trim()])
     .filter((quickie): quickie is Quickie => Boolean(quickie))
-    .filter((quickie) => quickie.isAvailable(draft.value))
+    .map((quickie) => ({
+      entry: quickie,
+      isDisabled: !quickie.isAvailable(draft.value),
+    }))
 })
-
 
 const cloneModelValue = (): EnhanceableText => props.modelValue.clone()
 const emitUpdated = (updated: EnhanceableText) => emit('update:modelValue', updated)
@@ -374,28 +374,16 @@ const activeQuickieComponent = computed(() => {
   return activeQuickie.value.component
 })
 
-const isQuickieTemplate = (quickie: Quickie): boolean => {
-  return quickie instanceof QuickieTemplate
-}
-
 // ############################################################################
 
 const openQuickie = async (quickie: Quickie) => {
   await rememberCursorPosition()
-
-  if (!isQuickieTemplate(quickie)) {
-    await insertQuickieText(quickie.createText())
-    return
-  }
-
   activeQuickie.value = quickie
   isQuickieModalOpen.value = true
 }
 
 const insertQuickieText = async (insertedText: string) => {
-  if (!insertedText || insertedText.trim().length === 0) {
-    return
-  }
+  if (!insertedText || insertedText.trim().length === 0) { return }
 
   commitOpenEditIfNeeded()
 
@@ -414,6 +402,7 @@ const insertQuickieText = async (insertedText: string) => {
   gainFocus(inputTextarea)
   pendingCursorPosition.value = insertedTextEnd
   await setCursorPosition(insertedTextEnd)
+
 }
 
 // ############################################################################

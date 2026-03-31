@@ -8,7 +8,7 @@
       <DodoInputTextArea v-model="store.doku.situation"
         title="Situation" placeholder="Beschreibe ..."
         :enhance-fn="enhanceGeneral" mandatory
-        :placeholders="placeholders">
+        :quickieKeys="quickieKeys">
         Beschreibe die <b>Situation</b> vor Ort. <br>
         <template v-if="ctx.isTrauma">
           Denke an den <b>Unfallzeitpunkt</b>.
@@ -24,7 +24,7 @@
 
 import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
-import { PH_Einweisung, PH_Verlegung } from '@/data/placeholders'
+import { PH_Einweisung, PH_Verlegung } from '@/data/quickies'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -32,7 +32,7 @@ const ctx = computed(() => store.context)
 
 // ############################################################################
 
-const placeholders = computed(() => {
+const quickieKeys = computed(() => {
   const list: Array<string> = []
   if (ctx.value.isCourseVerlegung) { list.push(PH_Verlegung) }
   if (ctx.value.isCourseEinweisung) { list.push(PH_Einweisung) }

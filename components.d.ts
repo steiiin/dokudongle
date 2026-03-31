@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    copy: typeof import('./src/components/quickie-components/DodoQuickieTemplate copy.vue')['default']
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
     DodoConnectionRename: typeof import('./src/components/DodoConnectionRename.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
@@ -28,7 +29,8 @@ declare module 'vue' {
     DodoInputTreatment: typeof import('./src/components/DodoInputTreatment.vue')['default']
     DodoItemModal: typeof import('./src/components/DodoItemModal.vue')['default']
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
-    DodoQuickieTemplate: typeof import('./src/components/placeholder-fields/DodoQuickieTemplate.vue')['default']
+    DodoQuickieAbdomonalPain: typeof import('./src/components/quickie-components/DodoQuickieAbdomonalPain.vue')['default']
+    DodoQuickieTemplate: typeof import('./src/components/quickie-components/DodoQuickieTemplate.vue')['default']
     DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']
     DodoSwitchButton: typeof import('./src/components/DodoSwitchButton.vue')['default']

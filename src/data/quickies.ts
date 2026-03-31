@@ -1,5 +1,6 @@
 import { OptionInput } from "@/components/DodoInputSelect.vue"
-import DodoQuickieTemplate from "@/components/placeholder-fields/DodoQuickieTemplate.vue"
+import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuickieAbdomonalPain.vue"
+import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
 import { Component, markRaw } from "vue"
@@ -23,7 +24,6 @@ export abstract class Quickie
     public component: Component,
   ){}
   abstract isAvailable(text: string): boolean
-  abstract createText(): string
 }
 
 // --------------------------------------------------------
@@ -44,33 +44,28 @@ export class QuickieTemplate extends Quickie
     super(key, label, markRaw(DodoQuickieTemplate))
   }
   public isAvailable(text: string): boolean {
-    return true
-  }
-  public createText(): string {
-    return ''
+    const templatePattern = this.fields.reduce((pattern, field) => {
+      return pattern.replaceAll(`<${field.key}>`, '(.+?)')
+    }, this.template.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    return new RegExp(templatePattern, 'm').test(text)
   }
 }
 
 // --------------------------------------------------------
 
-export class QuickieAbdominalOpqrst extends Quickie
+export class QuickieAbdominalPain extends Quickie
 {
-  constructor(public key: string, public label: string,
-    public template: string,
-    public fields: QuickieTemplateField[] ) {
-    super(key, label, () => null)
+  constructor(public key: string, public label: string) {
+    super(key, label, markRaw(DodoQuickieAbdomonalPain))
   }
   public isAvailable(text: string): boolean {
     return true
-  }
-  public createText(): string {
-    return ''
   }
 }
 
 // ############################################################################
 
-export const DATA_Placeholders: Record<string, Quickie> = {
+export const DATA_Quickies: Record<string, Quickie> = {
   [PH_Verlegung]: new QuickieTemplate(PH_Verlegung,
     'Verlegung', 'Verlegung von <START> nach <ZIEL>.\n',
     [
