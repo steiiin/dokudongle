@@ -2,7 +2,7 @@ import { OptionInput } from "@/components/DodoInputSelect.vue"
 import DodoQuickieTemplate from "@/components/placeholder-fields/DodoQuickieTemplate.vue"
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
-import { Component } from "vue"
+import { Component, markRaw } from "vue"
 
 // ############################################################################
 
@@ -41,7 +41,7 @@ export class QuickieTemplate extends Quickie
   constructor(public key: string, public label: string,
     public template: string,
     public fields: QuickieTemplateField[] ) {
-    super(key, label, () => DodoQuickieTemplate)
+    super(key, label, markRaw(DodoQuickieTemplate))
   }
   public isAvailable(text: string): boolean {
     return true
