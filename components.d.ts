@@ -28,6 +28,7 @@ declare module 'vue' {
     DodoInputTreatment: typeof import('./src/components/DodoInputTreatment.vue')['default']
     DodoItemModal: typeof import('./src/components/DodoItemModal.vue')['default']
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
+    DodoQuickieTemplate: typeof import('./src/components/placeholder-fields/DodoQuickieTemplate.vue')['default']
     DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']
     DodoSwitchButton: typeof import('./src/components/DodoSwitchButton.vue')['default']

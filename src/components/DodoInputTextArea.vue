@@ -52,17 +52,14 @@
             @ionBlur="handleBlur"
             @ionInput="handleInput"
           />
-          <div class="dd-placeholder-buttons" v-if="resolvedPlaceholders.length > 0">
-            <IonButton
-              v-for="placeholderTemplate in resolvedPlaceholders"
-              :key="placeholderTemplate.key"
-              :disabled="containsDuplicate(placeholderTemplate.key)"
-              fill="solid"
-              @click="openPlaceholderDialog(placeholderTemplate)"
-            >
-              {{ placeholderTemplate.label }}
+
+          <div class="dd-placeholder-buttons" v-if="resolvedQuickies.length > 0">
+            <IonButton v-for="quickie in resolvedQuickies" :key="quickie.key" fill="solid"
+              @click="openQuickie(quickie)">
+              {{ quickie.label }}
             </IonButton>
           </div>
+
         </div>
       </IonContent>
       <IonFooter>
@@ -84,56 +81,14 @@
       </IonFooter>
     </IonModal>
 
-    <IonModal :is-open="isPlaceholderModalOpen" class="dd-placeholder-modal">
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>{{ activePlaceholder?.label }}</IonTitle>
-        </IonToolbar>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton @click="closePlaceholderDialog">
-              Abbrechen
-            </IonButton>
-          </IonButtons>
-          <IonButtons slot="end">
-            <IonButton
-              color="primary"
-              :disabled="containsEmptyPlaceholders"
-              @click="acceptPlaceholderDialog">
-              Einfügen
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent class="ion-padding">
-        <div v-if="activePlaceholder" class="dd-placeholder-preview" v-html="placeholderPreviewText" />
-        <IonList v-if="activePlaceholder">
-          <template v-for="(field, index) in activePlaceholder.fields" :key="field.key">
-            <DodoInputSelect
-              v-if="field.allowOptions"
-              v-model="placeholderValues[field.key]"
-              :label="field.key"
-              :options="field.options"
-              :allow-custom="field.allowCustom"
-              :custom-label="field.customLabel"
-              :custom-placeholder="field.customPlaceholder"
-              :label-color="field.color"
-              :lines="isLastPlaceholderField(index) ? 'none' : 'full'"
-              :autocorrect-fn="field.autocorrectFn"
-            />
-            <IonItem v-else :lines="isLastPlaceholderField(index) ? 'none' : 'full'">
-              <DodoInputText
-                v-model="placeholderValues[field.key]"
-                :label="field.key"
-                :placeholder="field.customPlaceholder"
-                :label-color="field.color"
-                :autocorrect-fn="field.autocorrectFn"
-              />
-            </IonItem>
-          </template>
-        </IonList>
-      </IonContent>
-    </IonModal>
+    <component v-if="activeQuickieComponent"
+      :is="activeQuickieComponent"
+      :is-open="isQuickieModalOpen"
+      :quickie="activeQuickie"
+      @cancel="closeQuickieDialog"
+      @accept="acceptQuickieDialog"
+    />
+
   </div>
 </template>
 
@@ -143,9 +98,10 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
 import { alertController, toastController } from '@ionic/core'
 
-import { DATA_Placeholders, type PlaceholderTemplate } from '@/data/placeholders'
+import { DATA_Placeholders, QuickieTemplate, type Quickie } from '@/data/placeholders'
 import { EnhanceableText } from '@/types/protocol/input'
 import { gainFocus } from '@/utils/input'
+import DodoQuickieTemplate from './placeholder-fields/DodoQuickieTemplate.vue'
 
 // ############################################################################
 
@@ -169,17 +125,24 @@ const isModalOpen = ref(false)
 const draft = ref('')
 const isEditing = ref(false)
 
-const TYPING_SNAPSHOT_DELAY_MS = 500
+// ############################################################################
+
 let typingSnapshotTimeout: ReturnType<typeof setTimeout> | null = null
+
+// ############################################################################
 
 const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
 const pendingCursorPosition = ref<number|null>(null)
-
-const isPlaceholderModalOpen = ref(false)
-const activePlaceholder = ref<PlaceholderTemplate | null>(null)
-const placeholderValues = ref<Record<string, string>>({})
 const inputTextarea = ref<any | null>(null)
+
+// ############################################################################
+
+const isQuickieModalOpen = ref(false)
+const activeQuickie = ref<Quickie | null>(null)
+
+// ############################################################################
+
 
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
 const triggerActionLabel = computed(() => props.modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten')
@@ -189,58 +152,17 @@ const triggerColor = computed(() => {
 })
 const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'outline')
 const isEnhanceDisabled = computed(() => props.modelValue.isEnhancing || draft.value.trim().length === 0)
-const containsEmptyPlaceholders = computed(() => placeholderPreviewText.value.includes('dodo-tag'))
 
-const resolvedPlaceholders = computed(() => {
+const resolvedQuickies = computed(() => {
   if (!props.placeholders || props.placeholders.length === 0) {
     return []
   }
   return props.placeholders
-    .map((placeholderKey) => DATA_Placeholders[placeholderKey.toLowerCase().trim()])
-    .filter((placeholder): placeholder is PlaceholderTemplate => Boolean(placeholder))
+    .map((quickieKey) => DATA_Placeholders[quickieKey.toLowerCase().trim()])
+    .filter((quickie): quickie is Quickie => Boolean(quickie))
+    .filter((quickie) => quickie.isAvailable(draft.value))
 })
-const resolveColor = (color?: string): string | undefined => {
-  if (!color || color.trim().length === 0) {
-    return undefined
-  }
 
-  const trimmedColor = color.trim()
-  if (trimmedColor.startsWith('#') || trimmedColor.startsWith('rgb') || trimmedColor.startsWith('hsl') || trimmedColor.startsWith('var(')) {
-    return trimmedColor
-  }
-
-  return `var(--ion-color-${trimmedColor})`
-}
-
-const escapeHtml = (value: string): string => {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;')
-}
-
-const isLastPlaceholderField = (index: number): boolean => {
-  const placeholder = activePlaceholder.value
-  if (!placeholder) {
-    return false
-  }
-  return index === placeholder.fields.length - 1
-}
-
-const placeholderPreviewText = computed(() => {
-  if (!activePlaceholder.value) { return '' }
-  return activePlaceholder.value.fields.reduce((text, field) => {
-    const value = placeholderValues.value[field.key]?.trim()
-    const color = resolveColor(field.color)
-    const fallbackTag = color
-      ? `<dodo-tag style="--dd-tag-color: ${escapeHtml(color)};">${field.key}</dodo-tag>`
-      : `<dodo-tag>${field.key}</dodo-tag>`
-    const replacement = value && value.length > 0 ? value : fallbackTag
-    return text.replaceAll(`<${field.key}>`, replacement)
-  }, activePlaceholder.value.template)
-})
 
 const cloneModelValue = (): EnhanceableText => props.modelValue.clone()
 const emitUpdated = (updated: EnhanceableText) => emit('update:modelValue', updated)
@@ -264,6 +186,9 @@ const closeModal = () => {
   commitOpenEditIfNeeded()
   isModalOpen.value = false
 }
+
+
+//#region Textarea
 
 const getNativeTextarea = async (): Promise<HTMLTextAreaElement | null> => {
   const element = inputTextarea.value?.$el
@@ -298,6 +223,8 @@ const setCursorPosition = async (position: number) => {
   }
 }
 
+// ############################################################################
+
 const clearTypingSnapshotTimeout = () => {
   if (!typingSnapshotTimeout) {
     return
@@ -329,7 +256,7 @@ const scheduleTypingSnapshot = () => {
   typingSnapshotTimeout = setTimeout(() => {
     typingSnapshotTimeout = null
     createTypingSnapshot()
-  }, TYPING_SNAPSHOT_DELAY_MS)
+  }, 500)
 }
 
 const handleInput = () => {
@@ -376,6 +303,8 @@ const commitOpenEditIfNeeded = () => {
 
   draft.value = updated.value
 }
+
+//#endregion
 
 //#region Toolbar
 
@@ -438,40 +367,38 @@ const deleteText = async () => {
 
 //#endregion
 
-//#region Placeholders
+//#region Quickies
 
-const containsDuplicate = (key: string) => {
-  const placeholderDefinition = DATA_Placeholders[key]
-  if (!placeholderDefinition?.avoidDuplicates) {
-    return false
-  }
-  const templatePattern = placeholderDefinition.fields.reduce((pattern, field) => {
-    return pattern.replaceAll(`<${field.key}>`, '(.+?)')
-  }, placeholderDefinition.template.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-  return new RegExp(templatePattern, 'm').test(draft.value)
+const activeQuickieComponent = computed(() => {
+  if (!activeQuickie.value) { return null }
+  return activeQuickie.value.component
+})
+
+const isQuickieTemplate = (quickie: Quickie): boolean => {
+  return quickie instanceof QuickieTemplate
 }
 
-const openPlaceholderDialog = async (placeholderTemplate: PlaceholderTemplate) => {
+// ############################################################################
+
+const openQuickie = async (quickie: Quickie) => {
   await rememberCursorPosition()
-  activePlaceholder.value = placeholderTemplate
-  placeholderValues.value = placeholderTemplate.fields.reduce((collector, field) => {
-    collector[field.key] = ''
-    return collector
-  }, {} as Record<string, string>)
-  isPlaceholderModalOpen.value = true
+
+  if (!isQuickieTemplate(quickie)) {
+    await insertQuickieText(quickie.createText())
+    return
+  }
+
+  activeQuickie.value = quickie
+  isQuickieModalOpen.value = true
 }
 
-const closePlaceholderDialog = () => {
-  isPlaceholderModalOpen.value = false
-  activePlaceholder.value = null
-}
-
-const acceptPlaceholderDialog = async () => {
-  if (!activePlaceholder.value) { return }
+const insertQuickieText = async (insertedText: string) => {
+  if (!insertedText || insertedText.trim().length === 0) {
+    return
+  }
 
   commitOpenEditIfNeeded()
 
-  const insertedText = placeholderPreviewText.value
   const selectionStart = lastCursorStart.value
   const selectionEnd = lastCursorEnd.value
   const before = draft.value.slice(0, selectionStart)
@@ -479,7 +406,6 @@ const acceptPlaceholderDialog = async () => {
   const insertedTextEnd = before.length + insertedText.length
 
   draft.value = `${before}${insertedText}${after}`
-  closePlaceholderDialog()
 
   const updated = cloneModelValue()
   updated.setText(draft.value)
@@ -488,6 +414,18 @@ const acceptPlaceholderDialog = async () => {
   gainFocus(inputTextarea)
   pendingCursorPosition.value = insertedTextEnd
   await setCursorPosition(insertedTextEnd)
+}
+
+// ############################################################################
+
+const closeQuickieDialog = () => {
+  isQuickieModalOpen.value = false
+  activeQuickie.value = null
+}
+
+const acceptQuickieDialog = async (insertedText: string) => {
+  closeQuickieDialog()
+  await insertQuickieText(insertedText)
 }
 
 //#endregion

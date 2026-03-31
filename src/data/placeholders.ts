@@ -1,6 +1,8 @@
 import { OptionInput } from "@/components/DodoInputSelect.vue"
+import DodoQuickieTemplate from "@/components/placeholder-fields/DodoQuickieTemplate.vue"
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
+import { Component } from "vue"
 
 // ############################################################################
 
@@ -13,7 +15,20 @@ export const OP_Hospitals = [ 'KH Radebeul', 'KH Meißen', 'KH Riesa' ]
 
 // ############################################################################
 
-export type PlaceholderTemplateField = {
+export abstract class Quickie
+{
+  constructor(
+    public key: string,
+    public label: string,
+    public component: Component,
+  ){}
+  abstract isAvailable(text: string): boolean
+  abstract createText(): string
+}
+
+// --------------------------------------------------------
+
+export type QuickieTemplateField = {
   key: string, color?: string,
   allowOptions?: boolean, allowCustom?: boolean,
   options?: Array<OptionInput>,
@@ -21,43 +36,64 @@ export type PlaceholderTemplateField = {
   autocorrectFn?: (draft: string) => string,
 }
 
-export type PlaceholderTemplate = {
-  key: string
-  label: string
-  template: string
-  avoidDuplicates?: boolean
-  fields: PlaceholderTemplateField[]
+export class QuickieTemplate extends Quickie
+{
+  constructor(public key: string, public label: string,
+    public template: string,
+    public fields: QuickieTemplateField[] ) {
+    super(key, label, () => DodoQuickieTemplate)
+  }
+  public isAvailable(text: string): boolean {
+    return true
+  }
+  public createText(): string {
+    return ''
+  }
+}
+
+// --------------------------------------------------------
+
+export class QuickieAbdominalOpqrst extends Quickie
+{
+  constructor(public key: string, public label: string,
+    public template: string,
+    public fields: QuickieTemplateField[] ) {
+    super(key, label, () => null)
+  }
+  public isAvailable(text: string): boolean {
+    return true
+  }
+  public createText(): string {
+    return ''
+  }
 }
 
 // ############################################################################
 
-export const DATA_Placeholders: Record<string, PlaceholderTemplate> = {
-  [PH_Verlegung]: {
-    key: PH_Verlegung, label: 'Verlegung',
-    template: 'Verlegung von <START> nach <ZIEL>.\n',
-    avoidDuplicates: true,
-    fields: [
+export const DATA_Placeholders: Record<string, Quickie> = {
+  [PH_Verlegung]: new QuickieTemplate(PH_Verlegung,
+    'Verlegung', 'Verlegung von <START> nach <ZIEL>.\n',
+    [
       {
         key: 'START', color: 'warning',
         allowOptions: true, allowCustom: true,
         options: OP_Hospitals,
         customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
-        autocorrectFn: correctHospital
+        autocorrectFn: correctHospital,
       },
       {
         key: 'ZIEL', color: 'success',
         allowOptions: true, allowCustom: true,
         options: OP_Hospitals,
         customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
-        autocorrectFn: correctHospital
+        autocorrectFn: correctHospital,
       },
-    ],
-  },
-  [PH_Einweisung]: {
-    key: PH_Einweisung, label: 'Einweisung',
-    template: 'Einweisung <ARZT> nach <ZIEL> wg. <KRANKHEIT>.\n',
-    avoidDuplicates: true,
-    fields: [
+    ]
+  ),
+
+  [PH_Einweisung]: new QuickieTemplate(PH_Einweisung,
+    'Einweisung', 'Einweisung <ARZT> nach <ZIEL> wg. <KRANKHEIT>.\n',
+    [
       {
         key: 'ARZT', color: 'success',
         allowOptions: false, allowCustom: true,
@@ -78,5 +114,6 @@ export const DATA_Placeholders: Record<string, PlaceholderTemplate> = {
         autocorrectFn: basicCap,
       }
     ],
-  },
+  ),
+
 }
