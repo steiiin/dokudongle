@@ -24,7 +24,7 @@
 
 import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
-import { PH_Einweisung, PH_Verlegung } from '@/data/quickies'
+import { QU_Einweisung, QU_Verlegung } from '@/data/quickies'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -34,8 +34,8 @@ const ctx = computed(() => store.context)
 
 const quickieKeys = computed(() => {
   const list: Array<string> = []
-  if (ctx.value.isCourseVerlegung) { list.push(PH_Verlegung) }
-  if (ctx.value.isCourseEinweisung) { list.push(PH_Einweisung) }
+  if (ctx.value.isCourseVerlegung) { list.push(QU_Verlegung) }
+  if (ctx.value.isCourseEinweisung) { list.push(QU_Einweisung) }
   return list
 })
 

@@ -46,9 +46,11 @@ const toggle = () => {
   }
   .DdToggleChip--inactive {
     opacity: 0.8;
+    outline: 1px solid transparent;
   }
   .DdToggleChip--bold {
-    border: 1px solid var(--ion-color-shade);
+    border: 1px solid var(--ion-color-shade, transparent);
   }
+
 
 </style>

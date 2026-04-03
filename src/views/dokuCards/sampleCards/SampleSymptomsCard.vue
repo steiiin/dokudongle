@@ -3,7 +3,8 @@
   <hr v-if="ctx.isTrauma">
 
   <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
-    title="Symptome" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral">
+    title="Symptome" placeholder="Beschreibe ..."
+    :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
     Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
     Infos bezüglich <b>OPQRST</b> ergänzen.
   </DodoInputTextArea>
@@ -17,8 +18,17 @@ import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
+import { QU_AbdominalPain, QU_Einweisung } from '@/data/quickies'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+// ############################################################################
+
+const quickieKeys = computed(() => {
+  const list: Array<string> = []
+  if (store.doku.xabcdE.abdominal.isAssessed && store.doku.xabcdE.abdominal.value.pain != 'keine') { list.push(QU_AbdominalPain) }
+  return list
+})
 
 </script>
 <style scoped>

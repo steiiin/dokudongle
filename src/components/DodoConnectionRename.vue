@@ -6,7 +6,7 @@
     </IonButton>
   </IonButtons>
 
-  <IonModal :is-open="isModalOpen || isRenaming" :can-dismiss="!isRenaming">
+  <IonModal :is-open="isModalOpen || isRenaming" :can-dismiss="false">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">Dongle-Einstellungen</IonTitle>

@@ -79,7 +79,6 @@ const onTogglePointerDown = () => {
 }
 
 const handleEmpty = () => {
-  console.log('handleEmpty + ' + toggleChanging.value)
   if (toggleChanging.value) { return }
   emit('update:toggle', false)
 }

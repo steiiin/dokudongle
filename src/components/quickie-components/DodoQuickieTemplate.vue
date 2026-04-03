@@ -1,5 +1,5 @@
 <template>
-  <IonModal :is-open="isOpen" class="dd-placeholder-modal">
+  <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false">
     <IonHeader>
       <IonToolbar>
         <IonTitle>{{ quickie?.label }}</IonTitle>
@@ -16,7 +16,7 @@
 
     <IonContent class="ion-padding">
 
-      <div v-if="quickie" class="dd-placeholder-preview"
+      <div v-if="quickie" class="dd-quickie-preview"
         v-html="placeholderPreviewText">
       </div>
 
@@ -154,7 +154,7 @@ const handleAccept = () => {
 
 <style scoped>
 
-  .dd-placeholder-preview {
+  .dd-quickie-preview {
     white-space: pre-wrap;
     padding: 0.75rem;
     border: 1px solid var(--ion-color-medium-tint);

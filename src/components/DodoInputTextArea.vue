@@ -17,7 +17,7 @@
       {{ title }} {{ triggerActionLabel }}
     </IonButton>
 
-    <IonModal :is-open="isModalOpen" class="dd-input-modal" :class="{ 'is-enhancing': modelValue.isEnhancing }">
+    <IonModal :is-open="isModalOpen" class="dd-input-modal" :class="{ 'is-enhancing': modelValue.isEnhancing }" :can-dismiss="false">
       <IonHeader>
         <IonToolbar>
           <IonTitle>{{ title }}</IonTitle>
@@ -53,7 +53,7 @@
             @ionInput="handleInput"
           />
 
-          <div class="dd-placeholder-buttons" v-if="resolvedQuickies.length > 0">
+          <div class="dd-quickie-buttons" v-if="resolvedQuickies.length > 0">
             <IonButton v-for="quickie in resolvedQuickies"
               :key="quickie.entry.key" fill="solid"
               :disabled="quickie.isDisabled"
@@ -529,16 +529,16 @@ defineExpose({
   opacity: 0.8;
 }
 
-.dd-placeholder-buttons {
+.dd-quickie-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
-.dd-placeholder-buttons ion-button {
+.dd-quickie-buttons ion-button {
   flex: 0;
 }
 
-.dd-placeholder-preview {
+.dd-quickie-preview {
   white-space: pre-wrap;
   padding: 0.75rem;
   border: 1px solid var(--ion-color-medium-tint);
@@ -547,13 +547,13 @@ defineExpose({
   background: var(--ion-color-light);
 }
 
-.dd-placeholder-fields {
+.dd-quickie-fields {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.dd-placeholder-label {
+.dd-quickie-label {
   display: block;
   margin-bottom: 0.4rem;
 }

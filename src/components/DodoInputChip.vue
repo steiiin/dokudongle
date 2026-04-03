@@ -147,7 +147,7 @@ const getOptionKey = (opt: { value: string; label: string }) => opt.value
   }
 
   .DdInputChip--bold {
-    border: 1px solid var(--ion-color-shade);
+    border: 1px solid transparent;
   }
 
   .DdInputChip__clear {

@@ -11,14 +11,14 @@
       <IonNote slot="end">{{ stateText }}</IonNote>
     </template>
   </IonItem>
-  <IonModal :is-open="isModalOpen">
+  <IonModal :is-open="isModalOpen" :can-dismiss="false">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">{{ modalLabel }}</IonTitle>
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
-          <IonButton @click="isModalOpen = false">Zurück</IonButton>
+          <IonButton @click="isModalOpen=false">Zurück</IonButton>
         </IonButtons>
       </IonToolbar>
     </IonHeader>
