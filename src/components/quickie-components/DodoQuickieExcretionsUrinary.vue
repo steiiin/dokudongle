@@ -126,7 +126,16 @@ const handleCancel = () => {
   emit('cancel')
 }
 
+const syncQuickieFromLocalState = () => {
+  props.quickie.catheterIssues = localCatheterIssues.value as QuickieExcretionsUrinary['catheterIssues']
+  props.quickie.output = outputSet.value.filter(e => e.enabled).map(e => e.label)
+  props.quickie.pain = painSet.value.filter(e => e.enabled).map(e => e.label)
+  props.quickie.hematuria = localHematuria.value as QuickieExcretionsUrinary['hematuria']
+  props.quickie.anomalies = anomaliesSet.value.filter(e => e.enabled).map(e => e.label)
+}
+
 const handleAccept = () => {
+  syncQuickieFromLocalState()
   emit('accept', `${previewText.value}\n`)
 }
 

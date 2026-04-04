@@ -177,7 +177,20 @@ const handleCancel = () => {
   emit('cancel')
 }
 
+const syncQuickieFromLocalState = () => {
+  Object.assign(props.quickie.region, localRegion.value)
+  props.quickie.onset = localOnset.value as QuickieAbdominalPain['onset']
+  props.quickie.onspan = localOnspan.value
+  props.quickie.provocation = provocationSet.value.filter(e => e.enabled).map(e => e.label)
+  props.quickie.palliation = palliationSet.value.filter(e => e.enabled).map(e => e.label)
+  props.quickie.quality = qualitySet.value.filter(e => e.enabled).map(e => e.label)
+  props.quickie.radiation = radiationSet.value.filter(e => e.enabled).map(e => e.label)
+  props.quickie.severity = localSeverity.value as QuickieAbdominalPain['severity']
+  props.quickie.time = timeSet.value.filter(e => e.enabled).map(e => e.label)
+}
+
 const handleAccept = () => {
+  syncQuickieFromLocalState()
   emit('accept', `${previewText.value}\n`)
 }
 

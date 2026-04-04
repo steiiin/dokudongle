@@ -131,7 +131,17 @@ const handleCancel = () => {
   emit('cancel')
 }
 
+const syncQuickieFromLocalState = () => {
+  props.quickie.pattern = localPattern.value as QuickieExcretionsBowels['pattern']
+  props.quickie.consistency = localConsistency.value as QuickieExcretionsBowels['consistency']
+  props.quickie.lastBowel = localLastBowel.value
+  props.quickie.bowelSounds = localBowelSounds.value as QuickieExcretionsBowels['bowelSounds']
+  props.quickie.blood = localBlood.value as QuickieExcretionsBowels['blood']
+  props.quickie.bowelPain = localBowelPain.value
+}
+
 const handleAccept = () => {
+  syncQuickieFromLocalState()
   emit('accept', `${previewText.value}\n`)
 }
 
