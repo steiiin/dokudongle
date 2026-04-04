@@ -21,7 +21,7 @@
           </IonToggle>
         </IonItem>
 
-        <DodoItemModal label="Atemmechanik" modal-label="Atemmechanik" v-if="store.doku.xAbcde.isBreathing"
+        <DodoItemModal label="Atemmechanik" v-if="store.doku.xAbcde.isBreathing"
           :state="store.doku.xaBcde.breathingState" lines="full">
 
           <IonItemDivider>
@@ -69,7 +69,7 @@
 
         </DodoItemModal>
 
-        <DodoItemModal label="Auskultation" modal-label="Auskultation" v-if="store.doku.xAbcde.isBreathing"
+        <DodoItemModal label="Auskultation" v-if="store.doku.xAbcde.isBreathing"
           :state="store.doku.xaBcde.auscultationState" lines="full">
 
           <IonItem :lines="store.doku.xaBcde.auscultation.assessed ? 'full' : 'none'">
@@ -109,7 +109,7 @@
 
         </DodoItemModal>
 
-        <DodoItemModal label="Thoraxbefunde" modal-label="Thoraxbefunde"
+        <DodoItemModal label="Thoraxbefunde"
           :state="store.doku.xaBcde.thoraxState" lines="none">
 
           <IonItem v-show="store.doku.xAbcde.isBreathing" lines="inset">

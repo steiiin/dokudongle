@@ -18,7 +18,7 @@
         </DodoInputSelect>
 
         <DodoItemModal v-if="!ctx.isNonVerbal && ctx.isPediatric" lines="inset"
-          label="Orientierung (pädiatrisch)" modal-label="Orientierung (pädiatrisch)"
+          label="Orientierung (pädiatrisch)"
           :state="store.doku.xabcDe.zops.pediatricState">
 
           <DodoInputSelect v-model="store.doku.xabcDe.zops.consciousness"
@@ -50,7 +50,7 @@
         </DodoItemModal>
 
         <DodoItemModal v-if="!ctx.isNonVerbal && !ctx.isPediatric"
-          label="Orientierung" modal-label="Orientierung" lines="inset"
+          label="Orientierung" lines="inset"
           :state="store.doku.xabcDe.zops.adultState">
 
           <IonItem lines="inset">
@@ -100,7 +100,7 @@
         </DodoItemModal>
 
         <DodoItemModal
-          label="GCS" modal-label="GCS"
+          label="GCS"
           :state="store.doku.xabcDe.gcsScore.toString()">
 
           <DodoInputSelect v-model="store.doku.xabcDe.gcs.a"
@@ -171,7 +171,7 @@
         </DodoInputSelect>
 
         <DodoItemModal
-          label="Psych-Befund" modal-label="Psych-Befund"
+          label="Psych-Befund"
           :state="store.doku.xabcDe.psychiatricState">
 
           <IonItemDivider>

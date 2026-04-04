@@ -71,7 +71,7 @@
 
         </DodoItemModal>
 
-        <DodoItemModal label="Puls" modal-label="Puls"
+        <DodoItemModal label="Puls"
           :state="store.doku.xabCde.pulseText">
 
           <IonItemDivider>
@@ -144,7 +144,7 @@
           ]">
         </DodoInputSelect>
 
-        <DodoItemModal label="EKG" modal-label="EKG"
+        <DodoItemModal label="EKG"
           :state="store.doku.xabCde.ecgState" lines="full">
 
           <IonItem :lines="store.doku.xabCde.ecg.assessed ? 'full' : 'none'">
@@ -169,7 +169,7 @@
 
         </DodoItemModal>
 
-        <DodoItemModal label="Brustschmerz" modal-label="Brustschmerz" v-if="!ctx.isNonVerbal"
+        <DodoItemModal label="Brustschmerz" v-if="!ctx.isNonVerbal"
           :state="store.doku.xabCde.chestpainState" lines="full">
 
           <IonItem lines="full">

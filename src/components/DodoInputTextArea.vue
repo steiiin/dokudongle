@@ -53,18 +53,16 @@
             @ionInput="handleInput"
           />
 
-          <div class="dd-quickie-buttons" v-if="resolvedQuickies.length > 0">
-            <IonButton v-for="quickie in resolvedQuickies"
-              :key="quickie.entry.key" fill="solid"
-              :disabled="quickie.isDisabled"
-              @click="openQuickie(quickie.entry)">
-              {{ quickie.entry.label }}
-            </IonButton>
-          </div>
-
         </div>
       </IonContent>
       <IonFooter>
+        <IonToolbar v-if="resolvedQuickies.length>0">
+          <IonButton v-for="quickie in resolvedQuickies"
+            :key="quickie.key" fill="clear"
+            @click="openQuickie(quickie)">
+            {{ quickie.label }}
+          </IonButton>
+        </IonToolbar>
         <IonToolbar class="dd-modal-toolbar" v-if="!modelValue.isEnhancing">
           <IonButtons slot="start">
             <IonButton @click="undo" :disabled="!modelValue.canUndo">
@@ -158,10 +156,7 @@ const resolvedQuickies = computed(() => {
   return props.quickieKeys
     .map((quickieKey) => DATA_Quickies[quickieKey.toLowerCase().trim()])
     .filter((quickie): quickie is Quickie => Boolean(quickie))
-    .map((quickie) => ({
-      entry: quickie,
-      isDisabled: !quickie.isAvailable(draft.value),
-    }))
+    .filter((quickie) => quickie.isAvailable(draft.value))
 })
 
 const cloneModelValue = (): EnhanceableText => props.modelValue.clone()
@@ -510,7 +505,7 @@ defineExpose({
   margin-inline: -16px;
   width: calc(100% + 2*16px);
   padding-inline: 16px;
-  margin-top: 16px;
+  margin-top: 2px;
 }
 
 .dd-modal-textarea {

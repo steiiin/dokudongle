@@ -12,24 +12,22 @@
           </DodoInputTemperature>
         </IonItem>
 
-        <IonItem :lines="store.doku.xabcdE.hasAssessedExcretions ? 'inset' : 'full'">
-          <IonToggle v-model="store.doku.xabcdE.hasAssessedExcretions" label-placement="end">
-            Ausscheidungen erfassen?
-          </IonToggle>
-        </IonItem>
+        <DodoItemModal label="Ausscheidung"
+          :state="store.doku.xabcdE.excretionsState" lines="inset">
 
-        <template v-if="store.doku.xabcdE.hasAssessedExcretions">
+          <IonItem :lines="fullIf(store.doku.xabcdE.excretions.assessed)">
+            <IonToggle v-model="store.doku.xabcdE.excretions.assessed" label-placement="end">
+              Ausscheidungen erfassen?
+            </IonToggle>
+          </IonItem>
 
-          <DodoItemModal lines="inset"
-            label="Wasserlassen" modal-label="Wasserlassen"
-            :state="store.doku.xabcdE.urinary.text">
+          <template v-if="store.doku.xabcdE.excretions.assessed">
 
             <IonItemDivider>
               <IonLabel>Katheter</IonLabel>
             </IonItemDivider>
-
-            <DodoInputSelect v-model="store.doku.xabcdE.urinary.catheterType"
-              label="Typ" lines="full"
+            <DodoInputSelect v-model="store.doku.xabcdE.excretions.value.catheterType"
+              label="Typ" lines="none"
               :options="[
                 { value: '', label: 'Kein Katheter' },
                 { value: 'ISK', label: 'Einmalkatheter' },
@@ -39,50 +37,23 @@
               ]">
             </DodoInputSelect>
 
-            <DodoInputSelect v-if="store.doku.xabcdE.urinary.catheterType != ''"
-              v-model="store.doku.xabcdE.urinary.catheterIssues"
-              label="Komplikation" lines="full"
-              :options="[
-                { value: '', label: 'Keine' },
-                { value: 'disloziert', label: 'Disloziert' },
-                { value: 'gezogen', label: 'Gezogen' },
-                { value: 'verstopft', label: 'Verstopft' },
-              ]">
-            </DodoInputSelect>
-
             <IonItemDivider>
-              <IonLabel>Auffälligkeiten</IonLabel>
+              <IonLabel>Auffälligkeiten?</IonLabel>
             </IonItemDivider>
-
-            <DodoInputSelect
-              v-model="store.doku.xabcdE.urinary.output"
-              label="Ausfuhr" lines="full"
-              :options="[
-                { value: '', label: 'Normal' },
-                { value: 'verringert', label: 'Verringert' },
-                { value: 'Harnverhalt', label: 'Harnverhalt' },
-                { value: 'vermehrt', label: 'Vermehrt' },
-              ]">
-            </DodoInputSelect>
-
-            <IonItem>
-              <IonSelect label="Erscheinung" interface="popover" :multiple="true" v-model="store.doku.xabcdE.urinary.abnormalities">
-                <IonSelectOption value="blutig">Blutig</IonSelectOption>
-                <IonSelectOption value="flockig">Flockig</IonSelectOption>
-                <IonSelectOption value="dunkel">Dunkel</IonSelectOption>
-                <IonSelectOption value="übelriechend">Übelriechend</IonSelectOption>
-              </IonSelect>
+            <IonItem lines="inset">
+              <IonToggle v-model="store.doku.xabcdE.excretions.value.urinaryAbnormalities" label-placement="end">
+                Wasserlassen auffällig?
+              </IonToggle>
+            </IonItem>
+            <IonItem lines="none">
+              <IonToggle v-model="store.doku.xabcdE.excretions.value.bowelAbnormalities" label-placement="end">
+                Stuhlgang auffällig?
+              </IonToggle>
             </IonItem>
 
-          </DodoItemModal>
+          </template>
 
-          <DodoInputTextOptional
-            toggle-label="Stuhlgang auffällig?" v-model:toggle="store.doku.xabcdE.bowelAbnormalities.active"
-            text-label="Beschreibung:" text-placeholder="z.B. Durchfall" v-model:text="store.doku.xabcdE.bowelAbnormalities.value"
-            :autocorrect-fn="basicCap">
-          </DodoInputTextOptional>
-
-        </template>
+        </DodoItemModal>
 
         <IonItem lines="full">
           <IonToggle v-model="store.doku.xabcdE.urinaryIncontinence" label-placement="end">
@@ -204,19 +175,13 @@
 
 import { computed, watch } from 'vue'
 
-import { basicCap } from '@/utils/autocorrect/basic'
+import { fullIf } from '@/utils/filter'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
 // ############################################################################
-
-watch(() => store.doku.xabcdE.urinary.catheterType, (v) => {
-  if (v === '') {
-    store.doku.xabcdE.urinary.catheterIssues = ''
-  }
-})
 
 watch(() => store.doku.xabcdE.abdominal.value.guarding, (v) => {
   if (v != '' && store.doku.xabcdE.abdominal.value.pain == 'keine') {

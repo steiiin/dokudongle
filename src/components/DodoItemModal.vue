@@ -14,7 +14,7 @@
   <IonModal :is-open="isModalOpen" @will-dismiss="closeModal">
     <IonHeader>
       <IonToolbar>
-        <IonTitle type="ios">{{ modalLabel }}</IonTitle>
+        <IonTitle type="ios">{{ modalLabel ?? label }}</IonTitle>
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
@@ -38,7 +38,7 @@ import { computed, ref } from 'vue'
 
 const props = withDefaults(defineProps<{
   label: string
-  modalLabel: string
+  modalLabel?: string
   state?: string
   lines?: 'full' | 'none' | 'inset'
   detail?: boolean

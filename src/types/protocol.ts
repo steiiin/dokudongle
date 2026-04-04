@@ -158,6 +158,8 @@ export interface ProtocolContext {
   hasHeadache: boolean,
   hasDizziness: boolean,
   hasSensomotoricDeficit: boolean,
+  hasHeartIssue: boolean,
+  hasAbdominalIssue: boolean,
 
   isTrauma: boolean,
   isPediatric: boolean,

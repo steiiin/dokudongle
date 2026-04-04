@@ -1,10 +1,13 @@
 import { OptionInput } from "@/components/DodoInputSelect.vue"
+
 import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuickieAbdomonalPain.vue"
+import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
+import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
-import { OptionalValue } from "@/types/protocol/input"
+
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
-import { concatDoku } from "@/utils/text"
+
 import { Component, markRaw } from "vue"
 
 // ############################################################################
@@ -13,6 +16,8 @@ export const QU_Verlegung = 'verlegung'
 export const QU_Einweisung = 'einweisung'
 
 export const QU_AbdominalPain = 'abdominal_pain'
+export const QU_ExcretionsUrinary = 'excretions_urinary'
+export const QU_ExcretionsBowel = 'excretions_bowel'
 
 // ############################################################################
 
@@ -245,6 +250,37 @@ export class QuickieAbdominalPain extends Quickie
 
 }
 
+// --------------------------------------------------------
+
+export class QuickieExcretionsUrinary extends Quickie
+{
+  constructor(public key: string, public label: string) {
+    super(key, label, markRaw(DodoQuickieExcretionsUrinary))
+  }
+  public isAvailable(text: string): boolean {
+    return !text.includes('Wasserlassen: ')
+  }
+
+  public catheterIssues: '' | 'disloziert' | 'gezogen' | 'verstopft' = ''
+  public output: string[] = []
+  public pain: string[] = []
+
+  public hematuria: '' | 'minmal Blut im Urin' | 'etwas Blut im Urin' | 'viel Blut im Urin' = ''
+  public anomalies: string[] = []
+
+}
+
+export class QuickieExcretionsBowels extends Quickie
+{
+  constructor(public key: string, public label: string) {
+    super(key, label, markRaw(DodoQuickieExcretionsBowels))
+  }
+  public isAvailable(text: string): boolean {
+    return !text.includes('Stuhlgang: ')
+  }
+
+
+}
 // ############################################################################
 
 export const DATA_Quickies: Record<string, Quickie> = {
@@ -294,5 +330,7 @@ export const DATA_Quickies: Record<string, Quickie> = {
   ),
 
   [QU_AbdominalPain]: new QuickieAbdominalPain(QU_AbdominalPain, 'Bauchschmerz'),
+  [QU_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_ExcretionsUrinary, 'Wasserlassen'),
+  [QU_ExcretionsBowel]: new QuickieExcretionsBowels(QU_ExcretionsBowel, 'Stuhlgang'),
 
 }

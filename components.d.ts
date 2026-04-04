@@ -11,7 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/quickie-components/DodoQuickieTemplate copy.vue')['default']
+    copy: typeof import('./src/components/quickie-components/DodoQuickieExcretionsUrinary copy.vue')['default']
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
     DodoConnectionRename: typeof import('./src/components/DodoConnectionRename.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
@@ -30,6 +30,9 @@ declare module 'vue' {
     DodoItemModal: typeof import('./src/components/DodoItemModal.vue')['default']
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
     DodoQuickieAbdomonalPain: typeof import('./src/components/quickie-components/DodoQuickieAbdomonalPain.vue')['default']
+    DodoQuickieExcretions: typeof import('./src/components/quickie-components/DodoQuickieExcretions.vue')['default']
+    DodoQuickieExcretionsBowels: typeof import('./src/components/quickie-components/DodoQuickieExcretionsBowels.vue')['default']
+    DodoQuickieExcretionsUrinary: typeof import('./src/components/quickie-components/DodoQuickieExcretionsUrinary.vue')['default']
     DodoQuickieTemplate: typeof import('./src/components/quickie-components/DodoQuickieTemplate.vue')['default']
     DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']

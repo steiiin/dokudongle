@@ -82,6 +82,93 @@ export class ExposureUrinary {
 
 }
 
+export class ExposureExcretions {
+
+  public catheterType: '' | 'ISK' | 'transurethraler DK' | 'suprapubischer DK' | 'Nierenkatheter' = ''
+  public urinaryAbnormalities: boolean = false
+  public bowelAbnormalities: boolean = false
+
+  get needTreatment(): boolean {
+    return this.urinaryAbnormalities || this.bowelAbnormalities
+  }
+
+  get state(): string
+  {
+
+    const _catheter = this.catheterType
+    const _abnormalities =
+    ({
+      'false,false': 'Wasserlassen/Stuhlgang o.B.',
+      'false,true': 'Wasserlassen path./Stuhlgang o.B.',
+      'true,false': 'Wasserlassen o.B./Stuhlgang path.',
+      'true,true': 'Wasserlassen/Stuhlgang path.'
+    } as const)[`${this.bowelAbnormalities},${this.urinaryAbnormalities}`];
+
+    return [ _catheter, _abnormalities ].filter(e=>e).join(', ')
+
+  }
+
+  get text(): string
+  {
+
+    const _catheter = this.catheterType
+    const _abnormalities =
+    ({
+      'false,false': 'Wasserlassen/Stuhlgang o.B.',
+      'false,true': 'Stuhlgang o.B.',
+      'true,false': 'Wasserlassen o.B.',
+      'true,true': ''
+    } as const)[`${this.bowelAbnormalities},${this.urinaryAbnormalities}`];
+
+    return [ _catheter, _abnormalities ].filter(e=>e).join(', ')
+
+  }
+
+
+  // get excretionsText(): string
+  // {
+
+  //   const _catheter = this.urinary.catheterText
+  //   const _incontinence = textIf('eingenässt', this.urinaryIncontinence)
+  //   const _urinary = this.urinary.text
+
+  //   let _bowel = (this.bowelAbnormalities.active)
+  //     ? prefixDefecation(this.bowelAbnormalities.value)
+  //     : 'Stuhlgang o.B.'
+
+  //   const hasCatheter = _catheter.length > 0;
+  //   const hasIncontinence = _incontinence.length > 0;
+  //   const hasUrinary = _urinary.length > 0;
+  //   const isBowelNormal = _bowel === 'Stuhlgang o.B.';
+
+  //   // 1) all good
+  //   if (!hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
+  //     return 'Wasserlassen/Stuhlgang o.B.'
+  //   }
+
+  //   // 2) only incontinence, else good
+  //   if (!hasCatheter && hasIncontinence && !hasUrinary && isBowelNormal) {
+  //     return 'eingenässt, sonst Wasserlassen/Stuhlgang o.B.'
+  //   }
+
+  //   // 3) all good, but with catheter
+  //   if (hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
+  //     return concatDoku([_catheter, (this.urinary.catheterIssues != '' ? 'sonst ' : '') + 'Wasserlassen/Stuhlgang o.B.'])
+  //   }
+
+  //   // --- generic cases ---
+  //   return concatDoku([
+  //     _catheter,
+  //     _incontinence,
+  //     this.urinary.text,
+  //     _bowel,
+  //   ]);
+
+  // }
+
+
+}
+
 export class ExposureAbdominal {
 
   public guarding: '' | 'leichte' | 'starke'
@@ -145,9 +232,7 @@ export class AbcdeExposure {
   public nausea: boolean
   public emesis: ExposureEmisis
 
-  public hasAssessedExcretions: boolean
-  public bowelAbnormalities: OptionalValue<string>
-  public urinary: ExposureUrinary
+  public excretions: AssessedValue<ExposureExcretions>
   public urinaryIncontinence: boolean
 
   public abdominal: AssessedValue<ExposureAbdominal>
@@ -161,9 +246,7 @@ export class AbcdeExposure {
     this.bodyTemperature = 36.5
     this.nausea = false
     this.emesis = new ExposureEmisis()
-    this.hasAssessedExcretions = false
-    this.bowelAbnormalities = OptionalValue.inactive('')
-    this.urinary = new ExposureUrinary()
+    this.excretions = AssessedValue.unassessed(new ExposureExcretions())
     this.urinaryIncontinence = false
     this.abdominal = AssessedValue.unassessed(new ExposureAbdominal())
     this.treatment = ''
@@ -174,7 +257,7 @@ export class AbcdeExposure {
   get needTreatment(): boolean {
     return (this.bodyTemperature <= 35 || this.bodyTemperature >= 37.5)
       || this.emesis.needTreatment
-      || this.urinary.needTreatment
+      || (this.excretions.isAssessed && this.excretions.value.needTreatment)
       || this.nausea
       || this.urinaryIncontinence
   }
@@ -193,47 +276,6 @@ export class AbcdeExposure {
 
   ///////////////////////////////////////////////
 
-  get excretionsText(): string
-  {
-
-    const _catheter = this.urinary.catheterText
-    const _incontinence = textIf('eingenässt', this.urinaryIncontinence)
-    const _urinary = this.urinary.text
-
-    let _bowel = (this.bowelAbnormalities.active)
-      ? prefixDefecation(this.bowelAbnormalities.value)
-      : 'Stuhlgang o.B.'
-
-    const hasCatheter = _catheter.length > 0;
-    const hasIncontinence = _incontinence.length > 0;
-    const hasUrinary = _urinary.length > 0;
-    const isBowelNormal = _bowel === 'Stuhlgang o.B.';
-
-    // 1) all good
-    if (!hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
-      return 'Wasserlassen/Stuhlgang o.B.'
-    }
-
-    // 2) only incontinence, else good
-    if (!hasCatheter && hasIncontinence && !hasUrinary && isBowelNormal) {
-      return 'eingenässt, sonst Wasserlassen/Stuhlgang o.B.'
-    }
-
-    // 3) all good, but with catheter
-    if (hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
-      return concatDoku([_catheter, (this.urinary.catheterIssues != '' ? 'sonst ' : '') + 'Wasserlassen/Stuhlgang o.B.'])
-    }
-
-    // --- generic cases ---
-    return concatDoku([
-      _catheter,
-      _incontinence,
-      this.urinary.text,
-      _bowel,
-    ]);
-
-  }
-
   get abdominalState(): string {
 
     if (!this.abdominal.isAssessed) { return 'nicht untersucht' }
@@ -246,6 +288,14 @@ export class AbcdeExposure {
     if (!this.abdominal.isAssessed) { return '' }
     else { return this.abdominal.value.text }
 
+  }
+
+  get excretionsState(): string {
+    if (this.excretions.isAssessed) {
+      return this.excretions.value.state
+    } else {
+      return 'nicht untersucht'
+    }
   }
 
   // #####################################################################
@@ -262,7 +312,8 @@ export class AbcdeExposure {
         ),
         this.emesis.text
       ],
-      textIf(this.excretionsText, this.hasAssessedExcretions),
+      textIf(this.excretions.value.text, this.excretions.isAssessed || getCtx().hasAbdominalIssue),
+      textIf('eingenässt', this.urinaryIncontinence),
       this.abdominalText,
     ]))))
 
