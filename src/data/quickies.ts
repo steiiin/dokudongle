@@ -4,6 +4,7 @@ import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuicki
 import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
 import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
+import { OptionalValue } from "@/types/protocol/input"
 
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
@@ -279,6 +280,12 @@ export class QuickieExcretionsBowels extends Quickie
     return !text.includes('Stuhlgang: ')
   }
 
+  public pattern: '' | 'Obstipation' | 'Durchfall' = ''
+  public consistency: '' | 'kügelchenförmig' | 'hart' | 'geformt' | 'breiig' | 'wässrig' = ''
+  public lastBowel: OptionalValue<string> = OptionalValue.inactive('')
+  public bowelSounds: '' | 'normal' | 'vermehrt' | 'vermindert' | 'fehlend' | 'hochgestellt' = ''
+  public blood: '' | 'kein Blut' | 'Blut am Klopapier' | 'Blut im Stuhl' | 'Teerstuhl' = ''
+  public bowelPain: boolean = false
 
 }
 // ############################################################################
