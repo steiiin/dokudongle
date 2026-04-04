@@ -11,14 +11,14 @@
       <IonNote slot="end">{{ stateText }}</IonNote>
     </template>
   </IonItem>
-  <IonModal :is-open="isModalOpen" :can-dismiss="false">
+  <IonModal :is-open="isModalOpen" @will-dismiss="closeModal">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">{{ modalLabel }}</IonTitle>
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
-          <IonButton @click="isModalOpen=false">Zurück</IonButton>
+          <IonButton @click="closeModal">Zurück</IonButton>
         </IonButtons>
       </IonToolbar>
     </IonHeader>
@@ -54,6 +54,10 @@ const isModalOpen = ref(false)
 
 const stateText = computed(() => props.state ?? '')
 const useStackedLayout = computed(() => stateText.value.length > 22)
+
+const closeModal = () => {
+  isModalOpen.value = false
+}
 
 </script>
 <style scoped>

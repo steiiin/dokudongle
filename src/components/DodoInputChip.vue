@@ -142,12 +142,13 @@ const getOptionKey = (opt: { value: string; label: string }) => opt.value
     cursor: pointer;
   }
 
-  .DdInputChip--inactive {
-    opacity: 0.9;
+  .DdToggleChip--inactive {
+    outline: 1px solid transparent;
   }
-
   .DdInputChip--bold {
-    border: 1px solid transparent;
+    border: 1px solid var(--ion-color-base, transparent);
+    background-color: var(--ion-color-base);
+    color: var(--ion-color-contrast);
   }
 
   .DdInputChip__clear {

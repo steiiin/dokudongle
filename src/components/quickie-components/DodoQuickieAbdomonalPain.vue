@@ -16,11 +16,7 @@
 
     <IonContent class="ion-padding">
 
-      <div class="dd-quickie-preview"
-        v-html="previewText">
-      </div>
-
-      <IonList>
+      <IonList lines="none">
 
         <ion-item-divider>
           <ion-label>Region</ion-label>
@@ -38,7 +34,7 @@
           <DodoToggleChip v-model="localRegion.mbmi" color="warning">Mitte</DodoToggleChip>
           <DodoToggleChip v-model="localRegion.mbli" color="warning">Links</DodoToggleChip>
         </IonItem>
-        <IonItem lines="none">
+        <IonItem>
           <IonLabel>Unterbauch</IonLabel>
           <DodoToggleChip v-model="localRegion.ubre" color="primary">Rechts</DodoToggleChip>
           <DodoToggleChip v-model="localRegion.ubmi" color="primary">Mitte</DodoToggleChip>
@@ -48,15 +44,15 @@
         <ion-item-divider>
           <ion-label><b>O</b>nset</ion-label>
         </ion-item-divider>
-        <DodoInputSelect label="Wie" v-model="localOnset"
-          empty-label="Unklar"
-          :options="[
-            { value: 'plötzlicher Beginn', label: 'plötzlich' },
-            { value: 'schleichender Beginn', label: 'schleichend' },
-          ]">
-        </DodoInputSelect>
+        <IonItem lines="inset">
+            <IonLabel>Wie</IonLabel>
+            <DodoToggleGroup v-model="localOnset">
+              <DodoToggleButton color="warning" value="plötzlicher Beginn">Plötzlich</DodoToggleButton>
+              <DodoToggleButton color="success" value="schleichender Beginn">Schleichend</DodoToggleButton>
+            </DodoToggleGroup>
+          </IonItem>
         <DodoInputSelect label="Wann" v-model="localOnspan"
-          empty-label="Akut" lines="none"
+          empty-label="Akut"
           :options="[
             'seit Stunden', 'seit Tagen', 'seit Wochen', 'seit Gestern',
           ]"
@@ -66,7 +62,7 @@
         <ion-item-divider>
           <ion-label><b>P</b>rovokation <i>(Verschlechterung)</i></ion-label>
         </ion-item-divider>
-        <IonItem lines="none">
+        <IonItem>
           <div class="chip-container">
             <DodoToggleChip v-for="entry in provocationSet" :key="entry.label"
               v-model="entry.enabled" :color="entry.color">{{ entry.label }}
@@ -77,7 +73,7 @@
         <ion-item-divider>
           <ion-label><b>P</b>alliation <i>(Verbesserung)</i></ion-label>
         </ion-item-divider>
-        <IonItem lines="none">
+        <IonItem>
           <div class="chip-container">
             <DodoToggleChip v-for="entry in palliationSet" :key="entry.label"
               v-model="entry.enabled" :color="entry.color">{{ entry.label }}
@@ -123,10 +119,14 @@
         <ion-item-divider>
           <ion-label><b>T</b>ime <i>(Verlauf)</i></ion-label>
         </ion-item-divider>
-        <DodoInputTextOptional lines="none"
-          toggle-label="Verlauf erfassen?" v-model:toggle="localTime.active"
-          text-label="" text-placeholder="z.B. erstmalig, gleichbleibend" v-model:text="localTime.value">
-        </DodoInputTextOptional>
+        <IonItem>
+          <div class="chip-container">
+            <DodoToggleChip v-for="entry in timeSet" :key="entry.label"
+              v-model="entry.enabled" :color="entry.color">{{ entry.label }}
+            </DodoToggleChip>
+          </div>
+        </IonItem>
+
 
       </IonList>
 
@@ -167,7 +167,7 @@ const previewText = computed(() => {
     palliationText.value,
     qualitySet.value.filter(e=>e.enabled).map(e=>e.label),
     radiationText.value,
-    textIf(localTime.value.value, localTime.value.isActive),
+    timeText.value,
   ]))
 })
 
@@ -191,7 +191,7 @@ const localPalliation = ref<string[]>(props.quickie.palliation)
 const localQuality = ref<string[]>(props.quickie.quality)
 const localRadiation = ref<string[]>(props.quickie.radiation)
 const localSeverity = ref<string>(props.quickie.severity)
-const localTime = ref<OptionalValue<string>>(props.quickie.time)
+const localTime = ref<string[]>(props.quickie.time)
 
 watch(() => props.quickie, (v) => {
 
@@ -221,7 +221,10 @@ watch(() => props.quickie, (v) => {
     entry.enabled =
       v.radiation.includes(entry.label)
   })
-
+  timeSet.value.forEach(entry => {
+    entry.enabled =
+      v.time.includes(entry.label)
+  })
 
 })
 
@@ -354,6 +357,25 @@ const severityText = computed(() => {
     maximal:  'maximal/9-10',
   }[localSeverity.value] ?? '';
 })
+
+// ############################################################################
+
+const timeText = computed(() => {
+
+  const enabled = timeSet.value.filter(e=>e.enabled)
+  if (enabled.length==0) { return '' }
+  return enabled.map(e=>e.value ?? e.label).join(', ')
+
+})
+
+const timeSet = ref([
+  { label: 'Erstmalig',       value: 'erstmalig',                    color: 'primary', enabled: false },
+  { label: 'Früher Ähnlich',  value: 'bereits ähnlich aufgetreten',  color: 'warning', enabled: false },
+  { label: 'Früher Milder',   value: 'bereits milder aufgetreten',   color: 'warning', enabled: false },
+  { label: 'Wiederholt',      value: 'bereits mehrfach aufgetreten', color: 'warning', enabled: false },
+  { label: 'Zunehmend',       value: 'stetig zunehmend',    color: 'success', enabled: false },
+  { label: 'Gleichbleibend',  value: 'Intensität konstant', color: 'success', enabled: false },
+])
 
 </script>
 <style scoped>

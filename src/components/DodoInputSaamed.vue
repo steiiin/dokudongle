@@ -22,7 +22,7 @@
     </IonCardContent>
   </IonCard>
 
-  <IonModal :is-open="isSelectModalOpen" @did-present="gainFocus(selectSearchbar)" :can-dismiss="false">
+  <IonModal :is-open="isSelectModalOpen" @did-present="gainFocus(selectSearchbar)" @will-dismiss="closeSelectModal">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">Medikament auswählen</IonTitle>
@@ -52,7 +52,7 @@
     </IonContent>
   </IonModal>
 
-  <IonModal :is-open="isEditModalOpen" :can-dismiss="false">
+  <IonModal :is-open="isEditModalOpen" @will-dismiss="cancelEdit">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">{{ modalTitle }}</IonTitle>

@@ -24,7 +24,7 @@
       </IonButton>
     </IonCardContent>
   </IonCard>
-  <IonModal :is-open="isModalOpen" @did-present="focusRedSearchbar" :can-dismiss="false">
+  <IonModal :is-open="isModalOpen" @did-present="focusRedSearchbar" @will-dismiss="closeModal">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">RedFlag-Szenarien & Warnzeichen hinzufügen</IonTitle>

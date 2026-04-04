@@ -233,7 +233,7 @@ export class QuickieAbdominalPain extends Quickie
 
   public region: QuickieAbdominalPainRegion = new QuickieAbdominalPainRegion()
 
-  public onset: 'plötzlicher Beginn' | 'schleichender Beginn' | string = ''
+  public onset: 'plötzlicher Beginn' | 'schleichender Beginn' = 'plötzlicher Beginn'
   public onspan: '' | 'seit Stunden' | 'seit Tagen' | 'seit Wochen' | 'gestern' | string = ''
 
   public provocation: string[] = []
@@ -241,7 +241,7 @@ export class QuickieAbdominalPain extends Quickie
   public quality: string[] = []
   public radiation: string[] = []
   public severity: 'minimal'|'leicht'|'mittel'|'stark'|'maximal' = 'mittel'
-  public time: OptionalValue<string> = OptionalValue.inactive('')
+  public time: string[] = []
 
 }
 

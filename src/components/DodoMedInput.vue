@@ -24,7 +24,7 @@
     </IonCardContent>
   </IonCard>
 
-  <IonModal :is-open="isModalOpen" :can-dismiss="false">
+  <IonModal :is-open="isModalOpen" @will-dismiss="cancelEdit">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">{{ modalTitle }}</IonTitle>

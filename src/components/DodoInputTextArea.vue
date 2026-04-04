@@ -17,7 +17,7 @@
       {{ title }} {{ triggerActionLabel }}
     </IonButton>
 
-    <IonModal :is-open="isModalOpen" class="dd-input-modal" :class="{ 'is-enhancing': modelValue.isEnhancing }" :can-dismiss="false">
+    <IonModal :is-open="isModalOpen" class="dd-input-modal" :class="{ 'is-enhancing': modelValue.isEnhancing }" @will-dismiss="closeModal">
       <IonHeader>
         <IonToolbar>
           <IonTitle>{{ title }}</IonTitle>
