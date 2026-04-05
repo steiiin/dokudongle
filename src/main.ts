@@ -53,7 +53,7 @@ const app = createApp(App)
   .use(router)
   .use(pinia);
 
-const PERSISTENCE_DEBOUNCE_MS = 500
+const PERSISTENCE_DEBOUNCE_MS = 3000
 let persistTimer: ReturnType<typeof setTimeout> | null = null
 
 async function setupDokuPersistence() {

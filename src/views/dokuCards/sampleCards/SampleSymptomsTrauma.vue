@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="lazy.sample.stu">
 
     <IonCard class="stu-head">
 
@@ -256,6 +256,9 @@ import { fullIf } from '@/utils/filter'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+import { useLazyStore } from '@/store/lazy'
+const lazy = useLazyStore()
 
 // ############################################################################
 

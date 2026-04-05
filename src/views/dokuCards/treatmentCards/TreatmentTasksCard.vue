@@ -1,5 +1,5 @@
 <template>
-  <IonCard>
+  <IonCard v-if="lazy.treatment.tasks">
     <IonCardHeader>
       <IonCardTitle>Maßnahmen</IonCardTitle>
     </IonCardHeader>
@@ -24,6 +24,9 @@ import { enhanceGeneral } from '@/utils/gpt/general';
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+
+import { useLazyStore } from '@/store/lazy'
+const lazy = useLazyStore()
 
 </script>
 <style scoped>

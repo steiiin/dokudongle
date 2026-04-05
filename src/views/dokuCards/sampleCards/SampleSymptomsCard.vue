@@ -1,13 +1,17 @@
 <template>
 
-  <hr v-if="ctx.isTrauma">
+  <template v-if="lazy.sample.symptoms">
 
-  <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
-    title="Symptome" placeholder="Beschreibe ..."
-    :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
-    Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
-    Infos bezüglich <b>OPQRST</b> ergänzen.
-  </DodoInputTextArea>
+    <hr v-if="ctx.isTrauma">
+
+    <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
+      title="Symptome" placeholder="Beschreibe ..."
+      :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
+      Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
+      Infos bezüglich <b>OPQRST</b> ergänzen.
+    </DodoInputTextArea>
+
+  </template>
 
 </template>
 
@@ -21,6 +25,9 @@ import { useDokuStore } from '@/store/doku'
 import { QU_AbdominalPain, QU_Einweisung, QU_ExcretionsBowel, QU_ExcretionsUrinary } from '@/data/quickies'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+import { useLazyStore } from '@/store/lazy'
+const lazy = useLazyStore()
 
 // ############################################################################
 

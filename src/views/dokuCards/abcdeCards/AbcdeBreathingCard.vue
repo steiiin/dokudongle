@@ -1,5 +1,5 @@
 <template>
-  <IonCard>
+  <IonCard v-if="lazy.abcde.breathing">
     <IonCardHeader>
       <IonCardTitle>B - Breathing</IonCardTitle>
     </IonCardHeader>
@@ -167,6 +167,9 @@ import { computed, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+
+import { useLazyStore } from '@/store/lazy'
+const lazy = useLazyStore()
 
 // ############################################################################
 

@@ -1,5 +1,5 @@
 <template>
-  <IonCard>
+  <IonCard v-if="lazy.treatment.medications">
     <IonCardHeader>
       <IonCardTitle>SAA Medikamente</IonCardTitle>
     </IonCardHeader>
@@ -17,6 +17,10 @@ import { watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+
+import { useLazyStore } from '@/store/lazy'
+import { laptop } from 'ionicons/icons'
+const lazy = useLazyStore()
 
 // ############################################################################
 

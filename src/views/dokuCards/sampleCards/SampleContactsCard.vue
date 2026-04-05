@@ -1,5 +1,5 @@
 <template>
-  <IonCard class="card-sample">
+  <IonCard class="card-sample" v-if="lazy.sample.contacts">
     <IonCardHeader>
       <IonCardTitle>Angehörigenkontakte</IonCardTitle>
     </IonCardHeader>
@@ -13,6 +13,9 @@
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+
+import { useLazyStore } from '@/store/lazy'
+const lazy = useLazyStore()
 
 </script>
 

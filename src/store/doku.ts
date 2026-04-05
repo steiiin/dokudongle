@@ -472,6 +472,8 @@ export const useDokuStore = defineStore('doku', {
     generatedProtocol(state): string {
       let text = ''
 
+      console.log('regenerated protocol')
+
       // special course: NEF
       if (state.doku.course == ProtocolCourse.NEF_VOR_ORT) {
         return multiline([

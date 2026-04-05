@@ -11,14 +11,23 @@
     </IonHeader>
 
     <IonContent :fullscreen="true">
-      <textarea readonly>{{ store.generatedProtocol }}</textarea>
+      <textarea readonly>{{ localPreview }}</textarea>
     </IonContent>
+
   </IonPage>
 </template>
 <script setup lang="ts">
 
+import { onIonViewDidEnter } from '@ionic/vue'
+
 import { useDokuStore } from '@/store/doku'
+import { ref } from 'vue'
 const store = useDokuStore()
+
+const localPreview = ref<string>('')
+onIonViewDidEnter(() => {
+  localPreview.value = store.generatedProtocol
+})
 
 </script>
 <style scoped lang="scss">

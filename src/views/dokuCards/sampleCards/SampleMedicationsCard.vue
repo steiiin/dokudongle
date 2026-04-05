@@ -1,5 +1,5 @@
 <template>
-  <IonCard class="card-sample">
+  <IonCard class="card-sample" v-if="lazy.sample.medications">
     <IonCardHeader>
       <IonCardTitle>Medikamente</IonCardTitle>
     </IonCardHeader>
@@ -92,6 +92,9 @@ import { correctMedName } from '@/utils/autocorrect/medications'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+
+import { useLazyStore } from '@/store/lazy'
+const lazy = useLazyStore()
 
 // ############################################################################
 
