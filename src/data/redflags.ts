@@ -35,6 +35,10 @@ export const _SignalDefs = [
     'Luftnot'),
 
   defSg(
+    'atmung-luftnot-general',
+    'Atembeschwerden'),
+
+  defSg(
     'atmung-luftnot-neu',
     'Atembeschwerden (Luftnot/Stridor/Heiserkeit/Schluckbeschwerden)'),
 
@@ -1066,7 +1070,40 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     'schweren Unterzuckerung mit Krampfanfall, Bewusstlosigkeit, bleibendem Hirnschaden bis hin zum Tod',
   ),
 
-  // TODO: Hyperglykämie (leicht/schwer)
+  defSc(
+    'Hyperglykämie (leicht)', 'ohne Bewusstseinseinschränkungen, Zufallsbefund',
+    'BvO', 'neuro',
+    [
+      'neuro-vigilanzminderung',
+      'gastro-beschwerden-neu',
+      'atmung-luftnot-general',
+      'neuro-sehstoerung-neu',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Hyperglykämie',
+      'diabetisches Koma',
+    ],
+  ),
+  defSc(
+    'Hyperglykämie (schwer)', 'Vigilanzminderung',
+    'Verweigerung', 'neuro',
+    [
+      'neuro-vigilanzminderungSynkope',
+      'gastro-beschwerden-zunehmend',
+      'neuro-ausfall-neu',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Hyperglykämie',
+      'diabetisches Koma',
+    ],
+    'weiteren Entgleisung bis hin zum Koma und Tod',
+  ),
 
   defSc(
     'Krampfanfall (bekanntes Muster)', 'bek. Epilepsie, bek. Muster, vollständige Erholung',
@@ -1488,7 +1525,6 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     ],
     'eines Krampfanfalls oder lebensbedrohl. Gefährdung für Mutter und Kind',
   ),
-
 
 ] as const
 
