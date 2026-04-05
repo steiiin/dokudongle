@@ -8,7 +8,7 @@
       title="Symptome" placeholder="Beschreibe ..."
       :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
       Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
-      Infos bezüglich <b>OPQRST</b> ergänzen.
+      Infos ergänzen.
     </DodoInputTextArea>
 
   </template>

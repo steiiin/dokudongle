@@ -458,7 +458,7 @@ export const useDokuStore = defineStore('doku', {
         hasHeadache: state.doku.xabcDe.headache,
         hasDizziness: state.doku.xabcDe.dizziness != 'kein',
         hasSensomotoricDeficit: state.doku.xabcDe.paresis.active,
-        hasHeartIssue: state.doku.xabCde.chest.pain != 'keine' || state.doku.xabCde.chest.tenderness,
+        hasHeartIssue: state.doku.xabCde.chest.pain != 'keine' || state.doku.xabCde.chest.tightness,
         hasAbdominalIssue: state.doku.xabcdE.abdominal.isAssessed && state.doku.xabcdE.abdominal.value.pain != 'keine',
 
         isTrauma,
