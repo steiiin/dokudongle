@@ -1,5 +1,5 @@
 <template>
-  <IonCard v-if="lazy.abcde.disability">
+  <IonCard>
     <IonCardHeader>
       <IonCardTitle>D - Disablity</IonCardTitle>
     </IonCardHeader>
@@ -281,9 +281,6 @@ import { correctAnatomy } from '@/utils/autocorrect/anatomy'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
-
-import { useLazyStore } from '@/store/lazy'
-const lazy = useLazyStore()
 
 // ############################################################################
 

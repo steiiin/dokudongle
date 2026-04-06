@@ -1305,11 +1305,53 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     'Bauchfellentzündung, Perforation und inneren Blutungen bis zum Kreislaufversagen',
   ),
 
-  // TODO: Nierenkolik (leicht/schwer)
-  // TODO: Harnverhalt (leicht/schwer)
+  defSc(
+    'Nierenkolik (leicht)', '',
+    'BvO', 'gastro',
+    [],
+    [],
+    [],
+  ),
+  defSc(
+    'Nierenkolik (schwer)', '',
+    'Verweigerung', 'gastro',
+    [],
+    [],
+    [],
+    '',
+  ),
 
-  // TODO: Harnwegsinfekt
-  // TODO: Urosepsis
+  defSc(
+    'Harnverhalt (leicht)', '',
+    'BvO', 'neuro',
+    [],
+    [],
+    [],
+  ),
+  defSc(
+    'Harnverhalt (schwer)', '',
+    'Verweigerung', 'neuro',
+    [],
+    [],
+    [],
+    '',
+  ),
+
+  defSc(
+    'Harnwegsinfekt', '',
+    'BvO', 'gastro',
+    [],
+    [],
+    [],
+  ),
+  defSc(
+    'Urosepsis', '',
+    'Verweigerung', 'gastro',
+    [],
+    [],
+    [],
+    '',
+  ),
 
   defSc(
     'Gastrointestinale Blutung', '',
@@ -1370,7 +1412,21 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     'systemischer Infektion bis zum Multiorganversagen und Tod',
   ),
 
-  // TODO: Kindlicher Infekt
+  defSc(
+    'Kindlicher Infekt (leicht)', '',
+    'BvO', 'infekt',
+    [],
+    [],
+    [],
+  ),
+  defSc(
+    'Kindlicher Infekt (schwer)', '',
+    'Verweigerung', 'infekt',
+    [],
+    [],
+    [],
+    '',
+  ),
 
   /////////////////////////////////////////////////////////
   // HNO

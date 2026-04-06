@@ -1,5 +1,5 @@
 <template>
-  <IonCard class="card-sample" v-if="lazy.sample.pler">
+  <IonCard class="card-sample">
     <IonCardHeader>
       <IonCardTitle>P / L / E / (R)</IonCardTitle>
     </IonCardHeader>
@@ -28,9 +28,6 @@ import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-
-import { useLazyStore } from '@/store/lazy'
-const lazy = useLazyStore()
 
 </script>
 

@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router'
 import { RouteRecordRaw } from 'vue-router'
+
 import TabsPage from '../views/TabsPage.vue'
+import TabPageConnect from '@/views/TabPageConnect.vue'
+import TabPageDoku from '@/views/TabPageDoku.vue'
+import TabPagePreview from '@/views/TabPagePreview.vue'
 
 // ############################################################################
 
@@ -19,15 +23,15 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'connect',
-        component: () => import('@/views/TabPageConnect.vue')
+        component: TabPageConnect
       },
       {
         path: 'doku',
-        component: () => import('@/views/TabPageDoku.vue')
+        component: TabPageDoku
       },
       {
         path: 'preview',
-        component: () => import('@/views/TabPagePreview.vue')
+        component: TabPagePreview
       }
     ]
   }

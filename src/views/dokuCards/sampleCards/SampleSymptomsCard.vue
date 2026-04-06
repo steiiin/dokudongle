@@ -1,6 +1,6 @@
 <template>
 
-  <template v-if="lazy.sample.symptoms">
+  <template>
 
     <hr v-if="ctx.isTrauma">
 
@@ -25,9 +25,6 @@ import { useDokuStore } from '@/store/doku'
 import { QU_AbdominalPain, QU_Einweisung, QU_ExcretionsBowel, QU_ExcretionsUrinary } from '@/data/quickies'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
-
-import { useLazyStore } from '@/store/lazy'
-const lazy = useLazyStore()
 
 // ############################################################################
 

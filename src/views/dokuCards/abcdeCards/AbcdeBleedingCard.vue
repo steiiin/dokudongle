@@ -1,5 +1,5 @@
 <template>
-  <IonCard  v-show="ctx.isTrauma" v-if="lazy.abcde.bleeding">
+  <IonCard v-show="ctx.isTrauma">
     <IonCardHeader>
       <IonCardTitle>c - Blutung</IonCardTitle>
     </IonCardHeader>
@@ -27,9 +27,6 @@ import { enhanceBleeding } from '@/utils/gpt/bleeding'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
-
-import { useLazyStore } from '@/store/lazy'
-const lazy = useLazyStore()
 
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <IonCard v-if="lazy.abcde.airway">
+  <IonCard>
     <IonCardHeader>
       <IonCardTitle>A - Airway</IonCardTitle>
     </IonCardHeader>
@@ -88,9 +88,6 @@ import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-
-import { useLazyStore } from '@/store/lazy'
-const lazy = useLazyStore()
 
 // ############################################################################
 
