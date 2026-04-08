@@ -1400,28 +1400,50 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
   defSc(
     'Harnverhalt (leicht)', 'Wasserlassen möglich',
     'BvO', 'gastro',
-    [],
-    [],
-    [],
+    [
+      'uro-anurie',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'neuro-vigilanzminderung',
+      'infekt-infektzeichen',
+      'gastro-haematurie',
+    ],
+    [
+      'uro-dysurie-anhaltend',
+    ],
+    [
+      'Restharnbildung', 'Prostatahyperplasie',
+      'Obstruktion', 'Harnwegsinfekt',
+    ],
   ),
   defSc(
     'Harnverhalt (schwer)', 'Wasserlassen nicht möglich',
     'Verweigerung', 'gastro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'uro-anurie',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'neuro-vigilanzminderung',
+      'infekt-infektzeichen',
+      'gastro-haematurie',
+    ],
+    [
+      'uro-dysurie-anhaltend',
+    ],
+    [
+      'Prostatahyperplasie',
+      'Obstruktion', 'Harnwegsinfekt',
+    ],
+    'Harnstau bis zur Urosepsis, Blasenruptur, Nierenversagen und Tod',
   ),
 
   defSc(
-    'Harnwegsinfekt', '',
+    'Harnwegsinfekt', 'Wasserlassen möglich, leichte Schmerzen',
     'BvO', 'gastro',
     [],
     [],
     [],
   ),
   defSc(
-    'Urosepsis', '',
+    'Urosepsis', 'Systemische Infektion, Schmerzen',
     'Verweigerung', 'gastro',
     [],
     [],
