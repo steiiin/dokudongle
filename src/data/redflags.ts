@@ -115,14 +115,22 @@ export const _SignalDefs = [
     'Blut in Erbrochenem/Stuhl'),
 
   defSg(
+    'gastro-haematurie',
+    'Blut im Urin'),
+
+  defSg(
     'gastro-gib-zunehmend',
     'zunehmenden Blutbeimengungen in Erbrochenem/Stuhl'),
+
+  defSg(
+    'gastro-bauchschmerzen-rezidiv',
+    'erneuten Bauchschmerzen'),
 
   defSg(
     'gastro-bauchschmerzen-anhaltend',
     'anhaltenden Bauchschmerzen >48h'),
 
-     defSg(
+  defSg(
     'gastro-bauchschmerzen-zunehmend',
     'zunehmenden Bauchschmerzen'),
 
@@ -153,6 +161,14 @@ export const _SignalDefs = [
   defSg(
     'gastro-unterBauchschmerzen-zunehmend',
     'zunehmenden Unterbauchschmerzen'),
+
+  defSg(
+    'uro-dysurie',
+    'Problemen beim Wasserlassen'),
+
+  defSg(
+    'uro-anurie',
+    'unmöglichem Wasserlassen'),
 
   defSg(
     'haut-ausschlag-zunehmend',
@@ -372,7 +388,7 @@ export const _SignalDefs = [
 
   defSg(
     'neuro-hypoglyk-rezidiv',
-    'erneutem BZ-Abfall < 60mg/dl bzw. 3,3mmol/l'),
+    'erneutem BZ-Abfall < 60mg/ml bzw. 3,3mmol/l'),
 
   defSg(
     'neuro-hypoglyk-anhaltend',
@@ -1306,31 +1322,91 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
   ),
 
   defSc(
-    'Nierenkolik (leicht)', '',
+    'Nierenkolik (leicht)', 'Kolikschmerz, spontan beendet',
+    'BvO', 'gastro',
+    [
+      'gastro-bauchschmerzen-rezidiv',
+      'infekt-infektzeichen',
+      'kreislauf-probleme-neu',
+      'neuro-vigilanzminderung',
+      'uro-dysurie',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Nierenkolik', 'Harnleiterkolik',
+      'Harnstau', 'LWS-bedingter Schmerz',
+      'Appendizitis',
+    ],
+  ),
+  defSc(
+    'Nierenkolik (schwer)', '',
+    'Verweigerung', 'gastro',
+    [
+      'schmerzStark-zunehmend',
+      'infekt-infektzeichen-anhaltend',
+      'kreislauf-probleme-zunehmend',
+      'neuro-vigilanzminderung',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Nierenkolik', 'Harnleiterkolik',
+      'Harnstau', 'Urosepsis',
+      'Nierenversagen', 'Appendizitis',
+    ],
+    'Harnstau über Urosepsis bis zum Nierenversagen und Tod',
+  ),
+
+  defSc(
+    'Katheterkomplikation (leicht)', 'Wasserlassen möglich',
+    'BvO', 'gastro',
+    [
+      'gastro-unterBauchschmerzen-zunehmend',
+      'infekt-fieber',
+      'uro-anurie',
+      'gastro-haematurie',
+    ],
+    [
+      'infekt-infektzeichen',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Harnwegsinfekt', 'Harnstau',
+    ],
+  ),
+  defSc(
+    'Katheterkomplikation (schwer)', 'Wasserlassen nicht möglich',
+    'Verweigerung', 'gastro',
+    [
+      'gastro-unterBauchschmerzen-zunehmend',
+      'infekt-fieber',
+      'uro-anurie',
+      'gastro-haematurie',
+    ],
+    [
+      'infekt-infektzeichen',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Harnwegsinfekt', 'Harnstau',
+      'Nierenversagen',
+    ],
+    'Harnstau bis zur Urosepsis, Blasenruptur, Nierenversagen und Tod'
+  ),
+
+  defSc(
+    'Harnverhalt (leicht)', 'Wasserlassen möglich',
     'BvO', 'gastro',
     [],
     [],
     [],
   ),
   defSc(
-    'Nierenkolik (schwer)', '',
+    'Harnverhalt (schwer)', 'Wasserlassen nicht möglich',
     'Verweigerung', 'gastro',
-    [],
-    [],
-    [],
-    '',
-  ),
-
-  defSc(
-    'Harnverhalt (leicht)', '',
-    'BvO', 'neuro',
-    [],
-    [],
-    [],
-  ),
-  defSc(
-    'Harnverhalt (schwer)', '',
-    'Verweigerung', 'neuro',
     [],
     [],
     [],

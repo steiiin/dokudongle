@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/quickie-components/DodoQuickieExcretionsUrinary copy.vue')['default']
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
     DodoConnectionRename: typeof import('./src/components/DodoConnectionRename.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
@@ -30,7 +29,6 @@ declare module 'vue' {
     DodoItemModal: typeof import('./src/components/DodoItemModal.vue')['default']
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
     DodoQuickieAbdomonalPain: typeof import('./src/components/quickie-components/DodoQuickieAbdomonalPain.vue')['default']
-    DodoQuickieExcretions: typeof import('./src/components/quickie-components/DodoQuickieExcretions.vue')['default']
     DodoQuickieExcretionsBowels: typeof import('./src/components/quickie-components/DodoQuickieExcretionsBowels.vue')['default']
     DodoQuickieExcretionsUrinary: typeof import('./src/components/quickie-components/DodoQuickieExcretionsUrinary.vue')['default']
     DodoQuickieTemplate: typeof import('./src/components/quickie-components/DodoQuickieTemplate.vue')['default']
@@ -40,7 +38,6 @@ declare module 'vue' {
     DodoToggleButton: typeof import('./src/components/DodoToggleButton.vue')['default']
     DodoToggleChip: typeof import('./src/components/DodoToggleChip.vue')['default']
     DodoToggleGroup: typeof import('./src/components/DodoToggleGroup.vue')['default']
-    IonApp: typeof import('@ionic/vue')['IonApp']
     IonButton: typeof import('@ionic/vue')['IonButton']
     IonButtons: typeof import('@ionic/vue')['IonButtons']
     IonCard: typeof import('@ionic/vue')['IonCard']
@@ -73,7 +70,6 @@ declare module 'vue' {
     IonTabBar: typeof import('@ionic/vue')['IonTabBar']
     IonTabButton: typeof import('@ionic/vue')['IonTabButton']
     IonTabs: typeof import('@ionic/vue')['IonTabs']
-    IonText: typeof import('@ionic/vue')['IonText']
     IonTextarea: typeof import('@ionic/vue')['IonTextarea']
     IonTitle: typeof import('@ionic/vue')['IonTitle']
     IonToggle: typeof import('@ionic/vue')['IonToggle']

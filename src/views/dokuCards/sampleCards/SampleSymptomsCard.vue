@@ -1,7 +1,5 @@
 <template>
 
-  <template>
-
     <hr v-if="ctx.isTrauma">
 
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
@@ -10,8 +8,6 @@
       Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
       Infos ergänzen.
     </DodoInputTextArea>
-
-  </template>
 
 </template>
 
