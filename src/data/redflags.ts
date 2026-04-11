@@ -43,6 +43,11 @@ export const _SignalDefs = [
     'Atembeschwerden (Luftnot/Stridor/Heiserkeit/Schluckbeschwerden)'),
 
   defSg(
+    'atmung-luftnotKind-neu',
+    'Atembeschwerden (Luftnot/Stridor/Einziehungen/Nasenflügeln)'),
+
+
+  defSg(
     'atmung-luftnot-zunehmend',
     'zunehmenden Atembeschwerden (Schwellung/Luftnot/Schluckbeschwerden)'),
 
@@ -159,12 +164,20 @@ export const _SignalDefs = [
     'zunehmende Unsicherheit bzgl. fetaler Aktivität'),
 
   defSg(
+    'gastro-unterBauchschmerzen-neu',
+    'Unterbauchschmerzen'),
+
+  defSg(
     'gastro-unterBauchschmerzen-zunehmend',
     'zunehmenden Unterbauchschmerzen'),
 
   defSg(
     'uro-dysurie',
     'Problemen beim Wasserlassen'),
+
+  defSg(
+    'uro-dysurie-anhaltend',
+    'anhaltenden Problemen beim Wasserlassen'),
 
   defSg(
     'uro-anurie',
@@ -209,6 +222,10 @@ export const _SignalDefs = [
   defSg(
     'infekt-infektzeichen-anhaltend',
     'anhaltenden Infektzeichen/red. AZ'),
+
+  defSg(
+    'infekt-essenverweig-anhaltend',
+    'anhaltender verringerter Nahungs-/Flüssigkeitsaufnahme'),
 
   defSg(
     'kreislauf-probleme',
@@ -433,6 +450,14 @@ export const _SignalDefs = [
   defSg(
     'untereSchmerzAnalgesie-zunehmend',
     'zunehmenden starken Schmerzen mit Ausbreitung in beide Beine'),
+
+  defSg(
+    'nierenschmerz-neu',
+    'Flanken-/Rückenschmerzen'),
+
+  defSg(
+    'nierenschmerz-zunehmend',
+    'zunehmenden Flanken-/Rückenschmerzen'),
 
   defSg(
     'schmerzAnalgesie-zunehmend',
@@ -1402,7 +1427,7 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     'BvO', 'gastro',
     [
       'uro-anurie',
-      'gastro-unterBauchschmerzen-zunehmend',
+      'gastro-unterBauchschmerzen-neu',
       'neuro-vigilanzminderung',
       'infekt-infektzeichen',
       'gastro-haematurie',
@@ -1438,17 +1463,41 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
   defSc(
     'Harnwegsinfekt', 'Wasserlassen möglich, leichte Schmerzen',
     'BvO', 'gastro',
-    [],
-    [],
-    [],
+    [
+      'infekt-fieber',
+      'nierenschmerz-neu',
+      'gastro-unterBauchschmerzen-neu',
+      'kreislauf-probleme-neu',
+      'uro-anurie',
+    ],
+    [
+      'uro-dysurie-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Harnwegsinfekt', 'Sepsis',
+    ],
   ),
   defSc(
     'Urosepsis', 'Systemische Infektion, Schmerzen',
     'Verweigerung', 'gastro',
-    [],
-    [],
-    [],
-    '',
+    [
+      'neuro-vigilanzminderung',
+      'kreislauf-probleme-zunehmend',
+      'nierenschmerz-zunehmend',
+      'gastro-unterBauchschmerzen-zunehmend',
+      'kreislauf-probleme-zunehmend',
+      'uro-anurie',
+    ],
+    [
+      'uro-dysurie-anhaltend',
+      'kreislauf-belastungsSchwaeche-anhaltend',
+    ],
+    [
+      'Harnwegsinfekt', 'Sepsis', 'Schock',
+      'Nierenversagen',
+    ],
+    'einer fortschreitenden Urosepsis bis zum septischen Schock, Multiorganversagen und Tod',
   ),
 
   defSc(
@@ -1509,21 +1558,22 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     ],
     'systemischer Infektion bis zum Multiorganversagen und Tod',
   ),
-
   defSc(
     'Kindlicher Infekt (leicht)', '',
     'BvO', 'infekt',
-    [],
-    [],
-    [],
-  ),
-  defSc(
-    'Kindlicher Infekt (schwer)', '',
-    'Verweigerung', 'infekt',
-    [],
-    [],
-    [],
-    '',
+    [
+      'atmung-luftnotKind-neu',
+      'neuro-vigilanzminderung',
+      'neuro-krampfanfall-neu',
+    ],
+    [
+      'infekt-infektzeichen-anhaltend',
+      'infekt-essenverweig-anhaltend',
+    ],
+    [
+      'grippaler Infekt',
+      'Otitis', 'Bronchitis', 'Pneumonie',
+    ],
   ),
 
   /////////////////////////////////////////////////////////
