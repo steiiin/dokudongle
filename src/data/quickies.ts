@@ -3,6 +3,7 @@ import { OptionInput } from "@/components/DodoInputSelect.vue"
 import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuickieAbdomonalPain.vue"
 import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
 import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
+import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
 import { OptionalValue } from "@/types/protocol/input"
 
@@ -19,6 +20,8 @@ export const QU_Einweisung = 'einweisung'
 export const QU_AbdominalPain = 'abdominal_pain'
 export const QU_ExcretionsUrinary = 'excretions_urinary'
 export const QU_ExcretionsBowel = 'excretions_bowel'
+
+export const QU_OPQRST = 'intern_opqrst'
 
 // ############################################################################
 
@@ -288,6 +291,29 @@ export class QuickieExcretionsBowels extends Quickie
   public bowelPain: boolean = false
 
 }
+
+// --------------------------------------------------------
+
+export class QuickieOPQRST extends Quickie
+{
+  constructor(public key: string, public label: string) {
+    super(key, label, markRaw(DodoQuickieOPRST))
+  }
+  public isAvailable(text: string): boolean {
+    return !this.symptom || !text.includes(this.symptom)
+  }
+
+  public symptom: string = ''
+  public onset: string = ''
+  public provocation: string = ''
+  public palliation: string = ''
+  public radiation: string = ''
+  public quality: string = ''
+  public severity: string = ''
+  public time: string = ''
+
+}
+
 // ############################################################################
 
 export const DATA_Quickies: Record<string, Quickie> = {
@@ -339,5 +365,7 @@ export const DATA_Quickies: Record<string, Quickie> = {
   [QU_AbdominalPain]: new QuickieAbdominalPain(QU_AbdominalPain, 'Bauchschmerz'),
   [QU_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_ExcretionsUrinary, 'Wasserlassen'),
   [QU_ExcretionsBowel]: new QuickieExcretionsBowels(QU_ExcretionsBowel, 'Stuhlgang'),
+
+  [QU_OPQRST]: new QuickieOPQRST(QU_OPQRST, 'OPQRST'),
 
 }

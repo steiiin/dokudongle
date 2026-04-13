@@ -154,13 +154,6 @@ const handleAccept = () => {
 
 <style scoped>
 
-  .dd-quickie-preview {
-    white-space: pre-wrap;
-    padding: 0.75rem;
-    border: 1px solid var(--ion-color-medium-tint);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background: var(--ion-color-light);
-  }
+
 
 </style>

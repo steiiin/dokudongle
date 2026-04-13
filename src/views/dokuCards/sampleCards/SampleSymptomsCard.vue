@@ -18,7 +18,7 @@ import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
-import { QU_AbdominalPain, QU_Einweisung, QU_ExcretionsBowel, QU_ExcretionsUrinary } from '@/data/quickies'
+import { QU_AbdominalPain, QU_Einweisung, QU_ExcretionsBowel, QU_ExcretionsUrinary, QU_OPQRST } from '@/data/quickies'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -32,6 +32,7 @@ const quickieKeys = computed(() => {
     if (store.doku.xabcdE.excretions.value.urinaryAbnormalities) { list.push(QU_ExcretionsUrinary) }
     if (store.doku.xabcdE.excretions.value.bowelAbnormalities) { list.push(QU_ExcretionsBowel) }
   }
+  list.push(QU_OPQRST)
   return list
 })
 
