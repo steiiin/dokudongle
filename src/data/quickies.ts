@@ -316,7 +316,7 @@ export class QuickieOPQRST extends Quickie
 
 // ############################################################################
 
-export const DATA_Quickies: Record<string, Quickie> = {
+const buildQuickies = (): Record<string, Quickie> => ({
   [QU_Verlegung]: new QuickieTemplate(QU_Verlegung,
     'Verlegung', 'Verlegung von <START> nach <ZIEL>.\n',
     [
@@ -367,5 +367,16 @@ export const DATA_Quickies: Record<string, Quickie> = {
   [QU_ExcretionsBowel]: new QuickieExcretionsBowels(QU_ExcretionsBowel, 'Stuhlgang'),
 
   [QU_OPQRST]: new QuickieOPQRST(QU_OPQRST, 'OPQRST'),
+})
 
+export const DATA_Quickies: Record<string, Quickie> = buildQuickies()
+
+export function resetQuickies(): void {
+  const nextQuickies = buildQuickies()
+
+  for (const key of Object.keys(DATA_Quickies)) {
+    delete DATA_Quickies[key]
+  }
+
+  Object.assign(DATA_Quickies, nextQuickies)
 }

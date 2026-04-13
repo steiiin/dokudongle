@@ -155,18 +155,15 @@ watch(customText, (value) => {
 watch(
   () => props.modelValue,
   (value) => {
+
     const known = isKnownOption(value)
     const empty = isEmptyOption(value)
 
     if (known || empty) {
-      // regular option or explicit empty selection
-      if (!isCustomMode.value) {
-        customText.value = ''
-      }
-      return
-    }
+      isCustomMode.value = false
+      customText.value = ''
+      return }
 
-    // external modelValue is a custom value
     isCustomMode.value = true
     customText.value = String(value)
   },

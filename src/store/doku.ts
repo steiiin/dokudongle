@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core'
 import { defineStore } from 'pinia'
 
 import { toRaw } from 'vue'
+import { resetQuickies } from '@/data/quickies'
 import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persistence'
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
@@ -49,6 +50,11 @@ function hydrateProtocol(input: unknown): Protocol | null {
   return hydrateLikeTemplate(resetProtocol(), input)
 }
 
+function resetProtocolState(): Protocol {
+  resetQuickies()
+  return resetProtocol()
+}
+
 // ############################################################################
 
 export const useDokuStore = defineStore('doku', {
@@ -65,7 +71,7 @@ export const useDokuStore = defineStore('doku', {
       transmissionAbortController: null,
     } as DeviceConnection,
 
-    doku: resetProtocol(),
+    doku: resetProtocolState(),
 
   }),
   actions: {
@@ -201,24 +207,25 @@ export const useDokuStore = defineStore('doku', {
 
     // protocol
     newProtocol() {
-      this.doku = resetProtocol()
+      this.doku = resetProtocolState()
       void this.persistToStorage()
     },
     async hydrateFromStorage() {
       const persistedState = await loadDokuState()
       if (!persistedState || persistedState.schemaVersion !== DOKU_SCHEMA_VERSION) {
-        this.doku = resetProtocol()
+        this.doku = resetProtocolState()
         await this.persistToStorage()
         return
       }
 
       const hydratedProtocol = hydrateProtocol(persistedState.doku)
       if (!hydratedProtocol) {
-        this.doku = resetProtocol()
+        this.doku = resetProtocolState()
         await this.persistToStorage()
         return
       }
 
+      resetQuickies()
       this.doku = hydratedProtocol
     },
     async persistToStorage() {
