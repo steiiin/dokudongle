@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/DodoInputTreatment copy.vue')['default']
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
     DodoConnectionRename: typeof import('./src/components/DodoConnectionRename.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
@@ -55,7 +54,6 @@ declare module 'vue' {
     IonHeader: typeof import('@ionic/vue')['IonHeader']
     IonIcon: typeof import('@ionic/vue')['IonIcon']
     IonInput: typeof import('@ionic/vue')['IonInput']
-    Ionitem: typeof import('@ionic/vue')['Ionitem']
     IonItem: typeof import('@ionic/vue')['IonItem']
     IonItemDivider: typeof import('@ionic/vue')['IonItemDivider']
     IonLabel: typeof import('@ionic/vue')['IonLabel']
