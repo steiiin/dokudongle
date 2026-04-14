@@ -10,6 +10,7 @@ export const DOKU_SCHEMA_VERSION = 1;
 export interface PersistedDokuState {
   schemaVersion?: number
   updatedAt?: string
+  lastProtocolResetAt?: string
   doku?: any
 }
 

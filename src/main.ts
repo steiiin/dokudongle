@@ -9,6 +9,7 @@ import { createPinia } from 'pinia'
 import { App as CapacitorApp } from '@capacitor/app'
 import { useDokuStore } from '@/store/doku'
 import { initStorage } from '@/store/persistence'
+import { alertController } from '@ionic/core'
 const pinia = createPinia()
 
 /* Core CSS required for Ionic components to work properly */
@@ -55,12 +56,48 @@ const app = createApp(App)
 
 const PERSISTENCE_DEBOUNCE_MS = 3000
 let persistTimer: ReturnType<typeof setTimeout> | null = null
+let isAutoResetPromptOpen = false
+let lastPromptedResetAt: string | null = null
+
+async function maybePromptAutoProtocolReset() {
+  const dokuStore = useDokuStore(pinia)
+  if (isAutoResetPromptOpen || !dokuStore.isAutoProtocolResetDue()) {
+    return
+  }
+  if (lastPromptedResetAt === dokuStore.lastProtocolResetAt) {
+    return
+  }
+
+  isAutoResetPromptOpen = true
+  lastPromptedResetAt = dokuStore.lastProtocolResetAt
+  const alert = await alertController.create({
+    header: 'Protokoll zurücksetzen?',
+    message: 'Das letzte Zurücksetzen liegt mehr als 30 Minuten zurück. Möchtest du ein neues Protokoll starten?',
+    buttons: [
+      {
+        text: 'Später',
+        role: 'cancel',
+      },
+      {
+        text: 'Zurücksetzen',
+        handler: () => {
+          dokuStore.newProtocol()
+        },
+      },
+    ],
+  })
+
+  await alert.present()
+  await alert.onDidDismiss()
+  isAutoResetPromptOpen = false
+}
 
 async function setupDokuPersistence() {
   await initStorage()
 
   const dokuStore = useDokuStore(pinia)
   await dokuStore.hydrateFromStorage()
+  await maybePromptAutoProtocolReset()
 
   dokuStore.$subscribe((_mutation) => {
     if (persistTimer) {
@@ -74,6 +111,7 @@ async function setupDokuPersistence() {
 
   await CapacitorApp.addListener('resume', async () => {
     await dokuStore.hydrateFromStorage()
+    await maybePromptAutoProtocolReset()
   })
 }
 

@@ -55,6 +55,8 @@ function resetProtocolState(): Protocol {
   return resetProtocol()
 }
 
+const AUTO_RESET_THRESHOLD_MS = 30 * 60 * 1000
+
 // ############################################################################
 
 export const useDokuStore = defineStore('doku', {
@@ -72,6 +74,7 @@ export const useDokuStore = defineStore('doku', {
     } as DeviceConnection,
 
     doku: resetProtocolState(),
+    lastProtocolResetAt: new Date().toISOString(),
 
   }),
   actions: {
@@ -208,12 +211,14 @@ export const useDokuStore = defineStore('doku', {
     // protocol
     newProtocol() {
       this.doku = resetProtocolState()
+      this.lastProtocolResetAt = new Date().toISOString()
       void this.persistToStorage()
     },
     async hydrateFromStorage() {
       const persistedState = await loadDokuState()
       if (!persistedState || persistedState.schemaVersion !== DOKU_SCHEMA_VERSION) {
         this.doku = resetProtocolState()
+        this.lastProtocolResetAt = new Date().toISOString()
         await this.persistToStorage()
         return
       }
@@ -221,17 +226,27 @@ export const useDokuStore = defineStore('doku', {
       const hydratedProtocol = hydrateProtocol(persistedState.doku)
       if (!hydratedProtocol) {
         this.doku = resetProtocolState()
+        this.lastProtocolResetAt = new Date().toISOString()
         await this.persistToStorage()
         return
       }
 
       resetQuickies()
       this.doku = hydratedProtocol
+      this.lastProtocolResetAt = persistedState.lastProtocolResetAt ?? persistedState.updatedAt ?? new Date().toISOString()
+    },
+    isAutoProtocolResetDue(referenceTime: number = Date.now()) {
+      const lastResetAtMs = Date.parse(this.lastProtocolResetAt)
+      if (Number.isNaN(lastResetAtMs)) {
+        return true
+      }
+      return referenceTime - lastResetAtMs >= AUTO_RESET_THRESHOLD_MS
     },
     async persistToStorage() {
       await saveDokuState({
         schemaVersion: DOKU_SCHEMA_VERSION,
         updatedAt: new Date().toISOString(),
+        lastProtocolResetAt: this.lastProtocolResetAt,
         doku: toRaw(this.doku),
       })
     },
