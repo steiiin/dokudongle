@@ -35,9 +35,24 @@
               Schweißig?
             </IonToggle>
           </IonItem>
-          <IonItem>
+          <IonItem lines="full">
             <IonToggle v-model="store.doku.xabCde.skin.poorSkinTurgor" label-placement="end">
               Stehende Hautfalten?
+            </IonToggle>
+          </IonItem>
+          <IonItem lines="inset">
+            <IonToggle v-model="store.doku.xabCde.skin.hasUrtikaria" label-placement="end">
+              Quaddeln?
+            </IonToggle>
+          </IonItem>
+          <IonItem lines="inset">
+            <IonToggle v-model="store.doku.xabCde.skin.hasExanthem" label-placement="end">
+              Exanthem (flächiger Ausschlag)?
+            </IonToggle>
+          </IonItem>
+          <IonItem>
+            <IonToggle v-model="store.doku.xabCde.skin.hasFlush" label-placement="end">
+              Flush?
             </IonToggle>
           </IonItem>
 
