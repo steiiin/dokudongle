@@ -445,7 +445,6 @@ export const useDokuStore = defineStore('doku', {
         || state.doku.xabcDe.avpu == 'bewusstlos'
         || state.doku.xabcDe.avpu == 'soporös'
         || state.doku.xabcDe.gcs.v < 4
-        || (isPediatric && state.doku.xabcDe.zops.isPediatricNonVerbal)
 
       const isLowVigilant: boolean =
         (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&

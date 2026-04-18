@@ -57,11 +57,6 @@ export class DisabilityZops {
 
   ///////////////////////////////////////////////
 
-  get isPediatricNonVerbal(): boolean {
-    return this.consciousness == 'abwesend'
-      || this.response == 'keine'
-  }
-
   get pediatricState(): string
   {
 
