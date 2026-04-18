@@ -2,7 +2,7 @@
   <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false">
     <IonHeader>
       <IonToolbar>
-        <IonTitle>Bauchschmerz (OPQRST)</IonTitle>
+        <IonTitle>Schwindel (OPQRST)</IonTitle>
       </IonToolbar>
       <IonToolbar>
         <IonButtons slot="start">
@@ -17,29 +17,6 @@
     <IonContent class="ion-padding">
 
       <IonList lines="none">
-
-        <ion-item-divider>
-          <ion-label>Region</ion-label>
-        </ion-item-divider>
-
-        <IonItem lines="inset">
-          <IonLabel>Oberbauch</IonLabel>
-          <DodoToggleChip v-model="localRegion.obre" color="danger">Rechts</DodoToggleChip>
-          <DodoToggleChip v-model="localRegion.obmi" color="danger">Mitte</DodoToggleChip>
-          <DodoToggleChip v-model="localRegion.obli" color="danger">Links</DodoToggleChip>
-        </IonItem>
-        <IonItem lines="inset">
-          <IonLabel>Mittelbauch</IonLabel>
-          <DodoToggleChip v-model="localRegion.mbre" color="warning">Rechts</DodoToggleChip>
-          <DodoToggleChip v-model="localRegion.mbmi" color="warning">Mitte</DodoToggleChip>
-          <DodoToggleChip v-model="localRegion.mbli" color="warning">Links</DodoToggleChip>
-        </IonItem>
-        <IonItem>
-          <IonLabel>Unterbauch</IonLabel>
-          <DodoToggleChip v-model="localRegion.ubre" color="primary">Rechts</DodoToggleChip>
-          <DodoToggleChip v-model="localRegion.ubmi" color="primary">Mitte</DodoToggleChip>
-          <DodoToggleChip v-model="localRegion.ubli" color="primary">Links</DodoToggleChip>
-        </IonItem>
 
         <ion-item-divider>
           <ion-label><b>O</b>nset</ion-label>
@@ -104,15 +81,15 @@
         </IonItem>
 
         <ion-item-divider>
-          <ion-label><b>S</b>everity <i>(Schmerzskala)</i></ion-label>
+          <ion-label><b>S</b>everity</ion-label>
         </ion-item-divider>
-        <DodoInputSelect label="Schmerzen" v-model="localSeverity"
+        <DodoInputSelect label="Schweregrad" v-model="localSeverity"
           :options="[
-            { value: 'minimal', label: 'Minimal (0-1)' },
-            { value: 'leicht', label: 'Leicht (2-3)' },
-            { value: 'mittel', label: 'Mittel (4-6)' },
-            { value: 'stark', label: 'Stark (7-8)' },
-            { value: 'maximal', label: 'Maximal (9-10)' },
+            { value: 'minimal', label: 'Minimal' },
+            { value: 'leicht', label: 'Leicht' },
+            { value: 'mittel', label: 'Mittel' },
+            { value: 'stark', label: 'Stark' },
+            { value: 'maximal', label: 'Maximal' },
           ]" lines="none">
         </DodoInputSelect>
 
@@ -138,7 +115,7 @@
 
 import { computed, ref, watch } from 'vue'
 
-import { QuickieAbdominalPain, QuickieAbdominalPainRegion } from '@/data/quickies'
+import { QuickieAbdominalPain, QuickieAbdominalPainRegion, QuickieSchwindel } from '@/data/quickies'
 import { concatDoku, prefix } from '@/utils/text'
 import { prefixSeit } from '@/utils/prefix/general';
 import { OptionalValue } from '@/types/protocol/input';
@@ -148,7 +125,7 @@ import { textIf } from '@/utils/filter';
 
 const props = defineProps<{
   isOpen: boolean
-  quickie: QuickieAbdominalPain
+  quickie: QuickieSchwindel
 }>()
 
 const emit = defineEmits<{
@@ -159,8 +136,7 @@ const emit = defineEmits<{
 // ############################################################################
 
 const previewText = computed(() => {
-  return prefix('Bauchschmerz: ', concatDoku([
-    localRegion.value.regionText,
+  return prefix('Schwindel: ', concatDoku([
     severityText.value,
     [ prefixSeit(localOnspan.value), localOnset.value ],
     provocationText.value,
@@ -178,7 +154,6 @@ const handleCancel = () => {
 }
 
 const syncQuickieFromLocalState = () => {
-  Object.assign(props.quickie.region, localRegion.value)
   props.quickie.onset = localOnset.value as QuickieAbdominalPain['onset']
   props.quickie.onspan = localOnspan.value
   props.quickie.provocation = provocationSet.value.filter(e => e.enabled).map(e => e.label)
@@ -196,7 +171,6 @@ const handleAccept = () => {
 
 // ############################################################################
 
-const localRegion = ref<QuickieAbdominalPainRegion>(props.quickie.region)
 const localOnset = ref<string>(props.quickie.onset)
 const localOnspan = ref<string>(props.quickie.onspan)
 const localProvocation = ref<string[]>(props.quickie.provocation)
@@ -208,7 +182,6 @@ const localTime = ref<string[]>(props.quickie.time)
 
 watch(() => props.quickie, (v) => {
 
-  localRegion.value = v.region
   localOnset.value = v.onset
   localOnspan.value = v.onspan
   localProvocation.value = v.provocation
@@ -302,32 +275,26 @@ const palliationText = computed(() => {
 })
 
 const provocationSet = ref([
-  { label: 'Atmung',              value: 'tiefer Atmung', color: 'primary', prep: 'bei', enabled: false },
-  { label: 'Bewegung',            color: 'warning', prep: 'bei', enabled: false },
-  { label: 'Erschütterung',       color: 'warning', prep: 'bei', enabled: false },
-  { label: 'Lagewechsel',         color: 'warning', prep: 'bei', enabled: false },
-  { label: 'Belastung',           color: 'success', prep: 'bei', enabled: false },
-  { label: 'Nahrungsaufnahme',    color: 'success', prep: 'nach', enabled: false },
+  { label: 'Kopfbewegung',  color: 'primary', prep: 'bei', enabled: false },
+  { label: 'Lagewechsel',   color: 'warning', prep: 'bei', enabled: false },
+  { label: 'Aufstehen',     color: 'warning', prep: 'beim', enabled: false },
+  { label: 'Augen öffnen',  value: 'geöffnet. Augen', color: 'warning', prep: 'mit', enabled: false },
+  { label: 'Stress',        color: 'success', prep: 'bei', enabled: false },
+  { label: 'Belastung',     value: 'körperl. Belastung', prep: 'bei', color: 'success', enabled: false },
 ])
 
 const palliationSet = ref([
-  { label: 'Ruhe',      value: 'körperl. Schonung', color: 'primary', prep: 'bei', enabled: false },
-  { label: 'Sitzen',    color: 'warning', prep: 'im', enabled: false },
-  { label: 'Stehen',    color: 'warning', prep: 'im', enabled: false },
-  { label: 'Stuhlgang', color: 'success', prep: 'nach', enabled: false },
-  { label: 'Erbrechen', color: 'success', prep: 'nach', enabled: false },
+  { label: 'Ruhe',        value: 'ruhig liegen', color: 'primary', prep: 'bei', enabled: false },
+  { label: 'Augen zu',    value: 'Augen schließen', color: 'warning', prep: 'bei', enabled: false },
+  { label: 'Punkt',       value: 'Fixieren eines Punkts', color: 'warning', prep: 'bei', enabled: false },
+  { label: 'Medikamente', value: 'Medikamenteneinnahme', color: 'success', prep: 'nach', enabled: false },
 ])
 
 // ############################################################################
 
 const qualitySet = ref([
-  { label: 'brennend',      color: 'primary', enabled: false },
-  { label: 'stechend',      color: 'primary', enabled: false },
-  { label: 'dumpf',         color: 'success', enabled: false },
-  { label: 'drückend',      color: 'success', enabled: false },
-  { label: 'ziehend',       color: 'success', enabled: false },
-  { label: 'krampfartig',   color: 'warning', enabled: false },
-  { label: 'wellenförmig',  color: 'warning', enabled: false },
+  { label: 'Drehschwindel',    color: 'primary', enabled: false },
+  { label: 'Schwankschwindel', color: 'primary', enabled: false },
 ])
 
 // ############################################################################
@@ -336,26 +303,15 @@ const radiationText = computed(() => {
 
   const enabled = radiationSet.value.filter(e=>e.enabled)
   if (enabled.length==0) { return '' }
-  return 'strahlt aus in ' + getConcatText(enabled.map(e=>e.value ?? e.label))
+  return 'zusätzlich ' + getConcatText(enabled.map(e=>e.label))
 
 })
 const radiationSet = ref([
 
-  { label: 'Flanke re.',      color: 'primary', value: 're. Flanke', enabled: false },
-  { label: 'Flanke li.',      color: 'primary', value: 'li. Flanke', enabled: false },
-  { label: 'Schulter re.',    color: 'primary', value: 're. Schulter', enabled: false },
-  { label: 'Schulter li.',    color: 'primary', value: 'li. Schulter', enabled: false },
-
-  { label: 'Leiste re.',      color: 'success', value: 're. Leiste', enabled: false },
-  { label: 'Leiste li.',      color: 'success', value: 'li. Leiste', enabled: false },
-  { label: 'Genitalregion',   color: 'success', enabled: false },
-
-  { label: 'Thorax',          color: 'warning', enabled: false },
-
-  { label: 'Rücken',          color: 'danger', enabled: false },
-  { label: 'oberer Rücken',   color: 'danger', value: 'oberen Rücken', enabled: false },
-  { label: 'unterer Rücken',  color: 'danger', value: 'unteren Rücken', enabled: false },
-  { label: 'Schulterblätter', color: 'danger', value: 'zwischen die Schulterblätter', enabled: false },
+  { label: 'Ohrgeräusche',      color: 'primary', enabled: false },
+  { label: 'Hörminderung',      color: 'primary', enabled: false },
+  { label: 'Druck im Ohr',      color: 'warning', enabled: false },
+  { label: 'Schmerzen im Ohr',  color: 'warning', enabled: false },
 
 ])
 
@@ -363,11 +319,11 @@ const radiationSet = ref([
 
 const severityText = computed(() => {
   return {
-    minimal:   'minimal/0-1',
-    leicht:   'leicht/2-3',
-    mittel:   'mittel/4-6',
-    stark:    'stark/7-8',
-    maximal:  'maximal/9-10',
+    minimal:   'minimal',
+    leicht:   'leicht',
+    mittel:   'mittel',
+    stark:    'stark',
+    maximal:  'maximal',
   }[localSeverity.value] ?? '';
 })
 

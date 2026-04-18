@@ -65,7 +65,7 @@
             label="Blut im Urin" lines="inset"
             :options="[
               { value: '', label: 'Kein' },
-              { value: 'minmal Blut im Urin', label: 'Minimal' },
+              { value: 'minimal Blut im Urin', label: 'Minimal' },
               { value: 'etwas Blut im Urin', label: 'Etwas' },
               { value: 'viel Blut im Urin', label: 'Viel' },
             ]">

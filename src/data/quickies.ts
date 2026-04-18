@@ -4,6 +4,7 @@ import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuicki
 import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
 import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
+import DodoQuickieSchwindel from "@/components/quickie-components/DodoQuickieSchwindel.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
 import { OptionalValue } from "@/types/protocol/input"
 
@@ -21,6 +22,7 @@ export const QU_AbdominalPain = 'abdominal_pain'
 export const QU_ExcretionsUrinary = 'excretions_urinary'
 export const QU_ExcretionsBowel = 'excretions_bowel'
 
+export const QU_SCHWINDEL = 'intern_schwindel'
 export const QU_OPQRST = 'intern_opqrst'
 
 // ############################################################################
@@ -269,7 +271,7 @@ export class QuickieExcretionsUrinary extends Quickie
   public output: string[] = []
   public pain: string[] = []
 
-  public hematuria: '' | 'minmal Blut im Urin' | 'etwas Blut im Urin' | 'viel Blut im Urin' = ''
+  public hematuria: '' | 'minimal Blut im Urin' | 'etwas Blut im Urin' | 'viel Blut im Urin' = ''
   public anomalies: string[] = []
 
 }
@@ -289,6 +291,29 @@ export class QuickieExcretionsBowels extends Quickie
   public bowelSounds: '' | 'normal' | 'vermehrt' | 'vermindert' | 'fehlend' | 'hochgestellt' = ''
   public blood: '' | 'kein Blut' | 'Blut am Klopapier' | 'Blut im Stuhl' | 'Teerstuhl' = ''
   public bowelPain: boolean = false
+
+}
+
+// --------------------------------------------------------
+
+export class QuickieSchwindel extends Quickie
+{
+  constructor(public key: string, public label: string) {
+    super(key, label, markRaw(DodoQuickieSchwindel))
+  }
+  public isAvailable(text: string): boolean {
+    return !text.includes('Schwindel: ')
+  }
+
+  public onset: 'plötzlicher Beginn' | 'schleichender Beginn' = 'plötzlicher Beginn'
+  public onspan: '' | 'seit Stunden' | 'seit Tagen' | 'seit Wochen' | 'gestern' | string = ''
+
+  public provocation: string[] = []
+  public palliation: string[] = []
+  public quality: string[] = []
+  public radiation: string[] = []
+  public severity: 'minimal'|'leicht'|'mittel'|'stark'|'maximal' = 'mittel'
+  public time: string[] = []
 
 }
 
@@ -366,6 +391,7 @@ const buildQuickies = (): Record<string, Quickie> => ({
   [QU_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_ExcretionsUrinary, 'Wasserlassen'),
   [QU_ExcretionsBowel]: new QuickieExcretionsBowels(QU_ExcretionsBowel, 'Stuhlgang'),
 
+  [QU_SCHWINDEL]: new QuickieSchwindel(QU_SCHWINDEL, 'Schwindel'),
   [QU_OPQRST]: new QuickieOPQRST(QU_OPQRST, 'OPQRST'),
 })
 
