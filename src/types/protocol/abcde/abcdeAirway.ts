@@ -17,6 +17,7 @@ export class AbcdeAirway {
   public mucosa: AirwayMucosa
   public obstruction: string
 
+  public hasAngioEdema: boolean
   public hasStridor: boolean
   public hasTongueBite: boolean
 
@@ -29,6 +30,7 @@ export class AbcdeAirway {
     this.isBreathing = true
     this.mucosa = { m: 'feucht', e: 'rosig' }
     this.obstruction = ''
+    this.hasAngioEdema = false
     this.hasStridor = false
     this.hasTongueBite = false
     this.treatment = ''
@@ -66,6 +68,7 @@ export class AbcdeAirway {
     const assessedLine: string = breakDoku(prefix('A:',
       textIf('keine Atmung! ', !this.isBreathing) + capitalizeBegin(concatDoku([
       this.obstructionText,
+      textIf('Angioödem', this.hasAngioEdema),
       onNormal('SH ' + this.mucosaText),
       textIf('Stridor', this.hasStridor),
       this.hasTongueBite

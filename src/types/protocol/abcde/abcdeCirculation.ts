@@ -19,6 +19,9 @@ export interface CirculationSkin {
   color: 'rosig' | 'blass' | 'zyanotisch' | 'marmoriert'
   clammy: boolean
   poorSkinTurgor: boolean
+  hasUrtikaria: boolean
+  hasFlush: boolean
+  hasExanthem: boolean
   peripheralTemp: 'warm' | 'kühl'
   centralTemp: 'warm' | 'kühl'
 }
@@ -68,6 +71,9 @@ export class AbcdeCirculation {
       color: 'rosig',
       clammy: false,
       poorSkinTurgor: false,
+      hasExanthem: false,
+      hasFlush: false,
+      hasUrtikaria: false,
       peripheralTemp: 'warm',
       centralTemp: 'warm',
     }
@@ -112,8 +118,13 @@ export class AbcdeCirculation {
       ? `Stamm ${this.skin.centralTemp}, Extr. ${this.skin.peripheralTemp}`
       : this.skin.centralTemp
     return concatDoku([
-      `${this.skin.color}/${temp}/${this.skinSweatText}`,
-      textIf('stehende Hautfalten', this.skin.poorSkinTurgor)
+      [
+        `${this.skin.color}/${temp}/${this.skinSweatText}`,
+        textIf('Urtikaria', this.skin.hasUrtikaria),
+        textIf('Ausschlag', this.skin.hasExanthem),
+        textIf('Flush', this.skin.hasFlush),
+        textIf('stehende Hautfalten', this.skin.poorSkinTurgor),
+      ]
     ], false)
   }
 
@@ -211,7 +222,9 @@ export class AbcdeCirculation {
     const isNonVerbal = getCtx().isNonVerbal
 
     const assessedLine: string = breakDoku(prefix('C:', capitalizeBegin(concatDoku([
-      `Haut ${this.skinText}`,
+      [
+        `Haut ${this.skinText}`,
+      ],
       this.pulseText,
       textIf(
         this.capillaryRefill == '>3s' ? 'Rekap>3s' : onNormal(`Rekap ${this.capillaryRefill}`),
