@@ -8,6 +8,7 @@ import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persi
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
+import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
 import { breakDoku, multiline, placeholder } from '@/utils/text'
 import { textIf } from '@/utils/filter'
@@ -47,7 +48,35 @@ function hydrateProtocol(input: unknown): Protocol | null {
     return null
   }
 
-  return hydrateLikeTemplate(resetProtocol(), input)
+  const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), input)
+
+  hydratedProtocol.sampler.medication.PlanMedication = hydratedProtocol.sampler.medication.PlanMedication
+    .map((item) => new SampleMedicationItem(item))
+
+  hydratedProtocol.sampler.contacts.contacts = hydratedProtocol.sampler.contacts.contacts
+    .map((contact) => new SampleContactsItem(contact))
+
+  return hydratedProtocol
+}
+
+function toPersistable<T>(value: T): T {
+  const rawValue = toRaw(value)
+
+  if (Array.isArray(rawValue)) {
+    return rawValue.map((entry) => toPersistable(entry)) as T
+  }
+
+  if (isRecord(rawValue)) {
+    const plainObject: Record<string, unknown> = {}
+
+    for (const key of Object.keys(rawValue)) {
+      plainObject[key] = toPersistable(rawValue[key])
+    }
+
+    return plainObject as T
+  }
+
+  return rawValue
 }
 
 function resetProtocolState(): Protocol {
@@ -247,7 +276,7 @@ export const useDokuStore = defineStore('doku', {
         schemaVersion: DOKU_SCHEMA_VERSION,
         updatedAt: new Date().toISOString(),
         lastProtocolResetAt: this.lastProtocolResetAt,
-        doku: toRaw(this.doku),
+        doku: toPersistable(this.doku),
       })
     },
     async sendProtocol() {
