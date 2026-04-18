@@ -61,7 +61,7 @@
           </IonToggle>
         </IonItem>
 
-        <IonItem>
+        <IonItem v-if="!ctx.isNonVerbal">
           <IonToggle v-model="store.doku.xabcdE.nausea" label-placement="end">
             Übelkeit?
           </IonToggle>

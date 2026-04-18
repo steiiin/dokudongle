@@ -93,6 +93,13 @@ watch(() => store.doku.flavors.reanimation, (v) => {
   }
 })
 
+watch(() => store.doku.flavors.non_verbal, (v) => {
+  if (v && store.doku.xabcDe.gcs.v == 5)
+  {
+    store.doku.xabcDe.gcs.v = 5 
+  }
+})
+
 </script>
 
 <style scoped>

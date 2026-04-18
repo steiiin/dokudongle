@@ -6,7 +6,7 @@
     <IonCardContent>
       <IonList lines="none">
 
-        <DodoInputSelect label="Luftnot" v-model="store.doku.xaBcde.breathlessness" lines="full"  v-if="store.doku.xAbcde.isBreathing"
+        <DodoInputSelect label="Luftnot" v-model="store.doku.xaBcde.breathlessness" lines="full"  v-if="store.doku.xAbcde.isBreathing && !ctx.isNonVerbal"
           :options="[
             { value: 'keine', label: 'Keine' },
             { value: 'leichte', label: 'Leichte' },
@@ -167,6 +167,7 @@ import { computed, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
+const ctx = computed(() => store.context)
 
 // ############################################################################
 
