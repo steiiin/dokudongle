@@ -38,6 +38,7 @@ const quickieKeys = computed(() => {
     if (store.doku.xabcdE.excretions.value.bowelAbnormalities) { list.push(QU_ExcretionsBowel) }
   }
 
+  console.log(store.doku.xabcDe.dizziness)
   if (store.doku.xabcDe.dizziness == 'gerichteter')
   {
     list.push(QU_SCHWINDEL)

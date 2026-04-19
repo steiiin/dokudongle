@@ -165,8 +165,8 @@
           label="Schwindel" lines="full"
           :options="[
             { value: 'kein', label: 'Keiner' },
-            { value: 'ungerichtet', label: 'Ungerichtet/Diffus' },
-            { value: 'gerichtet', label: 'Dreh-/Schwankschwindel' },
+            { value: 'ungerichteter', label: 'Ungerichtet/Diffus' },
+            { value: 'gerichteter', label: 'Dreh-/Schwankschwindel' },
           ]">
         </DodoInputSelect>
 
