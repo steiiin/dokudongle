@@ -22,7 +22,7 @@
           <ion-label><b>O</b>nset</ion-label>
         </ion-item-divider>
         <IonItem lines="inset">
-            <IonLabel>Wie</IonLabel>
+            <IonLabel>Beginn</IonLabel>
             <DodoToggleGroup v-model="localOnset">
               <DodoToggleButton color="warning" value="plötzlicher Beginn">Plötzlich</DodoToggleButton>
               <DodoToggleButton color="success" value="schleichender Beginn">Schleichend</DodoToggleButton>
@@ -70,7 +70,7 @@
         </IonItem>
 
         <ion-item-divider>
-          <ion-label><b>R</b>adiation</ion-label>
+          <ion-label><b>R</b>el. Begleitsymptome</ion-label>
         </ion-item-divider>
         <IonItem>
           <div class="chip-container">
@@ -115,7 +115,7 @@
 
 import { computed, ref, watch } from 'vue'
 
-import { QuickieAbdominalPain, QuickieAbdominalPainRegion, QuickieSchwindel } from '@/data/quickies'
+import { QuickieSchwindel } from '@/data/quickies'
 import { concatDoku, prefix } from '@/utils/text'
 import { prefixSeit } from '@/utils/prefix/general';
 import { OptionalValue } from '@/types/protocol/input';
@@ -137,11 +137,11 @@ const emit = defineEmits<{
 
 const previewText = computed(() => {
   return prefix('Schwindel: ', concatDoku([
+    qualitySet.value.filter(e=>e.enabled).map(e=>e.label),
     severityText.value,
     [ prefixSeit(localOnspan.value), localOnset.value ],
     provocationText.value,
     palliationText.value,
-    qualitySet.value.filter(e=>e.enabled).map(e=>e.label),
     radiationText.value,
     timeText.value,
   ]))
@@ -154,13 +154,13 @@ const handleCancel = () => {
 }
 
 const syncQuickieFromLocalState = () => {
-  props.quickie.onset = localOnset.value as QuickieAbdominalPain['onset']
+  props.quickie.onset = localOnset.value as QuickieSchwindel['onset']
   props.quickie.onspan = localOnspan.value
   props.quickie.provocation = provocationSet.value.filter(e => e.enabled).map(e => e.label)
   props.quickie.palliation = palliationSet.value.filter(e => e.enabled).map(e => e.label)
   props.quickie.quality = qualitySet.value.filter(e => e.enabled).map(e => e.label)
   props.quickie.radiation = radiationSet.value.filter(e => e.enabled).map(e => e.label)
-  props.quickie.severity = localSeverity.value as QuickieAbdominalPain['severity']
+  props.quickie.severity = localSeverity.value as QuickieSchwindel['severity']
   props.quickie.time = timeSet.value.filter(e => e.enabled).map(e => e.label)
 }
 
@@ -276,18 +276,16 @@ const palliationText = computed(() => {
 
 const provocationSet = ref([
   { label: 'Kopfbewegung',  color: 'primary', prep: 'bei', enabled: false },
-  { label: 'Lagewechsel',   color: 'warning', prep: 'bei', enabled: false },
-  { label: 'Aufstehen',     color: 'warning', prep: 'beim', enabled: false },
-  { label: 'Augen öffnen',  value: 'geöffnet. Augen', color: 'warning', prep: 'mit', enabled: false },
-  { label: 'Stress',        color: 'success', prep: 'bei', enabled: false },
+  { label: 'Lagewechsel',   color: 'primary', prep: 'bei', enabled: false },
+  { label: 'Aufstehen',     color: 'primary', prep: 'beim', enabled: false },
+  { label: 'Gehen',         color: 'success', prep: 'beim', enabled: false },
   { label: 'Belastung',     value: 'körperl. Belastung', prep: 'bei', color: 'success', enabled: false },
 ])
 
 const palliationSet = ref([
-  { label: 'Ruhe',        value: 'ruhig liegen', color: 'primary', prep: 'bei', enabled: false },
-  { label: 'Augen zu',    value: 'Augen schließen', color: 'warning', prep: 'bei', enabled: false },
-  { label: 'Punkt',       value: 'Fixieren eines Punkts', color: 'warning', prep: 'bei', enabled: false },
-  { label: 'Medikamente', value: 'Medikamenteneinnahme', color: 'success', prep: 'nach', enabled: false },
+  { label: 'Ruhe',           value: 'ruhig liegen', color: 'primary', prep: 'beim', enabled: false },
+  { label: 'Augen zu',       value: 'Augen schließen', color: 'primary', prep: 'beim', enabled: false },
+  { label: 'Punkt fixieren', value: 'Fixieren eines Punkts', color: 'primary', prep: 'bei', enabled: false },
 ])
 
 // ############################################################################
@@ -295,6 +293,7 @@ const palliationSet = ref([
 const qualitySet = ref([
   { label: 'Drehschwindel',    color: 'primary', enabled: false },
   { label: 'Schwankschwindel', color: 'primary', enabled: false },
+  { label: 'Liftgefühl',       color: 'warning', enabled: false },
 ])
 
 // ############################################################################
@@ -310,21 +309,21 @@ const radiationSet = ref([
 
   { label: 'Ohrgeräusche',      color: 'primary', enabled: false },
   { label: 'Hörminderung',      color: 'primary', enabled: false },
-  { label: 'Druck im Ohr',      color: 'warning', enabled: false },
-  { label: 'Schmerzen im Ohr',  color: 'warning', enabled: false },
+  { label: 'Druck im Ohr',      color: 'primary', enabled: false },
+  { label: 'Nystagmus',         color: 'warning', enabled: false },
 
 ])
 
 // ############################################################################
 
 const severityText = computed(() => {
-  return {
-    minimal:   'minimal',
-    leicht:   'leicht',
-    mittel:   'mittel',
-    stark:    'stark',
-    maximal:  'maximal',
-  }[localSeverity.value] ?? '';
+  return 'Intensität ' + ({
+    minimal:  'minimal, kaum beeinträchtigt',
+    leicht:   'leicht, gehfähig',
+    mittel:   'mittel, unsicher beim Gehen',
+    stark:    'stark, nur mit Hilfe gehfähig',
+    maximal:  'maximal, nicht steh-/gehfähig',
+  }[localSeverity.value] ?? '');
 })
 
 // ############################################################################
@@ -338,12 +337,13 @@ const timeText = computed(() => {
 })
 
 const timeSet = ref([
-  { label: 'Erstmalig',       value: 'erstmalig',                    color: 'primary', enabled: false },
-  { label: 'Früher Ähnlich',  value: 'bereits ähnlich aufgetreten',  color: 'warning', enabled: false },
-  { label: 'Früher Milder',   value: 'bereits milder aufgetreten',   color: 'warning', enabled: false },
-  { label: 'Wiederholt',      value: 'bereits mehrfach aufgetreten', color: 'warning', enabled: false },
-  { label: 'Zunehmend',       value: 'stetig zunehmend',    color: 'success', enabled: false },
-  { label: 'Gleichbleibend',  value: 'Intensität konstant', color: 'success', enabled: false },
+
+  { label: 'Erstmalig',       value: 'erstmalig',                     color: 'primary', enabled: false },
+  { label: 'Früher Ähnlich',  value: 'bereits ähnlich aufgetreten',   color: 'warning', enabled: false },
+  { label: 'Wiederholt',      value: 'bereits mehrfach aufgetreten',  color: 'warning', enabled: false },
+  { label: 'Zunehmend',       value: 'stetig zunehmend',              color: 'success', enabled: false },
+  { label: 'Gleichbleibend',  value: 'gleichbleibend',                color: 'success', enabled: false },
+
 ])
 
 </script>
