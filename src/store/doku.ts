@@ -577,11 +577,9 @@ export const useDokuStore = defineStore('doku', {
       }
 
       // TREATMENT
-      text += breakDoku([
-        state.doku.saamed.getBlock(),
-        state.doku.redflags.getConsentBlock(),
-      ], true)
+      text += breakDoku(state.doku.saamed.getBlock(), true)
       text += breakDoku(placeholder(state.doku.treatment.value, 'Maßnahmen'), true)
+      text += breakDoku(state.doku.redflags.getConsentBlock(), true)
       text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
 
       return text.trim()
