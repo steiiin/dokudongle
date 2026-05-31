@@ -118,7 +118,6 @@ const selectValue = computed({
   set(val: SelectValue) {
     if (val === CUSTOM_VALUE) {
       isCustomMode.value = true
-      emit('update:modelValue', customText.value)
       setTimeout(() => { customInput.value?.setFocus() }, 300)
       return
     }
