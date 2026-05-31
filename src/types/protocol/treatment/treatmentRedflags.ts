@@ -11,6 +11,9 @@ export class TreatmentRedflags {
 
   public choosenScenarios: Array<RedflagScenario>
   public choosenSignals: Array<RedflagSignal>
+  public removedMajorSignals: Array<string>
+  public removedMinorSignals: Array<string>
+  public disableMinorBlock: boolean
 
   public attendant: OptionalValue<string>
 
@@ -23,6 +26,9 @@ export class TreatmentRedflags {
     this.noTransportType = ''
     this.choosenScenarios = []
     this.choosenSignals = []
+    this.removedMajorSignals = []
+    this.removedMinorSignals = []
+    this.disableMinorBlock = false
     this.attendant = OptionalValue.inactive('')
 
     this.consent = ''
@@ -87,6 +93,8 @@ export class TreatmentRedflags {
     let block = ''
     const scenarios = this.dedupeById(this.choosenScenarios)
     const signals = this.dedupeById(this.choosenSignals)
+    const removedMajorSignals = new Set(this.removedMajorSignals ?? [])
+    const removedMinorSignals = new Set(this.removedMinorSignals ?? [])
 
     // create intro
     const diagnoses = this.getInterleavedEntries(scenarios, 'diagnoses')
@@ -96,13 +104,15 @@ export class TreatmentRedflags {
 
     // create signals text
     const majorTexts: string[] = this.getInterleavedEntries(scenarios, 'majorSignals')
+      .filter(text => !removedMajorSignals.has(text))
     const minorTexts: string[] = this.getInterleavedEntries(scenarios, 'minorSignals')
+      .filter(text => !removedMinorSignals.has(text))
     const customSignals = signals.map(e => e.text)
 
     if (majorTexts.length>0 || customSignals.length>0) {
       block += `Bei ${this.getConcatText([ ...majorTexts, ...customSignals ])} erneut Notruf/Vorstellung NFA. \n`
     }
-    if (minorTexts.length>0) {
+    if (!this.disableMinorBlock && minorTexts.length>0) {
       block += `Bei ${this.getConcatText(minorTexts)} Rücksprache Haus-/Facharzt. \n`
     }
 

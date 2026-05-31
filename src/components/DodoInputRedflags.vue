@@ -3,17 +3,35 @@
   <IonCard class="dodo-redflag-input" v-if="hasAny">
     <IonCardContent class="dodo-redflag-input-content">
       <div class="chip-container" v-if="hasScenarios">
+        <div class="chip-container-label">Szenarien</div>
         <IonChip color="success" v-for="scenario in modelValue.choosenScenarios" :key="scenario.id" @click="removeScenario(scenario)">
           <IonLabel>{{ scenario.name }}</IonLabel>
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
-      <div class="chip-container" v-if="hasSignals">
-        <IonChip color="danger" v-for="signal in modelValue.choosenSignals" :key="signal.id" @click="removeSignal(signal)">
+      <div class="chip-container" v-if="hasMajorSignals">
+        <div class="chip-container-label">Redflags (dringlich)</div>
+        <IonChip color="danger" v-for="signal in visibleMajorSignals" :key="signal.key" @click="removeRedflag(signal)">
           <IonLabel>{{ signal.text }}</IonLabel>
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
       </div>
+      <template v-if="hasMinorSignals">
+        <div class="chip-container" v-show="!modelValue.disableMinorBlock">
+          <div class="chip-container-label">Redflags (nichtdringlich)</div>
+          <IonChip color="warning" v-for="signal in visibleMinorSignals" :key="signal.key" @click="removeRedflag(signal)">
+            <IonLabel>{{ signal.text }}</IonLabel>
+            <IonIcon :icon="closeCircle"></IonIcon>
+          </IonChip>
+        </div>
+      </template>
+      <IonItem v-if="hasScenarios" lines="full" class="minor-block-toggle">
+        <IonCheckbox justify="space-between" label-placement="start"
+          :checked="modelValue.disableMinorBlock"
+          @ionChange="setDisableMinorBlock($event.detail.checked)">
+          Nichtdringliche Redflags weglassen
+        </IonCheckbox>
+      </IonItem>
     </IonCardContent>
   </IonCard>
   <IonCard class="dodo-redflag-input" style="margin-bottom:0">
@@ -94,12 +112,14 @@ const cloneModelValue = (): TreatmentRedflagsModel => {
   const clone = Object.assign(new TreatmentRedflags(), props.modelValue)
   clone.choosenScenarios = [...props.modelValue.choosenScenarios]
   clone.choosenSignals = [...props.modelValue.choosenSignals]
+  clone.removedMajorSignals = [...(props.modelValue.removedMajorSignals ?? [])]
+  clone.removedMinorSignals = [...(props.modelValue.removedMinorSignals ?? [])]
+  clone.disableMinorBlock = props.modelValue.disableMinorBlock ?? false
   return clone
 }
 
 const hasScenarios = computed(() => props.modelValue.choosenScenarios.length > 0)
-const hasSignals = computed(() => props.modelValue.choosenSignals.length > 0)
-const hasAny = computed(() => hasScenarios.value || hasSignals.value)
+const hasAny = computed(() => hasScenarios.value || hasMajorSignals.value || hasMinorSignals.value)
 
 type RedEntryType = 'scenario' | 'signal'
 
@@ -110,6 +130,13 @@ type RedEntry = {
   subtitle: string
   groupName: string
   type: RedEntryType
+}
+
+type VisibleRedflag = {
+  key: string
+  text: string
+  source: 'scenario-major' | 'scenario-minor' | 'custom-major'
+  signal?: RedflagSignal
 }
 
 type RedSectionCategory = {
@@ -127,6 +154,59 @@ const isModalOpen = ref(false)
 const currentSearchQuery = ref('')
 const currentFilter = ref<RedEntryType>('scenario')
 const redSearchbar = ref<any | null>(null)
+
+const interleaveUnique = (lists: string[][]): string[] => {
+  const result: string[] = []
+  const seen = new Set<string>()
+  const maxLength = Math.max(...lists.map(list => list.length), 0)
+  for (let i = 0; i < maxLength; i += 1) {
+    for (const list of lists) {
+      const value = list[i]
+      if (value && !seen.has(value)) {
+        seen.add(value)
+        result.push(value)
+      }
+    }
+  }
+  return result
+}
+
+const inheritedMajorSignals = computed(() => {
+  const removed = new Set(props.modelValue.removedMajorSignals ?? [])
+  return interleaveUnique(props.modelValue.choosenScenarios.map(scenario => scenario.majorSignals))
+    .filter(text => !removed.has(text))
+})
+
+const inheritedMinorSignals = computed(() => {
+  const removed = new Set(props.modelValue.removedMinorSignals ?? [])
+  return interleaveUnique(props.modelValue.choosenScenarios.map(scenario => scenario.minorSignals))
+    .filter(text => !removed.has(text))
+})
+
+const visibleMajorSignals = computed<VisibleRedflag[]>(() => [
+  ...inheritedMajorSignals.value.map(text => ({
+    key: `scenario-major-${text}`,
+    text,
+    source: 'scenario-major' as const,
+  })),
+  ...props.modelValue.choosenSignals.map(signal => ({
+    key: `custom-major-${signal.id}`,
+    text: signal.text,
+    source: 'custom-major' as const,
+    signal,
+  }))
+])
+
+const visibleMinorSignals = computed<VisibleRedflag[]>(() => (
+  inheritedMinorSignals.value.map(text => ({
+    key: `scenario-minor-${text}`,
+    text,
+    source: 'scenario-minor' as const,
+  }))
+))
+
+const hasMajorSignals = computed(() => visibleMajorSignals.value.length > 0)
+const hasMinorSignals = computed(() => visibleMinorSignals.value.length > 0)
 
 const focusRedSearchbar = async () => {
   setTimeout(() => { redSearchbar.value?.$el?.setFocus() }, 300)
@@ -233,10 +313,33 @@ const removeSignal = (signal: RedflagSignal) => {
   emit('update:modelValue', updated)
 }
 
+const removeRedflag = (signal: VisibleRedflag) => {
+  if (signal.source === 'custom-major' && signal.signal) {
+    removeSignal(signal.signal)
+    return
+  }
+
+  closeModal()
+  const updated = cloneModelValue()
+  if (signal.source === 'scenario-major') {
+    updated.removedMajorSignals = [...new Set([...(updated.removedMajorSignals ?? []), signal.text])]
+  }
+  if (signal.source === 'scenario-minor') {
+    updated.removedMinorSignals = [...new Set([...(updated.removedMinorSignals ?? []), signal.text])]
+  }
+  emit('update:modelValue', updated)
+}
+
 const removeScenario = (scenario: RedflagScenario) => {
   closeModal()
   const updated = cloneModelValue()
   updated.choosenScenarios = updated.choosenScenarios.filter(e => e.id !== scenario.id)
+  emit('update:modelValue', updated)
+}
+
+const setDisableMinorBlock = (checked: boolean) => {
+  const updated = cloneModelValue()
+  updated.disableMinorBlock = checked
   emit('update:modelValue', updated)
 }
 
@@ -278,6 +381,20 @@ const fuzzyMatch = (search: string, target: string): boolean => {
 
   .chip-container {
     padding: .5rem;
+  }
+
+  .chip-container-label {
+    color: var(--ion-color-medium);
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    margin: 0 0 .25rem .25rem;
+    text-transform: uppercase;
+  }
+
+  .minor-block-toggle {
+    --padding-start: .75rem;
+    --inner-padding-end: .75rem;
   }
 
   .dodo-redflag-input-actions {

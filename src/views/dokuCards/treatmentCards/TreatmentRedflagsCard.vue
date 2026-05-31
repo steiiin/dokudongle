@@ -64,6 +64,9 @@ watch(() => [
   store.doku.redflags.choosenScenarios.length,
   store.doku.redflags.choosenSignals.length,
   store.doku.redflags.noTransportType,
+  store.doku.redflags.removedMajorSignals?.length ?? 0,
+  store.doku.redflags.removedMinorSignals?.length ?? 0,
+  store.doku.redflags.disableMinorBlock,
   store.doku.redflags.attendant.active
 ], async (oldV, newV) => {
 
