@@ -57,3 +57,7 @@ ion-card-content.card-in-card .dd-input-textarea {
 ion-header ion-buttons {
   padding-inline: .5rem;
 }
+
+ion-alert.protocol-reset-alert .alert-wrapper {
+  outline: none;
+}
