@@ -1,4 +1,5 @@
 import { onNormal } from "@/utils/filter"
+import { prefixAllergie } from "@/utils/prefix/sample"
 
 export class SampleAllergies {
 
@@ -20,10 +21,10 @@ export class SampleAllergies {
       return onNormal('Keine Allergien.')
     }
     else if (this.level == 'minor') {
-      return `Allergie: ${this.description}, sonst keine Med.-Unverträglichkeiten.`
+      return prefixAllergie(`${this.description}, sonst keine Med.-Unverträglichkeiten.`)
     }
     else {
-      return `Allergie: ${this.description}.`
+      return prefixAllergie(`${this.description}.`)
     }
   }
 
