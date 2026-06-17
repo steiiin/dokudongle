@@ -432,7 +432,7 @@ export const useDokuStore = defineStore('doku', {
 
       const isCourseVerlegung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
       const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.EINWEISUNG
-      const isPediatric: boolean = state.doku.ident.age?.totalYears <= 3
+      const isPediatric: boolean = state.doku.ident.age?.totalYears <= 4
 
       const nothingToTreat: boolean = (
         !state.doku.Xabcde.hasCriticalBleeding
