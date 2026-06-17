@@ -11,6 +11,7 @@ export interface PersistedDokuState {
   schemaVersion?: number
   updatedAt?: string
   lastProtocolResetAt?: string
+  lastAutoProtocolResetPromptAt?: string
   doku?: any
 }
 

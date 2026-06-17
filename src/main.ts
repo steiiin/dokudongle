@@ -57,20 +57,16 @@ const app = createApp(App)
 const PERSISTENCE_DEBOUNCE_MS = 3000
 let persistTimer: ReturnType<typeof setTimeout> | null = null
 let isAutoResetPromptOpen = false
-let lastPromptedResetAt: string | null = null
 
 async function maybePromptAutoProtocolReset() {
   const dokuStore = useDokuStore(pinia)
   if (isAutoResetPromptOpen || !dokuStore.isAutoProtocolResetDue()) {
     return
   }
-  if (lastPromptedResetAt === dokuStore.lastProtocolResetAt) {
-    return
-  }
 
   isAutoResetPromptOpen = true
-  lastPromptedResetAt = dokuStore.lastProtocolResetAt
   const alert = await alertController.create({
+    cssClass: 'protocol-reset-alert',
     header: 'Protokoll zurücksetzen?',
     message: 'Das letzte Zurücksetzen liegt mehr als 30 Minuten zurück. Möchtest du ein neues Protokoll starten?',
     buttons: [
@@ -89,6 +85,7 @@ async function maybePromptAutoProtocolReset() {
 
   await alert.present()
   await alert.onDidDismiss()
+  dokuStore.markAutoProtocolResetPrompted()
   isAutoResetPromptOpen = false
 }
 

@@ -104,6 +104,7 @@ export const useDokuStore = defineStore('doku', {
 
     doku: resetProtocolState(),
     lastProtocolResetAt: new Date().toISOString(),
+    lastAutoProtocolResetPromptAt: null as string | null,
 
   }),
   actions: {
@@ -243,11 +244,16 @@ export const useDokuStore = defineStore('doku', {
       this.lastProtocolResetAt = new Date().toISOString()
       void this.persistToStorage()
     },
+    markAutoProtocolResetPrompted() {
+      this.lastAutoProtocolResetPromptAt = new Date().toISOString()
+      void this.persistToStorage()
+    },
     async hydrateFromStorage() {
       const persistedState = await loadDokuState()
       if (!persistedState || persistedState.schemaVersion !== DOKU_SCHEMA_VERSION) {
         this.doku = resetProtocolState()
         this.lastProtocolResetAt = new Date().toISOString()
+        this.lastAutoProtocolResetPromptAt = null
         await this.persistToStorage()
         return
       }
@@ -256,6 +262,7 @@ export const useDokuStore = defineStore('doku', {
       if (!hydratedProtocol) {
         this.doku = resetProtocolState()
         this.lastProtocolResetAt = new Date().toISOString()
+        this.lastAutoProtocolResetPromptAt = null
         await this.persistToStorage()
         return
       }
@@ -263,19 +270,30 @@ export const useDokuStore = defineStore('doku', {
       resetQuickies()
       this.doku = hydratedProtocol
       this.lastProtocolResetAt = persistedState.lastProtocolResetAt ?? persistedState.updatedAt ?? new Date().toISOString()
+      this.lastAutoProtocolResetPromptAt = persistedState.lastAutoProtocolResetPromptAt ?? null
     },
     isAutoProtocolResetDue(referenceTime: number = Date.now()) {
       const lastResetAtMs = Date.parse(this.lastProtocolResetAt)
-      if (Number.isNaN(lastResetAtMs)) {
+      const lastPromptAtMs = this.lastAutoProtocolResetPromptAt
+        ? Date.parse(this.lastAutoProtocolResetPromptAt)
+        : Number.NaN
+      const lastOffsetAtMs = Math.max(
+        Number.isNaN(lastResetAtMs) ? 0 : lastResetAtMs,
+        Number.isNaN(lastPromptAtMs) ? 0 : lastPromptAtMs,
+      )
+
+      if (lastOffsetAtMs === 0) {
         return true
       }
-      return referenceTime - lastResetAtMs >= AUTO_RESET_THRESHOLD_MS
+
+      return referenceTime - lastOffsetAtMs >= AUTO_RESET_THRESHOLD_MS
     },
     async persistToStorage() {
       await saveDokuState({
         schemaVersion: DOKU_SCHEMA_VERSION,
         updatedAt: new Date().toISOString(),
         lastProtocolResetAt: this.lastProtocolResetAt,
+        lastAutoProtocolResetPromptAt: this.lastAutoProtocolResetPromptAt ?? undefined,
         doku: toPersistable(this.doku),
       })
     },
