@@ -3,6 +3,7 @@ import { Storage } from '@ionic/storage'
 // ############################################################################
 
 export const DOKU_STORAGE_KEY = 'doku_state';
+export const DOKU_AUDIT_STORAGE_KEY = 'doku_protocol_audit';
 export const DOKU_SCHEMA_VERSION = 1;
 
 // ############################################################################
@@ -13,6 +14,13 @@ export interface PersistedDokuState {
   lastProtocolResetAt?: string
   lastAutoProtocolResetPromptAt?: string
   doku?: any
+}
+
+export interface ProtocolAuditEntry {
+  schemaVersion: number
+  resetAt: string
+  protocolText: string
+  [freeformBlock: string]: unknown
 }
 
 let storageInstance: Storage | null = null;
@@ -50,4 +58,21 @@ export async function loadDokuState(): Promise<PersistedDokuState | null> {
 export async function saveDokuState(payload: PersistedDokuState): Promise<void> {
   const storage = await getStorage();
   await storage.set(DOKU_STORAGE_KEY, payload);
+}
+
+
+export async function loadProtocolAuditEntries(): Promise<ProtocolAuditEntry[]> {
+  const storage = await getStorage();
+  const raw = await storage.get(DOKU_AUDIT_STORAGE_KEY);
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw.filter(entry => entry && typeof entry === 'object') as ProtocolAuditEntry[];
+}
+
+export async function appendProtocolAuditEntry(entry: ProtocolAuditEntry): Promise<void> {
+  const storage = await getStorage();
+  const entries = await loadProtocolAuditEntries();
+  entries.push(entry);
+  await storage.set(DOKU_AUDIT_STORAGE_KEY, entries);
 }

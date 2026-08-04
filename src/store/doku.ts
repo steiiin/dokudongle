@@ -4,10 +4,11 @@ import { defineStore } from 'pinia'
 
 import { toRaw } from 'vue'
 import { resetQuickies } from '@/data/quickies'
-import { DOKU_SCHEMA_VERSION, loadDokuState, saveDokuState } from '@/store/persistence'
+import { DOKU_SCHEMA_VERSION, ProtocolAuditEntry, appendProtocolAuditEntry, loadDokuState, loadProtocolAuditEntries, saveDokuState } from '@/store/persistence'
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
+import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
 import { breakDoku, multiline, placeholder } from '@/utils/text'
@@ -77,6 +78,38 @@ function toPersistable<T>(value: T): T {
   }
 
   return rawValue
+}
+
+
+function collectFreeformBlocks(value: unknown, prefix = '', result: Record<string, string> = {}): Record<string, string> {
+  if (value instanceof EnhanceableText) {
+    if (prefix) {
+      result[prefix] = value.value
+    }
+    return result
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => collectFreeformBlocks(entry, `${prefix}${prefix ? '.' : ''}${index}`, result))
+    return result
+  }
+
+  if (isRecord(value)) {
+    for (const key of Object.keys(value)) {
+      collectFreeformBlocks(value[key], `${prefix}${prefix ? '.' : ''}${key}`, result)
+    }
+  }
+
+  return result
+}
+
+function createProtocolAuditEntry(protocol: unknown, protocolText: string): ProtocolAuditEntry {
+  return {
+    schemaVersion: DOKU_SCHEMA_VERSION,
+    resetAt: new Date().toISOString(),
+    protocolText,
+    ...collectFreeformBlocks(protocol),
+  }
 }
 
 function resetProtocolState(): Protocol {
@@ -239,10 +272,24 @@ export const useDokuStore = defineStore('doku', {
     },
 
     // protocol
-    newProtocol() {
+    async newProtocol() {
+      await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
       this.doku = resetProtocolState()
       this.lastProtocolResetAt = new Date().toISOString()
       void this.persistToStorage()
+    },
+    async downloadProtocolAuditJsonl() {
+      const entries = await loadProtocolAuditEntries()
+      const jsonl = entries.map(entry => JSON.stringify(entry)).join('\n')
+      const blob = new Blob([jsonl ? `${jsonl}\n` : ''], { type: 'application/x-ndjson;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `dokudongle-audit-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
     },
     markAutoProtocolResetPrompted() {
       this.lastAutoProtocolResetPromptAt = new Date().toISOString()
