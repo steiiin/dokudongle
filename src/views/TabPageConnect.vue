@@ -4,6 +4,11 @@
       <IonToolbar>
         <IonTitle>Verbindung</IonTitle>
         <IonProgressBar v-if="store.isDongleTransmitting" type="indeterminate"></IonProgressBar>
+        <IonButtons slot="primary">
+          <IonButton fill="clear" @click="downloadProtocolAudit" aria-label="Audit herunterladen">
+            <IonIcon :src="downloadSharp" slot="icon-only"></IonIcon>
+          </IonButton>
+        </IonButtons>
         <DodoConnectionRename></DodoConnectionRename>
       </IonToolbar>
     </IonHeader>
@@ -30,8 +35,9 @@
 
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import router from '@/router'
+import { downloadSharp } from 'ionicons/icons'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -69,6 +75,10 @@ const stateText = computed(() => {
 })
 
 // ############################################################################
+
+const downloadProtocolAudit = async () => {
+  await store.downloadProtocolAuditJsonl()
+}
 
 const connectDongle = async () => {
   await store.connectDongle()
