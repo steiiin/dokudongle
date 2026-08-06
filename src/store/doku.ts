@@ -6,6 +6,7 @@ import { toRaw } from 'vue'
 import { resetQuickies } from '@/data/quickies'
 import { DOKU_SCHEMA_VERSION, ProtocolAuditEntry, appendProtocolAuditEntry, loadDokuState, loadProtocolAuditEntries, saveDokuState } from '@/store/persistence'
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
+import { AuditExport } from '@/plugins/audit-export'
 import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { EnhanceableText } from '@/types/protocol/input'
@@ -281,11 +282,19 @@ export const useDokuStore = defineStore('doku', {
     async downloadProtocolAuditJsonl() {
       const entries = await loadProtocolAuditEntries()
       const jsonl = entries.map(entry => JSON.stringify(entry)).join('\n')
-      const blob = new Blob([jsonl ? `${jsonl}\n` : ''], { type: 'application/x-ndjson;charset=utf-8' })
+      const content = jsonl ? `${jsonl}\n` : ''
+      const fileName = `dokudongle-audit-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`
+
+      if (Capacitor.getPlatform() === 'android') {
+        await AuditExport.save({ content, fileName })
+        return
+      }
+
+      const blob = new Blob([content], { type: 'application/x-ndjson;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `dokudongle-audit-${new Date().toISOString().replace(/[:.]/g, '-')}.jsonl`
+      link.download = fileName
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -528,7 +537,7 @@ export const useDokuStore = defineStore('doku', {
         || state.doku.sampler.symptoms.trauma.thorax.hasUnstableChestWall
         || state.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability
 
-      const verbosity: ProtocolVerbosity = state.doku.course !== ProtocolCourse.TRANSPORT || isCritical
+      const verbosity: ProtocolVerbosity = isCritical
         ? ProtocolVerbosity.HIGH
         : nothingToTreat
           ? ProtocolVerbosity.LOW
