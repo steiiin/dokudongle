@@ -143,12 +143,12 @@ const activeQuickie = ref<Quickie | null>(null)
 // ############################################################################
 
 const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
-const triggerActionLabel = computed(() => props.modelValue.isEmpty ? 'hinzufügen' : 'bearbeiten')
+const triggerActionLabel = computed(() => props.modelValue.isEmpty ? (props.mandatory ? 'fehlt' : 'hinzufügen') : 'bearbeiten')
 const triggerColor = computed(() => {
   if (isMissingField.value) return 'danger'
-  return props.inheritStyle ? 'dark' : ''
+  return props.inheritStyle ? 'dark' : 'light'
 })
-const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'outline')
+const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'solid')
 const isEnhanceDisabled = computed(() => props.modelValue.isEnhancing || draft.value.trim().length === 0)
 
 const resolvedQuickies = computed(() => {
