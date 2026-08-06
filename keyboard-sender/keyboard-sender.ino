@@ -11,7 +11,10 @@
 
 //###############################################
 
-const char* BASE_NAME = "DokuDongle"; 
+const char* BASE_NAME = "DokuDongle";
+
+static constexpr size_t MAX_CUSTOM_NAME_BYTES = 18;
+static char fullName[30]; // MAX_CUSTOM_NAME_BYTE + strlen("DokuDongle-") + 1
 
 #define SERVICE_UUID   "00001888-0000-1000-8000-00805f9b34fb"
 #define SENDTEXT_UUID  "00000881-0000-1000-8000-00805f9b34fb"
@@ -21,7 +24,7 @@ const char* BASE_NAME = "DokuDongle";
 BLEService writerService(SERVICE_UUID);
 BLECharacteristic chSendChunk(SENDTEXT_UUID, BLEWrite, 20);
 BLECharacteristic chSendAck(SENDACK_UUID, BLENotify, 1);
-BLEStringCharacteristic chSetName(SETNAME_UUID, BLEWrite, 20);
+BLEStringCharacteristic chSetName(SETNAME_UUID, BLEWrite, MAX_CUSTOM_NAME_BYTES);
 
 //---------------------------
 
@@ -63,6 +66,8 @@ uint32_t gPageSize = 0;
 uint32_t gConfigAddr = 0;
 bool gFlashReady = false;
 
+//---------------------------
+
 String generateRandomId() {
 
   uint32_t r =
@@ -74,6 +79,27 @@ String generateRandomId() {
 
   return String("sf") + buf;
 }
+
+String truncateUtf8(const String& value, size_t maxBytes)
+{
+  if (value.length() <= maxBytes) {
+    return value;
+  }
+
+  size_t cut = maxBytes;
+
+  // Do not leave a partial UTF-8 character at the end.
+  while (
+    cut > 0 &&
+    (static_cast<uint8_t>(value[cut]) & 0xC0) == 0x80
+  ) {
+    cut--;
+  }
+
+  return value.substring(0, cut);
+}
+
+//---------------------------
 
 bool startFlash() {
 
@@ -110,7 +136,7 @@ void resetConfig() {
   rnd.toCharArray(gConfig.name, sizeof(gConfig.name));
 
   if (!saveConfig()) { error(); }
-  
+
 }
 
 bool loadConfig() {
@@ -151,18 +177,40 @@ bool saveConfig() {
 
 //---------------------------
 
-void advertise() {
-
+void configureName()
+{
   gConfig.name[sizeof(gConfig.name) - 1] = '\0';
-  char fullName[40];
 
-  snprintf(fullName, sizeof(fullName),
-    "%s-%s", BASE_NAME, gConfig.name);
+  const int length = snprintf(
+    fullName,
+    sizeof(fullName),
+    "%s-%s",
+    BASE_NAME,
+    gConfig.name
+  );
+
+  if (length < 0 || length >= sizeof(fullName)) {
+    return false;
+  }
+
+  BLE.setDeviceName(fullName);
+
+  if (!BLE.setLocalName(fullName)) {
+    return false;
+  }
+
+  return true;
+}
+
+void advertise() {
 
   BLE.stopAdvertise();
   BLE.setDeviceName(fullName);
   BLE.setLocalName(fullName);
-  BLE.advertise();
+
+  if (!BLE.advertise()) {
+    error();
+  }
 
 }
 
@@ -218,7 +266,7 @@ bool isSafeKey(uint8_t key, uint8_t mod) {
 //###############################################
 
 void setup() {
-  
+
   // device init
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
@@ -235,11 +283,17 @@ void setup() {
   writerService.addCharacteristic(chSendAck);
   writerService.addCharacteristic(chSetName);
   BLE.addService(writerService);
+
+  if (!configureName()) {
+    error();
+  }
+
   advertise();
 
 }
 
 void loop() {
+
   BLEDevice central = BLE.central();
   if (central)
   {
@@ -247,12 +301,13 @@ void loop() {
     // status light on
     digitalWrite(LED_BUILTIN, HIGH);
     bool led = digitalRead(LED_BUILTIN);
-    
+
     // keyboard mode
     while (central.connected()) {
 
+      // send keyboard chunks
       if (chSendChunk.written()) {
-        
+
         int len = chSendChunk.valueLength();
         const uint8_t* p = chSendChunk.value();
 
@@ -278,7 +333,7 @@ void loop() {
           led = !led;
           digitalWrite(LED_BUILTIN, led);
 
-          delay(30); 
+          delay(30);
         }
 
         uint8_t done = 1;
@@ -286,28 +341,36 @@ void loop() {
         digitalWrite(LED_BUILTIN, HIGH);
 
       }
+
+      // rename dongle
       if (chSetName.written()) {
 
         String newName = chSetName.value();
+        newName.trim();
+
+        if (newName.length() == 0) { return; }
+        newName = truncateUtf8(newName, MAX_CUSTOM_NAME_BYTES);
+
         newName.toCharArray(gConfig.name, sizeof(gConfig.name));
         if (saveConfig()) {
-          
+
           central.disconnect();
           delay(500);
           NVIC_SystemReset();
           break;
-          
+
         }
 
       }
       BLE.poll();
-      
+
     }
 
     // disconnected
     digitalWrite(LED_BUILTIN, LOW);
-    delay(200);
+    delay(800);
     advertise();
 
   }
+
 }

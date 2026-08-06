@@ -144,39 +144,6 @@ export const useDokuStore = defineStore('doku', {
   actions: {
 
     // dongle
-    async connectDongle() {
-
-      await this.initDongle()
-      await this.checkConnection()
-      if (this.isDongleConnected) { return }
-
-      this.connection.isConnecting = true
-      try {
-
-        const device = await BleClient.requestDevice({
-          services: [ ServiceUUID ],
-        })
-
-        this.connection.device = {
-          id: device.deviceId,
-          name: device.name ?? 'Unbekannt',
-        } as Device
-
-        await BleClient.disconnect(device.deviceId)
-        await BleClient.connect(device.deviceId, () => this.checkConnection())
-        await this.checkConnection()
-
-      }
-      catch (e) {
-        this.connection.isConnected = false
-        console.error('could not connect to dongle')
-        console.error(e)
-      }
-      finally {
-        this.connection.isConnecting = false
-      }
-
-    },
     async initDongle() {
 
       if (!this.initialized) {
@@ -210,19 +177,40 @@ export const useDokuStore = defineStore('doku', {
 
       }
 
-
     },
-    async checkConnection() {
+
+    async connectDongle() {
+
+      await this.initDongle()
+      await this.checkConnection()
+      if (this.isDongleConnected) { return }
+
+      this.connection.isConnecting = true
       try {
 
-        await this.initDongle()
-        const connected = await BleClient.getConnectedDevices([ ServiceUUID ])
-        this.connection.isConnected = connected.some(device => device.deviceId === this.connection.device?.id)
+        const device = await BleClient.requestDevice({
+          services: [ ServiceUUID ],
+        })
 
-      } catch (e) {
-        console.warn('Bluetooth not available')
-        console.warn(e)
+        this.connection.device = {
+          id: device.deviceId,
+          name: device.name ?? 'Unbekannt',
+        } as Device
+
+        await BleClient.disconnect(device.deviceId)
+        await BleClient.connect(device.deviceId, () => this.checkConnection())
+        await this.checkConnection()
+
       }
+      catch (e) {
+        this.connection.isConnected = false
+        console.error('could not connect to dongle')
+        console.error(e)
+      }
+      finally {
+        this.connection.isConnecting = false
+      }
+
     },
     async renameDongle(newName: string) {
 
@@ -234,12 +222,7 @@ export const useDokuStore = defineStore('doku', {
         if (!this.isDongleConnected) { return false }
         this.connection.isRenaming = true
 
-        // max length must match firmware
-        if (newName.length > 20) {
-          throw new Error("Name too long (max 20 chars)");
-        }
-
-        // convert string → bytes
+        // convert string to bytes
         const encoder = new TextEncoder();
         const data = encoder.encode(newName);
         const view = new DataView(
@@ -247,6 +230,14 @@ export const useDokuStore = defineStore('doku', {
           data.byteOffset,
           data.byteLength
         )
+
+        // max length must match firmware
+        if (data.byteLength === 0) {
+          throw new Error("Name darf nicht leer sein")
+        }
+        if (data.byteLength > 18) {
+          throw new Error("Name darf nicht länger als 18 Byte sein");
+        }
 
         await BleClient.write(
           this.connection.device!.id,
@@ -270,6 +261,18 @@ export const useDokuStore = defineStore('doku', {
         this.connectDongle()
       }
 
+    },
+    async checkConnection() {
+      try {
+
+        await this.initDongle()
+        const connected = await BleClient.getConnectedDevices([ ServiceUUID ])
+        this.connection.isConnected = connected.some(device => device.deviceId === this.connection.device?.id)
+
+      } catch (e) {
+        console.warn('Bluetooth not available')
+        console.warn(e)
+      }
     },
 
     // protocol
