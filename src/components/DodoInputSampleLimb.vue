@@ -2,7 +2,7 @@
 
   <ion-item button :detail="true" @click="isOpen = true" :lines="lines">
     <ion-label>{{ label }}</ion-label>
-    <ion-note slot="end">{{ model.text }}</ion-note>
+    <ion-note slot="end">{{ model.label }}</ion-note>
   </ion-item>
 
   <ion-modal :is-open="isOpen">

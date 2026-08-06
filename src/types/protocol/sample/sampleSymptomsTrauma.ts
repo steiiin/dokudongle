@@ -299,8 +299,8 @@ export class SstPelvis {
     {
 
       if (this.hasHighEnergyMechanism
-        && this.PelvisPainOccurence != ''
-        && this.hasObviousInjuries)
+        || this.PelvisPainOccurence != ''
+        || this.hasObviousInjuries)
       {
 
         const _mechanism = this.hasHighEnergyMechanism ? 'Kinematik plausibel' : ''
@@ -343,7 +343,7 @@ export class SstLimbs {
 
   private sameValues(obj1: SstLimb, obj2: SstLimb): boolean {
     return (obj1.isInjured == obj2.isInjured)
-      && obj1.dms.state == obj1.dms.state
+      && obj1.dms.state == obj2.dms.state
       && obj1.dms.deficit == obj2.dms.deficit
   }
 
@@ -354,10 +354,12 @@ export class SstLimbs {
 
     const sameArms = this.sameValues(this.armLeft, this.armRight)
     const sameLegs = this.sameValues(this.legLeft, this.legRight)
+    const allLimbsSame = this.sameValues(this.armLeft, this.armRight)
+      && this.sameValues(this.armLeft, this.legLeft)
+      && this.sameValues(this.armLeft, this.legRight)
 
-    if (this.sameValues(this.armLeft, this.legLeft))
+    if (allLimbsSame)
     {
-      // same
       const desc = this.armLeft.text
       return desc.length>0 ? `Arme/Beine: ${desc} \n` : ''
     }
@@ -389,7 +391,7 @@ export class SstLimbs {
       segs.push(descRight.length>0 ? `Bein (re.): ${descRight} \n` : '')
     }
 
-    return segs.filter(e=>e).join()
+    return segs.filter(e=>e).join('')
 
   }
 
@@ -406,6 +408,12 @@ export class SstLimb {
   {
     this.isInjured = false
     this.dms = new SstLimbDms()
+  }
+
+  get label(): string
+  {
+    if (this.isInjured && !this.dms.isApplicable) { return 'pDMS nicht anwendbar' }
+    else { return this.text }
   }
 
   get text(): string
@@ -441,7 +449,7 @@ export class SstLimbDms {
   get text(): string
   {
     if (!this.isApplicable) { return '' }
-    return this.isOkay ? 'pDMS iO' : `pDMS gestört (${this.deficit})`
+    return this.isOkay ? 'pDMS iO' : ('pDMS gestört' + (this.deficit.length>0 ? ` (${this.deficit})` : ''))
   }
 
 }
