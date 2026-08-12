@@ -4,9 +4,10 @@ import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuicki
 import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
 import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
+import DodoQuickieSchwangerschaft from "@/components/quickie-components/DodoQuickieSchwangerschaft.vue"
 import DodoQuickieSchwindel from "@/components/quickie-components/DodoQuickieSchwindel.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
-import { OptionalValue } from "@/types/protocol/input"
+import { AssessedValue, OptionalValue } from "@/types/protocol/input"
 
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
@@ -15,15 +16,17 @@ import { Component, markRaw } from "vue"
 
 // ############################################################################
 
-export const QU_Verlegung = 'verlegung'
-export const QU_Einweisung = 'einweisung'
+export const QU_SIT_Verlegung = 'verlegung'
+export const QU_SIT_Einweisung = 'einweisung'
 
-export const QU_AbdominalPain = 'abdominal_pain'
-export const QU_ExcretionsUrinary = 'excretions_urinary'
-export const QU_ExcretionsBowel = 'excretions_bowel'
+export const QU_SYM_AbdominalPain = 'abdominal_pain'
+export const QU_SYM_ExcretionsUrinary = 'excretions_urinary'
+export const QU_SYM_ExcretionsBowel = 'excretions_bowel'
 
 export const QU_SCHWINDEL = 'intern_schwindel'
-export const QU_OPQRST = 'intern_opqrst'
+export const QU_SYM_OPQRST = 'intern_opqrst'
+
+export const QU_PLER_Schwangerschaft = 'pler_schwangerschaft'
 
 // ############################################################################
 
@@ -339,10 +342,36 @@ export class QuickieOPQRST extends Quickie
 
 }
 
+// --------------------------------------------------------
+
+export class QuickieSchwangerschaft extends Quickie
+{
+
+  constructor(public key: string, public label: string) {
+    super(key, label, markRaw(DodoQuickieSchwangerschaft))
+  }
+  public isAvailable(text: string): boolean {
+    return !text.includes('Schwangerschaft: ')
+  }
+
+  public gravida: AssessedValue<number> = AssessedValue.unassessed(1)
+  public para: AssessedValue<number> = AssessedValue.unassessed(0)
+
+  public presentation: AssessedValue<'SL'|'BEL'|'QL'> = AssessedValue.unassessed('SL')
+  public amnioticFluid: AssessedValue<OptionalValue<'klar'|'grün'|'blutig'|string>> = AssessedValue.unassessed(OptionalValue.inactive('klar'))
+  public isMultiple: boolean = false
+  public calculatedTerm: AssessedValue<Date> = AssessedValue.unassessed(new Date())
+  public complications: OptionalValue<string> = OptionalValue.inactive('')
+  public previouslyComplications: OptionalValue<string> = OptionalValue.inactive('')
+  public previousGynOperations: OptionalValue<string> = OptionalValue.inactive('')
+
+
+}
+
 // ############################################################################
 
 const buildQuickies = (): Record<string, Quickie> => ({
-  [QU_Verlegung]: new QuickieTemplate(QU_Verlegung,
+  [QU_SIT_Verlegung]: new QuickieTemplate(QU_SIT_Verlegung,
     'Verlegung', 'Verlegung von <START> nach <ZIEL>.\n',
     [
       {
@@ -359,10 +388,11 @@ const buildQuickies = (): Record<string, Quickie> => ({
         customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
         autocorrectFn: correctHospital,
       },
+
     ]
   ),
 
-  [QU_Einweisung]: new QuickieTemplate(QU_Einweisung,
+  [QU_SIT_Einweisung]: new QuickieTemplate(QU_SIT_Einweisung,
     'Einweisung', 'Einweisung <ARZT> nach <ZIEL> wg. <KRANKHEIT>.\n',
     [
       {
@@ -383,16 +413,20 @@ const buildQuickies = (): Record<string, Quickie> => ({
         allowOptions: false, allowCustom: true,
         customLabel: 'Was?', customPlaceholder: 'z.B. Thrombose',
         autocorrectFn: basicCap,
-      }
+      },
+
     ],
   ),
 
-  [QU_AbdominalPain]: new QuickieAbdominalPain(QU_AbdominalPain, 'Bauchschmerz'),
-  [QU_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_ExcretionsUrinary, 'Wasserlassen'),
-  [QU_ExcretionsBowel]: new QuickieExcretionsBowels(QU_ExcretionsBowel, 'Stuhlgang'),
+  [QU_SYM_AbdominalPain]: new QuickieAbdominalPain(QU_SYM_AbdominalPain, 'Bauchschmerz'),
+  [QU_SYM_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_SYM_ExcretionsUrinary, 'Wasserlassen'),
+  [QU_SYM_ExcretionsBowel]: new QuickieExcretionsBowels(QU_SYM_ExcretionsBowel, 'Stuhlgang'),
 
   [QU_SCHWINDEL]: new QuickieSchwindel(QU_SCHWINDEL, 'Schwindel'),
-  [QU_OPQRST]: new QuickieOPQRST(QU_OPQRST, 'OPQRST'),
+  [QU_SYM_OPQRST]: new QuickieOPQRST(QU_SYM_OPQRST, 'OPQRST'),
+
+  [QU_PLER_Schwangerschaft]: new QuickieSchwangerschaft(QU_PLER_Schwangerschaft, 'Schwangerschaft'),
+
 })
 
 export const DATA_Quickies: Record<string, Quickie> = buildQuickies()

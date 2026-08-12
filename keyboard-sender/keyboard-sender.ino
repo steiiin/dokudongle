@@ -177,7 +177,7 @@ bool saveConfig() {
 
 //---------------------------
 
-void configureName()
+bool configureName()
 {
   gConfig.name[sizeof(gConfig.name) - 1] = '\0';
 

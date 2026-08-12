@@ -6,7 +6,8 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
-        title="PLER" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral">
+        title="PLER" placeholder="Beschreibe ..."
+        :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
         <p><b>(P)</b> Beschreibung von:</p>
         <ul>
           <li>Vorerkrankungen</li>
@@ -24,10 +25,23 @@
 
 <script setup lang="ts">
 
+import { computed } from 'vue'
+
 import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
+import { QU_PLER_Schwangerschaft } from '@/data/quickies'
 const store = useDokuStore()
+
+// ############################################################################
+
+const quickieKeys = computed(() => {
+  const list: Array<string> = []
+
+  list.push(QU_PLER_Schwangerschaft)
+
+  return list
+})
 
 </script>
 

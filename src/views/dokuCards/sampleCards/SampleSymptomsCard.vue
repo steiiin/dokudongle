@@ -18,7 +18,7 @@ import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
-import { QU_AbdominalPain, QU_Einweisung, QU_ExcretionsBowel, QU_ExcretionsUrinary, QU_OPQRST, QU_SCHWINDEL } from '@/data/quickies'
+import { QU_SYM_AbdominalPain, QU_SIT_Einweisung, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST, QU_SCHWINDEL } from '@/data/quickies'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -29,13 +29,13 @@ const quickieKeys = computed(() => {
 
   if (store.doku.xabcdE.abdominal.isAssessed && store.doku.xabcdE.abdominal.value.pain != 'keine')
   {
-    list.push(QU_AbdominalPain)
+    list.push(QU_SYM_AbdominalPain)
   }
 
   if (store.doku.xabcdE.excretions.isAssessed)
   {
-    if (store.doku.xabcdE.excretions.value.urinaryAbnormalities) { list.push(QU_ExcretionsUrinary) }
-    if (store.doku.xabcdE.excretions.value.bowelAbnormalities) { list.push(QU_ExcretionsBowel) }
+    if (store.doku.xabcdE.excretions.value.urinaryAbnormalities) { list.push(QU_SYM_ExcretionsUrinary) }
+    if (store.doku.xabcdE.excretions.value.bowelAbnormalities) { list.push(QU_SYM_ExcretionsBowel) }
   }
 
   if (store.doku.xabcDe.dizziness == 'gerichteter')
@@ -43,7 +43,7 @@ const quickieKeys = computed(() => {
     list.push(QU_SCHWINDEL)
   }
 
-  list.push(QU_OPQRST)
+  list.push(QU_SYM_OPQRST)
 
   return list
 })
