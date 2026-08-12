@@ -86,8 +86,9 @@ const model = computed<SstLimb>({
 
 // ############################################################################
 
-watch(() => model.value.isInjured, () => {
-  model.value.dms.state = 'iO'
+watch(() => model.value.isInjured, (isInjured) => {
+  model.value.dms.state = isInjured ? 'iO' : ''
+  if (!isInjured) { model.value.dms.deficit = '' }
 })
 watch(() => model.value.dms.state, (v) => {
   model.value.dms.deficit = ''

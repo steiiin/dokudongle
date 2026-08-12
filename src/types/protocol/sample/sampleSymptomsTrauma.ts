@@ -344,9 +344,11 @@ export class SstLimbs {
   // ##########################################################################
 
   private sameValues(obj1: SstLimb, obj2: SstLimb): boolean {
-    return (obj1.isInjured == obj2.isInjured)
-      && obj1.dms.state == obj2.dms.state
-      && obj1.dms.deficit == obj2.dms.deficit
+    if (obj1.isInjured !== obj2.isInjured) { return false }
+    if (!obj1.isInjured) { return true }
+    if (obj1.dms.state !== obj2.dms.state) { return false }
+    if (obj1.dms.state !== 'gestoert') { return true }
+    return obj1.dms.deficit === obj2.dms.deficit
   }
 
   // ##########################################################################
