@@ -14,6 +14,7 @@ export class SampleSymptomsTrauma {
   public thorax: SstThorax
   public pelvis: SstPelvis
   public limbs: SstLimbs
+  public injuries: string[]
 
   constructor()
   {
@@ -22,6 +23,7 @@ export class SampleSymptomsTrauma {
     this.thorax = new SstThorax()
     this.pelvis = new SstPelvis()
     this.limbs = new SstLimbs()
+    this.injuries = []
   }
 
 }

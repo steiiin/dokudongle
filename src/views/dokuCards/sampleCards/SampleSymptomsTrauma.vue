@@ -243,12 +243,65 @@
       </IonCardContent>
     </IonCard>
 
+    <IonCard class="stu-injuries">
+      <IonCardHeader>
+        <IonCardTitle>Verletzungen</IonCardTitle>
+      </IonCardHeader>
+      <IonCardContent>
+        <IonList v-if="store.doku.sampler.symptoms.trauma.injuries.length > 0" lines="none">
+          <IonItem v-for="(injury, index) in store.doku.sampler.symptoms.trauma.injuries"
+            :key="`${injury}-${index}`" lines="none" button @click="editInjury(index)">
+            <IonLabel>{{ injury }}</IonLabel>
+          </IonItem>
+        </IonList>
+        <IonButton fill="solid" color="light" @click="addInjury">
+          <IonIcon slot="start" :icon="addCircle"></IonIcon>
+          Verletzung
+        </IonButton>
+      </IonCardContent>
+    </IonCard>
+
+    <IonModal :is-open="isInjuryModalOpen" @did-present="focusInjuryInput" @will-dismiss="cancelInjuryEdit">
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle type="ios">{{ injuryModalTitle }}</IonTitle>
+        </IonToolbar>
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonButton @click="cancelInjuryEdit">Zurück</IonButton>
+          </IonButtons>
+          <IonButtons slot="end">
+            <IonButton color="success" :disabled="!isInjuryValid" @click="saveInjury">
+              {{ isNewInjury ? 'Hinzufügen' : 'Speichern' }}
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <IonList>
+          <IonItemDivider>
+            <IonLabel>Verletzung</IonLabel>
+          </IonItemDivider>
+          <IonItem lines="none">
+            <DodoInputText ref="injuryInput" v-model="currentInjury"
+              label="" placeholder="z.B. Platzwunde Stirn">
+            </DodoInputText>
+          </IonItem>
+        </IonList>
+        <IonButton v-if="!isNewInjury" expand="block" fill="outline" color="danger"
+          style="margin: 1rem;" @click="deleteInjury">
+          Entfernen
+        </IonButton>
+      </IonContent>
+    </IonModal>
+
   </div>
 </template>
 
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import { addCircle } from 'ionicons/icons'
+import { computed, ref } from 'vue'
 
 import { basicCap } from '@/utils/autocorrect/basic'
 import { fullIf } from '@/utils/filter'
@@ -265,4 +318,81 @@ const stepline = (expr: boolean) => expr ? 'full' : 'inset'
 
 const isSHTStateVisible = computed(() => !!store.doku.sampler.symptoms.trauma.head.headState.title)
 
+// ############################################################################
+
+const isInjuryModalOpen = ref(false)
+const isNewInjury = ref(true)
+const currentInjury = ref('')
+const currentInjuryIndex = ref(-1)
+const injuryInput = ref<any | null>(null)
+
+const focusInjuryInput = () => {
+  setTimeout(() => { injuryInput.value?.setFocus?.() }, 300)
+}
+
+const addInjury = () => {
+  isNewInjury.value = true
+  currentInjury.value = ''
+  currentInjuryIndex.value = -1
+  isInjuryModalOpen.value = true
+}
+
+const editInjury = (index: number) => {
+  isNewInjury.value = false
+  currentInjury.value = store.doku.sampler.symptoms.trauma.injuries[index]
+  currentInjuryIndex.value = index
+  isInjuryModalOpen.value = true
+}
+
+const cancelInjuryEdit = () => {
+  isNewInjury.value = true
+  currentInjury.value = ''
+  currentInjuryIndex.value = -1
+  isInjuryModalOpen.value = false
+}
+
+const saveInjury = () => {
+  if (!isInjuryValid.value) return
+
+  const injury = basicCap(currentInjury.value.trim())
+  const updated = [...store.doku.sampler.symptoms.trauma.injuries]
+  if (isNewInjury.value) {
+    updated.push(injury)
+  } else {
+    updated[currentInjuryIndex.value] = injury
+  }
+  store.doku.sampler.symptoms.trauma.injuries = updated
+  isInjuryModalOpen.value = false
+}
+
+const deleteInjury = () => {
+  if (currentInjuryIndex.value < 0) return
+
+  const updated = [...store.doku.sampler.symptoms.trauma.injuries]
+  updated.splice(currentInjuryIndex.value, 1)
+  store.doku.sampler.symptoms.trauma.injuries = updated
+  isInjuryModalOpen.value = false
+}
+
+const injuryModalTitle = computed(() => {
+  return isNewInjury.value
+    ? 'Neue Verletzung'
+    : (currentInjury.value.trim() || 'Verletzung')
+})
+
+const isInjuryValid = computed(() => {
+  const normalized = currentInjury.value.trim().toLowerCase()
+  if (!normalized) return false
+
+  return !store.doku.sampler.symptoms.trauma.injuries.some((injury, index) => (
+    injury.trim().toLowerCase() === normalized
+    && (isNewInjury.value || index !== currentInjuryIndex.value)
+  ))
+})
+
 </script>
+<style scoped>
+  .stu-injuries ion-card-content {
+    padding: 0 .5rem .5rem .5rem;
+  }
+</style>

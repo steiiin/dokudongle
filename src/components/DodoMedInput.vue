@@ -202,6 +202,7 @@ watch(() => currentItem.value.isRegularly, (v) => {
     --card-bg: transparent;
     margin-top: 0;
     margin-bottom: 0;
+    margin:0;
   }
   .dd-med-input-content {
     padding: 0;

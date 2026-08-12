@@ -635,6 +635,9 @@ export const useDokuStore = defineStore('doku', {
           state.doku.sampler.symptoms.trauma.thorax.generateText(),
           state.doku.sampler.symptoms.trauma.pelvis.generateText(),
           state.doku.sampler.symptoms.trauma.limbs.generateText(),
+          state.doku.sampler.symptoms.trauma.injuries.length === 1
+            ? state.doku.sampler.symptoms.trauma.injuries[0] + '.'
+            : state.doku.sampler.symptoms.trauma.injuries.map(injury => `- ${injury}`).join('\n'),
         ], true), this.context.isTrauma)
 
       }
