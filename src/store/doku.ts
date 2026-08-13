@@ -526,8 +526,8 @@ export const useDokuStore = defineStore('doku', {
 
       const isTrauma: boolean = requireSceneDetails && (state.doku.flavors.trauma)
 
-      const isCritical: boolean = state.doku.Xabcde.hasCriticalBleeding
-        || !state.doku.xAbcde.isBreathing
+      const isCritical: boolean =
+        !state.doku.xAbcde.isBreathing
         || state.doku.xaBcde.breathlessness == 'schwere'
         || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
         || state.doku.xaBcde.hasTrachealDeviation
@@ -557,8 +557,8 @@ export const useDokuStore = defineStore('doku', {
         (!state.doku.xabcDe.psychBaseline && !state.doku.xabcDe.psychDementia)
 
       const isChildbearingAge: boolean =
-        (state.doku.ident.age.totalYears >= 10) &&
-        (state.doku.ident.age.totalYears <= 52)
+        (state.doku.ident.age?.totalYears >= 10) &&
+        (state.doku.ident.age?.totalYears <= 52)
 
       return {
 
