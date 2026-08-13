@@ -3,15 +3,6 @@
     <ion-card-content>
       <ion-list style="padding: 0;">
 
-        <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.simple">
-
-          <DodoToggleChip :model-value="store.doku.flavors.simple" color="primary"
-            @update:modelValue="setFlavor('simple', $event)">
-            Einfacher Einsatz
-          </DodoToggleChip>
-
-        </ion-item>
-
         <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.trauma || visibleFlavors.reanimation">
 
           <DodoToggleChip v-if="visibleFlavors.trauma"
@@ -58,19 +49,12 @@ const setFlavor = (key: FlavorKey, enabled: boolean) => {
 
 // ############################################################################
 
-const anyNonSimpleSelected = computed(() =>
-  Object.entries(store.doku.flavors)
-    .some(([key, enabled]) => key !== 'simple' && enabled),
-)
-
 const visibleFlavors = computed(() => {
-  const isSimpleSelected = store.doku.flavors.simple
   const isReanimationSelected = store.doku.flavors.reanimation
   return {
-    simple: !anyNonSimpleSelected.value,
-    trauma: !isSimpleSelected,
-    reanimation: !isSimpleSelected,
-    nonVerbal: !isSimpleSelected && !isReanimationSelected,
+    trauma: true,
+    reanimation: true,
+    nonVerbal: !isReanimationSelected,
   }
 })
 
@@ -96,7 +80,7 @@ watch(() => store.doku.flavors.reanimation, (v) => {
 watch(() => store.doku.flavors.non_verbal, (v) => {
   if (v && store.doku.xabcDe.gcs.v == 5)
   {
-    store.doku.xabcDe.gcs.v = 5 
+    store.doku.xabcDe.gcs.v = 5
   }
 })
 
