@@ -51,7 +51,7 @@ const props = defineProps<{
   modelValue: SelectValue
   label: string
   labelColor?: string
-  options: OptionInput[]
+  options: readonly OptionInput[]
   emptyLabel?: string
   allowCustom?: boolean
   customLabel?: string

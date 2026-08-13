@@ -13,9 +13,12 @@ vi.mock('@/utils/filter', () => ({
 
 vi.mock('@/utils/input', () => ({
   gainFocus: vi.fn(),
+  setNativeValue: vi.fn(),
 }))
 
+import DodoInputNumber from '@/components/DodoInputNumber.vue'
 import DodoInputSampleLimb from '@/components/DodoInputSampleLimb.vue'
+import { AssessedValue } from '@/types/protocol/input'
 import { SstLimb, SstLimbs } from '@/types/protocol/sample'
 
 const noVisibleInjuries = 'keine Verletzungen sichtbar; frei beweglich.'
@@ -96,5 +99,41 @@ describe('DodoInputSampleLimb', () => {
     await nextTick()
     expect(limb.dms.state).toBe('')
     expect(limb.dms.deficit).toBe('')
+  })
+})
+
+describe('DodoInputNumber', () => {
+  test('clamps values to the configured min and max', async () => {
+    const wrapper = shallowMount(DodoInputNumber, {
+      props: {
+        modelValue: AssessedValue.assessed(50),
+        min: 10,
+        max: 20,
+      },
+      global: {
+        stubs: {
+          IonInput: {
+            props: ['modelValue', 'label', 'placeholder', 'class', 'inputmode', 'maxlength', 'clearInput', 'fill', 'labelPlacement'],
+            template: `
+              <input
+                :value="modelValue"
+                @input="$emit('ionInput', { detail: { value: $event.target.value } })"
+                @blur="$emit('ionBlur')"
+                @focus="$emit('ionFocus')"
+              />
+            `,
+          },
+        },
+      },
+    })
+
+    const input = wrapper.find('input')
+    await input.setValue('999')
+    await nextTick()
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toEqual(AssessedValue.assessed(20))
+
+    await input.setValue('2')
+    await nextTick()
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toEqual(AssessedValue.assessed(10))
   })
 })

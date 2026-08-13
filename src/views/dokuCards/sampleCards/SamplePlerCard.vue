@@ -32,13 +32,16 @@ import { enhanceGeneral } from '@/utils/gpt/general'
 import { useDokuStore } from '@/store/doku'
 import { QU_PLER_Schwangerschaft } from '@/data/quickies'
 const store = useDokuStore()
+const ctx = computed(() => store.context)
 
 // ############################################################################
 
 const quickieKeys = computed(() => {
   const list: Array<string> = []
 
-  list.push(QU_PLER_Schwangerschaft)
+  if (ctx.value.isChildbearingAge) {
+    list.push(QU_PLER_Schwangerschaft)
+  }
 
   return list
 })

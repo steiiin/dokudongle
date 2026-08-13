@@ -556,6 +556,10 @@ export const useDokuStore = defineStore('doku', {
         (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&
         (!state.doku.xabcDe.psychBaseline && !state.doku.xabcDe.psychDementia)
 
+      const isChildbearingAge: boolean =
+        (state.doku.ident.age.totalYears >= 10) &&
+        (state.doku.ident.age.totalYears <= 52)
+
       return {
 
         verbosity,
@@ -591,6 +595,7 @@ export const useDokuStore = defineStore('doku', {
         isTrauma,
         isPediatric,
         isGeriatric: state.doku.ident.age?.totalYears >= 65,
+        isChildbearingAge,
 
       } as ProtocolContext
     },

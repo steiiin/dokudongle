@@ -8,6 +8,7 @@ import DodoQuickieSchwangerschaft from "@/components/quickie-components/DodoQuic
 import DodoQuickieSchwindel from "@/components/quickie-components/DodoQuickieSchwindel.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
 import { AssessedValue, OptionalValue } from "@/types/protocol/input"
+import { PregnancySpan } from "@/types/protocol/pregnancy"
 
 import { basicCap } from "@/utils/autocorrect/basic"
 import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
@@ -357,14 +358,10 @@ export class QuickieSchwangerschaft extends Quickie
   public gravida: AssessedValue<number> = AssessedValue.unassessed(1)
   public para: AssessedValue<number> = AssessedValue.unassessed(0)
 
-  public presentation: AssessedValue<'SL'|'BEL'|'QL'> = AssessedValue.unassessed('SL')
-  public amnioticFluid: AssessedValue<OptionalValue<'klar'|'grün'|'blutig'|string>> = AssessedValue.unassessed(OptionalValue.inactive('klar'))
-  public isMultiple: boolean = false
-  public calculatedTerm: AssessedValue<Date> = AssessedValue.unassessed(new Date())
-  public complications: OptionalValue<string> = OptionalValue.inactive('')
-  public previouslyComplications: OptionalValue<string> = OptionalValue.inactive('')
-  public previousGynOperations: OptionalValue<string> = OptionalValue.inactive('')
-
+  public presentation: '' | 'SL'|'BEL'|'QL' = ''
+  public amnioticFluid: string = ''
+  public childCount: string = ''
+  public calculatedTerm: PregnancySpan = new PregnancySpan('1. Trimenon')
 
 }
 

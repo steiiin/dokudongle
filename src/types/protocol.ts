@@ -5,6 +5,9 @@ import { Setting } from "./protocol/setting"
 import { TreatmentSaamed } from "./protocol/treatment/treatmentSaamed"
 import { TreatmentRedflags } from "./protocol/treatment/treatmentRedflags"
 
+export { PregnancySpan } from "./protocol/pregnancy"
+export type { PregnancyTrimester } from "./protocol/pregnancy"
+
 export interface Protocol {
 
   course: ProtocolCourse,
@@ -164,6 +167,6 @@ export interface ProtocolContext {
   isTrauma: boolean,
   isPediatric: boolean,
   isGeriatric: boolean,
-
+  isChildbearingAge: boolean,
 
 }
