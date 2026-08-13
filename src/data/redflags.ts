@@ -392,6 +392,10 @@ export const _SignalDefs = [
     'Bewusstseinsverlust/-eintrübung'),
 
   defSg(
+    'neuro-synkope-neu',
+    'Bewusstseinsverlust'),
+
+  defSg(
     'neuro-synkope-rezidiv',
     'erneutem/zunehmender Bewusstseinsverlust/-eintrübung'),
 
@@ -928,6 +932,26 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
     ],
   ),
   defSc(
+    'Kreislaufdysregulation (leicht)', 'orthostatische Ursache, kein Bewusstseinsverlust, vollständig erholt',
+    'BvO', 'kreislauf',
+    [
+      'neuro-synkope-neu',
+      'kreislauf-ap-neu',
+      'atmung-luftnot',
+      'kreislauf-herzrhythmus-neu',
+      'neuro-ausfall-neu',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+      'neuro-fallneigung-anhaltend',
+    ],
+    [
+      'orthostatische Kreislaufdysregulation', 'Präsynkope',
+    ],
+  ),
+
+  defSc(
     'Hypertensive Krise (schwer)', 'Zeichen Organschaden',
     'Verweigerung', 'kreislauf',
     [
@@ -1050,6 +1074,26 @@ export const DATA_Scenarios: Array<RedflagScenario> = [
       'Vestibul. Schwindel',
     ],
     'einer raschen Verschlechterung mit bleibenden neurol. Schäden bis hin zum Tod',
+  ),
+
+  defSc(
+    'Synkope (leicht)', 'orthostatische Ursache, kurzzeitiger Bewusstseinsverlust, vollständig erholt',
+    'BvO', 'neuro',
+    [
+      'neuro-synkope-rezidiv',
+      'kreislauf-ap-neu',
+      'atmung-luftnot',
+      'kreislauf-herzrhythmus-neu',
+      'neuro-ausfall-neu',
+      'kreislauf-probleme-zunehmend',
+    ],
+    [
+      'kreislauf-belastungsSchwaeche-anhaltend',
+      'neuro-fallneigung-anhaltend',
+    ],
+    [
+      'orthostatische Synkope',
+    ],
   ),
 
   defSc(
