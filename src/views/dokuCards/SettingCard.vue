@@ -12,9 +12,10 @@
             'Häuslichkeit',
             'Betreutes Wohnen',
             'Pflegeheim',
-            'Werkhalle',
-            'Büro',
+            { value: 'In Werkhalle', label: 'Werkhalle' },
             'Bahnhof',
+            { value: 'Auf Straße', label: 'Straße' },
+            { value: 'Auf Fußweg', label: 'Fußweg' },
           ]"
           allow-custom custom-label="Wo?" custom-placeholder="z.B. Fußweg"
           :autocorrect-fn="basicCap">
@@ -48,6 +49,7 @@
           empty-label="Keiner / k.A."
           :options="[
             'Pflegedienst',
+            'Pflegepersonal',
             'Angehörige',
             'Ehepartner',
             'Lebenspartner',
