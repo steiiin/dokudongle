@@ -243,23 +243,34 @@
       </IonCardContent>
     </IonCard>
 
-    <IonCard class="stu-injuries">
+    <IonCard v-if="store.doku.sampler.symptoms.trauma.injuries.length > 0" class="stu-injuries">
       <IonCardHeader>
         <IonCardTitle>Verletzungen</IonCardTitle>
       </IonCardHeader>
       <IonCardContent>
-        <IonList v-if="store.doku.sampler.symptoms.trauma.injuries.length > 0" lines="none">
+        <IonList v-if="store.doku.sampler.symptoms.trauma.injuries.length > 0" lines="none" class="stu-injuries__list">
           <IonItem v-for="(injury, index) in store.doku.sampler.symptoms.trauma.injuries"
             :key="`${injury}-${index}`" lines="none" button @click="editInjury(index)">
             <IonLabel>{{ injury }}</IonLabel>
           </IonItem>
         </IonList>
-        <IonButton fill="solid" color="light" @click="addInjury">
+        <IonButton fill="solid" color="light" @click="addInjury" class="stu-injuries__button">
           <IonIcon slot="start" :icon="addCircle"></IonIcon>
           Verletzung
         </IonButton>
       </IonCardContent>
     </IonCard>
+
+    <IonButton
+      v-if="store.doku.sampler.symptoms.trauma.injuries.length === 0"
+      fill="solid" style="padding: .2rem .5rem"
+      color="light"
+      expand="block"
+      size="default"
+      @click="addInjury"
+    >
+      Verletzungen hinzufügen
+    </IonButton>
 
     <IonModal :is-open="isInjuryModalOpen" @did-present="focusInjuryInput" @will-dismiss="cancelInjuryEdit">
       <IonHeader>
@@ -391,8 +402,21 @@ const isInjuryValid = computed(() => {
 })
 
 </script>
-<style scoped>
-  .stu-injuries ion-card-content {
-    padding: 0 .5rem .5rem .5rem;
+<style lang="scss" scoped>
+
+  .stu-injuries {
+
+    &__list {
+
+      padding: .5rem 0 0 0;
+
+    }
+
+    &__button {
+
+      margin: .5rem;
+
+    }
   }
+
 </style>
