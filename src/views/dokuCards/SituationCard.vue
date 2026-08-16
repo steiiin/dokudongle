@@ -34,8 +34,8 @@ const ctx = computed(() => store.context)
 
 const quickieKeys = computed(() => {
   const list: Array<string> = []
-  if (ctx.value.isCourseVerlegung) { list.push(QU_SIT_Verlegung) }
-  if (ctx.value.isCourseEinweisung) { list.push(QU_SIT_Einweisung) }
+  if (ctx.value.isVerlegung) { list.push(QU_SIT_Verlegung) }
+  if (ctx.value.isEinweisung) { list.push(QU_SIT_Einweisung) }
   return list
 })
 

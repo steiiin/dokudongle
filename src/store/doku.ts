@@ -50,7 +50,14 @@ function hydrateProtocol(input: unknown): Protocol | null {
     return null
   }
 
+  const legacyCourse = input.course
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), input)
+
+  if (legacyCourse === 1 || legacyCourse === 2) {
+    hydratedProtocol.course = ProtocolCourse.TRANSPORT
+    hydratedProtocol.flavors.verlegung = legacyCourse === 1
+    hydratedProtocol.flavors.einweisung = legacyCourse === 2
+  }
 
   hydratedProtocol.sampler.medication.PlanMedication = hydratedProtocol.sampler.medication.PlanMedication
     .map((item) => new SampleMedicationItem(item))
@@ -285,7 +292,17 @@ export const useDokuStore = defineStore('doku', {
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
       this.doku.flavors[key] = enabled
 
-      if (key !== 'no_emergency_call' || !enabled) {
+      if (!enabled) {
+        return
+      }
+
+      if (key === 'no_emergency_call' || key === 'verlegung' || key === 'einweisung') {
+        this.doku.flavors.no_emergency_call = key === 'no_emergency_call'
+        this.doku.flavors.verlegung = key === 'verlegung'
+        this.doku.flavors.einweisung = key === 'einweisung'
+      }
+
+      if (key !== 'no_emergency_call') {
         return
       }
 
@@ -524,16 +541,16 @@ export const useDokuStore = defineStore('doku', {
     context(state): ProtocolContext {
 
       const isNoEmergencyCall: boolean = state.doku.flavors.no_emergency_call
-      const requireSceneDetails: boolean = state.doku.course == ProtocolCourse.TRANSPORT
+      const isVerlegung: boolean = state.doku.flavors.verlegung
+      const isEinweisung: boolean = state.doku.flavors.einweisung
+      const isTransport: boolean = state.doku.course == ProtocolCourse.TRANSPORT
+      const requireSceneDetails: boolean = isTransport && !isVerlegung && !isEinweisung
       const requireFlavors: boolean = state.doku.course == ProtocolCourse.TRANSPORT
-      const requireABCDE: boolean = !isNoEmergencyCall && (state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG)
-      const requireSampler: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
+      const requireABCDE: boolean = !isNoEmergencyCall && isTransport && !isVerlegung
+      const requireSampler: boolean = isTransport && !isVerlegung
       const requireSampleSymptoms: boolean = requireSampler && !isNoEmergencyCall
       const requireSaamed: boolean = !isNoEmergencyCall
-      const requireRedflags: boolean = !isNoEmergencyCall && (state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG)
-
-      const isCourseVerlegung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
-      const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.EINWEISUNG
+      const requireRedflags: boolean = !isNoEmergencyCall && isTransport && !isVerlegung
       const isPediatric: boolean = state.doku.ident.age?.totalYears <= 4
 
       const nothingToTreat: boolean = (
@@ -549,7 +566,7 @@ export const useDokuStore = defineStore('doku', {
       const gcs: number = state.doku.xabcDe.gcsScore
       const isBaseline: boolean = state.doku.xabcDe.psychBaseline
 
-      const isTrauma: boolean = requireSceneDetails && (state.doku.flavors.trauma)
+      const isTrauma: boolean = requireABCDE && state.doku.flavors.trauma
 
       const isCritical: boolean =
         !state.doku.xAbcde.isBreathing
@@ -600,8 +617,8 @@ export const useDokuStore = defineStore('doku', {
         requireSaamed,
         requireRedflags,
 
-        isCourseVerlegung,
-        isCourseEinweisung,
+        isVerlegung,
+        isEinweisung,
 
         isBreathing: state.doku.xAbcde.isBreathing,
         hasPulse: state.doku.xabCde.pulse.centralStrength != 'nicht',

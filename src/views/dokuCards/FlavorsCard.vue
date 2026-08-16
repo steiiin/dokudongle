@@ -3,12 +3,24 @@
     <ion-card-content>
       <ion-list style="padding: 0;">
 
-        <ion-item lines="none" class="flavor-row">
+        <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.noEmergencyCall || visibleFlavors.verlegung || visibleFlavors.einweisung">
 
-          <DodoToggleChip
+          <DodoToggleChip v-if="visibleFlavors.noEmergencyCall"
             :model-value="store.doku.flavors.no_emergency_call" color="primary"
             @update:modelValue="setFlavor('no_emergency_call', $event)">
             Fehlfahrt
+          </DodoToggleChip>
+
+          <DodoToggleChip v-if="visibleFlavors.verlegung"
+            :model-value="store.doku.flavors.verlegung" color="primary"
+            @update:modelValue="setFlavor('verlegung', $event)">
+            Verlegung
+          </DodoToggleChip>
+
+          <DodoToggleChip v-if="visibleFlavors.einweisung"
+            :model-value="store.doku.flavors.einweisung" color="primary"
+            @update:modelValue="setFlavor('einweisung', $event)">
+            Einweisung
           </DodoToggleChip>
 
         </ion-item>
@@ -61,10 +73,15 @@ const setFlavor = (key: FlavorKey, enabled: boolean) => {
 
 const visibleFlavors = computed(() => {
   const isNoEmergencyCallSelected = store.doku.flavors.no_emergency_call
+  const isVerlegungSelected = store.doku.flavors.verlegung
+  const isEinweisungSelected = store.doku.flavors.einweisung
   const isReanimationSelected = store.doku.flavors.reanimation
   return {
-    trauma: !isNoEmergencyCallSelected,
-    reanimation: !isNoEmergencyCallSelected,
+    noEmergencyCall: !isVerlegungSelected && !isEinweisungSelected,
+    verlegung: !isNoEmergencyCallSelected && !isEinweisungSelected,
+    einweisung: !isNoEmergencyCallSelected && !isVerlegungSelected,
+    trauma: !isNoEmergencyCallSelected && !isVerlegungSelected,
+    reanimation: !isNoEmergencyCallSelected && !isVerlegungSelected,
     nonVerbal: !isNoEmergencyCallSelected && !isReanimationSelected,
   }
 })

@@ -38,6 +38,8 @@ export function resetProtocol(): Protocol {
     course: ProtocolCourse.TRANSPORT,
     flavors: {
       no_emergency_call: false,
+      verlegung: false,
+      einweisung: false,
       trauma: false,
       non_verbal: false,
       reanimation: false
@@ -73,14 +75,14 @@ export enum ProtocolVerbosity {
 }
 
 export enum ProtocolCourse {
-  TRANSPORT,
-  VERLEGUNG,
-  EINWEISUNG,
-  NEF_VOR_ORT,
+  TRANSPORT = 0,
+  NEF_VOR_ORT = 3,
 }
 
 export interface ProtocolFlavors {
   no_emergency_call: boolean
+  verlegung: boolean
+  einweisung: boolean
   trauma: boolean
   non_verbal: boolean
   reanimation: boolean
@@ -147,8 +149,8 @@ export interface ProtocolContext {
   requireSaamed: boolean,
   requireRedflags: boolean,
 
-  isCourseVerlegung: boolean,
-  isCourseEinweisung: boolean,
+  isVerlegung: boolean,
+  isEinweisung: boolean,
 
   isBreathing: boolean,
   hasPulse: boolean,

@@ -40,6 +40,8 @@ describe('Fehlfahrt flavor', () => {
 
     expect(store.doku.flavors).toEqual({
       no_emergency_call: false,
+      verlegung: false,
+      einweisung: false,
       trauma: true,
       non_verbal: false,
       reanimation: false,
@@ -48,6 +50,8 @@ describe('Fehlfahrt flavor', () => {
 
   test('selecting Fehlfahrt is exclusive and clears excluded clinical data', () => {
     const store = useDokuStore()
+    store.doku.flavors.verlegung = true
+    store.doku.flavors.einweisung = true
     store.doku.flavors.trauma = true
     store.doku.flavors.non_verbal = true
     store.doku.flavors.reanimation = true
@@ -73,6 +77,8 @@ describe('Fehlfahrt flavor', () => {
 
     expect(store.doku.flavors).toEqual({
       no_emergency_call: true,
+      verlegung: false,
+      einweisung: false,
       trauma: false,
       non_verbal: false,
       reanimation: false,
