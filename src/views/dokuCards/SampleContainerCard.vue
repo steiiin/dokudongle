@@ -5,7 +5,7 @@
     </IonCardHeader>
     <IonCardContent class="card-in-card">
 
-          <IonCard class="sample-symptoms">
+          <IonCard class="sample-symptoms" v-show="ctx.requireSampleSymptoms">
             <IonCardHeader>
               <IonCardTitle>Symptome</IonCardTitle>
             </IonCardHeader>

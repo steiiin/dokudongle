@@ -8,7 +8,7 @@ import { DOKU_SCHEMA_VERSION, ProtocolAuditEntry, appendProtocolAuditEntry, load
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { AuditExport } from '@/plugins/audit-export'
 import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
-import { Protocol, ProtocolContext, ProtocolCourse, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
+import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
@@ -282,6 +282,28 @@ export const useDokuStore = defineStore('doku', {
       this.lastProtocolResetAt = new Date().toISOString()
       void this.persistToStorage()
     },
+    setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
+      this.doku.flavors[key] = enabled
+
+      if (key !== 'no_emergency_call' || !enabled) {
+        return
+      }
+
+      this.doku.flavors.trauma = false
+      this.doku.flavors.non_verbal = false
+      this.doku.flavors.reanimation = false
+
+      const emptyProtocol = resetProtocol()
+      this.doku.Xabcde = emptyProtocol.Xabcde
+      this.doku.xAbcde = emptyProtocol.xAbcde
+      this.doku.xaBcde = emptyProtocol.xaBcde
+      this.doku.xabCde = emptyProtocol.xabCde
+      this.doku.xabcDe = emptyProtocol.xabcDe
+      this.doku.xabcdE = emptyProtocol.xabcdE
+      this.doku.sampler.symptoms = emptyProtocol.sampler.symptoms
+      this.doku.saamed = emptyProtocol.saamed
+      this.doku.redflags = emptyProtocol.redflags
+    },
     async downloadProtocolAuditJsonl() {
       const entries = await loadProtocolAuditEntries()
       const jsonl = entries.map(entry => JSON.stringify(entry)).join('\n')
@@ -501,11 +523,14 @@ export const useDokuStore = defineStore('doku', {
     // context
     context(state): ProtocolContext {
 
+      const isNoEmergencyCall: boolean = state.doku.flavors.no_emergency_call
       const requireSceneDetails: boolean = state.doku.course == ProtocolCourse.TRANSPORT
       const requireFlavors: boolean = state.doku.course == ProtocolCourse.TRANSPORT
-      const requireABCDE: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
+      const requireABCDE: boolean = !isNoEmergencyCall && (state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG)
       const requireSampler: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
-      const requireRedflags: boolean = state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG
+      const requireSampleSymptoms: boolean = requireSampler && !isNoEmergencyCall
+      const requireSaamed: boolean = !isNoEmergencyCall
+      const requireRedflags: boolean = !isNoEmergencyCall && (state.doku.course == ProtocolCourse.TRANSPORT || state.doku.course == ProtocolCourse.EINWEISUNG)
 
       const isCourseVerlegung: boolean = state.doku.course == ProtocolCourse.VERLEGUNG
       const isCourseEinweisung: boolean = state.doku.course == ProtocolCourse.EINWEISUNG
@@ -571,6 +596,8 @@ export const useDokuStore = defineStore('doku', {
         requireFlavors,
         requireABCDE,
         requireSampler,
+        requireSampleSymptoms,
+        requireSaamed,
         requireRedflags,
 
         isCourseVerlegung,
@@ -651,7 +678,7 @@ export const useDokuStore = defineStore('doku', {
       {
 
         // SAMPLE
-        text += breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true)
+        text += textIf(breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true), this.context.requireSampleSymptoms)
         text += breakDoku([
           state.doku.sampler.allergies.generateText(),
           state.doku.sampler.medication.generateText(),
@@ -662,9 +689,9 @@ export const useDokuStore = defineStore('doku', {
       }
 
       // TREATMENT
-      text += breakDoku(state.doku.saamed.getBlock(), true)
+      text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
       text += breakDoku(placeholder(state.doku.treatment.value, 'Maßnahmen'), true)
-      text += breakDoku(state.doku.redflags.getConsentBlock(), true)
+      text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
       text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
 
       return text.trim()

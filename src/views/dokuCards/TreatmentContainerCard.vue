@@ -6,7 +6,7 @@
     <IonCardContent class="card-in-card">
 
       <TreatmentTasksCard />
-      <TreatmentMedicationsCard />
+      <TreatmentMedicationsCard v-show="ctx.requireSaamed" />
       <TreatmentRedflagsCard v-show="ctx.requireRedflags" />
 
     </IonCardContent>

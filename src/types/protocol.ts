@@ -37,6 +37,7 @@ export function resetProtocol(): Protocol {
 
     course: ProtocolCourse.TRANSPORT,
     flavors: {
+      no_emergency_call: false,
       trauma: false,
       non_verbal: false,
       reanimation: false
@@ -79,6 +80,7 @@ export enum ProtocolCourse {
 }
 
 export interface ProtocolFlavors {
+  no_emergency_call: boolean
   trauma: boolean
   non_verbal: boolean
   reanimation: boolean
@@ -141,6 +143,8 @@ export interface ProtocolContext {
   requireFlavors: boolean,
   requireABCDE: boolean,
   requireSampler: boolean,
+  requireSampleSymptoms: boolean,
+  requireSaamed: boolean,
   requireRedflags: boolean,
 
   isCourseVerlegung: boolean,

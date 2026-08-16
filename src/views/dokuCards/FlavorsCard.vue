@@ -3,6 +3,16 @@
     <ion-card-content>
       <ion-list style="padding: 0;">
 
+        <ion-item lines="none" class="flavor-row">
+
+          <DodoToggleChip
+            :model-value="store.doku.flavors.no_emergency_call" color="primary"
+            @update:modelValue="setFlavor('no_emergency_call', $event)">
+            Fehlfahrt
+          </DodoToggleChip>
+
+        </ion-item>
+
         <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.trauma || visibleFlavors.reanimation">
 
           <DodoToggleChip v-if="visibleFlavors.trauma"
@@ -44,17 +54,18 @@ const store = useDokuStore()
 type FlavorKey = keyof typeof store.doku.flavors
 
 const setFlavor = (key: FlavorKey, enabled: boolean) => {
-  store.doku.flavors[key] = enabled
+  store.setFlavor(key, enabled)
 }
 
 // ############################################################################
 
 const visibleFlavors = computed(() => {
+  const isNoEmergencyCallSelected = store.doku.flavors.no_emergency_call
   const isReanimationSelected = store.doku.flavors.reanimation
   return {
-    trauma: true,
-    reanimation: true,
-    nonVerbal: !isReanimationSelected,
+    trauma: !isNoEmergencyCallSelected,
+    reanimation: !isNoEmergencyCallSelected,
+    nonVerbal: !isNoEmergencyCallSelected && !isReanimationSelected,
   }
 })
 
