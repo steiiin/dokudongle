@@ -6,6 +6,7 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
+        assist-context-id="sampler.pler"
         title="PLER" placeholder="Beschreibe ..."
         :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
         <p><b>(P)</b> Beschreibung von:</p>

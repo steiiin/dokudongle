@@ -1,0 +1,7 @@
+export * from './types'
+export { TextAssistService, textAssistService } from './TextAssistService'
+export { AutocorrectService } from './AutocorrectService'
+export { UserDictionaryService } from './UserDictionaryService'
+export { SnippetService } from './SnippetService'
+export { SuggestionService } from './SuggestionService'
+export { TextLearningService } from './TextLearningService'

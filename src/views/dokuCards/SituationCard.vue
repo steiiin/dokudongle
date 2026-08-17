@@ -6,6 +6,7 @@
     <IonCardContent>
 
       <DodoInputTextArea v-model="store.doku.situation"
+        assist-context-id="situation"
         title="Situation" placeholder="Beschreibe ..."
         :enhance-fn="enhanceGeneral" mandatory
         :quickieKeys="quickieKeys">

@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
+import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import DodoQuickieTemplate from '@/components/quickie-components/DodoQuickieTemplate.vue'
 import { QU_SIT_Verlegung } from '@/data/quickies'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
@@ -17,6 +18,7 @@ const mountTextarea = (modelValue = new EnhanceableText('')) => shallowMount(Dod
   props: {
     modelValue,
     title: 'Situation',
+    assistContextId: 'test.situation',
     placeholder: 'Text eingeben ...',
     enhanceFn: vi.fn().mockResolvedValue('Verbessert'),
   },
@@ -112,5 +114,57 @@ describe('DodoInputTextArea native textarea', () => {
     await flushPromises()
 
     expect(lastModelUpdate(wrapper).value).toBe('Anfang Zeile 1\nZeile 2\nEnde')
+  })
+
+  test('shows @ snippets and applies one without moving the caret to the end', async () => {
+    const wrapper = mountTextarea(new EnhanceableText('Ziel '))
+    wrapper.vm.openModal()
+    await nextTick()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    textarea.element.setSelectionRange(5, 5)
+    await textarea.trigger('focus')
+    textarea.element.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data: '@',
+      inputType: 'insertText',
+    }))
+    await textarea.setValue('Ziel @')
+    await flushPromises()
+
+    const panel = wrapper.getComponent(DodoTextSuggestionPanel)
+    await vi.waitFor(() => expect(panel.props('suggestions')).toHaveLength(4))
+    const university = panel.props('suggestions').find(suggestion => suggestion.label === 'Universitätsklinikum Dresden')!
+    panel.vm.$emit('select', university)
+    await flushPromises()
+
+    expect(textarea.element.value).toBe('Ziel Universitätsklinikum Dresden')
+    expect(textarea.element.selectionStart).toBe('Ziel Universitätsklinikum Dresden'.length)
+  })
+
+  test('uses beforeinput Backspace to undo the immediately preceding correction', async () => {
+    const wrapper = mountTextarea()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    await textarea.trigger('focus')
+    textarea.element.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data: ' ',
+      inputType: 'insertText',
+    }))
+    await textarea.setValue('Tachykardje ')
+    await vi.waitFor(() => expect(textarea.element.value).toBe('Tachykardie '))
+
+    textarea.element.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      inputType: 'deleteContentBackward',
+    }))
+    await flushPromises()
+
+    expect(textarea.element.value).toBe('Tachykardje')
+    expect(textarea.element.selectionStart).toBe('Tachykardje'.length)
   })
 })

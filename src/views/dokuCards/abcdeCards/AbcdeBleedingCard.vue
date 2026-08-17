@@ -7,6 +7,7 @@
       <IonList lines="none">
 
         <DodoInputTextArea v-model="store.doku.Xabcde.description"
+          assist-context-id="abcde.bleeding"
           ref="bleedingInput" inherit-style
           title="Kritische Blutung" placeholder="z.B. Schnittverletzung Arm: Tourniquet"
           :enhance-fn="enhanceBleeding">

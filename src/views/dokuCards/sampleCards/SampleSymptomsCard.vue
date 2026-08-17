@@ -3,6 +3,7 @@
     <hr v-if="ctx.isTrauma">
 
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
+      assist-context-id="sampler.symptoms"
       title="Symptome" placeholder="Beschreibe ..."
       :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
       Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>

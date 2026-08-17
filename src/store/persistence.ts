@@ -40,6 +40,17 @@ async function getStorage(): Promise<Storage> {
   return storageInstance;
 }
 
+export async function loadStoredValue<T>(key: string): Promise<T | null> {
+  const storage = await getStorage()
+  const value = await storage.get(key)
+  return value == null ? null : value as T
+}
+
+export async function saveStoredValue<T>(key: string, value: T): Promise<void> {
+  const storage = await getStorage()
+  await storage.set(key, value)
+}
+
 // ############################################################################
 
 export async function initStorage(): Promise<void> {

@@ -55,6 +55,12 @@
             @focus="handleFocus"
             @blur="handleBlur"
             @input="handleInput"
+            @beforeinput="handleBeforeInput"
+            @compositionstart="handleCompositionStart"
+            @compositionend="handleCompositionEnd"
+            @click="handleSelectionInteraction"
+            @select="handleSelectionInteraction"
+            @keyup="handleSelectionInteraction"
           />
 
         </div>
@@ -77,11 +83,19 @@
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
+            <IonButton @click="openDictionary" aria-label="Eigenes Wörterbuch">
+              <IonIcon :src="bookOutline" slot="icon-only"></IonIcon>
+            </IonButton>
             <IonButton @click="deleteText" v-if="!modelValue.isEmpty">
               <IonIcon :src="trashBin" color="danger" slot="icon-only"></IonIcon>
             </IonButton>
           </IonButtons>
         </IonToolbar>
+        <DodoTextSuggestionPanel
+          v-if="isEditing && !isComposing"
+          :suggestions="textSuggestions"
+          @select="applyTextSuggestion"
+        />
       </IonFooter>
     </IonModal>
 
@@ -93,18 +107,29 @@
       @accept="acceptQuickieDialog"
     />
 
+    <DodoUserDictionaryModal
+      :is-open="isDictionaryOpen"
+      :entries="dictionaryEntries"
+      :busy="isDictionaryBusy"
+      :error="dictionaryError"
+      @close="closeDictionary"
+      @add="addDictionaryWord"
+      @remove="removeDictionaryWord"
+    />
+
   </div>
 </template>
 
 <script setup lang="ts">
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ionicons/icons'
+import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin, warningOutline } from 'ionicons/icons'
 import { alertController, toastController } from '@ionic/core'
 
 import { DATA_Quickies, QuickieTemplate, type Quickie } from '@/data/quickies'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
+import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
 
 // ############################################################################
 
@@ -116,6 +141,7 @@ const props = defineProps<{
   inheritStyle?: boolean
   quickieKeys?: string[]
   enhanceFn: (draft: string) => Promise<string | null>
+  assistContextId: string
 }>()
 
 const emit = defineEmits<{
@@ -138,6 +164,18 @@ const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
 const pendingCursorPosition = ref<number|null>(null)
 const inputTextarea = ref<HTMLTextAreaElement | null>(null)
+const textSuggestions = ref<TextSuggestion[]>([])
+const isComposing = ref(false)
+const pendingBeforeInput = ref<TextInputSnapshot | null>(null)
+const compositionBefore = ref<TextInputSnapshot | null>(null)
+const isApplyingAssistMutation = ref(false)
+let assistRevision = 0
+const assistSessionId = `dodo-textarea-${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+const isDictionaryOpen = ref(false)
+const isDictionaryBusy = ref(false)
+const dictionaryError = ref('')
+const dictionaryEntries = ref<UserDictionaryEntry[]>([])
 
 // ############################################################################
 
@@ -178,12 +216,16 @@ watch(
 const openModal = () => {
   draft.value = props.modelValue.value
   isModalOpen.value = true
+  void textAssistService.initialize()
   resizeTextarea()
   focusTextarea()
 }
 
 const closeModal = () => {
   commitOpenEditIfNeeded()
+  textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
+  textSuggestions.value = []
+  void textAssistService.flush()
   setSuggestionSuppression(false)
   isModalOpen.value = false
 }
@@ -236,6 +278,61 @@ const setCursorPosition = async (position: number) => {
   }
 }
 
+const snapshotTextarea = (): TextInputSnapshot => {
+  const textarea = inputTextarea.value
+  return {
+    text: draft.value,
+    selectionStart: textarea?.selectionStart ?? lastCursorStart.value ?? draft.value.length,
+    selectionEnd: textarea?.selectionEnd ?? lastCursorEnd.value ?? draft.value.length,
+    isComposing: isComposing.value,
+  }
+}
+
+const applyAssistMutation = async (mutation: TextMutation) => {
+  const textarea = inputTextarea.value
+  const scrollTop = textarea?.scrollTop ?? 0
+  isApplyingAssistMutation.value = true
+  draft.value = draft.value.slice(0, mutation.start) + mutation.replacement + draft.value.slice(mutation.end)
+  lastCursorStart.value = mutation.cursor
+  lastCursorEnd.value = mutation.cursor
+  scheduleTypingSnapshot()
+  await resizeTextarea()
+  await setCursorPosition(mutation.cursor)
+  if (inputTextarea.value) inputTextarea.value.scrollTop = scrollTop
+  setTimeout(() => { isApplyingAssistMutation.value = false }, 0)
+}
+
+const refreshTextSuggestions = async () => {
+  if (!isEditing.value || isComposing.value || isDictionaryOpen.value) {
+    textSuggestions.value = []
+    return
+  }
+  const revision = ++assistRevision
+  const suggestions = await textAssistService.getSuggestions(
+    assistSessionId,
+    props.assistContextId,
+    snapshotTextarea(),
+  )
+  if (revision === assistRevision) textSuggestions.value = suggestions
+}
+
+const processAssistInput = async (before: TextInputSnapshot, event: InputEvent, after = snapshotTextarea()) => {
+  const revision = ++assistRevision
+  await textAssistService.initialize()
+  if (revision !== assistRevision) return
+  const update = await textAssistService.processInput({
+    sessionId: assistSessionId,
+    contextId: props.assistContextId,
+    before,
+    after,
+    inputType: event.inputType || 'insertText',
+    data: event.data,
+  })
+  if (revision !== assistRevision) return
+  if (update.mutation) await applyAssistMutation(update.mutation)
+  if (revision === assistRevision) textSuggestions.value = update.suggestions
+}
+
 // ############################################################################
 
 const clearTypingSnapshotTimeout = () => {
@@ -272,7 +369,21 @@ const scheduleTypingSnapshot = () => {
   }, 500)
 }
 
-const handleInput = () => {
+const handleBeforeInput = (event: InputEvent) => {
+  const before = snapshotTextarea()
+  pendingBeforeInput.value = before
+  if (event.isComposing || isComposing.value) return
+  if (event.inputType !== 'deleteContentBackward') return
+
+  const mutation = textAssistService.handleBackspace(assistSessionId, before)
+  if (!mutation) return
+  event.preventDefault()
+  pendingBeforeInput.value = null
+  assistRevision += 1
+  void applyAssistMutation(mutation).then(refreshTextSuggestions)
+}
+
+const handleInput = (event: Event) => {
   resizeTextarea()
 
   if (!isEditing.value) {
@@ -280,9 +391,20 @@ const handleInput = () => {
   }
 
   scheduleTypingSnapshot()
+  const inputEvent = event as InputEvent
+  const before = pendingBeforeInput.value ?? {
+    ...snapshotTextarea(),
+    text: draft.value,
+  }
+  pendingBeforeInput.value = null
+  if (inputEvent.isComposing || isComposing.value) {
+    textSuggestions.value = []
+    return
+  }
+  void processAssistInput(before, inputEvent)
 }
 
-const handleFocus = () => {
+const handleFocus = async () => {
   setSuggestionSuppression(true)
   isEditing.value = true
 
@@ -290,11 +412,15 @@ const handleFocus = () => {
   updated.beginEdit()
   emitUpdated(updated)
   rememberCursorPosition()
+  await textAssistService.initialize()
+  await refreshTextSuggestions()
 }
 
 const handleBlur = () => {
   clearTypingSnapshotTimeout()
   rememberCursorPosition()
+  textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
+  textSuggestions.value = []
   setSuggestionSuppression(false)
   isEditing.value = false
 
@@ -303,6 +429,47 @@ const handleBlur = () => {
   emitUpdated(updated)
 
   draft.value = updated.value
+}
+
+const handleCompositionStart = () => {
+  compositionBefore.value = snapshotTextarea()
+  isComposing.value = true
+  textAssistService.invalidateSession(assistSessionId, compositionBefore.value)
+  textSuggestions.value = []
+}
+
+const handleCompositionEnd = async (event: CompositionEvent) => {
+  isComposing.value = false
+  await nextTick()
+  const before = compositionBefore.value ?? snapshotTextarea()
+  compositionBefore.value = null
+  const inputEvent = new InputEvent('input', {
+    data: event.data,
+    inputType: 'insertCompositionText',
+    isComposing: false,
+  })
+  await processAssistInput(before, inputEvent)
+}
+
+const handleSelectionInteraction = (event: Event) => {
+  if (isApplyingAssistMutation.value || isComposing.value) return
+  if (event instanceof KeyboardEvent && !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) return
+  const snapshot = snapshotTextarea()
+  textAssistService.invalidateSession(assistSessionId, snapshot)
+  void rememberCursorPosition()
+  void refreshTextSuggestions()
+}
+
+const applyTextSuggestion = async (suggestion: TextSuggestion) => {
+  const mutation = textAssistService.applySuggestion(
+    assistSessionId,
+    props.assistContextId,
+    snapshotTextarea(),
+    suggestion,
+  )
+  assistRevision += 1
+  await applyAssistMutation(mutation)
+  await refreshTextSuggestions()
 }
 
 const commitOpenEditIfNeeded = () => {
@@ -319,6 +486,55 @@ const commitOpenEditIfNeeded = () => {
   emitUpdated(updated)
 
   draft.value = updated.value
+}
+
+const refreshDictionaryEntries = async () => {
+  dictionaryEntries.value = await textAssistService.getUserDictionaryEntries()
+}
+
+const openDictionary = async () => {
+  await rememberCursorPosition()
+  dictionaryError.value = ''
+  await refreshDictionaryEntries()
+  isDictionaryOpen.value = true
+}
+
+const closeDictionary = async () => {
+  if (!isDictionaryOpen.value) return
+  isDictionaryOpen.value = false
+  dictionaryError.value = ''
+  focusTextarea()
+  await setCursorPosition(lastCursorStart.value)
+}
+
+const addDictionaryWord = async (word: string) => {
+  dictionaryError.value = ''
+  isDictionaryBusy.value = true
+  try {
+    await textAssistService.addUserWord(word)
+    await refreshDictionaryEntries()
+  }
+  catch (error) {
+    dictionaryError.value = error instanceof Error ? error.message : 'Das Wort konnte nicht hinzugefügt werden.'
+  }
+  finally {
+    isDictionaryBusy.value = false
+  }
+}
+
+const removeDictionaryWord = async (word: string) => {
+  dictionaryError.value = ''
+  isDictionaryBusy.value = true
+  try {
+    await textAssistService.removeUserWord(word)
+    await refreshDictionaryEntries()
+  }
+  catch {
+    dictionaryError.value = 'Das Wort konnte nicht entfernt werden.'
+  }
+  finally {
+    isDictionaryBusy.value = false
+  }
 }
 
 //#endregion
@@ -478,6 +694,8 @@ const showEnhanceError = async () => {
 
 onBeforeUnmount(() => {
   clearTypingSnapshotTimeout()
+  textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
+  void textAssistService.flush()
   setSuggestionSuppression(false)
 })
 

@@ -1,0 +1,118 @@
+[
+
+  {
+    "id": "hospital-dd-uniklinik",
+    "trigger": "@",
+    "label": "Uniklinik Dresden",
+    "replacement": "Uniklinik Dresden",
+    "keywords": [ "uniklinik", "ukd", "uni", "dresden" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-dd-friedrichstadt",
+    "trigger": "@",
+    "label": "KH DD-Friedrichstadt",
+    "replacement": "KH DD-Friedrichstadt",
+    "keywords": [ "krankenhaus", "fstadt", "friedrichstadt" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-dd-neustadt",
+    "trigger": "@",
+    "label": "KH DD-Neustadt",
+    "replacement": "KH DD-Neustadt",
+    "keywords": [ "krankenhaus", "neustadt" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-dd-neustadt",
+    "trigger": "@",
+    "label": "KH DD-Neustadt",
+    "replacement": "KH DD-Neustadt",
+    "keywords": [ "krankenhaus", "neustadt" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-dd-josephstift",
+    "trigger": "@",
+    "label": "KH DD-StJosephStift",
+    "replacement": "KH DD-StJosephStift",
+    "keywords": [ "krankenhaus", "stift", "joseph" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-dd-stmarien",
+    "trigger": "@",
+    "label": "KH DD-StMarien",
+    "replacement": "KH DD-StMarien",
+    "keywords": [ "krankenhaus", "stmarien", "sankt", "marien", "psych" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-dd-diako",
+    "trigger": "@",
+    "label": "KH DD-Diako",
+    "replacement": "KH DD-Diako",
+    "keywords": [ "krankenhaus", "diakonissen" ],
+    "category": "hospital"
+  },
+
+  {
+    "id": "hospital-mei-radebeul",
+    "trigger": "@",
+    "label": "KH Radebeul",
+    "replacement": "KH Radebeul",
+    "keywords": [ "krankenhaus", "radebeul" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-mei-meissen",
+    "trigger": "@",
+    "label": "KH Meißen",
+    "replacement": "KH Meißen",
+    "keywords": [ "krankenhaus", "meissen", "meißen" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-mei-riesa",
+    "trigger": "@",
+    "label": "KH Riesa",
+    "replacement": "KH Riesa",
+    "keywords": [ "krankenhaus", "riesa" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-mei-coswig",
+    "trigger": "@",
+    "label": "FKH Coswig",
+    "replacement": "FKH Coswig",
+    "keywords": [ "krankenhaus", "coswig", "lungenklinik" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-mei-radeburg",
+    "trigger": "@",
+    "label": "Reha Radeburg",
+    "replacement": "Reha Radeburg",
+    "keywords": [ "reha", "radeburg" ],
+    "category": "hospital"
+  },
+
+  {
+    "id": "hospital-soe-freital",
+    "trigger": "@",
+    "label": "KH Freital",
+    "replacement": "KH Freital",
+    "keywords": [ "krankenhaus", "freital" ],
+    "category": "hospital"
+  },
+  {
+    "id": "hospital-soe-arnsdorf",
+    "trigger": "@",
+    "label": "KH Arnsdorf",
+    "replacement": "KH Arnsdorf",
+    "keywords": [ "krankenhaus", "arnsdorf", "psych" ],
+    "category": "hospital"
+  }
+
+]
