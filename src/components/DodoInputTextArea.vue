@@ -41,16 +41,20 @@
           <slot />
         </div>
         <div class="dd-modal-data">
-          <IonTextarea
+          <textarea
             ref="inputTextarea"
             v-model="draft"
             class="dd-modal-textarea"
             :placeholder="placeholder"
-            :auto-grow="true"
             :disabled="modelValue.isEnhancing"
-            @ionFocus="handleFocus"
-            @ionBlur="handleBlur"
-            @ionInput="handleInput"
+            rows="1"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            :spellcheck="false"
+            @focus="handleFocus"
+            @blur="handleBlur"
+            @input="handleInput"
           />
 
         </div>
@@ -99,8 +103,8 @@ import { alertCircle, arrowRedo, arrowUndo, trashBin, warningOutline } from 'ion
 import { alertController, toastController } from '@ionic/core'
 
 import { DATA_Quickies, QuickieTemplate, type Quickie } from '@/data/quickies'
+import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
-import { gainFocus } from '@/utils/input'
 
 // ############################################################################
 
@@ -133,7 +137,7 @@ let typingSnapshotTimeout: ReturnType<typeof setTimeout> | null = null
 const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
 const pendingCursorPosition = ref<number|null>(null)
-const inputTextarea = ref<any | null>(null)
+const inputTextarea = ref<HTMLTextAreaElement | null>(null)
 
 // ############################################################################
 
@@ -174,27 +178,41 @@ watch(
 const openModal = () => {
   draft.value = props.modelValue.value
   isModalOpen.value = true
-  gainFocus(inputTextarea)
+  resizeTextarea()
+  focusTextarea()
 }
 
 const closeModal = () => {
   commitOpenEditIfNeeded()
+  setSuggestionSuppression(false)
   isModalOpen.value = false
 }
 
 
 //#region Textarea
 
-const getNativeTextarea = async (): Promise<HTMLTextAreaElement | null> => {
-  const element = inputTextarea.value?.$el
-  if (!element || typeof element.getInputElement !== 'function') {
-    return null
-  }
-  return (await element.getInputElement()) as HTMLTextAreaElement
+const setSuggestionSuppression = (disabled: boolean) => {
+  void setInputSuggestionsDisabled(disabled)
 }
 
+const resizeTextarea = async () => {
+  await nextTick()
+  const textarea = inputTextarea.value
+  if (!textarea) { return }
+
+  textarea.style.height = 'auto'
+  textarea.style.height = `${Math.max(textarea.scrollHeight, 44)}px`
+}
+
+const focusTextarea = () => {
+  setSuggestionSuppression(true)
+  setTimeout(() => inputTextarea.value?.focus(), 300)
+}
+
+watch(draft, resizeTextarea, { flush: 'post' })
+
 const rememberCursorPosition = async () => {
-  const textarea = await getNativeTextarea()
+  const textarea = inputTextarea.value
   if (!textarea) { return }
 
   lastCursorStart.value = textarea.selectionStart ?? draft.value.length
@@ -206,7 +224,7 @@ const setCursorPosition = async (position: number) => {
   pendingCursorPosition.value = boundedPosition
   await nextTick()
   for (let attempt = 0; attempt < 6; attempt += 1) {
-    const textarea = await getNativeTextarea()
+    const textarea = inputTextarea.value
     if (textarea && document.activeElement === textarea) {
       textarea.setSelectionRange(boundedPosition, boundedPosition)
       lastCursorStart.value = boundedPosition
@@ -255,6 +273,8 @@ const scheduleTypingSnapshot = () => {
 }
 
 const handleInput = () => {
+  resizeTextarea()
+
   if (!isEditing.value) {
     return
   }
@@ -263,6 +283,7 @@ const handleInput = () => {
 }
 
 const handleFocus = () => {
+  setSuggestionSuppression(true)
   isEditing.value = true
 
   const updated = cloneModelValue()
@@ -274,6 +295,7 @@ const handleFocus = () => {
 const handleBlur = () => {
   clearTypingSnapshotTimeout()
   rememberCursorPosition()
+  setSuggestionSuppression(false)
   isEditing.value = false
 
   const updated = cloneModelValue()
@@ -394,7 +416,7 @@ const insertQuickieText = async (insertedText: string) => {
   updated.setText(draft.value)
   emitUpdated(updated)
 
-  gainFocus(inputTextarea)
+  focusTextarea()
   pendingCursorPosition.value = insertedTextEnd
   await setCursorPosition(insertedTextEnd)
 
@@ -456,6 +478,7 @@ const showEnhanceError = async () => {
 
 onBeforeUnmount(() => {
   clearTypingSnapshotTimeout()
+  setSuggestionSuppression(false)
 })
 
 defineExpose({
@@ -509,8 +532,55 @@ defineExpose({
 }
 
 .dd-modal-textarea {
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 0 8px;
+  border: 0;
   border-bottom: 1px solid var(--ion-color-primary);
-  --padding-top: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-family: var(--ion-font-family, inherit);
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: normal;
+  text-align: inherit;
+  text-decoration: inherit;
+  text-indent: inherit;
+  text-overflow: inherit;
+  text-transform: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+  resize: none;
+  overflow: hidden;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.dd-modal-textarea:focus {
+  caret-color: var(--ion-color-primary);
+  box-shadow: 0 1px 0 var(--ion-color-primary);
+}
+
+.dd-modal-textarea:disabled {
+  opacity: 0.38;
+}
+
+.dd-modal-textarea::placeholder {
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  opacity: var(--ion-placeholder-opacity, 0.6);
 }
 
 .dd-actions {
