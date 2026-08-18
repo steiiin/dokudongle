@@ -18,6 +18,10 @@
             { value: 'Auf Fußweg', label: 'Fußweg' },
           ]"
           allow-custom custom-label="Wo?" custom-placeholder="z.B. Fußweg"
+          :ime-dictionary="{
+            words: [ 'hekkiwara' ],
+            shortcuts: { gg: 'geggiwara' },
+          }"
           :autocorrect-fn="basicCap">
         </DodoInputSelect>
 

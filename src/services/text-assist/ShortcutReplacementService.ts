@@ -15,7 +15,10 @@ export class ShortcutReplacementService {
 
   constructor(private readonly replacements: Readonly<Record<string, string>> = shortcutReplacements) {}
 
-  replaceAfterDelimiter(change: TextInputChange): TextMutation | null {
+  replaceAfterDelimiter(
+    change: TextInputChange,
+    additionalReplacements: Readonly<Record<string, string>> = {},
+  ): TextMutation | null {
     if (change.before.isComposing || change.after.isComposing) return null
     if (change.before.selectionStart !== change.before.selectionEnd) return null
     if (!change.inputType.startsWith('insert')) return null
@@ -26,8 +29,11 @@ export class ShortcutReplacementService {
     if (!isCompletionDelimiter(delimiter)) return null
 
     const range = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
-    if (!range || !Object.prototype.hasOwnProperty.call(this.replacements, range.word)) return null
-    const replacement = this.replacements[range.word]
+    if (!range) return null
+    const hasAdditionalReplacement = Object.prototype.hasOwnProperty.call(additionalReplacements, range.word)
+    const replacements = hasAdditionalReplacement ? additionalReplacements : this.replacements
+    if (!Object.prototype.hasOwnProperty.call(replacements, range.word)) return null
+    const replacement = replacements[range.word]
     if (!replacement || replacement === range.word) return null
 
     const cursorAfterReplacement = range.start + replacement.length + delimiter.length

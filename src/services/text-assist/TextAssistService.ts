@@ -7,6 +7,7 @@ import { TextAssistStateRepository, type TextAssistStateRepositoryLike } from '.
 import { UserDictionaryService } from './UserDictionaryService'
 import type {
   AppliedCorrection,
+  ImeDictionary,
   TextAssistUpdate,
   TextContext,
   TextInputChange,
@@ -15,7 +16,19 @@ import type {
   TextSuggestion,
   UserDictionaryEntry,
 } from './types'
-import { isCompletionDelimiter, normalizeKey, wordImmediatelyBefore, wordsBefore } from './text'
+import {
+  isCompletionDelimiter,
+  isDictionaryWord,
+  normalizeDictionaryWord,
+  normalizeKey,
+  wordImmediatelyBefore,
+  wordsBefore,
+} from './text'
+
+interface ResolvedImeDictionary {
+  words: string[]
+  shortcuts: Record<string, string>
+}
 
 export class TextAssistService {
   readonly repository: TextAssistStateRepositoryLike
@@ -48,6 +61,10 @@ export class TextAssistService {
     return this.initialization
   }
 
+  initializeAutomatic(): Promise<void> {
+    return this.autocorrect.initialize()
+  }
+
   async processInput(change: TextInputChange): Promise<TextAssistUpdate> {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return { suggestions: [] }
@@ -72,6 +89,19 @@ export class TextAssistService {
     }
   }
 
+  async processAutomaticInput(change: TextInputChange, dictionary: ImeDictionary = {}): Promise<TextMutation | null> {
+    await this.initializeAutomatic()
+    if (change.before.isComposing || change.after.isComposing) return null
+
+    this.invalidateAutomaticSession(change.sessionId)
+    const resolvedDictionary = this.resolveImeDictionary(dictionary)
+    const shortcutMutation = this.shortcutReplacements.replaceAfterDelimiter(change, resolvedDictionary.shortcuts)
+    if (shortcutMutation) return shortcutMutation
+
+    const corrected = await this.autocorrect.correctAfterDelimiter(change, resolvedDictionary.words)
+    return corrected?.mutation ?? null
+  }
+
   handleBackspace(sessionId: string, snapshot: TextInputSnapshot): TextMutation | null {
     const revertedShortcut = this.shortcutReplacements.tryUndo(sessionId, snapshot)
     if (revertedShortcut) return revertedShortcut
@@ -79,6 +109,17 @@ export class TextAssistService {
     if (!undone) return null
     void this.recordRejection(undone.correction)
     return undone.mutation
+  }
+
+  handleAutomaticBackspace(sessionId: string, snapshot: TextInputSnapshot): TextMutation | null {
+    const revertedShortcut = this.shortcutReplacements.tryUndo(sessionId, snapshot)
+    if (revertedShortcut) return revertedShortcut
+    return this.autocorrect.tryUndo(sessionId, snapshot)?.mutation ?? null
+  }
+
+  invalidateAutomaticSession(sessionId: string): void {
+    this.shortcutReplacements.invalidate(sessionId)
+    this.autocorrect.invalidate(sessionId)
   }
 
   async getSuggestions(sessionId: string, contextId: string, snapshot: TextInputSnapshot): Promise<TextSuggestion[]> {
@@ -135,6 +176,26 @@ export class TextAssistService {
     this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction) this.learnAcceptedCorrection(correction, snapshot.text)
+  }
+
+  private resolveImeDictionary(dictionary: ImeDictionary): ResolvedImeDictionary {
+    const words = new Map<string, string>()
+    for (const candidate of dictionary.words ?? []) {
+      const word = normalizeDictionaryWord(candidate)
+      if (!word || !isDictionaryWord(word)) continue
+      const key = normalizeKey(word)
+      if (!words.has(key)) words.set(key, word)
+    }
+
+    const shortcuts: Record<string, string> = {}
+    for (const [rawTrigger, rawReplacement] of Object.entries(dictionary.shortcuts ?? {})) {
+      const trigger = normalizeDictionaryWord(rawTrigger)
+      const replacement = normalizeDictionaryWord(rawReplacement)
+      if (!trigger || !replacement || !isDictionaryWord(trigger)) continue
+      shortcuts[trigger] = replacement
+    }
+
+    return { words: [...words.values()], shortcuts }
   }
 
   private learnAcceptedCorrection(correction: AppliedCorrection, text: string): void {

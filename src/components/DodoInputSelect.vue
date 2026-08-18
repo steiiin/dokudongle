@@ -27,6 +27,7 @@
       :placeholder="customPlaceholder"
       :label-color="labelColor"
       :autocorrectFn="autocorrectFn"
+      :ime-dictionary="imeDictionary"
       @leaved-empty="handleEmpty"
     />
   </IonItem>
@@ -36,6 +37,7 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
+import type { ImeDictionary } from '@/services/text-assist'
 
 // ############################################################################
 
@@ -57,6 +59,7 @@ const props = defineProps<{
   customLabel?: string
   customPlaceholder?: string
   autocorrectFn?: (draft: string) => string,
+  imeDictionary?: ImeDictionary,
   lines?: 'full' | 'inset' | 'none'
 }>()
 

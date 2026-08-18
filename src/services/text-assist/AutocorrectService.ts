@@ -11,7 +11,7 @@ import type {
   TextMutation,
 } from './types'
 import type { TextAssistStateRepositoryLike } from './persistence'
-import { isCompletionDelimiter, normalizeKey, wordImmediatelyBefore } from './text'
+import { isCompletionDelimiter, normalizeDictionaryWord, normalizeKey, wordImmediatelyBefore } from './text'
 
 const preserveInitialCapitalization = (original: string, replacement: string): string => {
   if (!/^\p{Lu}/u.test(original) || !/^\p{Ll}/u.test(replacement)) return replacement
@@ -80,7 +80,10 @@ export class AutocorrectService {
     ])
   }
 
-  async correctAfterDelimiter(change: TextInputChange): Promise<{ mutation: TextMutation; correction: AppliedCorrection } | null> {
+  async correctAfterDelimiter(
+    change: TextInputChange,
+    additionalWords: readonly string[] = [],
+  ): Promise<{ mutation: TextMutation; correction: AppliedCorrection } | null> {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return null
     if (change.before.selectionStart !== change.before.selectionEnd) return null
@@ -92,9 +95,19 @@ export class AutocorrectService {
     if (!isCompletionDelimiter(delimiter)) return null
 
     const range = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
-    if (!range || await this.spell.correct(range.word)) return null
-    const suggestions = await this.spell.suggest(range.word)
-    const candidate = this.policy.choose(range.word, suggestions, this.medicalKeys)
+    if (!range
+      || additionalWords.includes(normalizeDictionaryWord(range.word))
+      || await this.spell.correct(range.word)) return null
+    const spellSuggestions = await this.spell.suggest(range.word)
+    const suggestions = [
+      ...spellSuggestions,
+      ...additionalWords.filter(word => !spellSuggestions.includes(word)),
+    ]
+    const preferredWords = new Set([
+      ...this.medicalKeys,
+      ...additionalWords.map(normalizeKey),
+    ])
+    const candidate = this.policy.choose(range.word, suggestions, preferredWords)
     if (!candidate) return null
 
     const replacement = preserveInitialCapitalization(range.word, candidate.replacement)

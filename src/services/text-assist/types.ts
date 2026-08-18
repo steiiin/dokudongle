@@ -23,6 +23,11 @@ export interface TextInputChange {
   data: string | null
 }
 
+export interface ImeDictionary {
+  words?: readonly string[]
+  shortcuts?: Readonly<Record<string, string>>
+}
+
 export interface TextContext {
   text: string
   cursor: number

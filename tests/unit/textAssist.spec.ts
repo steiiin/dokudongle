@@ -124,6 +124,57 @@ describe('shortcut replacements', () => {
   })
 })
 
+describe('automatic-only text assist', () => {
+  test('uses additional words as local accepted spellings and preferred correction targets', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const dictionary = { words: [' DokuDongle ', '', 'DOKUDONGLE', 'two words'] }
+
+    const exact = await service.processAutomaticInput(
+      change('local-exact', 'DokuDongle', 'DokuDongle '),
+      dictionary,
+    )
+    expect(exact).toBeNull()
+
+    const casing = await service.processAutomaticInput(
+      change('local-casing', 'dokudongle', 'dokudongle '),
+      dictionary,
+    )
+    expect(casing).toMatchObject({ replacement: 'DokuDongle', cursor: 11 })
+
+    const typo = await service.processAutomaticInput(
+      change('local-typo', 'DokuDongel', 'DokuDongel '),
+      dictionary,
+    )
+    expect(typo).toMatchObject({ replacement: 'DokuDongle', cursor: 11 })
+
+    const withoutDictionary = await service.processAutomaticInput(
+      change('local-isolation', 'DokuDongel', 'DokuDongel '),
+    )
+    expect(withoutDictionary).toBeNull()
+  })
+
+  test('keeps custom shortcuts local, lets them override defaults, and undoes without persistence', async () => {
+    const repository = new MemoryRepository()
+    const service = new TextAssistService(repository)
+    const dictionary = { shortcuts: { dd: 'DokuDongle', lt: 'gemäß', empty: ' ' } }
+
+    const custom = await service.processAutomaticInput(change('local-shortcut', 'dd', 'dd '), dictionary)
+    expect(custom).toEqual({ start: 0, end: 2, replacement: 'DokuDongle', cursor: 11 })
+    const expanded = applyMutation('dd ', custom!)
+    const undone = service.handleAutomaticBackspace('local-shortcut', snapshot(expanded))
+    expect(undone).toEqual({ start: 0, end: 11, replacement: 'dd', cursor: 2 })
+
+    const overridden = await service.processAutomaticInput(change('override-shortcut', 'lt', 'lt '), dictionary)
+    expect(overridden?.replacement).toBe('gemäß')
+
+    const isolated = await service.processAutomaticInput(change('isolated-shortcut', 'dd', 'dd '))
+    expect(isolated).toBeNull()
+    expect(repository.state.rejectedCorrections).toEqual([])
+    expect(repository.state.userDictionary).toEqual([])
+    expect(repository.saveNow).not.toHaveBeenCalled()
+  })
+})
+
 describe('text assist integration', () => {
   const repository = new MemoryRepository()
   const service = new TextAssistService(repository)

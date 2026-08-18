@@ -17,6 +17,7 @@
       :options="props.options"
       :allow-custom="props.allowCustom" :custom-label="props.customLabel" :custom-placeholder="props.customPlaceholder"
       :autocorrect-fn="props.autocorrectFn"
+      :ime-dictionary="props.imeDictionary"
       @update:model-value="onTextChange"
       @leaved-empty="handleEmpty">
     </DodoInputSelect>
@@ -28,6 +29,7 @@
 
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import DodoInputSelect, { OptionInput, SelectValue } from './DodoInputSelect.vue'
+import type { ImeDictionary } from '@/services/text-assist'
 
 // ############################################################################
 
@@ -46,6 +48,7 @@ const props = withDefaults(defineProps<{
   customPlaceholder?: string
 
   autocorrectFn?: (draft: string) => string
+  imeDictionary?: ImeDictionary
   lines?: 'full' | 'inset' | 'none'
 
 }>(), {
