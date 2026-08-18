@@ -161,6 +161,10 @@ watch(
     const known = isKnownOption(value)
     const empty = isEmptyOption(value)
 
+    if (empty && isCustomMode.value && customText.value === '') {
+      return
+    }
+
     if (known || empty) {
       isCustomMode.value = false
       customText.value = ''

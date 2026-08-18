@@ -17,6 +17,7 @@
       :model-value="props.text"
       :label="props.textLabel ? '↳ ' + props.textLabel : '↳ '"
       :placeholder="props.textPlaceholder"
+      :ime-dictionary="imeDictionary"
       :autocorrectFn="props.autocorrectFn"
       @update:model-value="onTextChange"
       @leaved-empty="handleEmpty"
@@ -28,6 +29,7 @@
 <script setup lang="ts">
 
 import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
+import type { ImeDictionary } from '@/services/text-assist'
 
 // ############################################################################
 
@@ -38,7 +40,8 @@ const props = withDefaults(defineProps<{
   textPlaceholder?: string
   text: string
   autocorrectFn?: (draft: string) => string
-  lines?: 'full' | 'inset' | 'none'
+  lines?: 'full' | 'inset' | 'none',
+  imeDictionary?: ImeDictionary,
 }>(), {
   textLabel: '',
   textPlaceholder: '',

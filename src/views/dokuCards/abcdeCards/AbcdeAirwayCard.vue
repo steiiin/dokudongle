@@ -21,7 +21,7 @@
             'Blut',
           ]"
           allow-custom custom-label="Durch?" custom-placeholder="z.B. Blut"
-          :autocorrect-fn="basicCap">
+          :ime-dictionary="{ /* activate IME */ }">
         </DodoInputSelect>
 
         <IonItem :lines="store.doku.xAbcde.isBreathing ? 'inset' : 'full'">
@@ -90,7 +90,6 @@
 <script setup lang="ts">
 
 import { watch } from 'vue'
-import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

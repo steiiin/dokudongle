@@ -19,7 +19,7 @@
           <DodoInputText ref="inputAllergiesDescription"
             v-model="store.doku.sampler.allergies.description"
             label="↳ Welche:" :placeholder="placeholder"
-            :autocorrect-fn="basicCap">
+            :ime-dictionary="{ /* activate IME */ }">
           </DodoInputText>
         </IonItem>
 
@@ -31,7 +31,6 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { basicCap } from '@/utils/autocorrect/basic'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

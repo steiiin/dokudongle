@@ -43,7 +43,7 @@
           <DodoInputText ref="inputName"
             v-model="currentContact.contactName"
             label="" placeholder="z.B. Ehepartner"
-            :beautify-fn="basicCap">
+            :ime-dictionary="{ /* activate IME */ }">
           </DodoInputText>
         </ion-item>
         <ion-item-divider>

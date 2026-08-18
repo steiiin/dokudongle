@@ -376,7 +376,7 @@ const buildQuickies = (): Record<string, Quickie> => ({
         allowOptions: true, allowCustom: true,
         options: OP_Hospitals,
         customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
-        autocorrectFn: correctHospital,
+        autocorrectFn: correctHospital, /* TODO use IME in quickies */
       },
       {
         key: 'ZIEL', color: 'success',

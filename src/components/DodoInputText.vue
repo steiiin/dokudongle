@@ -129,7 +129,13 @@ const handleBlur = () => {
   const value = draft.trim()
   if (value === '') { emit('leaved-empty') }
 
-  if (!props.autocorrectFn) { return }
+  if (!props.autocorrectFn)
+  {
+    if (draft !== value) {
+      emit('update:modelValue', value)
+    }
+    return
+  }
 
   const corrected = props.autocorrectFn(draft)
   if (corrected !== draft) {

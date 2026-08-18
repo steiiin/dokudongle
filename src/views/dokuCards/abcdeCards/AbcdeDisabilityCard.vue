@@ -140,13 +140,13 @@
         <DodoInputTextOptional :lines="(ctx.isNonVerbal || store.doku.xabcDe.paresis.active) ? 'full' : 'inset'"
           toggle-label="Paresen?" v-model:toggle="store.doku.xabcDe.paresis.active"
           text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresis.value"
-          :autocorrect-fn="correctAnatomy">
+          :ime-dictionary="{ /* activate IME */ }">
         </DodoInputTextOptional>
 
         <DodoInputTextOptional v-if="!ctx.isNonVerbal" :lines="(store.doku.xabcDe.paresthesia.active) ? 'full' : 'inset'"
           toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.paresthesia.active"
           text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresthesia.value"
-          :autocorrect-fn="correctAnatomy">
+          :ime-dictionary="{ /* activate IME */ }">
         </DodoInputTextOptional>
 
         <IonItem v-if="!ctx.isNonVerbal" lines="full">
@@ -275,8 +275,6 @@
 <script setup lang="ts">
 
 import { computed, watch } from 'vue'
-
-import { correctAnatomy } from '@/utils/autocorrect/anatomy'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

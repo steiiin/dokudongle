@@ -220,7 +220,7 @@
             <DodoInputTextOptional lines="none"
               toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed"
               text-label="Wohin?" text-placeholder="z.B. li. Arm" v-model:text="store.doku.xabCde.chest.radiation.value"
-              :autocorrect-fn="correctAnatomy">
+              :ime-dictionary="{ /* activate IME */ }">
             </DodoInputTextOptional>
 
           </template>
@@ -273,7 +273,6 @@ import { computed, watch } from 'vue'
 
 import { AssessedValue } from '@/types/protocol/input'
 import { insetIf } from '@/utils/filter'
-import { correctAnatomy } from '@/utils/autocorrect/anatomy'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

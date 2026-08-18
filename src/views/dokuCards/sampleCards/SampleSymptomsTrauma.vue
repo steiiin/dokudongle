@@ -139,7 +139,7 @@
                 { value: 'Komfortlagerung', label: 'Komfortlagerung' },
               ]"
               allow-custom custom-label="Womit?" custom-placeholder="z.B. Unterpolsterung"
-              :autocorrect-fn="basicCap">
+              :ime-dictionary="{ /* activate IME */ }">
             </DodoInputSelect>
 
             <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.spine.usedExtrication"
@@ -150,7 +150,7 @@
                 { value: 'achsengerechte Umlagerung', label: 'Achsengerechte Umlagerung' },
               ]"
               allow-custom custom-label="Wie?" custom-placeholder="z.B. Rettung durch Höhenrettung"
-              :autocorrect-fn="basicCap">
+              :ime-dictionary="{ /* activate IME */ }">
             </DodoInputSelect>
 
           </template>

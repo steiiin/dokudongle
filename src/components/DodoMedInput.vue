@@ -49,7 +49,7 @@
           <DodoInputText ref="inputName"
             v-model="currentItem.Name"
             label="" placeholder="z.B. ASS"
-            :autocorrect-fn="correctMedName">
+            :ime-dictionary="{ /* activate IME TODO medikamente */ }">
           </DodoInputText>
 
         </IonItem>
@@ -96,7 +96,6 @@ import { computed, ref, watch } from 'vue'
 import { addCircle } from 'ionicons/icons'
 
 import { SampleMedicationItem } from '@/types/protocol/sample'
-import { correctMedName } from '@/utils/autocorrect/medications'
 
 // ############################################################################
 

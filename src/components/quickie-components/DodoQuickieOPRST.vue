@@ -28,8 +28,8 @@
           <p>z.B. Rückenschmerz</p>
         </DodoListArticle> -->
         <IonItem>
-          <DodoInputText v-model="localSymtom"
-            label="Symptom" :autocorrect-fn="basicCap">
+          <DodoInputText v-model="localSymtom" label="Symptom"
+            :ime-dictionary="{ /* activate IME */ }">
           </DodoInputText>
         </IonItem>
 
@@ -83,7 +83,6 @@ import { bodyOutline, playOutline, pulseOutline, speedometerOutline, timeOutline
 
 import { QuickieOPQRST } from '@/data/quickies'
 import { concatDoku } from '@/utils/text'
-import { basicCap } from '@/utils/autocorrect/basic'
 
 // ############################################################################
 

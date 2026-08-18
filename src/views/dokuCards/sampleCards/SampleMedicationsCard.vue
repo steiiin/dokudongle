@@ -74,7 +74,7 @@
           <DodoInputText ref="inputMinormedDescription"
             v-model="store.doku.sampler.medication.MinormedDescription"
             label="Einnahme von:" placeholder="z.B. Pille"
-            :autocorrect-fn="correctMedName">
+            :ime-dictionary="{ /* activate IME */ }">
           </DodoInputText>
         </IonItem>
 
@@ -87,7 +87,6 @@
 
 import { computed, ref, watch } from 'vue'
 import { noneIf } from '@/utils/filter'
-import { correctMedName } from '@/utils/autocorrect/medications'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
