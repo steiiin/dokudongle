@@ -50,13 +50,15 @@ export class TextAssistService {
     if (change.before.isComposing || change.after.isComposing) return { suggestions: [] }
 
     this.acceptPendingCorrection(change.sessionId, change.before)
-    const corrected = await this.autocorrect.correctAfterDelimiter(change)
+    const snippetCompletion = this.completeSnippetAfterDelimiter(change)
+    const corrected = snippetCompletion.active ? null : await this.autocorrect.correctAfterDelimiter(change)
     let snapshot = change.after
-    if (corrected) snapshot = this.snapshotAfterMutation(change.after, corrected.mutation)
-    else this.learnCompletedInput(change)
+    if (snippetCompletion.mutation) snapshot = this.snapshotAfterMutation(change.after, snippetCompletion.mutation)
+    else if (corrected) snapshot = this.snapshotAfterMutation(change.after, corrected.mutation)
+    else if (!snippetCompletion.active) this.learnCompletedInput(change)
 
     return {
-      mutation: corrected?.mutation,
+      mutation: snippetCompletion.mutation ?? corrected?.mutation,
       suggestions: await this.getSuggestions(change.sessionId, change.contextId, snapshot),
     }
   }
@@ -87,9 +89,7 @@ export class TextAssistService {
 
   applySuggestion(sessionId: string, contextId: string, snapshot: TextInputSnapshot, suggestion: TextSuggestion): TextMutation {
     this.acceptPendingCorrection(sessionId, snapshot)
-    const history = wordsBefore(snapshot.text, suggestion.start, 4)
-    const insertedWords = wordsBefore(suggestion.replacement, suggestion.replacement.length, 20)
-    if (insertedWords.length > 0) this.learning.recordSequence(insertedWords, contextId, history)
+    this.recordSuggestionUsage(contextId, snapshot, suggestion)
     return {
       start: suggestion.start,
       end: suggestion.end,
@@ -138,6 +138,45 @@ export class TextAssistService {
     const word = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
     if (!word) return
     this.learning.recordCompletedWord(word.word, change.contextId, wordsBefore(change.after.text, word.start, 4))
+  }
+
+  private completeSnippetAfterDelimiter(change: TextInputChange): { active: boolean; mutation?: TextMutation } {
+    if (!change.inputType.startsWith('insert')) return { active: false }
+    if (change.before.selectionStart !== change.before.selectionEnd) return { active: false }
+    if (change.after.selectionStart !== change.after.selectionEnd) return { active: false }
+
+    const insertionStart = change.before.selectionStart
+    const insertedLength = change.after.text.length - change.before.text.length
+    if (insertedLength <= 0) return { active: false }
+    const inserted = change.after.text.slice(insertionStart, insertionStart + insertedLength)
+    if (!isCompletionDelimiter(inserted)) return { active: false }
+    if (change.after.selectionStart !== insertionStart + inserted.length) return { active: false }
+    const expectedText = change.before.text.slice(0, insertionStart)
+      + inserted
+      + change.before.text.slice(insertionStart)
+    if (change.after.text !== expectedText) return { active: false }
+
+    const active = this.snippets.getActiveQuery(change.before.text, insertionStart)
+    if (!active) return { active: false }
+    const suggestions = this.snippets.getSuggestions(change.before.text, insertionStart)
+    if (suggestions.length !== 1) return { active: true }
+    const suggestion = suggestions[0]
+    this.recordSuggestionUsage(change.contextId, change.before, suggestion)
+    return {
+      active: true,
+      mutation: {
+        start: suggestion.start,
+        end: suggestion.end,
+        replacement: suggestion.replacement,
+        cursor: suggestion.start + suggestion.replacement.length + inserted.length,
+      },
+    }
+  }
+
+  private recordSuggestionUsage(contextId: string, snapshot: TextInputSnapshot, suggestion: TextSuggestion): void {
+    const history = wordsBefore(snapshot.text, suggestion.start, 4)
+    const insertedWords = wordsBefore(suggestion.replacement, suggestion.replacement.length, 20)
+    if (insertedWords.length > 0) this.learning.recordSequence(insertedWords, contextId, history)
   }
 
   private async recordRejection(correction: AppliedCorrection): Promise<void> {

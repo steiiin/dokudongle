@@ -190,6 +190,43 @@ describe('DodoInputTextArea native textarea', () => {
     expect(textarea.element.selectionStart).toBe('Ziel Uniklinik Dresden'.length)
   })
 
+  test('automatically applies a unique @ location when a delimiter is typed', async () => {
+    const wrapper = mountTextarea(new EnhanceableText('Ziel '), document.body)
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    textarea.element.setSelectionRange(5, 5)
+    await textarea.trigger('focus')
+
+    textarea.element.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data: '@radebe',
+      inputType: 'insertText',
+    }))
+    await textarea.setValue('Ziel @radebe')
+    await flushPromises()
+
+    textarea.element.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data: ' ',
+      inputType: 'insertText',
+    }))
+    textarea.element.value = 'Ziel @radebe '
+    textarea.element.setSelectionRange(13, 13)
+    textarea.element.dispatchEvent(new InputEvent('input', {
+      bubbles: true,
+      data: ' ',
+      inputType: 'insertText',
+    }))
+
+    await vi.waitFor(() => {
+      expect(textarea.element.value).toBe('Ziel KH Radebeul ')
+      expect(textarea.element.selectionStart).toBe('Ziel KH Radebeul '.length)
+    })
+    wrapper.unmount()
+  })
+
   test('corrects on punctuation in the middle without moving the caret to the end', async () => {
     const wrapper = mountTextarea(new EnhanceableText('Tachykardje Rest'), document.body)
     const textarea = wrapper.get<HTMLTextAreaElement>('textarea')

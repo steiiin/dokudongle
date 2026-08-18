@@ -236,6 +236,58 @@ describe('snippets and usage learning', () => {
     expect(filtered[0]).toMatchObject({ start: 5, end: 9, replacement: 'Uniklinik Dresden' })
   })
 
+  test('automatically applies a unique @ location when space is inserted', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const update = await service.processInput(change(
+      'snippet-space',
+      'Ziel @radebe',
+      'Ziel @radebe ',
+    ))
+
+    expect(update.mutation).toMatchObject({
+      start: 5,
+      end: 12,
+      replacement: 'KH Radebeul',
+      cursor: 'Ziel KH Radebeul '.length,
+    })
+    expect(applyMutation('Ziel @radebe ', update.mutation!)).toBe('Ziel KH Radebeul ')
+  })
+
+  test('preserves punctuation, suffix, and caret when completing a unique @ location in the middle', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const update = await service.processInput({
+      sessionId: 'snippet-punctuation',
+      contextId: 'situation',
+      before: snapshot('Ziel @radebe danach', 12),
+      after: snapshot('Ziel @radebe, danach', 13),
+      inputType: 'insertText',
+      data: ',',
+    })
+
+    expect(update.mutation).toMatchObject({
+      start: 5,
+      end: 12,
+      replacement: 'KH Radebeul',
+      cursor: 'Ziel KH Radebeul,'.length,
+    })
+    expect(applyMutation('Ziel @radebe, danach', update.mutation!)).toBe('Ziel KH Radebeul, danach')
+  })
+
+  test('does not automatically apply ambiguous or unmatched @ location queries', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    for (const [sessionId, query] of [
+      ['snippet-ambiguous', '@rad'],
+      ['snippet-unmatched', '@zzzz'],
+    ]) {
+      const update = await service.processInput(change(
+        sessionId,
+        `Ziel ${query}`,
+        `Ziel ${query} `,
+      ))
+      expect(update.mutation).toBeUndefined()
+    }
+  })
+
   test('combines global and field bigram and phrase statistics after two uses', () => {
     const repository = new MemoryRepository()
     const learning = new TextLearningService(repository)
