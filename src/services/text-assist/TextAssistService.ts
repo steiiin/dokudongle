@@ -14,7 +14,7 @@ import type {
   TextSuggestion,
   UserDictionaryEntry,
 } from './types'
-import { DELIMITERS, normalizeKey, wordImmediatelyBefore, wordsBefore } from './text'
+import { isCompletionDelimiter, normalizeKey, wordImmediatelyBefore, wordsBefore } from './text'
 
 export class TextAssistService {
   readonly repository: TextAssistStateRepositoryLike
@@ -133,9 +133,9 @@ export class TextAssistService {
     if (!change.inputType.startsWith('insert')) return
     const cursor = change.after.selectionStart
     if (cursor !== change.after.selectionEnd || cursor === 0) return
-    const delimiter = change.after.text[cursor - 1]
-    if (!DELIMITERS.has(delimiter)) return
-    const word = wordImmediatelyBefore(change.after.text, cursor - 1)
+    const delimiter = Array.from(change.after.text.slice(0, cursor)).at(-1) ?? ''
+    if (!isCompletionDelimiter(delimiter)) return
+    const word = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
     if (!word) return
     this.learning.recordCompletedWord(word.word, change.contextId, wordsBefore(change.after.text, word.start, 4))
   }

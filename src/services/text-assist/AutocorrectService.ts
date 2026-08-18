@@ -1,7 +1,8 @@
-import type { NSpell } from 'nspell'
 import medicalWords from '@/assets/dictionaries/medical-de.json'
 import type { CorrectionPolicy } from './CorrectionPolicy'
 import { ConservativeCorrectionPolicy } from './CorrectionPolicy'
+import type { GermanSpellChecker } from './GermanSpellChecker'
+import { DefaultGermanSpellChecker } from './GermanSpellChecker'
 import type {
   AppliedCorrection,
   CorrectionCandidate,
@@ -10,7 +11,7 @@ import type {
   TextMutation,
 } from './types'
 import type { TextAssistStateRepositoryLike } from './persistence'
-import { DELIMITERS, normalizeKey, wordImmediatelyBefore } from './text'
+import { isCompletionDelimiter, normalizeKey, wordImmediatelyBefore } from './text'
 
 const preserveInitialCapitalization = (original: string, replacement: string): string => {
   if (!/^\p{Lu}/u.test(original) || !/^\p{Ll}/u.test(replacement)) return replacement
@@ -18,7 +19,6 @@ const preserveInitialCapitalization = (original: string, replacement: string): s
 }
 
 export class AutocorrectService {
-  private spell?: NSpell
   private initialization?: Promise<void>
   private readonly lastCorrections = new Map<string, AppliedCorrection>()
   private readonly medicalKeys = new Set(medicalWords.map(normalizeKey))
@@ -26,18 +26,17 @@ export class AutocorrectService {
   constructor(
     private readonly repository: TextAssistStateRepositoryLike,
     private readonly policy: CorrectionPolicy = new ConservativeCorrectionPolicy(),
+    private readonly spell: GermanSpellChecker = new DefaultGermanSpellChecker(),
   ) {}
 
   initialize(): Promise<void> {
     if (!this.initialization) {
-      this.initialization = Promise.all([
-        import('nspell'),
-        import('virtual:dictionary-de'),
-        this.repository.initialize(),
-      ]).then(([nspellModule, dictionaryModule, state]) => {
-        this.spell = nspellModule.default(dictionaryModule.default)
-        for (const word of medicalWords) this.spell.add(word)
-        for (const entry of state.userDictionary) this.spell.add(entry.word)
+      this.initialization = this.repository.initialize().then(state => {
+        const additionalWords = [
+          ...medicalWords,
+          ...state.userDictionary.map(entry => entry.word),
+        ]
+        return this.spell.initialize(additionalWords)
       })
     }
     return this.initialization
@@ -53,13 +52,14 @@ export class AutocorrectService {
 
   async isCorrect(word: string): Promise<boolean> {
     await this.initialize()
-    return this.spell!.correct(word)
+    return this.spell.correct(word)
   }
 
   async getSpellingCandidates(word: string, limit = 5): Promise<CorrectionCandidate[]> {
     await this.initialize()
-    if (!word || this.spell!.correct(word)) return []
-    return this.spell!.suggest(word).slice(0, limit).map(replacement => ({
+    if (!word || await this.spell.correct(word)) return []
+    const suggestions = await this.spell.suggest(word)
+    return suggestions.slice(0, limit).map(replacement => ({
       original: word,
       replacement: preserveInitialCapitalization(word, replacement),
       confidence: 1 - Math.min(1, Math.max(0, Math.abs(word.length - replacement.length)) / Math.max(1, word.length)),
@@ -68,13 +68,16 @@ export class AutocorrectService {
 
   async addUserWord(word: string): Promise<void> {
     await this.initialize()
-    this.spell!.add(word)
+    await this.spell.addWord(word)
   }
 
   async rebuildUserWords(): Promise<void> {
-    this.initialization = undefined
-    this.spell = undefined
     await this.initialize()
+    const state = this.repository.getState()
+    await this.spell.rebuild([
+      ...medicalWords,
+      ...state.userDictionary.map(entry => entry.word),
+    ])
   }
 
   async correctAfterDelimiter(change: TextInputChange): Promise<{ mutation: TextMutation; correction: AppliedCorrection } | null> {
@@ -85,12 +88,13 @@ export class AutocorrectService {
 
     const cursor = change.after.selectionStart
     if (cursor !== change.after.selectionEnd || cursor === 0) return null
-    const delimiter = change.after.text[cursor - 1]
-    if (!DELIMITERS.has(delimiter)) return null
+    const delimiter = Array.from(change.after.text.slice(0, cursor)).at(-1) ?? ''
+    if (!isCompletionDelimiter(delimiter)) return null
 
-    const range = wordImmediatelyBefore(change.after.text, cursor - 1)
-    if (!range || this.spell!.correct(range.word)) return null
-    const candidate = this.policy.choose(range.word, this.spell!.suggest(range.word), this.medicalKeys)
+    const range = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
+    if (!range || await this.spell.correct(range.word)) return null
+    const suggestions = await this.spell.suggest(range.word)
+    const candidate = this.policy.choose(range.word, suggestions, this.medicalKeys)
     if (!candidate) return null
 
     const replacement = preserveInitialCapitalization(range.word, candidate.replacement)

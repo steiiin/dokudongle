@@ -8,6 +8,13 @@ export interface CorrectionPolicy {
 export class ConservativeCorrectionPolicy implements CorrectionPolicy {
   choose(original: string, suggestions: string[], preferredWords: ReadonlySet<string> = new Set()): CorrectionCandidate | null {
     const normalizedOriginal = normalizeKey(original)
+    const caseOnly = [...new Set(suggestions.filter(candidate =>
+      candidate !== original && normalizeKey(candidate) === normalizedOriginal))]
+    if (caseOnly.length === 1) {
+      return { original, replacement: caseOnly[0], confidence: 1 }
+    }
+    if (caseOnly.length > 1) return null
+
     const ranked = suggestions
       .filter(candidate => normalizeKey(candidate) !== normalizedOriginal)
       .map(replacement => ({

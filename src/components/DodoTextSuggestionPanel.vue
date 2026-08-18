@@ -1,5 +1,5 @@
 <template>
-  <div v-if="suggestions.length" class="dd-suggestion-panel" role="listbox" aria-label="Textvorschläge">
+  <div v-if="true" class="dd-suggestion-panel" role="listbox" aria-label="Textvorschläge">
     <button
       v-for="suggestion in suggestions"
       :key="suggestion.id"
@@ -51,6 +51,7 @@ const selectFromClick = (suggestion: TextSuggestion) => {
   border-top: 1px solid var(--ion-color-step-200, #333);
   background: var(--ion-toolbar-background, var(--ion-background-color));
   scrollbar-width: none;
+  justify-content: center;
 }
 
 .dd-suggestion-panel::-webkit-scrollbar {

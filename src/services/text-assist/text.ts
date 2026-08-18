@@ -1,7 +1,10 @@
 const WORD_PATTERN = /[\p{L}\p{M}]+(?:[-'’][\p{L}\p{M}]+)*/gu
 const SINGLE_WORD_PATTERN = /^[\p{L}\p{M}]+(?:[-'’][\p{L}\p{M}]+)*$/u
+const COMPLETION_DELIMITER_PATTERN = /^(?:\s|\p{P})$/u
+const WORD_JOINERS = new Set(['-', "'", '’'])
 
-export const DELIMITERS = new Set([' ', '.', ',', ';', ':', '!', '?', '\n'])
+export const isCompletionDelimiter = (value: string): boolean =>
+  value.length > 0 && !WORD_JOINERS.has(value) && COMPLETION_DELIMITER_PATTERN.test(value)
 
 export const normalizeKey = (value: string): string => value
   .normalize('NFC')
@@ -31,6 +34,21 @@ export const wordAtCursor = (text: string, cursor: number): WordRange | null => 
   const prefix = text.slice(0, cursor)
   const range = wordImmediatelyBefore(prefix, prefix.length)
   return range
+}
+
+export const wordAroundCursor = (text: string, cursor: number): WordRange | null => {
+  const boundedCursor = Math.max(0, Math.min(cursor, text.length))
+  WORD_PATTERN.lastIndex = 0
+  let match: RegExpExecArray | null
+  while ((match = WORD_PATTERN.exec(text)) !== null) {
+    const start = match.index
+    const end = start + match[0].length
+    if (start <= boundedCursor && boundedCursor <= end) {
+      return { word: match[0], start, end }
+    }
+    if (start > boundedCursor) break
+  }
+  return null
 }
 
 export const wordsBefore = (text: string, cursor: number, limit = 5): string[] => {

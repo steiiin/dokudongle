@@ -14,7 +14,8 @@ vi.mock('@/plugins/input-suggestions', () => ({
   setInputSuggestionsDisabled: vi.fn().mockResolvedValue(undefined),
 }))
 
-const mountTextarea = (modelValue = new EnhanceableText('')) => shallowMount(DodoInputTextArea, {
+const mountTextarea = (modelValue = new EnhanceableText(''), attachTo?: HTMLElement) => shallowMount(DodoInputTextArea, {
+  ...(attachTo ? { attachTo } : {}),
   props: {
     modelValue,
     title: 'Situation',
@@ -79,6 +80,52 @@ describe('DodoInputTextArea native textarea', () => {
     expect(textarea.element.style.height).toBe('96px')
   })
 
+  test('underlines the complete active word without exposing the mirror to assistive technology', async () => {
+    const wrapper = mountTextarea()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    await textarea.trigger('focus')
+    await textarea.setValue('Erste\nNot-Arzt Ende')
+    await flushPromises()
+
+    textarea.element.setSelectionRange(10, 10)
+    await textarea.trigger('select')
+    await nextTick()
+
+    const mirror = wrapper.get('.dd-modal-textarea-mirror')
+    expect(mirror.attributes('aria-hidden')).toBe('true')
+    expect(mirror.get('.dd-active-word').text()).toBe('Not-Arzt')
+  })
+
+  test('hides the active-word underline for selections, composition, and completed words', async () => {
+    const wrapper = mountTextarea()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    await textarea.trigger('focus')
+    await textarea.setValue('Alpha Beta')
+    await flushPromises()
+
+    textarea.element.setSelectionRange(6, 10)
+    await textarea.trigger('select')
+    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+
+    textarea.element.setSelectionRange(10, 10)
+    await textarea.trigger('select')
+    expect(wrapper.get('.dd-active-word').text()).toBe('Beta')
+
+    await textarea.trigger('compositionstart')
+    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+
+    await textarea.trigger('compositionend', { data: 'Beta' })
+    await flushPromises()
+    await textarea.setValue('Alpha ')
+    await flushPromises()
+    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+
+    await textarea.trigger('blur')
+    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+  })
+
   test('suppresses suggestions only for the textarea focus lifecycle', async () => {
     const wrapper = mountTextarea()
     const textarea = wrapper.get('textarea')
@@ -127,20 +174,48 @@ describe('DodoInputTextArea native textarea', () => {
     textarea.element.dispatchEvent(new InputEvent('beforeinput', {
       bubbles: true,
       cancelable: true,
-      data: '@',
+      data: '@uni',
       inputType: 'insertText',
     }))
-    await textarea.setValue('Ziel @')
+    await textarea.setValue('Ziel @uni')
     await flushPromises()
 
     const panel = wrapper.getComponent(DodoTextSuggestionPanel)
-    await vi.waitFor(() => expect(panel.props('suggestions')).toHaveLength(4))
-    const university = panel.props('suggestions').find(suggestion => suggestion.label === 'Universitätsklinikum Dresden')!
+    await vi.waitFor(() => expect(panel.props('suggestions')).toHaveLength(1))
+    const university = panel.props('suggestions').find(suggestion => suggestion.label === 'Uniklinik Dresden')!
     panel.vm.$emit('select', university)
     await flushPromises()
 
-    expect(textarea.element.value).toBe('Ziel Universitätsklinikum Dresden')
-    expect(textarea.element.selectionStart).toBe('Ziel Universitätsklinikum Dresden'.length)
+    expect(textarea.element.value).toBe('Ziel Uniklinik Dresden')
+    expect(textarea.element.selectionStart).toBe('Ziel Uniklinik Dresden'.length)
+  })
+
+  test('corrects on punctuation in the middle without moving the caret to the end', async () => {
+    const wrapper = mountTextarea(new EnhanceableText('Tachykardje Rest'), document.body)
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    textarea.element.setSelectionRange(11, 11)
+    await textarea.trigger('focus')
+
+    textarea.element.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      data: ',',
+      inputType: 'insertText',
+    }))
+    textarea.element.value = 'Tachykardje, Rest'
+    textarea.element.setSelectionRange(12, 12)
+    textarea.element.dispatchEvent(new InputEvent('input', {
+      bubbles: true,
+      data: ',',
+      inputType: 'insertText',
+    }))
+
+    await vi.waitFor(() => {
+      expect(textarea.element.value).toBe('Tachykardie, Rest')
+      expect(textarea.element.selectionStart).toBe(12)
+    })
+    wrapper.unmount()
   })
 
   test('uses beforeinput Backspace to undo the immediately preceding correction', async () => {

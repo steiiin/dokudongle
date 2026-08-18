@@ -41,27 +41,35 @@
           <slot />
         </div>
         <div class="dd-modal-data">
-          <textarea
-            ref="inputTextarea"
-            v-model="draft"
-            class="dd-modal-textarea"
-            :placeholder="placeholder"
-            :disabled="modelValue.isEnhancing"
-            rows="1"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            :spellcheck="false"
-            @focus="handleFocus"
-            @blur="handleBlur"
-            @input="handleInput"
-            @beforeinput="handleBeforeInput"
-            @compositionstart="handleCompositionStart"
-            @compositionend="handleCompositionEnd"
-            @click="handleSelectionInteraction"
-            @select="handleSelectionInteraction"
-            @keyup="handleSelectionInteraction"
-          />
+          <div class="dd-modal-textarea-wrap">
+            <div
+              v-show="activeWordRange"
+              class="dd-modal-textarea-mirror"
+              aria-hidden="true"
+            ><span>{{ draft.slice(0, activeWordRange?.start ?? 0) }}</span><span class="dd-active-word">{{ activeWordRange?.word ?? '' }}</span><span>{{ draft.slice(activeWordRange?.end ?? 0) }}</span></div>
+            <textarea
+              ref="inputTextarea"
+              v-model="draft"
+              class="dd-modal-textarea"
+              :placeholder="placeholder"
+              :disabled="modelValue.isEnhancing"
+              :readonly="!isTextAssistReady"
+              rows="1"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              :spellcheck="false"
+              @focus="handleFocus"
+              @blur="handleBlur"
+              @input="handleInput"
+              @beforeinput="handleBeforeInput"
+              @compositionstart="handleCompositionStart"
+              @compositionend="handleCompositionEnd"
+              @click="handleSelectionInteraction"
+              @select="handleSelectionInteraction"
+              @keyup="handleSelectionInteraction"
+            />
+          </div>
 
         </div>
       </IonContent>
@@ -130,6 +138,7 @@ import { DATA_Quickies, QuickieTemplate, type Quickie } from '@/data/quickies'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
+import { isCompletionDelimiter, wordAroundCursor } from '@/services/text-assist/text'
 
 // ############################################################################
 
@@ -153,6 +162,17 @@ const emit = defineEmits<{
 const isModalOpen = ref(false)
 const draft = ref('')
 const isEditing = ref(false)
+const isTextAssistReady = ref(false)
+const isTextAssistAvailable = ref(true)
+
+const textAssistInitialization = textAssistService.initialize()
+  .catch((error) => {
+    isTextAssistAvailable.value = false
+    console.warn('Could not initialize text assistance', error)
+  })
+  .finally(() => {
+    isTextAssistReady.value = true
+  })
 
 // ############################################################################
 
@@ -170,6 +190,7 @@ const pendingBeforeInput = ref<TextInputSnapshot | null>(null)
 const compositionBefore = ref<TextInputSnapshot | null>(null)
 const isApplyingAssistMutation = ref(false)
 let assistRevision = 0
+let assistInputsInFlight = 0
 const assistSessionId = `dodo-textarea-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 const isDictionaryOpen = ref(false)
@@ -192,6 +213,12 @@ const triggerColor = computed(() => {
 })
 const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'solid')
 const isEnhanceDisabled = computed(() => props.modelValue.isEnhancing || draft.value.trim().length === 0)
+const activeWordRange = computed(() => {
+  if (!isEditing.value || isComposing.value || lastCursorStart.value !== lastCursorEnd.value) return null
+  const previousCharacter = Array.from(draft.value.slice(0, lastCursorStart.value)).at(-1) ?? ''
+  if (isCompletionDelimiter(previousCharacter)) return null
+  return wordAroundCursor(draft.value, lastCursorStart.value)
+})
 
 const resolvedQuickies = computed(() => {
   if (!props.quickieKeys || props.quickieKeys.length === 0) { return [] }
@@ -213,10 +240,10 @@ watch(
   }
 )
 
-const openModal = () => {
+const openModal = async () => {
   draft.value = props.modelValue.value
   isModalOpen.value = true
-  void textAssistService.initialize()
+  await textAssistInitialization
   resizeTextarea()
   focusTextarea()
 }
@@ -303,7 +330,7 @@ const applyAssistMutation = async (mutation: TextMutation) => {
 }
 
 const refreshTextSuggestions = async () => {
-  if (!isEditing.value || isComposing.value || isDictionaryOpen.value) {
+  if (!isTextAssistAvailable.value || !isEditing.value || isComposing.value || isDictionaryOpen.value) {
     textSuggestions.value = []
     return
   }
@@ -318,19 +345,25 @@ const refreshTextSuggestions = async () => {
 
 const processAssistInput = async (before: TextInputSnapshot, event: InputEvent, after = snapshotTextarea()) => {
   const revision = ++assistRevision
-  await textAssistService.initialize()
-  if (revision !== assistRevision) return
-  const update = await textAssistService.processInput({
-    sessionId: assistSessionId,
-    contextId: props.assistContextId,
-    before,
-    after,
-    inputType: event.inputType || 'insertText',
-    data: event.data,
-  })
-  if (revision !== assistRevision) return
-  if (update.mutation) await applyAssistMutation(update.mutation)
-  if (revision === assistRevision) textSuggestions.value = update.suggestions
+  assistInputsInFlight += 1
+  try {
+    await textAssistInitialization
+    if (!isTextAssistAvailable.value || revision !== assistRevision) return
+    const update = await textAssistService.processInput({
+      sessionId: assistSessionId,
+      contextId: props.assistContextId,
+      before,
+      after,
+      inputType: event.inputType || 'insertText',
+      data: event.data,
+    })
+    if (revision !== assistRevision) return
+    if (update.mutation) await applyAssistMutation(update.mutation)
+    if (revision === assistRevision) textSuggestions.value = update.suggestions
+  }
+  finally {
+    assistInputsInFlight -= 1
+  }
 }
 
 // ############################################################################
@@ -385,6 +418,7 @@ const handleBeforeInput = (event: InputEvent) => {
 
 const handleInput = (event: Event) => {
   resizeTextarea()
+  void rememberCursorPosition()
 
   if (!isEditing.value) {
     return
@@ -407,13 +441,14 @@ const handleInput = (event: Event) => {
 const handleFocus = async () => {
   setSuggestionSuppression(true)
   isEditing.value = true
+  const revision = assistRevision
 
   const updated = cloneModelValue()
   updated.beginEdit()
   emitUpdated(updated)
   rememberCursorPosition()
-  await textAssistService.initialize()
-  await refreshTextSuggestions()
+  await textAssistInitialization
+  if (revision === assistRevision) await refreshTextSuggestions()
 }
 
 const handleBlur = () => {
@@ -454,9 +489,10 @@ const handleCompositionEnd = async (event: CompositionEvent) => {
 const handleSelectionInteraction = (event: Event) => {
   if (isApplyingAssistMutation.value || isComposing.value) return
   if (event instanceof KeyboardEvent && !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) return
+  void rememberCursorPosition()
+  if (assistInputsInFlight > 0) return
   const snapshot = snapshotTextarea()
   textAssistService.invalidateSession(assistSessionId, snapshot)
-  void rememberCursorPosition()
   void refreshTextSuggestions()
 }
 
@@ -742,6 +778,11 @@ defineExpose({
   gap: 0.75rem;
 }
 
+.dd-modal-textarea-wrap {
+  position: relative;
+  width: 100%;
+}
+
 .dd-modal-toolbar {
   margin-inline: -16px;
   width: calc(100% + 2*16px);
@@ -749,9 +790,9 @@ defineExpose({
   margin-top: 2px;
 }
 
-.dd-modal-textarea {
+.dd-modal-textarea,
+.dd-modal-textarea-mirror {
   display: block;
-  position: relative;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
@@ -779,8 +820,32 @@ defineExpose({
   word-break: break-word;
   resize: none;
   overflow: hidden;
+}
+
+.dd-modal-textarea {
+  position: relative;
+  z-index: 1;
   appearance: none;
   -webkit-appearance: none;
+}
+
+.dd-modal-textarea-mirror {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  height: 100%;
+  border-color: transparent;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+
+.dd-modal-textarea-mirror .dd-active-word {
+  color: transparent;
+  text-decoration-line: underline;
+  text-decoration-color: var(--ion-color-primary-tint, var(--ion-color-primary));
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .dd-modal-textarea:focus {
