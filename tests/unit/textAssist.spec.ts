@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test, vi } from 'vitest'
 import { ConservativeCorrectionPolicy } from '@/services/text-assist/CorrectionPolicy'
 import { SnippetService } from '@/services/text-assist/SnippetService'
+import { ShortcutReplacementService } from '@/services/text-assist/ShortcutReplacementService'
 import { TextAssistService } from '@/services/text-assist/TextAssistService'
 import { TextLearningService } from '@/services/text-assist/TextLearningService'
 import { emptyTextAssistState, type TextAssistStateRepositoryLike } from '@/services/text-assist/persistence'
@@ -87,6 +88,42 @@ describe('typing word boundaries', () => {
   })
 })
 
+describe('shortcut replacements', () => {
+  test('replaces the configured shortcut after space or punctuation', () => {
+    const shortcuts = new ShortcutReplacementService()
+    const afterSpace = shortcuts.replaceAfterDelimiter(change('shortcut-space', 'lt', 'lt '))
+    expect(afterSpace).toEqual({ start: 0, end: 2, replacement: 'laut', cursor: 5 })
+    expect(applyMutation('lt ', afterSpace!)).toBe('laut ')
+
+    const afterPunctuation = shortcuts.replaceAfterDelimiter({
+      sessionId: 'shortcut-punctuation',
+      contextId: 'situation',
+      before: snapshot('Ziel lt danach', 7),
+      after: snapshot('Ziel lt, danach', 8),
+      inputType: 'insertText',
+      data: ',',
+    })
+    expect(afterPunctuation).toEqual({ start: 5, end: 7, replacement: 'laut', cursor: 10 })
+    expect(applyMutation('Ziel lt, danach', afterPunctuation!)).toBe('Ziel laut, danach')
+  })
+
+  test('matches complete shortcuts with exact casing only', () => {
+    const shortcuts = new ShortcutReplacementService()
+    for (const typed of ['Lt', 'LT', 'halt', 'unbekannt']) {
+      expect(shortcuts.replaceAfterDelimiter(change(`exact-${typed}`, typed, `${typed} `))).toBeNull()
+    }
+  })
+
+  test('does not replace selections or text composed by an IME', () => {
+    const shortcuts = new ShortcutReplacementService()
+    expect(shortcuts.replaceAfterDelimiter({
+      ...change('shortcut-selection', 'lt', 'lt '),
+      before: { ...snapshot('lt'), selectionStart: 0, selectionEnd: 2 },
+    })).toBeNull()
+    expect(shortcuts.replaceAfterDelimiter(change('shortcut-ime', 'lt', 'lt ', 3, true))).toBeNull()
+  })
+})
+
 describe('text assist integration', () => {
   const repository = new MemoryRepository()
   const service = new TextAssistService(repository)
@@ -105,6 +142,12 @@ describe('text assist integration', () => {
 
     const valid = await service.processInput(change('valid', 'Tachykardie', 'Tachykardie '))
     expect(valid.mutation).toBeUndefined()
+  })
+
+  test('applies configured shortcuts before spelling autocorrection', async () => {
+    const update = await service.processInput(change('shortcut-precedence', 'lt', 'lt '))
+    expect(update.mutation).toEqual({ start: 0, end: 2, replacement: 'laut', cursor: 5 })
+    expect(applyMutation('lt ', update.mutation!)).toBe('laut ')
   })
 
   test('capitalizes unambiguous German nouns and compounds after a delimiter', async () => {
@@ -165,6 +208,30 @@ describe('text assist integration', () => {
     expect(undo).toMatchObject({ replacement: 'Tachykardje', cursor: 11 })
     expect(applyMutation(corrected, undo!)).toBe('Tachykardje')
     expect(service.handleBackspace('undo', snapshot('Tachykardje'))).toBeNull()
+  })
+
+  test('immediate Backspace restores a shortcut without recording a spelling rejection', async () => {
+    const shortcutRepository = new MemoryRepository()
+    const shortcutService = new TextAssistService(shortcutRepository)
+    const update = await shortcutService.processInput(change('shortcut-undo', 'lt', 'lt,'))
+    const expanded = applyMutation('lt,', update.mutation!)
+
+    expect(expanded).toBe('laut,')
+    const undo = shortcutService.handleBackspace('shortcut-undo', snapshot(expanded))
+    expect(undo).toEqual({ start: 0, end: 5, replacement: 'lt', cursor: 2 })
+    expect(applyMutation(expanded, undo!)).toBe('lt')
+    expect(shortcutService.handleBackspace('shortcut-undo', snapshot('lt'))).toBeNull()
+    expect(shortcutRepository.state.rejectedCorrections).toEqual([])
+    expect(shortcutRepository.state.userDictionary).toEqual([])
+  })
+
+  test('cursor activity invalidates immediate shortcut undo', async () => {
+    const shortcutService = new TextAssistService(new MemoryRepository())
+    const update = await shortcutService.processInput(change('shortcut-moved', 'lt', 'lt '))
+    const expanded = applyMutation('lt ', update.mutation!)
+
+    shortcutService.invalidateSession('shortcut-moved', snapshot(expanded, expanded.length - 1))
+    expect(shortcutService.handleBackspace('shortcut-moved', snapshot(expanded))).toBeNull()
   })
 
   test('cursor or selection activity invalidates immediate correction undo', async () => {

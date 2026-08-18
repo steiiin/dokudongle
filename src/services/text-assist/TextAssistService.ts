@@ -1,5 +1,6 @@
 import { AutocorrectService } from './AutocorrectService'
 import { SnippetService } from './SnippetService'
+import { ShortcutReplacementService } from './ShortcutReplacementService'
 import { SuggestionService } from './SuggestionService'
 import { TextLearningService } from './TextLearningService'
 import { TextAssistStateRepository, type TextAssistStateRepositoryLike } from './persistence'
@@ -21,6 +22,7 @@ export class TextAssistService {
   readonly autocorrect: AutocorrectService
   readonly userDictionary: UserDictionaryService
   readonly snippets: SnippetService
+  readonly shortcutReplacements: ShortcutReplacementService
   readonly learning: TextLearningService
   readonly suggestions: SuggestionService
   private initialization?: Promise<void>
@@ -30,6 +32,7 @@ export class TextAssistService {
     this.autocorrect = new AutocorrectService(repository)
     this.userDictionary = new UserDictionaryService(repository, this.autocorrect)
     this.snippets = new SnippetService()
+    this.shortcutReplacements = new ShortcutReplacementService()
     this.learning = new TextLearningService(repository)
     this.suggestions = new SuggestionService(this.autocorrect, this.snippets, this.learning)
   }
@@ -49,21 +52,29 @@ export class TextAssistService {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return { suggestions: [] }
 
-    this.acceptPendingCorrection(change.sessionId, change.before)
+    this.acceptPendingAutomaticChange(change.sessionId, change.before)
     const snippetCompletion = this.completeSnippetAfterDelimiter(change)
-    const corrected = snippetCompletion.active ? null : await this.autocorrect.correctAfterDelimiter(change)
+    const shortcutMutation = snippetCompletion.active
+      ? null
+      : this.shortcutReplacements.replaceAfterDelimiter(change)
+    const corrected = !snippetCompletion.active && !shortcutMutation
+      ? await this.autocorrect.correctAfterDelimiter(change)
+      : null
     let snapshot = change.after
     if (snippetCompletion.mutation) snapshot = this.snapshotAfterMutation(change.after, snippetCompletion.mutation)
+    else if (shortcutMutation) snapshot = this.snapshotAfterMutation(change.after, shortcutMutation)
     else if (corrected) snapshot = this.snapshotAfterMutation(change.after, corrected.mutation)
     else if (!snippetCompletion.active) this.learnCompletedInput(change)
 
     return {
-      mutation: snippetCompletion.mutation ?? corrected?.mutation,
+      mutation: snippetCompletion.mutation ?? shortcutMutation ?? corrected?.mutation,
       suggestions: await this.getSuggestions(change.sessionId, change.contextId, snapshot),
     }
   }
 
   handleBackspace(sessionId: string, snapshot: TextInputSnapshot): TextMutation | null {
+    const revertedShortcut = this.shortcutReplacements.tryUndo(sessionId, snapshot)
+    if (revertedShortcut) return revertedShortcut
     const undone = this.autocorrect.tryUndo(sessionId, snapshot)
     if (!undone) return null
     void this.recordRejection(undone.correction)
@@ -88,7 +99,7 @@ export class TextAssistService {
   }
 
   applySuggestion(sessionId: string, contextId: string, snapshot: TextInputSnapshot, suggestion: TextSuggestion): TextMutation {
-    this.acceptPendingCorrection(sessionId, snapshot)
+    this.acceptPendingAutomaticChange(sessionId, snapshot)
     this.recordSuggestionUsage(contextId, snapshot, suggestion)
     return {
       start: suggestion.start,
@@ -99,6 +110,7 @@ export class TextAssistService {
   }
 
   invalidateSession(sessionId: string, snapshot?: TextInputSnapshot): void {
+    this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction && snapshot) this.learnAcceptedCorrection(correction, snapshot.text)
   }
@@ -119,7 +131,8 @@ export class TextAssistService {
     return this.repository.saveNow()
   }
 
-  private acceptPendingCorrection(sessionId: string, snapshot: TextInputSnapshot): void {
+  private acceptPendingAutomaticChange(sessionId: string, snapshot: TextInputSnapshot): void {
+    this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction) this.learnAcceptedCorrection(correction, snapshot.text)
   }
