@@ -10,13 +10,13 @@
     </IonHeader>
     <IonContent class="ion-padding">
       <form class="dd-dictionary-form" @submit.prevent="addWord">
-        <input
+        <IonInput
           v-model="newWord"
-          class="dd-dictionary-input"
           placeholder="Wort hinzufügen"
           autocomplete="off"
           autocapitalize="sentences"
           :disabled="busy"
+          fill="solid"
         />
         <IonButton type="submit" :disabled="busy || !newWord.trim()">Hinzufügen</IonButton>
       </form>
@@ -83,18 +83,6 @@ const addWord = () => {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-}
-
-.dd-dictionary-input {
-  flex: 1;
-  min-width: 0;
-  min-height: 44px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--ion-color-step-300, #555);
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
 }
 
 .dd-dictionary-error {

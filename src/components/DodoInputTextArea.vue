@@ -28,7 +28,7 @@
               Speichern
             </IonButton>
           </IonButtons>
-          <IonButtons slot="end">
+          <IonButtons slot="end" v-if="false">
             <IonButton color="success" :disabled="isEnhanceDisabled" @click="enhance">
               Korrigieren
             </IonButton>
