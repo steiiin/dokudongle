@@ -1,5 +1,5 @@
 <template>
-  <div v-if="true" class="dd-suggestion-panel" role="listbox" aria-label="Textvorschläge">
+  <div v-if="suggestions.length" class="dd-suggestion-panel" role="listbox" aria-label="Textvorschläge">
     <button
       v-for="suggestion in suggestions"
       :key="suggestion.id"
