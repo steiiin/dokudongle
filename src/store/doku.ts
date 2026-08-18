@@ -1,5 +1,6 @@
 import { BleClient } from '@capacitor-community/bluetooth-le'
 import { Capacitor } from '@capacitor/core'
+import { Device as CapacitorDevice } from '@capacitor/device'
 import { defineStore } from 'pinia'
 
 import { toRaw } from 'vue'
@@ -127,6 +128,35 @@ function resetProtocolState(): Protocol {
 
 const AUTO_RESET_THRESHOLD_MS = 30 * 60 * 1000
 
+const LEGACY_ANDROID_MAX_SDK = 30
+
+function connectionErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error)
+  const normalizedMessage = message.toLowerCase()
+
+  if (normalizedMessage.includes('permission denied')) {
+    return 'Die Bluetooth-Berechtigung fehlt. Bitte erlaube DokuDongle in den Android-Einstellungen den Zugriff auf Geräte in der Nähe.'
+  }
+
+  if (normalizedMessage.includes('location services disabled')) {
+    return 'Bitte aktiviere die Android-Standortdienste und starte die Dongle-Suche anschließend erneut.'
+  }
+
+  if (normalizedMessage.includes('requestenable failed')) {
+    return 'Bluetooth wurde nicht aktiviert. Bitte aktiviere Bluetooth und starte die Suche erneut.'
+  }
+
+  if (normalizedMessage.includes('no device found')) {
+    return 'Kein DokuDongle gefunden. Prüfe, ob der Dongle eingeschaltet und in Reichweite ist.'
+  }
+
+  if (normalizedMessage.includes('ble is not supported') || normalizedMessage.includes('ble is not available')) {
+    return 'Bluetooth Low Energy ist auf diesem Gerät nicht verfügbar.'
+  }
+
+  return 'Die Dongle-Suche ist fehlgeschlagen. Prüfe Bluetooth und die App-Berechtigung „Geräte in der Nähe“ und versuche es erneut.'
+}
+
 // ############################################################################
 
 export const useDokuStore = defineStore('doku', {
@@ -137,6 +167,7 @@ export const useDokuStore = defineStore('doku', {
       device: null,
       isConnecting: false,
       isConnected: false,
+      lastError: null,
       isTransmitting: false,
       isRenaming: false,
       transmissionCurrent: 0, transmissionLength: 0,
@@ -153,9 +184,21 @@ export const useDokuStore = defineStore('doku', {
     // dongle
     async initDongle() {
 
+      if (Capacitor.getPlatform() === 'android') {
+        const deviceInfo = await CapacitorDevice.getInfo()
+
+        if ((deviceInfo.androidSDKVersion ?? Number.MAX_SAFE_INTEGER) <= LEGACY_ANDROID_MAX_SDK) {
+          const isLocationEnabled = await BleClient.isLocationEnabled()
+          if (!isLocationEnabled) {
+            await BleClient.openLocationSettings()
+            throw new Error('Location services disabled.')
+          }
+        }
+      }
+
       if (!this.initialized) {
 
-        await BleClient.initialize()
+        await BleClient.initialize({ androidNeverForLocation: true })
         BleClient.setDisplayStrings({
           scanning: 'Suche DokuDongle ...',
           cancel: 'Abbrechen',
@@ -166,34 +209,24 @@ export const useDokuStore = defineStore('doku', {
 
       }
 
-      // check Android permissions
-      if (Capacitor.getPlatform() === 'android')
-      {
-
-        // location permission
-        const isLocationEnabled = await BleClient.isLocationEnabled()
-        if (!isLocationEnabled) {
-          await BleClient.openLocationSettings()
-        }
-
-        // bluetooth enabled
+      if (Capacitor.getPlatform() === 'android') {
         const isBleEnabled = await BleClient.isEnabled()
         if (!isBleEnabled) {
           await BleClient.requestEnable()
         }
-
       }
 
     },
 
     async connectDongle() {
 
-      await this.initDongle()
-      await this.checkConnection()
-      if (this.isDongleConnected) { return }
-
       this.connection.isConnecting = true
+      this.connection.lastError = null
       try {
+
+        await this.initDongle()
+        await this.checkConnection()
+        if (this.isDongleConnected) { return }
 
         const device = await BleClient.requestDevice({
           services: [ ServiceUUID ],
@@ -211,6 +244,7 @@ export const useDokuStore = defineStore('doku', {
       }
       catch (e) {
         this.connection.isConnected = false
+        this.connection.lastError = connectionErrorMessage(e)
         console.error('could not connect to dongle')
         console.error(e)
       }

@@ -7,6 +7,7 @@ export interface DeviceConnection {
   device: (Device | null),
   isConnecting: boolean,
   isConnected: boolean,
+  lastError: string | null,
   isTransmitting: boolean,
   isRenaming: boolean,
   transmissionCurrent: number,

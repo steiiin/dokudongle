@@ -67,8 +67,8 @@ const stateText = computed(() => {
   else
   {
     return {
-      title: "Keine Verbindung",
-      description: "Es ist kein DokuDongle mit diesem Telefon verbunden.",
+      title: store.connection.lastError ? "Verbindung fehlgeschlagen" : "Keine Verbindung",
+      description: store.connection.lastError ?? "Es ist kein DokuDongle mit diesem Telefon verbunden.",
     } as StateText
   }
 
