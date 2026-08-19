@@ -1,4 +1,4 @@
-import { IonButton } from '@ionic/vue'
+import { IonButton, IonModal } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
@@ -73,6 +73,24 @@ describe('DodoInputTextArea native textarea', () => {
     expect(updated.value).toBe('Vorher')
   })
 
+  test('trims surrounding whitespace and blank lines when saving', async () => {
+    const wrapper = mountTextarea(new EnhanceableText('Vorher'))
+    wrapper.vm.openModal()
+    await nextTick()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+
+    await textarea.trigger('focus')
+    await wrapper.setProps({ modelValue: lastModelUpdate(wrapper) })
+    await textarea.setValue('\n  Erste Zeile  \nZweite Zeile\n\n')
+    await textarea.trigger('blur')
+    await wrapper.setProps({ modelValue: lastModelUpdate(wrapper) })
+
+    wrapper.getComponent(IonModal).vm.$emit('willDismiss')
+    await nextTick()
+
+    expect(lastModelUpdate(wrapper).value).toBe('Erste Zeile  \nZweite Zeile')
+  })
+
   test('auto-grows to its native scroll height', async () => {
     const wrapper = mountTextarea()
     const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
@@ -82,6 +100,38 @@ describe('DodoInputTextArea native textarea', () => {
     await nextTick()
 
     expect(textarea.element.style.height).toBe('96px')
+  })
+
+  test('remeasures its height whenever the modal is presented', async () => {
+    const wrapper = mountTextarea(new EnhanceableText('Erste Zeile\nZweite Zeile'))
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    let scrollHeight = 96
+    Object.defineProperty(textarea.element, 'scrollHeight', {
+      configurable: true,
+      get: () => scrollHeight,
+    })
+
+    wrapper.vm.openModal()
+    wrapper.getComponent(IonModal).vm.$emit('didPresent')
+    await flushPromises()
+    expect(textarea.element.style.height).toBe('96px')
+
+    wrapper.getComponent(IonModal).vm.$emit('willDismiss')
+    await nextTick()
+    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(false)
+    scrollHeight = 128
+
+    wrapper.vm.openModal()
+    await nextTick()
+    const reopenedTextarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    Object.defineProperty(reopenedTextarea.element, 'scrollHeight', {
+      configurable: true,
+      get: () => scrollHeight,
+    })
+    reopenedTextarea.element.style.height = '44px'
+    wrapper.getComponent(IonModal).vm.$emit('didPresent')
+    await flushPromises()
+    expect(reopenedTextarea.element.style.height).toBe('128px')
   })
 
   test('underlines the complete active word without exposing the mirror to assistive technology', async () => {

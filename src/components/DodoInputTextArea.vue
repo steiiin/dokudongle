@@ -17,7 +17,13 @@
       {{ title }} {{ triggerActionLabel }}
     </IonButton>
 
-    <IonModal :is-open="isModalOpen" class="dd-input-modal" :class="{ 'is-enhancing': modelValue.isEnhancing }" @will-dismiss="closeModal">
+    <IonModal
+      :is-open="isModalOpen"
+      class="dd-input-modal"
+      :class="{ 'is-enhancing': modelValue.isEnhancing }"
+      @did-present="handleModalDidPresent"
+      @will-dismiss="closeModal"
+    >
       <IonHeader>
         <IonToolbar>
           <IonTitle>{{ title }}</IonTitle>
@@ -244,16 +250,19 @@ watch(
   }
 )
 
-const openModal = async () => {
+const openModal = () => {
   draft.value = props.modelValue.value
   isModalOpen.value = true
+}
+
+const handleModalDidPresent = async () => {
+  await resizeTextarea()
   await textAssistInitialization
-  resizeTextarea()
   focusTextarea()
 }
 
 const closeModal = () => {
-  commitOpenEditIfNeeded()
+  saveDraft()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
   textSuggestions.value = []
   suggestionScope.clear(suggestionOwner)
@@ -523,6 +532,25 @@ const commitOpenEditIfNeeded = () => {
   }
 
   isEditing.value = false
+
+  const updated = cloneModelValue()
+  updated.setText(draft.value)
+  emitUpdated(updated)
+
+  draft.value = updated.value
+}
+
+const saveDraft = () => {
+  draft.value = draft.value.trim()
+
+  if (isEditing.value) {
+    commitOpenEditIfNeeded()
+    return
+  }
+
+  if (draft.value === props.modelValue.value) {
+    return
+  }
 
   const updated = cloneModelValue()
   updated.setText(draft.value)
