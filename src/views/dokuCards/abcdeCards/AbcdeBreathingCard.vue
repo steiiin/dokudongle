@@ -173,14 +173,14 @@ const ctx = computed(() => store.context)
 
 const hasPattern = computed(() => store.doku.xaBcde.mechanics.pattern != '')
 
-watch(() => store.doku.xaBcde.mechanics.pattern, (v) => {
+watch(() => store.doku.xaBcde.mechanics.pattern, () => {
   store.doku.xaBcde.mechanics.frequency = ''
   store.doku.xaBcde.mechanics.depth = ''
 })
 
 const hasAusculated = computed(() => store.doku.xaBcde.auscultation.assessed)
 
-watch(() => hasAusculated.value, (v) => {
+watch(() => hasAusculated.value, () => {
   store.doku.xaBcde.auscultation.value.wheezing = ''
   store.doku.xaBcde.auscultation.value.crackles = ''
   store.doku.xaBcde.auscultation.value.dimished = ''

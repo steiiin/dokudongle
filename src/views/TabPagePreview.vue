@@ -11,7 +11,7 @@
     </IonHeader>
 
     <IonContent :fullscreen="true">
-      <textarea readonly>{{ localPreview }}</textarea>
+      <textarea readonly :value="localPreview"></textarea>
     </IonContent>
 
   </IonPage>

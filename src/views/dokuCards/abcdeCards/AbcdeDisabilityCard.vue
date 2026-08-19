@@ -324,11 +324,11 @@ const setZopsYes = () => {
 
 // ############################################################################
 
-watch(() => ctx.value.isNonVerbal, (v) => {
+watch(() => ctx.value.isNonVerbal, () => {
   store.doku.xabcDe.headache = false
 })
 
-watch(() => store.doku.xabcDe.couldBeBaseline, (v) => {
+watch(() => store.doku.xabcDe.couldBeBaseline, () => {
   store.doku.xabcDe.psychBaseline = false
 })
 

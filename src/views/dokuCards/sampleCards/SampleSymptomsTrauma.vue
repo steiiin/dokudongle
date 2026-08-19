@@ -323,7 +323,7 @@ const ctx = computed(() => store.context)
 
 // ############################################################################
 
-const stepline = (expr: boolean) => expr ? 'full' : 'inset'
+const stepline = (expr: boolean): 'full' | 'inset' => expr ? 'full' : 'inset'
 
 // ############################################################################
 

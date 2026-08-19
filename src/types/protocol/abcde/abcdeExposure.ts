@@ -1,8 +1,7 @@
 import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { prefixAbdominalPain, prefixAbdominalPeristalsis, prefixDefecation } from "@/utils/prefix/exposure"
 import { ProtocolContext } from "@/types/protocol"
-import { AssessedValue, OptionalValue } from "../input"
+import { AssessedValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 function getCtx(): ProtocolContext { return useDokuStore().context }

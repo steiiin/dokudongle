@@ -141,8 +141,6 @@ import { computed, ref, watch } from 'vue'
 import { QuickieAbdominalPain, QuickieAbdominalPainRegion } from '@/data/quickies'
 import { concatDoku, prefix } from '@/utils/text'
 import { prefixSeit } from '@/utils/prefix/general';
-import { OptionalValue } from '@/types/protocol/input';
-import { textIf } from '@/utils/filter';
 
 // ############################################################################
 

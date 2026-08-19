@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { paperPlaneSharp } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
 

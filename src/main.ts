@@ -96,7 +96,7 @@ async function setupDokuPersistence() {
   await dokuStore.hydrateFromStorage()
   await maybePromptAutoProtocolReset()
 
-  dokuStore.$subscribe((_mutation) => {
+  dokuStore.$subscribe(() => {
     if (persistTimer) {
       clearTimeout(persistTimer)
     }

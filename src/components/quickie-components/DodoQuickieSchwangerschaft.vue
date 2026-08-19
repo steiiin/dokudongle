@@ -90,7 +90,7 @@ import DodoInputGravTerm from '../DodoInputGravTerm.vue'
 import DodoInputNumber from '../DodoInputNumber.vue'
 
 import { QuickieSchwangerschaft } from '@/data/quickies'
-import { AssessedValue, OptionalValue } from '@/types/protocol/input'
+import { AssessedValue } from '@/types/protocol/input'
 import { concatDoku, prefix } from '@/utils/text'
 import { IonItem } from '@ionic/vue'
 
@@ -112,9 +112,6 @@ type Presentation = QuickieSchwangerschaft['presentation']
 
 const cloneAssessed = <T>(source: AssessedValue<T>, cloneValue: (value: T) => T = value => value) =>
   new AssessedValue(source.assessed, cloneValue(source.value))
-
-const cloneOptional = <T>(source: OptionalValue<T>) =>
-  new OptionalValue(source.active, source.value)
 
 const localGravida = ref(cloneAssessed(props.quickie.gravida))
 const localPara = ref(cloneAssessed(props.quickie.para))

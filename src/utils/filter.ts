@@ -39,21 +39,21 @@ export function textDef(def: string, text: string): string {
 /**
  * return 'full' if true, otherwise 'none'
  */
-export function fullIf(expr: boolean): string {
+export function fullIf(expr: boolean): 'full' | 'none' {
   return expr ? 'full' : 'none'
 }
 
 /**
  * return 'inset' if true, otherwise 'none'
  */
-export function insetIf(expr: boolean): string {
+export function insetIf(expr: boolean): 'inset' | 'none' {
   return expr ? 'inset' : 'none'
 }
 
 /**
  * return 'none' if true, otherwise 'full'
  */
-export function noneIf(expr: boolean): string {
+export function noneIf(expr: boolean): 'none' | 'full' {
   return expr ? 'none' : 'full'
 }
 

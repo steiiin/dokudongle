@@ -183,16 +183,24 @@ describe('text assist integration', () => {
     await service.initialize()
   })
 
-  test('corrects German and medical typos only after a delimiter', async () => {
-    const pain = await service.processInput(change('pain', 'Patient Schmerzne', 'Patient Schmerzne '))
-    expect(pain.mutation).toMatchObject({ replacement: 'Schmerzen', cursor: 18 })
-    expect(applyMutation('Patient Schmerzne ', pain.mutation!)).toBe('Patient Schmerzen ')
+  test('corrects supported German and medical typos only after a delimiter', async () => {
+    const german = await service.processInput(change('german', 'Krankehaus', 'Krankehaus '))
+    expect(german.mutation).toMatchObject({ replacement: 'Krankenhaus', cursor: 12 })
+    expect(applyMutation('Krankehaus ', german.mutation!)).toBe('Krankenhaus ')
 
-    const tachy = await service.processInput(change('tachy', 'Tachykardje', 'Tachykardje '))
-    expect(tachy.mutation?.replacement).toBe('Tachykardie')
+    const medical = await service.processInput(change('medical', 'Patietn', 'Patietn '))
+    expect(medical.mutation).toMatchObject({ replacement: 'Patient', cursor: 8 })
+    expect(applyMutation('Patietn ', medical.mutation!)).toBe('Patient ')
 
-    const valid = await service.processInput(change('valid', 'Tachykardie', 'Tachykardie '))
+    const valid = await service.processInput(change('valid', 'Patient', 'Patient '))
     expect(valid.mutation).toBeUndefined()
+  })
+
+  test('leaves removed or ambiguous medical terms unchanged', async () => {
+    for (const term of ['Schmerzne', 'Tachykardje', 'Tachykardie']) {
+      const update = await service.processInput(change(`unsupported-${term}`, term, `${term} `))
+      expect(update.mutation).toBeUndefined()
+    }
   })
 
   test('applies configured shortcuts before spelling autocorrection', async () => {
@@ -241,24 +249,24 @@ describe('text assist integration', () => {
   })
 
   test('preserves the suffix and caret for a correction in the middle', async () => {
-    const update = await service.processInput(change('middle', 'Schmerzne Text', 'Schmerzne, Text', 10))
-    expect(update.mutation).toMatchObject({ start: 0, end: 9, replacement: 'Schmerzen', cursor: 10 })
-    expect(applyMutation('Schmerzne, Text', update.mutation!)).toBe('Schmerzen, Text')
+    const update = await service.processInput(change('middle', 'Krankehaus Text', 'Krankehaus, Text', 11))
+    expect(update.mutation).toMatchObject({ start: 0, end: 10, replacement: 'Krankenhaus', cursor: 12 })
+    expect(applyMutation('Krankehaus, Text', update.mutation!)).toBe('Krankenhaus, Text')
   })
 
   test('corrects after Unicode punctuation and preserves initial capitalization', async () => {
-    const punctuation = await service.processInput(change('punctuation', 'Tachykardje', 'Tachykardje𐄀'))
-    expect(punctuation.mutation).toMatchObject({ replacement: 'Tachykardie', cursor: 13 })
-    expect(applyMutation('Tachykardje𐄀', punctuation.mutation!)).toBe('Tachykardie𐄀')
+    const punctuation = await service.processInput(change('punctuation', 'Patietn', 'Patietn𐄀'))
+    expect(punctuation.mutation).toMatchObject({ replacement: 'Patient', cursor: 9 })
+    expect(applyMutation('Patietn𐄀', punctuation.mutation!)).toBe('Patient𐄀')
   })
 
   test('immediate Backspace restores the typo and only works once', async () => {
-    const update = await service.processInput(change('undo', 'Tachykardje', 'Tachykardje '))
-    const corrected = applyMutation('Tachykardje ', update.mutation!)
+    const update = await service.processInput(change('undo', 'Krankehaus', 'Krankehaus '))
+    const corrected = applyMutation('Krankehaus ', update.mutation!)
     const undo = service.handleBackspace('undo', snapshot(corrected, update.mutation!.cursor))
-    expect(undo).toMatchObject({ replacement: 'Tachykardje', cursor: 11 })
-    expect(applyMutation(corrected, undo!)).toBe('Tachykardje')
-    expect(service.handleBackspace('undo', snapshot('Tachykardje'))).toBeNull()
+    expect(undo).toMatchObject({ replacement: 'Krankehaus', cursor: 10 })
+    expect(applyMutation(corrected, undo!)).toBe('Krankehaus')
+    expect(service.handleBackspace('undo', snapshot('Krankehaus'))).toBeNull()
   })
 
   test('immediate Backspace restores a shortcut without recording a spelling rejection', async () => {
@@ -286,26 +294,26 @@ describe('text assist integration', () => {
   })
 
   test('cursor or selection activity invalidates immediate correction undo', async () => {
-    const update = await service.processInput(change('moved', 'Tachykardje', 'Tachykardje '))
-    const corrected = applyMutation('Tachykardje ', update.mutation!)
+    const update = await service.processInput(change('moved', 'Rettungsdient', 'Rettungsdient '))
+    const corrected = applyMutation('Rettungsdient ', update.mutation!)
     service.invalidateSession('moved', snapshot(corrected, corrected.length - 1))
     expect(service.handleBackspace('moved', snapshot(corrected, corrected.length))).toBeNull()
   })
 
   test('two rejected corrections add the original to the learned dictionary', async () => {
     for (const sessionId of ['learn-1', 'learn-2']) {
-      const update = await service.processInput(change(sessionId, 'Schmerzne', 'Schmerzne '))
-      const corrected = applyMutation('Schmerzne ', update.mutation!)
+      const update = await service.processInput(change(sessionId, 'Patietn', 'Patietn '))
+      const corrected = applyMutation('Patietn ', update.mutation!)
       service.handleBackspace(sessionId, snapshot(corrected, update.mutation!.cursor))
       await vi.waitFor(async () => {
-        const rejection = repository.state.rejectedCorrections.find(entry => entry.original === 'Schmerzne')
+        const rejection = repository.state.rejectedCorrections.find(entry => entry.original === 'Patietn')
         expect(rejection?.rejectionCount).toBe(sessionId === 'learn-1' ? 1 : 2)
       })
     }
-    expect(await service.userDictionary.getWords()).toContain('Schmerzne')
-    await service.removeUserWord('Schmerzne')
-    expect(await service.userDictionary.getWords()).not.toContain('Schmerzne')
-    expect(repository.state.rejectedCorrections.some(entry => entry.original === 'Schmerzne')).toBe(false)
+    expect(await service.userDictionary.getWords()).toContain('Patietn')
+    await service.removeUserWord('Patietn')
+    expect(await service.userDictionary.getWords()).not.toContain('Patietn')
+    expect(repository.state.rejectedCorrections.some(entry => entry.original === 'Patietn')).toBe(false)
   })
 
   test('two rejected capitalization corrections preserve the lowercase user preference', async () => {

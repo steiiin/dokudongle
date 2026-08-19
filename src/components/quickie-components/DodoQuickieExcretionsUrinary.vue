@@ -172,16 +172,6 @@ watch(() => props.quickie, (v) => {
 
 // ############################################################################
 
-const getConcatText = (list: Array<string>): string => {
-  if (list.length <= 1) { return list.pop() ?? '' }
-  else {
-    const lastEntry = list.pop()
-    return `${list.join(', ')} & ${lastEntry}`
-  }
-}
-
-// ############################################################################
-
 const outputText = computed(() => {
   return outputSet.value.filter(e=>e.enabled)
                         .map(e=>e.value ?? e.label)

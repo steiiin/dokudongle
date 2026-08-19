@@ -1,12 +1,10 @@
-/// <reference types="vitest" />
-
 import Components from 'unplugin-vue-components/vite'
 import legacy from '@vitejs/plugin-legacy'
 import vue from '@vitejs/plugin-vue'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 const VIRTUAL_DICTIONARY_DE = 'virtual:dictionary-de'
 const RESOLVED_VIRTUAL_DICTIONARY_DE = `\0${VIRTUAL_DICTIONARY_DE}`

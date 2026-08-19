@@ -221,7 +221,7 @@ export class QuickieAbdominalPainRegion {
 
     if (this.eachRowColumn) { return 'diffus' }
 
-    let regions: Array<string> = []
+    const regions: Array<string> = []
     if (this.obli) { regions.push('OB li.') }
     if (this.obmi) { regions.push('epigastr.') }
     if (this.obre) { regions.push('OB re.') }

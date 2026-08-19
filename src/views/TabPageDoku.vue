@@ -58,7 +58,6 @@ import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 
 // ############################################################################
 
-import { onIonViewDidEnter } from '@ionic/vue'
 import { computed } from 'vue'
 
 import { ProtocolCourse } from '@/types/protocol'

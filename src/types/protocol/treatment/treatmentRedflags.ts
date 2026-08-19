@@ -2,7 +2,7 @@ import { RedflagScenario, RedflagSignal, RedflagApplication } from "@/data/redfl
 import { OptionalValue } from "../input"
 
 type WithArrayProp<T> = {
-  [K in keyof T]: T[K] extends (infer U)[] | undefined ? K : never
+  [K in keyof T]: T[K] extends unknown[] | undefined ? K : never
 }[keyof T]
 
 export class TreatmentRedflags {

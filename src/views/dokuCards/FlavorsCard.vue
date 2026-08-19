@@ -43,7 +43,7 @@
         <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.nonVerbal">
 
           <DodoToggleChip
-            :model-value="store.doku.flavors.non_verbal"color="success"
+            :model-value="store.doku.flavors.non_verbal" color="success"
             @update:modelValue="setFlavor('non_verbal', $event)">
             Non-Verbal
           </DodoToggleChip>

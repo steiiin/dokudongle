@@ -1782,7 +1782,7 @@ function genKey(
   cat: string,
   name: string
 ) {
-  return cat + name.replace(/[\/(]/g, '_').replace(/[ \-)]/gi, '')
+  return cat + name.replace(/[/(]/g, '_').replace(/[ \-)]/gi, '')
 }
 
 function defSc(

@@ -36,7 +36,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: string
     label: string
-    lines?: string
+    lines?: 'full' | 'inset' | 'none'
     icon: string
     placeholder: string
     autocorrectFn?: (draft: string) => string

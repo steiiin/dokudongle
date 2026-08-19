@@ -1,5 +1,4 @@
 import { conditionalPrefix } from "../filter"
-import { capitalizeBegin } from "../text"
 
 /**
  * Prefixes chestpain radiation findings with "strahlen aus" unless one of the keywords already exists in the draft.

@@ -20,12 +20,11 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { gainFocus } from '@/utils/input'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
-import {
-  textAssistService,
-  type ImeDictionary,
-  type TextInputSnapshot,
-  type TextMutation,
-} from '@/services/text-assist'
+
+import { textAssistService } from '@/services/text-assist'
+import type { ImeDictionary } from '@/services/text-assist'
+import type { TextInputSnapshot } from '@/services/text-assist'
+import type { TextMutation } from '@/services/text-assist'
 
 // ############################################################################
 

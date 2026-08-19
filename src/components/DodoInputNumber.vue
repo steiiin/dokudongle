@@ -17,10 +17,9 @@
 
 <script setup lang="ts">
 
-import { computed, nextTick, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 import { gainFocus, setNativeValue } from '@/utils/input'
-import { PatientAge } from '@/types/protocol'
 import { AssessedValue } from '@/types/protocol/input';
 
 // ############################################################################

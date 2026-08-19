@@ -12,7 +12,7 @@
 
     <DodoInputSelect
       ref="textSelect"
-      :label="props.textLabel ? '↳ ' + props.textLabel : '↳ '" v-model="props.text"
+      :label="props.textLabel ? '↳ ' + props.textLabel : '↳ '" :model-value="props.text"
       :empty-label="props.emptyLabel"
       :options="props.options"
       :allow-custom="props.allowCustom" :custom-label="props.customLabel" :custom-placeholder="props.customPlaceholder"

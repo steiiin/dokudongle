@@ -40,7 +40,7 @@ export function setNativeValue(inputRef: any|null, value: string) {
 
 // ############################################################################
 
-var currentlyScrolling: boolean = false
+let currentlyScrolling: boolean = false
 const Scroll_Top = 'top'
 const Scroll_Bottom = 'bottom'
 const Scroll_Delay = 300

@@ -134,7 +134,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin, warningOutline } from 'ionicons/icons'
 import { alertController, toastController } from '@ionic/core'
 
-import { DATA_Quickies, QuickieTemplate, type Quickie } from '@/data/quickies'
+import { DATA_Quickies, type Quickie } from '@/data/quickies'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
@@ -598,7 +598,7 @@ const redo = () => {
 }
 
 const deleteText = async () => {
-  const confirmDelete = (): Promise<boolean> => new Promise(async (resolve) => {
+  const confirmDelete = async (): Promise<boolean> => {
     const alert = await alertController.create({
       header: 'Eingaben löschen',
       message: 'Möchtest du die Eingaben wirklich löschen?',
@@ -606,17 +606,17 @@ const deleteText = async () => {
         {
           text: 'Abbrechen',
           role: 'cancel',
-          handler: () => resolve(false),
         },
         {
           text: 'Ja, Löschen',
           role: 'destructive',
-          handler: () => resolve(true),
         },
       ],
     })
     await alert.present()
-  })
+    const result = await alert.onDidDismiss()
+    return result.role === 'destructive'
+  }
 
   const confirmed = await confirmDelete()
   if (!confirmed) {

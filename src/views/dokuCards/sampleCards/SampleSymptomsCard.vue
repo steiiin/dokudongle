@@ -19,7 +19,7 @@ import { computed } from 'vue'
 import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
-import { QU_SYM_AbdominalPain, QU_SIT_Einweisung, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST, QU_SCHWINDEL } from '@/data/quickies'
+import { QU_SYM_AbdominalPain, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST, QU_SCHWINDEL } from '@/data/quickies'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

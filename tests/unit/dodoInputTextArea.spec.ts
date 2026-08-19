@@ -228,10 +228,10 @@ describe('DodoInputTextArea native textarea', () => {
   })
 
   test('corrects on punctuation in the middle without moving the caret to the end', async () => {
-    const wrapper = mountTextarea(new EnhanceableText('Tachykardje Rest'), document.body)
+    const wrapper = mountTextarea(new EnhanceableText('Krankehaus Rest'), document.body)
     const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
     textarea.element.focus()
-    textarea.element.setSelectionRange(11, 11)
+    textarea.element.setSelectionRange(10, 10)
     await textarea.trigger('focus')
 
     textarea.element.dispatchEvent(new InputEvent('beforeinput', {
@@ -240,8 +240,8 @@ describe('DodoInputTextArea native textarea', () => {
       data: ',',
       inputType: 'insertText',
     }))
-    textarea.element.value = 'Tachykardje, Rest'
-    textarea.element.setSelectionRange(12, 12)
+    textarea.element.value = 'Krankehaus, Rest'
+    textarea.element.setSelectionRange(11, 11)
     textarea.element.dispatchEvent(new InputEvent('input', {
       bubbles: true,
       data: ',',
@@ -249,7 +249,7 @@ describe('DodoInputTextArea native textarea', () => {
     }))
 
     await vi.waitFor(() => {
-      expect(textarea.element.value).toBe('Tachykardie, Rest')
+      expect(textarea.element.value).toBe('Krankenhaus, Rest')
       expect(textarea.element.selectionStart).toBe(12)
     })
     wrapper.unmount()
@@ -266,8 +266,8 @@ describe('DodoInputTextArea native textarea', () => {
       data: ' ',
       inputType: 'insertText',
     }))
-    await textarea.setValue('Tachykardje ')
-    await vi.waitFor(() => expect(textarea.element.value).toBe('Tachykardie '))
+    await textarea.setValue('Patietn ')
+    await vi.waitFor(() => expect(textarea.element.value).toBe('Patient '))
 
     textarea.element.dispatchEvent(new InputEvent('beforeinput', {
       bubbles: true,
@@ -276,7 +276,7 @@ describe('DodoInputTextArea native textarea', () => {
     }))
     await flushPromises()
 
-    expect(textarea.element.value).toBe('Tachykardje')
-    expect(textarea.element.selectionStart).toBe('Tachykardje'.length)
+    expect(textarea.element.value).toBe('Patietn')
+    expect(textarea.element.selectionStart).toBe('Patietn'.length)
   })
 })
