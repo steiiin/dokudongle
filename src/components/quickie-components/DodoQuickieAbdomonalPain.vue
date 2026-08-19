@@ -361,11 +361,11 @@ const radiationSet = ref([
 
 const severityText = computed(() => {
   return {
-    minimal:   'minimal/0-1',
-    leicht:   'leicht/2-3',
-    mittel:   'mittel/4-6',
-    stark:    'stark/7-8',
-    maximal:  'maximal/9-10',
+    minimal:  'NRS 0-1',
+    leicht:   'NRS 2-3',
+    mittel:   'NRS 4-6',
+    stark:    'NRS 7-8',
+    maximal:  'NRS 9-10',
   }[localSeverity.value] ?? '';
 })
 
