@@ -20,7 +20,10 @@ vi.mock('@/store/persistence', () => ({
   appendProtocolAuditEntry: vi.fn(),
   loadDokuState: vi.fn(),
   loadProtocolAuditEntries: vi.fn().mockResolvedValue([]),
+  loadTemporaryProtocolState: vi.fn(),
+  removeTemporaryProtocolState: vi.fn(),
   saveDokuState: vi.fn(),
+  saveTemporaryProtocolState: vi.fn(),
 }))
 
 const mountFlavors = () => shallowMount(FlavorsCard, {

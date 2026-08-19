@@ -9,7 +9,7 @@ import { createPinia } from 'pinia'
 import { App as CapacitorApp } from '@capacitor/app'
 import { useDokuStore } from '@/store/doku'
 import { initStorage } from '@/store/persistence'
-import { alertController } from '@ionic/core'
+import { alertController, toastController } from '@ionic/core'
 const pinia = createPinia()
 
 /* Core CSS required for Ionic components to work properly */
@@ -56,45 +56,112 @@ const app = createApp(App)
 
 const PERSISTENCE_DEBOUNCE_MS = 3000
 let persistTimer: ReturnType<typeof setTimeout> | null = null
-let isAutoResetPromptOpen = false
+let isAutoResetFlowOpen = false
 
-async function maybePromptAutoProtocolReset() {
+async function showAutoResetError(message: string) {
+  const toast = await toastController.create({
+    message,
+    color: 'danger',
+    duration: 5000,
+    position: 'bottom',
+  })
+  await toast.present()
+}
+
+async function offerTemporaryProtocolRestore() {
   const dokuStore = useDokuStore(pinia)
-  if (isAutoResetPromptOpen || !dokuStore.isAutoProtocolResetDue()) {
-    return
-  }
-
-  isAutoResetPromptOpen = true
-  const alert = await alertController.create({
-    cssClass: 'protocol-reset-alert',
-    header: 'Protokoll zurücksetzen?',
-    message: 'Das letzte Zurücksetzen liegt mehr als 30 Minuten zurück. Möchtest du ein neues Protokoll starten?',
+  const toast = await toastController.create({
+    message: 'Das Protokoll wurde nach 30 Minuten automatisch zurückgesetzt.',
+    duration: 5000,
+    position: 'bottom',
     buttons: [
       {
-        text: 'Später',
-        role: 'cancel',
-      },
-      {
-        text: 'Zurücksetzen',
-        handler: () => {
-          dokuStore.newProtocol()
-        },
+        text: 'Wiederherstellen',
+        role: 'restore',
       },
     ],
   })
 
-  await alert.present()
-  await alert.onDidDismiss()
-  dokuStore.markAutoProtocolResetPrompted()
-  isAutoResetPromptOpen = false
+  await toast.present()
+  const { role } = await toast.onDidDismiss()
+
+  if (role === 'restore') {
+    const restored = await dokuStore.restoreTemporaryProtocol()
+    if (!restored) {
+      await showAutoResetError('Das Protokoll konnte nicht wiederhergestellt werden.')
+    }
+    return
+  }
+
+  await dokuStore.discardTemporaryProtocol()
+}
+
+async function maybeHandleAutoProtocolReset() {
+  const dokuStore = useDokuStore(pinia)
+  if (isAutoResetFlowOpen) {
+    return
+  }
+
+  const action = dokuStore.getAutoProtocolResetAction()
+  if (action === 'none') {
+    return
+  }
+
+  isAutoResetFlowOpen = true
+  try {
+    if (action === 'reset') {
+      try {
+        await dokuStore.autoResetProtocol()
+      } catch (error) {
+        console.error('Could not save and automatically reset the protocol.', error)
+        await showAutoResetError('Das Protokoll konnte nicht automatisch zurückgesetzt werden.')
+        return
+      }
+
+      await offerTemporaryProtocolRestore()
+      return
+    }
+
+    const alert = await alertController.create({
+      cssClass: 'protocol-reset-alert',
+      header: 'Protokoll zurücksetzen?',
+      message: 'Das letzte Zurücksetzen liegt mehr als 10 Minuten zurück. Möchtest du ein neues Protokoll starten?',
+      buttons: [
+        {
+          text: 'Später',
+          role: 'cancel',
+        },
+        {
+          text: 'Zurücksetzen',
+          role: 'reset',
+        },
+      ],
+    })
+
+    await alert.present()
+    const { role } = await alert.onDidDismiss()
+    if (role === 'reset') {
+      try {
+        await dokuStore.newProtocol()
+      } catch (error) {
+        console.error('Could not reset the protocol.', error)
+        await showAutoResetError('Das Protokoll konnte nicht zurückgesetzt werden.')
+      }
+    } else {
+      dokuStore.markAutoProtocolResetPrompted()
+    }
+  } finally {
+    isAutoResetFlowOpen = false
+  }
 }
 
 async function setupDokuPersistence() {
   await initStorage()
 
   const dokuStore = useDokuStore(pinia)
+  await dokuStore.discardTemporaryProtocol()
   await dokuStore.hydrateFromStorage()
-  await maybePromptAutoProtocolReset()
+  await maybeHandleAutoProtocolReset()
 
   dokuStore.$subscribe(() => {
     if (persistTimer) {
@@ -108,7 +175,7 @@ async function setupDokuPersistence() {
 
   await CapacitorApp.addListener('resume', async () => {
     await dokuStore.hydrateFromStorage()
-    await maybePromptAutoProtocolReset()
+    await maybeHandleAutoProtocolReset()
   })
 }
 

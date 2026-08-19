@@ -4,6 +4,7 @@ import { Storage } from '@ionic/storage'
 
 export const DOKU_STORAGE_KEY = 'doku_state';
 export const DOKU_AUDIT_STORAGE_KEY = 'doku_protocol_audit';
+export const DOKU_TEMPORARY_PROTOCOL_STORAGE_KEY = 'doku_temporary_protocol';
 export const DOKU_SCHEMA_VERSION = 1;
 
 // ############################################################################
@@ -21,6 +22,12 @@ export interface ProtocolAuditEntry {
   resetAt: string
   protocolText: string
   [freeformBlock: string]: unknown
+}
+
+export interface TemporaryProtocolState {
+  schemaVersion: number
+  savedAt: string
+  doku: unknown
 }
 
 let storageInstance: Storage | null = null;
@@ -71,6 +78,24 @@ export async function saveDokuState(payload: PersistedDokuState): Promise<void> 
   await storage.set(DOKU_STORAGE_KEY, payload);
 }
 
+export async function loadTemporaryProtocolState(): Promise<TemporaryProtocolState | null> {
+  const storage = await getStorage()
+  const raw = await storage.get(DOKU_TEMPORARY_PROTOCOL_STORAGE_KEY)
+  if (!raw || typeof raw !== 'object') {
+    return null
+  }
+  return raw as TemporaryProtocolState
+}
+
+export async function saveTemporaryProtocolState(payload: TemporaryProtocolState): Promise<void> {
+  const storage = await getStorage()
+  await storage.set(DOKU_TEMPORARY_PROTOCOL_STORAGE_KEY, payload)
+}
+
+export async function removeTemporaryProtocolState(): Promise<void> {
+  const storage = await getStorage()
+  await storage.remove(DOKU_TEMPORARY_PROTOCOL_STORAGE_KEY)
+}
 
 export async function loadProtocolAuditEntries(): Promise<ProtocolAuditEntry[]> {
   const storage = await getStorage();
