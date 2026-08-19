@@ -1,12 +1,15 @@
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 import { defineComponent, onMounted, ref } from 'vue'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import DodoInputSelectOptional from '@/components/DodoInputSelectOptional.vue'
 import DodoInputText from '@/components/DodoInputText.vue'
+import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
+import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { textAssistService, type ImeDictionary } from '@/services/text-assist'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 vi.mock('@/plugins/input-suggestions', () => ({
   setInputSuggestionsDisabled: vi.fn().mockResolvedValue(undefined),
@@ -62,6 +65,30 @@ const mountInput = (imeDictionary?: ImeDictionary) => shallowMount(DodoInputText
   global: {
     stubs: { IonInput: IonInputStub },
   },
+})
+
+const AssistedInputHarness = defineComponent({
+  components: { DodoInputText, DodoTextSuggestionHost },
+  props: { imeDictionary: { type: Object, required: true } },
+  setup() {
+    provideTextSuggestionScope()
+    const value = ref('')
+    return { value }
+  },
+  template: `
+    <DodoInputText
+      v-model="value"
+      :ime-dictionary="imeDictionary"
+      assist-context-id="test.single-line"
+    />
+    <DodoTextSuggestionHost />
+  `,
+})
+
+const mountAssistedInput = () => mount(AssistedInputHarness, {
+  attachTo: document.body,
+  props: { imeDictionary: {} },
+  global: { stubs: { IonInput: IonInputStub } },
 })
 
 const insertText = (input: HTMLInputElement, before: string, after: string, data: string) => {
@@ -147,6 +174,46 @@ describe('DodoInputText single-line IME', () => {
     wrapper.unmount()
   })
 
+  test('shows and applies @ location suggestions through the scoped host', async () => {
+    const wrapper = mountAssistedInput()
+    await flushPromises()
+    const input = wrapper.get('input').element as HTMLInputElement
+    input.focus()
+
+    insertText(input, '', '@uni', '@uni')
+    const panel = wrapper.getComponent(DodoTextSuggestionPanel)
+    await vi.waitFor(() => expect(panel.props('suggestions')).toHaveLength(1))
+    const suggestion = panel.props('suggestions')[0]
+    expect(suggestion.label).toBe('Uniklinik Dresden')
+
+    panel.vm.$emit('select', suggestion)
+    await flushPromises()
+
+    expect(input.value).toBe('Uniklinik Dresden')
+    expect(input.selectionStart).toBe('Uniklinik Dresden'.length)
+    input.blur()
+    await flushPromises()
+    expect(panel.props('suggestions')).toEqual([])
+    wrapper.unmount()
+  })
+
+  test('automatically expands a unique @ location after a delimiter', async () => {
+    const wrapper = mountAssistedInput()
+    await flushPromises()
+    const input = wrapper.get('input').element as HTMLInputElement
+    input.focus()
+
+    insertText(input, '', '@radebe', '@radebe')
+    await vi.waitFor(() => {
+      expect(wrapper.getComponent(DodoTextSuggestionPanel).props('suggestions')).toHaveLength(1)
+    })
+    insertText(input, '@radebe', '@radebe ', ' ')
+
+    await vi.waitFor(() => expect(input.value).toBe('KH Radebeul '))
+    expect(input.selectionStart).toBe('KH Radebeul '.length)
+    wrapper.unmount()
+  })
+
   test('suppresses platform suggestions only for enabled focus and ignores active composition', async () => {
     const wrapper = mountInput({ shortcuts: { dd: 'DokuDongle' } })
     await flushPromises()
@@ -174,7 +241,7 @@ describe('DodoInputText single-line IME', () => {
   })
 
   test('falls back to editable native input when initialization fails', async () => {
-    vi.spyOn(textAssistService, 'initializeAutomatic').mockRejectedValueOnce(new Error('unavailable'))
+    vi.spyOn(textAssistService, 'initialize').mockRejectedValueOnce(new Error('unavailable'))
     vi.spyOn(console, 'warn').mockImplementation(() => undefined)
     const wrapper = mountInput({})
     await flushPromises()

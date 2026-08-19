@@ -25,6 +25,10 @@ const mountTextarea = (modelValue = new EnhanceableText(''), attachTo?: HTMLElem
   },
   global: {
     renderStubDefaultSlot: true,
+    stubs: {
+      DodoTextSuggestionHost: false,
+      DodoTextSuggestionPanel: false,
+    },
   },
 })
 

@@ -24,7 +24,7 @@
     </IonCardContent>
   </IonCard>
 
-  <IonModal :is-open="isModalOpen" @will-dismiss="cancelEdit">
+  <IonModal :is-open="isModalOpen" @will-dismiss="cancelEdit" @did-dismiss="suggestionScope.reset()">
     <IonHeader>
       <IonToolbar>
         <IonTitle type="ios">{{ modalTitle }}</IonTitle>
@@ -86,6 +86,9 @@
         expand="block" fill="outline" color="danger" style="margin: 1rem;">Entfernen
       </IonButton>
     </IonContent>
+    <IonFooter>
+      <DodoTextSuggestionHost />
+    </IonFooter>
   </IonModal>
 
 </template>
@@ -95,7 +98,9 @@
 import { computed, ref, watch } from 'vue'
 import { addCircle } from 'ionicons/icons'
 
+import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { SampleMedicationItem } from '@/types/protocol/sample'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 // ############################################################################
 
@@ -103,6 +108,7 @@ const props = defineProps<{ modelValue: Array<SampleMedicationItem> }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Array<SampleMedicationItem>): void
 }>()
+const suggestionScope = provideTextSuggestionScope()
 
 // ############################################################################
 

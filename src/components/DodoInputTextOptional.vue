@@ -18,6 +18,7 @@
       :label="props.textLabel ? '↳ ' + props.textLabel : '↳ '"
       :placeholder="props.textPlaceholder"
       :ime-dictionary="imeDictionary"
+      :assist-context-id="assistContextId"
       :autocorrectFn="props.autocorrectFn"
       @update:model-value="onTextChange"
       @leaved-empty="handleEmpty"
@@ -42,6 +43,7 @@ const props = withDefaults(defineProps<{
   autocorrectFn?: (draft: string) => string
   lines?: 'full' | 'inset' | 'none',
   imeDictionary?: ImeDictionary,
+  assistContextId?: string,
 }>(), {
   textLabel: '',
   textPlaceholder: '',

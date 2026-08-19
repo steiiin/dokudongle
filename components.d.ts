@@ -43,6 +43,7 @@ declare module 'vue' {
     DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']
     DodoSwitchButton: typeof import('./src/components/DodoSwitchButton.vue')['default']
+    DodoTextSuggestionHost: typeof import('./src/components/DodoTextSuggestionHost.vue')['default']
     DodoTextSuggestionPanel: typeof import('./src/components/DodoTextSuggestionPanel.vue')['default']
     DodoToggleButton: typeof import('./src/components/DodoToggleButton.vue')['default']
     DodoToggleChip: typeof import('./src/components/DodoToggleChip.vue')['default']

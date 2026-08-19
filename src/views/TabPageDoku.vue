@@ -41,6 +41,9 @@
       </div>
 
     </IonContent>
+    <IonFooter>
+      <DodoTextSuggestionHost />
+    </IonFooter>
   </IonPage>
 </template>
 
@@ -48,6 +51,7 @@
 
 import DetailLevelCard from './dokuCards/DetailLevelCard.vue'
 import FlavorsCard from './dokuCards/FlavorsCard.vue'
+import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 
 import IdentifikationCard from './dokuCards/IdentifikationCard.vue'
 import SettingCard from './dokuCards/SettingCard.vue'
@@ -61,10 +65,12 @@ import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 import { computed } from 'vue'
 
 import { ProtocolCourse } from '@/types/protocol'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+provideTextSuggestionScope()
 
 </script>
 <style lang="scss" scoped>

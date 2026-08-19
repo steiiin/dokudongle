@@ -209,6 +209,30 @@ describe('text assist integration', () => {
     expect(applyMutation('lt ', update.mutation!)).toBe('laut ')
   })
 
+  test('combines field-local dictionaries with full suggestions and global snippets', async () => {
+    const localService = new TextAssistService(new MemoryRepository())
+
+    const shortcut = await localService.processInput(
+      change('full-local-shortcut', 'dd', 'dd '),
+      { shortcuts: { dd: 'DokuDongle' } },
+    )
+    expect(shortcut.mutation).toMatchObject({ replacement: 'DokuDongle', cursor: 11 })
+
+    const localWord = await localService.processInput(
+      change('full-local-word', 'DokuDongel', 'DokuDongel '),
+      { words: ['DokuDongle'] },
+    )
+    expect(localWord.mutation).toMatchObject({ replacement: 'DokuDongle', cursor: 11 })
+
+    const snippets = await localService.getSuggestions(
+      'full-location-snippet',
+      'single-line',
+      snapshot('@uni'),
+    )
+    expect(snippets).toHaveLength(1)
+    expect(snippets[0]).toMatchObject({ type: 'snippet', replacement: 'Uniklinik Dresden' })
+  })
+
   test('capitalizes unambiguous German nouns and compounds after a delimiter', async () => {
     for (const [typed, expected] of [
       ['krankenhaus', 'Krankenhaus'],

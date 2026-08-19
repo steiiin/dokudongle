@@ -18,6 +18,7 @@
       :allow-custom="props.allowCustom" :custom-label="props.customLabel" :custom-placeholder="props.customPlaceholder"
       :autocorrect-fn="props.autocorrectFn"
       :ime-dictionary="props.imeDictionary"
+      :assist-context-id="props.assistContextId"
       @update:model-value="onTextChange"
       @leaved-empty="handleEmpty">
     </DodoInputSelect>
@@ -49,6 +50,7 @@ const props = withDefaults(defineProps<{
 
   autocorrectFn?: (draft: string) => string
   imeDictionary?: ImeDictionary
+  assistContextId?: string
   lines?: 'full' | 'inset' | 'none'
 
 }>(), {

@@ -1,5 +1,3 @@
-import { OptionInput } from "@/components/DodoInputSelect.vue"
-
 import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuickieAbdomonalPain.vue"
 import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
 import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
@@ -9,9 +7,6 @@ import DodoQuickieSchwindel from "@/components/quickie-components/DodoQuickieSch
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
 import { AssessedValue, OptionalValue } from "@/types/protocol/input"
 import { PregnancySpan } from "@/types/protocol/pregnancy"
-
-import { basicCap } from "@/utils/autocorrect/basic"
-import { correctDoc, correctHospital } from "@/utils/autocorrect/locations"
 
 import { Component, markRaw } from "vue"
 
@@ -31,10 +26,6 @@ export const QU_PLER_Schwangerschaft = 'pler_schwangerschaft'
 
 // ############################################################################
 
-export const OP_Hospitals = [ 'KH Radebeul', 'KH Meißen', 'KH Riesa' ]
-
-// ############################################################################
-
 export abstract class Quickie
 {
   constructor(
@@ -49,10 +40,7 @@ export abstract class Quickie
 
 export type QuickieTemplateField = {
   key: string, color?: string,
-  allowOptions?: boolean, allowCustom?: boolean,
-  options?: Array<OptionInput>,
-  customLabel?: string, customPlaceholder?: string,
-  autocorrectFn?: (draft: string) => string,
+  customPlaceholder?: string,
 }
 
 export class QuickieTemplate extends Quickie
@@ -373,17 +361,11 @@ const buildQuickies = (): Record<string, Quickie> => ({
     [
       {
         key: 'START', color: 'warning',
-        allowOptions: true, allowCustom: true,
-        options: OP_Hospitals,
-        customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
-        autocorrectFn: correctHospital, /* TODO use IME in quickies */
+        customPlaceholder: 'z.B. FKH Coswig',
       },
       {
         key: 'ZIEL', color: 'success',
-        allowOptions: true, allowCustom: true,
-        options: OP_Hospitals,
-        customLabel: 'Welches?', customPlaceholder: 'z.B. FKH Coswig',
-        autocorrectFn: correctHospital,
+        customPlaceholder: 'z.B. FKH Coswig',
       },
 
     ]
@@ -394,22 +376,15 @@ const buildQuickies = (): Record<string, Quickie> => ({
     [
       {
         key: 'ARZT', color: 'success',
-        allowOptions: false, allowCustom: true,
-        customLabel: 'Wer?', customPlaceholder: 'z.B. HA Wegner',
-        autocorrectFn: correctDoc,
+        customPlaceholder: 'z.B. HA Wegner',
       },
       {
         key: 'ZIEL', color: 'warning',
-        allowOptions: true, allowCustom: true,
-        options: OP_Hospitals,
-        customLabel: 'Wohin?', customPlaceholder: 'z.B. FKH Coswig',
-        autocorrectFn: correctHospital,
+        customPlaceholder: 'z.B. FKH Coswig',
       },
       {
         key: 'KRANKHEIT', color: 'primary',
-        allowOptions: false, allowCustom: true,
-        customLabel: 'Was?', customPlaceholder: 'z.B. Thrombose',
-        autocorrectFn: basicCap,
+        customPlaceholder: 'z.B. Thrombose',
       },
 
     ],

@@ -1,10 +1,17 @@
 [
 
+  "HA",
+
   "Patient",
 
   "PD",
   "RD",
 
-  "KH"
+  "KH",
+
+  "Wegner",
+  "Hennesthal",
+  "Baumann",
+  "Naumann"
 
 ]

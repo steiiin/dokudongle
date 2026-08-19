@@ -99,11 +99,7 @@
             </IonButton>
           </IonButtons>
         </IonToolbar>
-        <DodoTextSuggestionPanel
-          v-if="isEditing && !isComposing"
-          :suggestions="textSuggestions"
-          @select="applyTextSuggestion"
-        />
+        <DodoTextSuggestionHost />
       </IonFooter>
     </IonModal>
 
@@ -134,8 +130,10 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin, warningOutline } from 'ionicons/icons'
 import { alertController, toastController } from '@ionic/core'
 
+import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { DATA_Quickies, type Quickie } from '@/data/quickies'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
 import { isCompletionDelimiter, wordAroundCursor } from '@/services/text-assist/text'
@@ -192,6 +190,8 @@ const isApplyingAssistMutation = ref(false)
 let assistRevision = 0
 let assistInputsInFlight = 0
 const assistSessionId = `dodo-textarea-${Date.now()}-${Math.random().toString(36).slice(2)}`
+const suggestionOwner = Symbol(assistSessionId)
+const suggestionScope = provideTextSuggestionScope()
 
 const isDictionaryOpen = ref(false)
 const isDictionaryBusy = ref(false)
@@ -228,6 +228,10 @@ const resolvedQuickies = computed(() => {
     .filter((quickie) => quickie.isAvailable(draft.value))
 })
 
+watch(textSuggestions, (suggestions) => {
+  suggestionScope.update(suggestionOwner, suggestions)
+})
+
 const cloneModelValue = (): EnhanceableText => props.modelValue.clone()
 const emitUpdated = (updated: EnhanceableText) => emit('update:modelValue', updated)
 
@@ -252,6 +256,7 @@ const closeModal = () => {
   commitOpenEditIfNeeded()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
   textSuggestions.value = []
+  suggestionScope.clear(suggestionOwner)
   void textAssistService.flush()
   setSuggestionSuppression(false)
   isModalOpen.value = false
@@ -441,6 +446,7 @@ const handleInput = (event: Event) => {
 const handleFocus = async () => {
   setSuggestionSuppression(true)
   isEditing.value = true
+  suggestionScope.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) })
   const revision = assistRevision
 
   const updated = cloneModelValue()
@@ -456,6 +462,7 @@ const handleBlur = () => {
   rememberCursorPosition()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
   textSuggestions.value = []
+  suggestionScope.clear(suggestionOwner)
   setSuggestionSuppression(false)
   isEditing.value = false
 
@@ -731,6 +738,7 @@ const showEnhanceError = async () => {
 onBeforeUnmount(() => {
   clearTypingSnapshotTimeout()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
+  suggestionScope.clear(suggestionOwner)
   void textAssistService.flush()
   setSuggestionSuppression(false)
 })

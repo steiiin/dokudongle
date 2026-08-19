@@ -28,6 +28,7 @@
       :label-color="labelColor"
       :autocorrectFn="autocorrectFn"
       :ime-dictionary="imeDictionary"
+      :assist-context-id="assistContextId"
       @leaved-empty="handleEmpty"
     />
   </IonItem>
@@ -60,6 +61,7 @@ const props = defineProps<{
   customPlaceholder?: string
   autocorrectFn?: (draft: string) => string,
   imeDictionary?: ImeDictionary,
+  assistContextId?: string,
   lines?: 'full' | 'inset' | 'none'
 }>()
 

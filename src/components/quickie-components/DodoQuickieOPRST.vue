@@ -1,5 +1,5 @@
 <template>
-  <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false">
+  <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false" @did-dismiss="suggestionScope.reset()">
     <IonHeader>
       <IonToolbar>
         <IonTitle>OPQRST</IonTitle>
@@ -29,7 +29,8 @@
         </DodoListArticle> -->
         <IonItem>
           <DodoInputText v-model="localSymtom" label="Symptom"
-            :ime-dictionary="{ /* activate IME */ }">
+            :ime-dictionary="{ /* activate IME */ }"
+            assist-context-id="quickie.intern_opqrst.symptom">
           </DodoInputText>
         </IonItem>
 
@@ -73,6 +74,9 @@
       </IonList>
 
     </IonContent>
+    <IonFooter>
+      <DodoTextSuggestionHost />
+    </IonFooter>
   </IonModal>
 </template>
 
@@ -81,7 +85,9 @@
 import { computed, ref, watch } from 'vue'
 import { bodyOutline, playOutline, pulseOutline, speedometerOutline, timeOutline, trendingDownOutline, trendingUpOutline } from 'ionicons/icons'
 
+import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { QuickieOPQRST } from '@/data/quickies'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 import { concatDoku } from '@/utils/text'
 
 // ############################################################################
@@ -95,6 +101,7 @@ const emit = defineEmits<{
   (e: 'cancel'): void
   (e: 'accept', insertedText: string): void
 }>()
+const suggestionScope = provideTextSuggestionScope()
 
 // ############################################################################
 
@@ -119,6 +126,7 @@ const isValid = computed(() =>
 // ############################################################################
 
 const handleCancel = () => {
+  suggestionScope.reset()
   emit('cancel')
 }
 
@@ -135,6 +143,7 @@ const syncQuickieFromLocalState = () => {
 
 const handleAccept = () => {
   syncQuickieFromLocalState()
+  suggestionScope.reset()
   emit('accept', `${previewText.value}\n`)
 }
 

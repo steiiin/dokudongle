@@ -20,11 +20,13 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { gainFocus } from '@/utils/input'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
+import { useTextSuggestionScope } from '@/services/text-suggestions'
 
 import { textAssistService } from '@/services/text-assist'
 import type { ImeDictionary } from '@/services/text-assist'
 import type { TextInputSnapshot } from '@/services/text-assist'
 import type { TextMutation } from '@/services/text-assist'
+import type { TextSuggestion } from '@/services/text-assist'
 
 // ############################################################################
 
@@ -36,6 +38,7 @@ const props = defineProps<{
   autocorrectFn?: (draft: string) => string,
   inputmode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'search' | 'email' | 'url',
   imeDictionary?: ImeDictionary,
+  assistContextId?: string,
 }>()
 
 const emit = defineEmits<{
@@ -54,6 +57,8 @@ const isApplyingAssistMutation = ref(false)
 const pendingBeforeInput = ref<TextInputSnapshot | null>(null)
 const compositionBefore = ref<TextInputSnapshot | null>(null)
 const assistSessionId = `dodo-input-${Date.now()}-${Math.random().toString(36).slice(2)}`
+const suggestionOwner = Symbol(assistSessionId)
+const suggestionScope = useTextSuggestionScope()
 let assistRevision = 0
 let assistInputsInFlight = 0
 let suggestionsSuppressed = false
@@ -77,7 +82,7 @@ const initializeTextAssist = () => {
   if (textAssistInitialization) return textAssistInitialization
 
   isTextAssistReady.value = false
-  textAssistInitialization = textAssistService.initializeAutomatic()
+  textAssistInitialization = textAssistService.initialize()
     .catch((error) => {
       isTextAssistAvailable.value = false
       console.warn('Could not initialize single-line text assistance', error)
@@ -154,6 +159,10 @@ const snapshotInput = (): TextInputSnapshot => {
   }
 }
 
+const updateTextSuggestions = (suggestions: TextSuggestion[]) => {
+  suggestionScope?.update(suggestionOwner, suggestions)
+}
+
 const applyAssistMutation = async (mutation: TextMutation, sourceText: string) => {
   const input = nativeInput.value
   if (!input || input.value !== sourceText) return
@@ -179,20 +188,50 @@ const processAssistInput = async (before: TextInputSnapshot, event: InputEvent, 
     await initializeTextAssist()
     if (!imeOperational.value || revision !== assistRevision) return
 
-    const mutation = await textAssistService.processAutomaticInput({
+    const update = await textAssistService.processInput({
       sessionId: assistSessionId,
-      contextId: 'single-line',
+      contextId: props.assistContextId ?? 'single-line',
       before,
       after,
       inputType: event.inputType || 'insertText',
       data: event.data,
     }, props.imeDictionary)
-    if (!mutation || revision !== assistRevision) return
-    await applyAssistMutation(mutation, after.text)
+    if (revision !== assistRevision) return
+    if (update.mutation) await applyAssistMutation(update.mutation, after.text)
+    if (revision === assistRevision) updateTextSuggestions(update.suggestions)
   }
   finally {
     assistInputsInFlight -= 1
   }
+}
+
+const refreshTextSuggestions = async () => {
+  const revision = ++assistRevision
+  await initializeTextAssist()
+  if (!imeOperational.value || isComposing.value || revision !== assistRevision) {
+    updateTextSuggestions([])
+    return
+  }
+
+  const suggestions = await textAssistService.getSuggestions(
+    assistSessionId,
+    props.assistContextId ?? 'single-line',
+    snapshotInput(),
+  )
+  if (revision === assistRevision) updateTextSuggestions(suggestions)
+}
+
+const applyTextSuggestion = async (suggestion: TextSuggestion) => {
+  const snapshot = snapshotInput()
+  const mutation = textAssistService.applySuggestion(
+    assistSessionId,
+    props.assistContextId ?? 'single-line',
+    snapshot,
+    suggestion,
+  )
+  assistRevision += 1
+  await applyAssistMutation(mutation, snapshot.text)
+  await refreshTextSuggestions()
 }
 
 const handleBeforeInput = (event: InputEvent) => {
@@ -202,13 +241,13 @@ const handleBeforeInput = (event: InputEvent) => {
   pendingBeforeInput.value = before
   if (event.isComposing || isComposing.value || event.inputType !== 'deleteContentBackward') return
 
-  const mutation = textAssistService.handleAutomaticBackspace(assistSessionId, before)
+  const mutation = textAssistService.handleBackspace(assistSessionId, before)
   if (!mutation) return
 
   event.preventDefault()
   pendingBeforeInput.value = null
   assistRevision += 1
-  void applyAssistMutation(mutation, before.text)
+  void applyAssistMutation(mutation, before.text).then(refreshTextSuggestions)
 }
 
 const handleInput = (event: Event) => {
@@ -225,6 +264,8 @@ const handleInput = (event: Event) => {
 const handleFocus = () => {
   if (!imeOperational.value) return
   setSuggestionSuppression(true)
+  suggestionScope?.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) })
+  void refreshTextSuggestions()
 }
 
 const handleNativeBlur = () => {
@@ -232,7 +273,8 @@ const handleNativeBlur = () => {
   pendingBeforeInput.value = null
   compositionBefore.value = null
   isComposing.value = false
-  textAssistService.invalidateAutomaticSession(assistSessionId)
+  textAssistService.invalidateSession(assistSessionId, snapshotInput())
+  suggestionScope?.clear(suggestionOwner)
   setSuggestionSuppression(false)
 }
 
@@ -242,7 +284,8 @@ const handleCompositionStart = () => {
   isComposing.value = true
   pendingBeforeInput.value = null
   assistRevision += 1
-  textAssistService.invalidateAutomaticSession(assistSessionId)
+  textAssistService.invalidateSession(assistSessionId, compositionBefore.value)
+  updateTextSuggestions([])
 }
 
 const handleCompositionEnd = (event: CompositionEvent) => {
@@ -263,7 +306,8 @@ const handleSelectionInteraction = (event: Event) => {
     && !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
   if (assistInputsInFlight > 0) return
   assistRevision += 1
-  textAssistService.invalidateAutomaticSession(assistSessionId)
+  textAssistService.invalidateSession(assistSessionId, snapshotInput())
+  void refreshTextSuggestions()
 }
 
 const addNativeInputListeners = (input: HTMLInputElement) => {
@@ -294,12 +338,13 @@ watch(
   imeDictionarySignature,
   (signature) => {
     assistRevision += 1
-    textAssistService.invalidateAutomaticSession(assistSessionId)
+    textAssistService.invalidateSession(assistSessionId, snapshotInput())
     if (signature !== null) {
       void initializeTextAssist()
       return
     }
     isTextAssistReady.value = true
+    suggestionScope?.clear(suggestionOwner)
     setSuggestionSuppression(false)
   },
   { immediate: true },
@@ -318,7 +363,8 @@ onBeforeUnmount(() => {
   componentUnmounted = true
   assistRevision += 1
   if (nativeInput.value) removeNativeInputListeners(nativeInput.value)
-  textAssistService.invalidateAutomaticSession(assistSessionId)
+  textAssistService.invalidateSession(assistSessionId, snapshotInput())
+  suggestionScope?.clear(suggestionOwner)
   setSuggestionSuppression(false)
 })
 

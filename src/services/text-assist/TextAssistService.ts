@@ -65,17 +65,18 @@ export class TextAssistService {
     return this.autocorrect.initialize()
   }
 
-  async processInput(change: TextInputChange): Promise<TextAssistUpdate> {
+  async processInput(change: TextInputChange, dictionary: ImeDictionary = {}): Promise<TextAssistUpdate> {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return { suggestions: [] }
 
     this.acceptPendingAutomaticChange(change.sessionId, change.before)
+    const resolvedDictionary = this.resolveImeDictionary(dictionary)
     const snippetCompletion = this.completeSnippetAfterDelimiter(change)
     const shortcutMutation = snippetCompletion.active
       ? null
-      : this.shortcutReplacements.replaceAfterDelimiter(change)
+      : this.shortcutReplacements.replaceAfterDelimiter(change, resolvedDictionary.shortcuts)
     const corrected = !snippetCompletion.active && !shortcutMutation
-      ? await this.autocorrect.correctAfterDelimiter(change)
+      ? await this.autocorrect.correctAfterDelimiter(change, resolvedDictionary.words)
       : null
     let snapshot = change.after
     if (snippetCompletion.mutation) snapshot = this.snapshotAfterMutation(change.after, snippetCompletion.mutation)

@@ -20,7 +20,7 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-modal :is-open="isModalOpen" @did-present="focusNameInput">
+  <ion-modal :is-open="isModalOpen" @did-present="focusNameInput" @did-dismiss="suggestionScope.reset()">
     <ion-header>
       <ion-toolbar>
         <ion-title type="ios">{{ modalTitle }}</ion-title>
@@ -62,6 +62,9 @@
         expand="block" fill="outline" color="danger" style="margin: 1rem;">Entfernen
       </ion-button>
     </ion-content>
+    <ion-footer>
+      <DodoTextSuggestionHost />
+    </ion-footer>
   </ion-modal>
 
 </template>
@@ -69,6 +72,7 @@
 <script setup lang="ts">
 
 import DodoInputText from './DodoInputText.vue'
+import DodoTextSuggestionHost from './DodoTextSuggestionHost.vue'
 
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
@@ -77,6 +81,7 @@ import { addCircle } from 'ionicons/icons'
 
 import { correctPhone } from '@/utils/autocorrect/telephone'
 import { basicCap } from '@/utils/autocorrect/basic'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 import { SampleContactsItem, SampleContacts } from '@/types/protocol/sample'
 type ContactsModel = SampleContacts | UnwrapRef<SampleContacts>
@@ -85,6 +90,7 @@ const props = defineProps<{ modelValue: ContactsModel }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: ContactsModel): void
 }>()
+const suggestionScope = provideTextSuggestionScope()
 
 const hasContacts = computed(() => props.modelValue.contacts.length > 0)
 

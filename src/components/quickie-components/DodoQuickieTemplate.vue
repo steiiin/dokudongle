@@ -23,36 +23,34 @@
       <IonList v-if="quickie">
         <template v-for="(field, index) in quickie.fields" :key="field.key">
 
-          <DodoInputSelect v-if="field.allowOptions" v-model="placeholderValues[field.key]"
-            :label="field.key" :label-color="field.color"
-            :options="field.options ?? []"
-            :allow-custom="field.allowCustom" :custom-label="field.customLabel" :custom-placeholder="field.customPlaceholder"
-            :lines="isLastPlaceholderField(index) ? 'none' : 'full'"
-            :autocorrect-fn="field.autocorrectFn">
-          </DodoInputSelect>
-
-          <IonItem v-else :lines="isLastPlaceholderField(index) ? 'none' : 'full'">
+          <IonItem :lines="isLastPlaceholderField(index) ? 'none' : 'full'">
             <DodoInputText
               v-model="placeholderValues[field.key]"
               :label="field.key"
               :placeholder="field.customPlaceholder"
               :label-color="field.color"
-              :autocorrect-fn="field.autocorrectFn">
+              :ime-dictionary="{ /* activate IME */ }"
+              :assist-context-id="fieldAssistContext(field.key)">
             </DodoInputText>
           </IonItem>
 
         </template>
       </IonList>
     </IonContent>
+    <IonFooter>
+      <DodoTextSuggestionHost />
+    </IonFooter>
   </IonModal>
 </template>
 
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonList, IonItem } from '@ionic/vue'
+import { IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonFooter, IonList, IonItem } from '@ionic/vue'
 
+import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { QuickieTemplate } from '@/data/quickies'
+import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 const props = defineProps<{
   isOpen: boolean
@@ -65,6 +63,7 @@ const emit = defineEmits<{
 }>()
 
 const placeholderValues = ref<Record<string, string>>({})
+const suggestionScope = provideTextSuggestionScope()
 
 watch(
   () => props.quickie,
@@ -143,11 +142,16 @@ const isLastPlaceholderField = (index: number): boolean => {
   return index === quickie.fields.length - 1
 }
 
+const fieldAssistContext = (fieldKey: string): string =>
+  `quickie.${props.quickie?.key ?? 'template'}.${fieldKey.toLowerCase()}`
+
 const handleCancel = () => {
+  suggestionScope.reset()
   emit('cancel')
 }
 
 const handleAccept = () => {
+  suggestionScope.reset()
   emit('accept', placeholderPreviewText.value)
 }
 </script>
