@@ -390,9 +390,9 @@ export const useDokuStore = defineStore('doku', {
       link.remove()
       URL.revokeObjectURL(url)
     },
-    markAutoProtocolResetPrompted(referenceTime: number = Date.now()) {
+    async markAutoProtocolResetPrompted(referenceTime: number = Date.now()) {
       this.lastAutoProtocolResetPromptAt = new Date(referenceTime).toISOString()
-      void this.persistToStorage()
+      await this.persistToStorage()
     },
     async autoResetProtocol() {
       await saveTemporaryProtocolState({

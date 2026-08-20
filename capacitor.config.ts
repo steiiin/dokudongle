@@ -6,7 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   plugins: {
     SplashScreen: {
-      backgroundColor: "#1e1e1e"
+      backgroundColor: "#1e1e1e",
+      launchAutoHide: false,
     },
     SystemBars: {
       insetsHandling: "disable",

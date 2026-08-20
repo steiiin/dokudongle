@@ -1,71 +1,90 @@
 <template>
   <IonApp>
-    <div v-if="!isPreloaded" class="app-loading" role="status" aria-live="polite">
-      <IonIcon :src="hourglassOutline"></IonIcon>
-    </div>
-    <IonRouterOutlet />
+    <main v-if="startup.state.status === 'loading'" class="startup-screen" role="status" aria-live="polite">
+      <span class="startup-hourglass" aria-hidden="true">⌛</span>
+      <p>DokuDongle wird geladen …</p>
+    </main>
+
+    <main v-else-if="startup.state.status === 'error'" class="startup-screen startup-error" role="alert">
+      <h1>Start fehlgeschlagen</h1>
+      <p>{{ startup.state.errorMessage }}</p>
+      <button type="button" @click="startup.reload">App neu laden</button>
+    </main>
+
+    <IonRouterOutlet v-else />
   </IonApp>
 </template>
+
 <script setup lang="ts">
-
-import { onMounted, nextTick, ref } from 'vue'
+import { nextTick, onMounted } from 'vue'
+import { Capacitor } from '@capacitor/core'
+import { SplashScreen } from '@capacitor/splash-screen'
 import { IonApp, IonRouterOutlet } from '@ionic/vue'
-import { useRoute, useRouter } from 'vue-router'
-import { hourglassOutline } from 'ionicons/icons'
 
-const isPreloaded = ref(false)
-const router = useRouter()
-const route = useRoute()
+import { appStartup } from '@/services/app-startup'
 
-const ROUTE_PRELOAD_TARGETS = ['/tabs/connect', '/tabs/doku', '/tabs/preview']
+const startup = appStartup
 
-async function waitForFrame() {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => resolve())
-  })
-}
+const waitForFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
 onMounted(async () => {
-  await router.isReady()
+  // Commit the loading shell before releasing the native splash screen.
+  await nextTick()
 
-  const initialPath = route.fullPath
-  const preloadPaths = ROUTE_PRELOAD_TARGETS.filter((path, index, paths) => paths.indexOf(path) === index)
-
-  for (const path of preloadPaths) {
-    if (router.currentRoute.value.fullPath !== path) {
-      await router.replace(path)
-    }
-
-    await nextTick()
-    await waitForFrame()
+  if (Capacitor.isNativePlatform()) {
+    void SplashScreen.hide()
+      .catch(error => console.warn('[startup] Could not hide the native splash screen.', error))
   }
 
-  if (router.currentRoute.value.fullPath !== initialPath) {
-    await router.replace(initialPath)
-    await nextTick()
-    await waitForFrame()
-  }
-
-  isPreloaded.value = true
+  // Give the web view a paint opportunity before storage or route work begins.
+  await waitForFrame()
+  void startup.start()
 })
-
 </script>
-<style scoped>
 
-.app-loading
-{
+<style scoped>
+.startup-screen {
   position: absolute;
-  top: 0; left: 0;
-  right: 0; bottom: 0;
+  inset: 0;
   z-index: 999;
-  background-color: var(--ion-background-color);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  padding: 2rem;
+  background-color: var(--ion-background-color, #121212);
+  color: var(--ion-text-color, #fff);
+  text-align: center;
 }
 
-.app-loading ion-icon {
+.startup-screen p,
+.startup-screen h1 {
+  margin: 0;
+}
+
+.startup-hourglass {
   font-size: 2rem;
 }
 
+.startup-error h1 {
+  font-size: 1.35rem;
+}
+
+.startup-error p {
+  max-width: 32rem;
+  line-height: 1.5;
+}
+
+.startup-error button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  background: var(--ion-color-primary, #4d8dff);
+  color: var(--ion-color-primary-contrast, #000);
+  font: inherit;
+  font-weight: 600;
+}
 </style>
