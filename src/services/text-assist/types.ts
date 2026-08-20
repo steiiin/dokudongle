@@ -23,9 +23,12 @@ export interface TextInputChange {
   data: string | null
 }
 
+export type ImeAutocorrectFlag = 'capitalize' | 'phone'
+
 export interface ImeDictionary {
   words?: readonly string[]
   shortcuts?: Readonly<Record<string, string>>
+  autocorrect?: readonly ImeAutocorrectFlag[]
 }
 
 export interface TextContext {

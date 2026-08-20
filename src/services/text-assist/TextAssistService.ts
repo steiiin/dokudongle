@@ -1,4 +1,5 @@
 import { AutocorrectService } from './AutocorrectService'
+import { ImeAutocorrectService } from './ImeAutocorrectService'
 import { SnippetService } from './SnippetService'
 import { ShortcutReplacementService } from './ShortcutReplacementService'
 import { SuggestionService } from './SuggestionService'
@@ -7,6 +8,7 @@ import { TextAssistStateRepository, type TextAssistStateRepositoryLike } from '.
 import { UserDictionaryService } from './UserDictionaryService'
 import type {
   AppliedCorrection,
+  ImeAutocorrectFlag,
   ImeDictionary,
   TextAssistUpdate,
   TextContext,
@@ -28,11 +30,13 @@ import {
 interface ResolvedImeDictionary {
   words: string[]
   shortcuts: Record<string, string>
+  autocorrect: ImeAutocorrectFlag[]
 }
 
 export class TextAssistService {
   readonly repository: TextAssistStateRepositoryLike
   readonly autocorrect: AutocorrectService
+  readonly imeAutocorrect: ImeAutocorrectService
   readonly userDictionary: UserDictionaryService
   readonly snippets: SnippetService
   readonly shortcutReplacements: ShortcutReplacementService
@@ -43,6 +47,7 @@ export class TextAssistService {
   constructor(repository: TextAssistStateRepositoryLike = new TextAssistStateRepository()) {
     this.repository = repository
     this.autocorrect = new AutocorrectService(repository)
+    this.imeAutocorrect = new ImeAutocorrectService()
     this.userDictionary = new UserDictionaryService(repository, this.autocorrect)
     this.snippets = new SnippetService()
     this.shortcutReplacements = new ShortcutReplacementService()
@@ -78,14 +83,19 @@ export class TextAssistService {
     const corrected = !snippetCompletion.active && !shortcutMutation
       ? await this.autocorrect.correctAfterDelimiter(change, resolvedDictionary.words)
       : null
+    const baseMutation = snippetCompletion.mutation ?? shortcutMutation ?? corrected?.mutation
+    const imeAutocorrectMutation = this.imeAutocorrect.correctAfterDelimiter(
+      change,
+      resolvedDictionary.autocorrect,
+      baseMutation,
+    )
+    const mutation = imeAutocorrectMutation ?? baseMutation
     let snapshot = change.after
-    if (snippetCompletion.mutation) snapshot = this.snapshotAfterMutation(change.after, snippetCompletion.mutation)
-    else if (shortcutMutation) snapshot = this.snapshotAfterMutation(change.after, shortcutMutation)
-    else if (corrected) snapshot = this.snapshotAfterMutation(change.after, corrected.mutation)
+    if (mutation) snapshot = this.snapshotAfterMutation(change.after, mutation)
     else if (!snippetCompletion.active) this.learnCompletedInput(change)
 
     return {
-      mutation: snippetCompletion.mutation ?? shortcutMutation ?? corrected?.mutation,
+      mutation,
       suggestions: await this.getSuggestions(change.sessionId, change.contextId, snapshot),
     }
   }
@@ -97,13 +107,25 @@ export class TextAssistService {
     this.invalidateAutomaticSession(change.sessionId)
     const resolvedDictionary = this.resolveImeDictionary(dictionary)
     const shortcutMutation = this.shortcutReplacements.replaceAfterDelimiter(change, resolvedDictionary.shortcuts)
-    if (shortcutMutation) return shortcutMutation
-
-    const corrected = await this.autocorrect.correctAfterDelimiter(change, resolvedDictionary.words)
-    return corrected?.mutation ?? null
+    const corrected = shortcutMutation
+      ? null
+      : await this.autocorrect.correctAfterDelimiter(change, resolvedDictionary.words)
+    const baseMutation = shortcutMutation ?? corrected?.mutation
+    return this.imeAutocorrect.correctAfterDelimiter(
+      change,
+      resolvedDictionary.autocorrect,
+      baseMutation,
+    ) ?? baseMutation ?? null
   }
 
   handleBackspace(sessionId: string, snapshot: TextInputSnapshot): TextMutation | null {
+    const revertedImeAutocorrect = this.imeAutocorrect.tryUndo(sessionId, snapshot)
+    if (revertedImeAutocorrect) {
+      this.shortcutReplacements.invalidate(sessionId)
+      const correction = this.autocorrect.invalidate(sessionId)
+      if (correction) void this.recordRejection(correction)
+      return revertedImeAutocorrect
+    }
     const revertedShortcut = this.shortcutReplacements.tryUndo(sessionId, snapshot)
     if (revertedShortcut) return revertedShortcut
     const undone = this.autocorrect.tryUndo(sessionId, snapshot)
@@ -113,12 +135,19 @@ export class TextAssistService {
   }
 
   handleAutomaticBackspace(sessionId: string, snapshot: TextInputSnapshot): TextMutation | null {
+    const revertedImeAutocorrect = this.imeAutocorrect.tryUndo(sessionId, snapshot)
+    if (revertedImeAutocorrect) {
+      this.shortcutReplacements.invalidate(sessionId)
+      this.autocorrect.invalidate(sessionId)
+      return revertedImeAutocorrect
+    }
     const revertedShortcut = this.shortcutReplacements.tryUndo(sessionId, snapshot)
     if (revertedShortcut) return revertedShortcut
     return this.autocorrect.tryUndo(sessionId, snapshot)?.mutation ?? null
   }
 
   invalidateAutomaticSession(sessionId: string): void {
+    this.imeAutocorrect.invalidate(sessionId)
     this.shortcutReplacements.invalidate(sessionId)
     this.autocorrect.invalidate(sessionId)
   }
@@ -152,6 +181,7 @@ export class TextAssistService {
   }
 
   invalidateSession(sessionId: string, snapshot?: TextInputSnapshot): void {
+    this.imeAutocorrect.invalidate(sessionId)
     this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction && snapshot) this.learnAcceptedCorrection(correction, snapshot.text)
@@ -174,6 +204,7 @@ export class TextAssistService {
   }
 
   private acceptPendingAutomaticChange(sessionId: string, snapshot: TextInputSnapshot): void {
+    this.imeAutocorrect.invalidate(sessionId)
     this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction) this.learnAcceptedCorrection(correction, snapshot.text)
@@ -196,7 +227,13 @@ export class TextAssistService {
       shortcuts[trigger] = replacement
     }
 
-    return { words: [...words.values()], shortcuts }
+    const autocorrect: ImeAutocorrectFlag[] = []
+    for (const flag of dictionary.autocorrect ?? []) {
+      if (flag !== 'capitalize' && flag !== 'phone') continue
+      if (!autocorrect.includes(flag)) autocorrect.push(flag)
+    }
+
+    return { words: [...words.values()], shortcuts, autocorrect }
   }
 
   private learnAcceptedCorrection(correction: AppliedCorrection, text: string): void {

@@ -6,7 +6,13 @@ import { TextAssistService } from '@/services/text-assist/TextAssistService'
 import { TextLearningService } from '@/services/text-assist/TextLearningService'
 import { emptyTextAssistState, type TextAssistStateRepositoryLike } from '@/services/text-assist/persistence'
 import { isCompletionDelimiter, wordAroundCursor } from '@/services/text-assist/text'
-import type { TextAssistPersistedState, TextInputChange, TextInputSnapshot, TextMutation } from '@/services/text-assist/types'
+import type {
+  ImeDictionary,
+  TextAssistPersistedState,
+  TextInputChange,
+  TextInputSnapshot,
+  TextMutation,
+} from '@/services/text-assist/types'
 
 class MemoryRepository implements TextAssistStateRepositoryLike {
   state: TextAssistPersistedState = emptyTextAssistState()
@@ -172,6 +178,93 @@ describe('automatic-only text assist', () => {
     expect(repository.state.rejectedCorrections).toEqual([])
     expect(repository.state.userDictionary).toEqual([])
     expect(repository.saveNow).not.toHaveBeenCalled()
+  })
+})
+
+describe('IME autocorrect flags', () => {
+  test('capitalizes the completed field prefix and preserves delimiters, suffixes, and carets', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const dictionary = {
+      autocorrect: ['unknown', 'capitalize', 'capitalize'],
+    } as unknown as ImeDictionary
+    const atEnd = await service.processAutomaticInput(
+      change('capitalize-end', '  max', '  max '),
+      dictionary,
+    )
+
+    expect(atEnd).toEqual({ start: 0, end: 5, replacement: 'Max', cursor: 4 })
+    expect(applyMutation('  max ', atEnd!)).toBe('Max ')
+
+    const inMiddle = await service.processAutomaticInput({
+      sessionId: 'capitalize-middle',
+      contextId: 'contact.name',
+      before: snapshot('max Rest', 3),
+      after: snapshot('max, Rest', 4),
+      inputType: 'insertText',
+      data: ',',
+    }, { autocorrect: ['capitalize'] })
+
+    expect(inMiddle).toEqual({ start: 0, end: 3, replacement: 'Max', cursor: 4 })
+    expect(applyMutation('max, Rest', inMiddle!)).toBe('Max, Rest')
+  })
+
+  test('formats a completed telephone prefix with the legacy grouping', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const mutation = await service.processAutomaticInput(
+      change('phone', '0151-1234567', '0151-1234567 '),
+      { autocorrect: ['phone'] },
+    )
+
+    expect(mutation).toEqual({ start: 0, end: 12, replacement: '0151 123 4567', cursor: 14 })
+    expect(applyMutation('0151-1234567 ', mutation!)).toBe('0151 123 4567 ')
+  })
+
+  test('composes shortcut replacement with configured field normalization', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const mutation = await service.processAutomaticInput(
+      change('shortcut-capitalize', 'dd', 'dd '),
+      {
+        shortcuts: { dd: 'dokuDongle' },
+        autocorrect: ['capitalize'],
+      },
+    )
+
+    expect(mutation).toEqual({ start: 0, end: 2, replacement: 'DokuDongle', cursor: 11 })
+    expect(applyMutation('dd ', mutation!)).toBe('DokuDongle ')
+  })
+
+  test('immediate Backspace restores the exact pre-transform text and invalidation disables undo', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const mutation = await service.processAutomaticInput(
+      change('profile-undo', '  max', '  max '),
+      { autocorrect: ['capitalize'] },
+    )
+    const corrected = applyMutation('  max ', mutation!)
+
+    const undo = service.handleAutomaticBackspace('profile-undo', snapshot(corrected))
+    expect(undo).toEqual({ start: 0, end: 4, replacement: '  max', cursor: 5 })
+    expect(applyMutation(corrected, undo!)).toBe('  max')
+    expect(service.handleAutomaticBackspace('profile-undo', snapshot('  max'))).toBeNull()
+
+    const invalidatedMutation = await service.processAutomaticInput(
+      change('profile-invalidated', 'max', 'max '),
+      { autocorrect: ['capitalize'] },
+    )
+    const invalidatedText = applyMutation('max ', invalidatedMutation!)
+    service.invalidateAutomaticSession('profile-invalidated')
+    expect(service.handleAutomaticBackspace('profile-invalidated', snapshot(invalidatedText))).toBeNull()
+  })
+
+  test('does not apply flags without a delimiter or during composition and selection replacement', async () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const dictionary = { autocorrect: ['capitalize'] as const }
+
+    expect(await service.processAutomaticInput(change('no-delimiter', 'ma', 'max'), dictionary)).toBeNull()
+    expect(await service.processAutomaticInput(change('composing', 'max', 'max ', 4, true), dictionary)).toBeNull()
+    expect(await service.processAutomaticInput({
+      ...change('selection', 'max', 'max '),
+      before: { ...snapshot('max'), selectionStart: 0, selectionEnd: 3 },
+    }, dictionary)).toBeNull()
   })
 })
 

@@ -35,7 +35,6 @@ const props = defineProps<{
   label?: string,
   placeholder?: string,
   labelColor?: string,
-  autocorrectFn?: (draft: string) => string,
   inputmode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'search' | 'email' | 'url',
   imeDictionary?: ImeDictionary,
   assistContextId?: string,
@@ -133,17 +132,8 @@ const handleBlur = () => {
   const value = draft.trim()
   if (value === '') { emit('leaved-empty') }
 
-  if (!props.autocorrectFn)
-  {
-    if (draft !== value) {
-      emit('update:modelValue', value)
-    }
-    return
-  }
-
-  const corrected = props.autocorrectFn(draft)
-  if (corrected !== draft) {
-    emit('update:modelValue', corrected)
+  if (draft !== value) {
+    emit('update:modelValue', value)
   }
 
 }

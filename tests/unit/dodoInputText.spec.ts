@@ -1,10 +1,13 @@
 import { flushPromises, mount, shallowMount } from '@vue/test-utils'
-import { defineComponent, onMounted, ref } from 'vue'
+import { defineComponent, nextTick, onMounted, ref } from 'vue'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import DodoInputSelectOptional from '@/components/DodoInputSelectOptional.vue'
+import DodoInputQuick from '@/components/DodoInputQuick.vue'
 import DodoInputText from '@/components/DodoInputText.vue'
+import DodoInputTextOptional from '@/components/DodoInputTextOptional.vue'
+import DodoInputTreatment from '@/components/DodoInputTreatment.vue'
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
@@ -174,6 +177,39 @@ describe('DodoInputText single-line IME', () => {
     wrapper.unmount()
   })
 
+  test('applies configured field autocorrection and supports immediate Backspace undo', async () => {
+    const wrapper = mountInput({ autocorrect: ['capitalize'] })
+    await flushPromises()
+    const input = wrapper.get('input').element as HTMLInputElement
+
+    insertText(input, 'max', 'max ', ' ')
+    await vi.waitFor(() => expect(input.value).toBe('Max '))
+
+    input.dispatchEvent(new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      inputType: 'deleteContentBackward',
+    }))
+    await flushPromises()
+
+    expect(input.value).toBe('max')
+    expect(input.selectionStart).toBe(3)
+    wrapper.unmount()
+  })
+
+  test('does not run field autocorrection on blur without a delimiter', async () => {
+    const wrapper = mountInput({ autocorrect: ['capitalize'] })
+    await flushPromises()
+    const input = wrapper.get('input').element as HTMLInputElement
+    input.value = '  max'
+
+    input.dispatchEvent(new FocusEvent('blur', { bubbles: true }))
+    await flushPromises()
+
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toBe('max')
+    wrapper.unmount()
+  })
+
   test('shows and applies @ location suggestions through the scoped host', async () => {
     const wrapper = mountAssistedInput()
     await flushPromises()
@@ -291,5 +327,53 @@ describe('single-line IME dictionary forwarding', () => {
     })
 
     expect(wrapper.getComponent(DodoInputSelect).props('imeDictionary')).toEqual(dictionary)
+  })
+
+  test('forwards the dictionary from DodoInputTextOptional to DodoInputText', () => {
+    const wrapper = shallowMount(DodoInputTextOptional, {
+      props: {
+        toggleLabel: 'Enabled',
+        toggle: true,
+        text: '',
+        imeDictionary: dictionary,
+      },
+      global: { renderStubDefaultSlot: true },
+    })
+
+    expect(wrapper.getComponent(DodoInputText).props('imeDictionary')).toEqual(dictionary)
+  })
+
+  test('forwards the dictionary from DodoInputQuick to DodoInputText', async () => {
+    const wrapper = shallowMount(DodoInputQuick, {
+      props: {
+        modelValue: '',
+        label: 'Quick',
+        icon: 'test-icon',
+        placeholder: 'Quick input',
+        imeDictionary: dictionary,
+      },
+      global: { renderStubDefaultSlot: true },
+    })
+
+    await wrapper.get('ion-item-stub').trigger('click')
+    await nextTick()
+
+    expect(wrapper.getComponent(DodoInputText).props('imeDictionary')).toEqual(dictionary)
+  })
+
+  test('forwards the dictionary from DodoInputTreatment to DodoInputText', async () => {
+    const wrapper = shallowMount(DodoInputTreatment, {
+      props: {
+        modelValue: '',
+        placeholder: 'Treatment input',
+        imeDictionary: dictionary,
+      },
+      global: { renderStubDefaultSlot: true },
+    })
+
+    await wrapper.get('.add-treatment').trigger('click')
+    await nextTick()
+
+    expect(wrapper.getComponent(DodoInputText).props('imeDictionary')).toEqual(dictionary)
   })
 })

@@ -43,7 +43,7 @@
           <DodoInputText ref="inputName"
             v-model="currentContact.contactName"
             label="" placeholder="z.B. Ehepartner"
-            :ime-dictionary="{ /* activate IME */ }">
+            :ime-dictionary="{ autocorrect: ['capitalize'] }">
           </DodoInputText>
         </ion-item>
         <ion-item-divider>
@@ -54,7 +54,7 @@
             v-model="currentContact.telephone"
             label="" placeholder="z.B. 0151 23456789"
             inputmode="tel" type="tel"
-            :beautify-fn="correctPhone">
+            :ime-dictionary="{ autocorrect: ['phone'] }">
           </DodoInputText>
         </ion-item>
       </ion-list>
@@ -79,8 +79,6 @@ import type { UnwrapRef } from 'vue'
 
 import { addCircle } from 'ionicons/icons'
 
-import { correctPhone } from '@/utils/autocorrect/telephone'
-import { basicCap } from '@/utils/autocorrect/basic'
 import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 import { SampleContactsItem, SampleContacts } from '@/types/protocol/sample'
@@ -134,9 +132,6 @@ const cancelEdit = () => {
 
 const saveContact = () => {
   if (!modalValid.value) return
-
-  currentContact.value.contactName = basicCap(currentContact.value.contactName)
-  currentContact.value.telephone = correctPhone(currentContact.value.telephone)
 
   const updated = cloneModelValue()
   if (currentNew.value) {

@@ -13,7 +13,7 @@
         ref="treatInput"
         v-model="quickValue"
         :placeholder="'z.B. ' + placeholder"
-        :autocorrectFn="autocorrectFn"
+        :ime-dictionary="imeDictionary"
         @leaved-empty="clearQuick"
       />
       <IonButton v-if="hasQuickInput" size="default" fill="clear" color="dark" @click="clearQuick">
@@ -29,6 +29,7 @@ import { computed, ref } from 'vue'
 import { closeOutline, pulseOutline } from 'ionicons/icons'
 
 import { notEmpty } from '@/utils/filter'
+import type { ImeDictionary } from '@/services/text-assist'
 
 // ############################################################################
 
@@ -39,7 +40,7 @@ const props = withDefaults(
     lines?: 'full' | 'inset' | 'none'
     icon: string
     placeholder: string
-    autocorrectFn?: (draft: string) => string
+    imeDictionary?: ImeDictionary
   }>(),
   {
     icon: pulseOutline,

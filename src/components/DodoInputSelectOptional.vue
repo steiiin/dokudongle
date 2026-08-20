@@ -16,7 +16,6 @@
       :empty-label="props.emptyLabel"
       :options="props.options"
       :allow-custom="props.allowCustom" :custom-label="props.customLabel" :custom-placeholder="props.customPlaceholder"
-      :autocorrect-fn="props.autocorrectFn"
       :ime-dictionary="props.imeDictionary"
       :assist-context-id="props.assistContextId"
       @update:model-value="onTextChange"
@@ -48,7 +47,6 @@ const props = withDefaults(defineProps<{
   customLabel?: string
   customPlaceholder?: string
 
-  autocorrectFn?: (draft: string) => string
   imeDictionary?: ImeDictionary
   assistContextId?: string
   lines?: 'full' | 'inset' | 'none'

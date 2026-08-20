@@ -17,7 +17,7 @@
         ref="treatInput" label=""
         v-model="treatmentValue"
         :placeholder="'z.B. ' + placeholder"
-        :autocorrectFn="autocorrectFn"
+        :ime-dictionary="imeDictionary"
         @leaved-empty="clearTreatment"
       />
       <IonButton v-if="hasTreatmentInput" size="default" fill="clear" color="dark" @click="clearTreatment">
@@ -34,13 +34,14 @@ import { computed, ref } from 'vue'
 import { closeOutline, pulseOutline } from 'ionicons/icons'
 
 import { notEmpty } from '@/utils/filter'
+import type { ImeDictionary } from '@/services/text-assist'
 
 // ############################################################################
 
 const props = defineProps<{
   modelValue: string
   placeholder: string
-  autocorrectFn?: (draft: string) => string
+  imeDictionary?: ImeDictionary
 }>()
 
 const emit = defineEmits<{

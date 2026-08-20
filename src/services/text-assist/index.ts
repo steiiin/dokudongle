@@ -1,6 +1,7 @@
 export * from './types'
 export { TextAssistService, textAssistService } from './TextAssistService'
 export { AutocorrectService } from './AutocorrectService'
+export { ImeAutocorrectService } from './ImeAutocorrectService'
 export { UserDictionaryService } from './UserDictionaryService'
 export { SnippetService } from './SnippetService'
 export { ShortcutReplacementService } from './ShortcutReplacementService'
