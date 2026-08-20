@@ -1,7 +1,8 @@
-import { IonFabButton, IonModal } from '@ionic/vue'
+import { IonFabButton } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
 import protocolCheckService, { type ProtocolCheckResult } from '@/services/protocol-check'
 import TabPagePreview from '@/views/TabPagePreview.vue'
 
@@ -46,18 +47,23 @@ describe('TabPagePreview protocol check', () => {
     expect(protocolCheckService.checkProtocol).toHaveBeenCalledOnce()
     expect(protocolCheckService.checkProtocol).toHaveBeenCalledWith(generatedProtocol)
     expect(fab.props('disabled')).toBe(true)
-    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(true)
-    expect(wrapper.text()).toContain('Das Protokoll wird geprüft')
+    expect(wrapper.getComponent(DodoProtocolCheckModal).props()).toMatchObject({
+      isOpen: true,
+      isChecking: true,
+    })
 
     resolveCheck(successfulResult)
     await flushPromises()
 
     expect(fab.props('disabled')).toBe(false)
-    expect(wrapper.text()).toContain('Keine Auffälligkeiten gefunden.')
+    expect(wrapper.getComponent(DodoProtocolCheckModal).props()).toMatchObject({
+      isChecking: false,
+      result: successfulResult,
+    })
   })
 
-  test('renders all issue details in API order', async () => {
-    vi.mocked(protocolCheckService.checkProtocol).mockResolvedValue({
+  test('passes all issues to the shared modal in API order', async () => {
+    const result: ProtocolCheckResult = {
       status: 'warning',
       issues: [
         {
@@ -77,20 +83,14 @@ describe('TabPagePreview protocol check', () => {
           check: 'Zweite Prüfung',
         },
       ],
-    })
+    }
+    vi.mocked(protocolCheckService.checkProtocol).mockResolvedValue(result)
     const wrapper = mountPreview()
 
     await wrapper.getComponent(IonFabButton).trigger('click')
     await flushPromises()
 
-    const text = wrapper.text()
-    expect(text).toContain('Widerspruch')
-    expect(text).toContain('Kontextlücke')
-    expect(text).toContain('0.91')
-    expect(text).toContain('Beleg A')
-    expect(text).toContain('Beleg B')
-    expect(text).toContain('Erste Prüfung')
-    expect(text.indexOf('Erste Auffälligkeit')).toBeLessThan(text.indexOf('Zweite Auffälligkeit'))
+    expect(wrapper.getComponent(DodoProtocolCheckModal).props('result')).toEqual(result)
   })
 
   test('shows a retryable error without exposing the service error', async () => {
@@ -102,17 +102,15 @@ describe('TabPagePreview protocol check', () => {
     await wrapper.getComponent(IonFabButton).trigger('click')
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Prüfung fehlgeschlagen')
+    const modal = wrapper.getComponent(DodoProtocolCheckModal)
+    expect(modal.props('checkError')).toBe(true)
     expect(wrapper.text()).not.toContain('secret API detail')
 
-    const retry = wrapper.findAllComponents({ name: 'IonButton' })
-      .find((button) => button.text().includes('Erneut versuchen'))
-    expect(retry).toBeDefined()
-    await retry!.trigger('click')
+    modal.vm.$emit('retry')
     await flushPromises()
 
     expect(protocolCheckService.checkProtocol).toHaveBeenCalledTimes(2)
-    expect(wrapper.text()).toContain('Keine Auffälligkeiten gefunden.')
+    expect(modal.props('result')).toEqual(successfulResult)
   })
 
   test('closes a completed result modal', async () => {
@@ -121,11 +119,10 @@ describe('TabPagePreview protocol check', () => {
     await wrapper.getComponent(IonFabButton).trigger('click')
     await flushPromises()
 
-    const close = wrapper.findAllComponents({ name: 'IonButton' })
-      .find((button) => button.text().includes('Schließen'))
-    expect(close).toBeDefined()
-    await close!.trigger('click')
+    const modal = wrapper.getComponent(DodoProtocolCheckModal)
+    modal.vm.$emit('close')
+    await wrapper.vm.$nextTick()
 
-    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(false)
+    expect(modal.props('isOpen')).toBe(false)
   })
 })

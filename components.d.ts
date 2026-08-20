@@ -33,6 +33,7 @@ declare module 'vue' {
     DodoListArticle: typeof import('./src/components/DodoListArticle.vue')['default']
     DodoListPreview: typeof import('./src/components/DodoListPreview.vue')['default']
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
+    DodoProtocolCheckModal: typeof import('./src/components/DodoProtocolCheckModal.vue')['default']
     DodoQuickieAbdomonalPain: typeof import('./src/components/quickie-components/DodoQuickieAbdomonalPain.vue')['default']
     DodoQuickieExcretionsBowels: typeof import('./src/components/quickie-components/DodoQuickieExcretionsBowels.vue')['default']
     DodoQuickieExcretionsUrinary: typeof import('./src/components/quickie-components/DodoQuickieExcretionsUrinary.vue')['default']

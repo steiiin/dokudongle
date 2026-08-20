@@ -12,7 +12,7 @@
 
     <IonContent :fullscreen="true">
       <textarea readonly :value="localPreview"></textarea>
-      <IonFab slot="fixed" vertical="bottom" horizontal="end">
+      <IonFab slot="fixed" vertical="bottom" horizontal="end" v-if="hasntPlaceholders">
         <IonFabButton
           color="primary"
           aria-label="Protokoll prüfen"
@@ -25,75 +25,22 @@
       </IonFab>
     </IonContent>
 
-    <IonModal :is-open="isCheckModalOpen" class="protocol-check-modal" @did-dismiss="closeCheckModal">
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Protokollprüfung</IonTitle>
-          <IonButtons slot="end">
-            <IonButton :disabled="isChecking" @click="closeCheckModal">Schließen</IonButton>
-          </IonButtons>
-        </IonToolbar>
-        <IonProgressBar v-if="isChecking" type="indeterminate"></IonProgressBar>
-      </IonHeader>
-
-      <IonContent class="ion-padding">
-        <div v-if="isChecking" class="check-state" role="status" aria-live="polite">
-          <IonSpinner name="crescent"></IonSpinner>
-          <p>Das Protokoll wird geprüft …</p>
-        </div>
-
-        <div v-else-if="checkError" class="check-state check-error" role="alert">
-          <IonIcon :src="alertCircleOutline"></IonIcon>
-          <h2>Prüfung fehlgeschlagen</h2>
-          <p>Das Protokoll konnte nicht geprüft werden. Bitte versuche es erneut.</p>
-          <IonButton @click="checkProtocol">Erneut versuchen</IonButton>
-        </div>
-
-        <div v-else-if="isSuccessfulCheck" class="check-state check-success" role="status">
-          <IonIcon :src="checkmarkCircleOutline"></IonIcon>
-          <h2>Keine Auffälligkeiten gefunden.</h2>
-        </div>
-
-        <template v-else-if="checkResult">
-          <IonList v-if="checkResult.issues.length" lines="none">
-            <IonItem v-for="(issue, index) in checkResult.issues" :key="index" class="protocol-issue">
-              <IonLabel class="ion-text-wrap" style="margin: .5rem 0 .25rem 0">
-                <div class="issue-labels">
-                  <IonBadge :color="severityColor(issue.severity)">
-                    {{ severityLabel(issue.severity) }}
-                  </IonBadge>
-                  <IonBadge color="medium">{{ issueTypeLabel(issue.type) }}</IonBadge>
-                </div>
-                <h2>{{ issue.message }}</h2>
-                <p><strong>Konfidenz:</strong> {{ issue.confidence }}</p>
-                <div v-if="issue.evidence.length" class="issue-details">
-                  <strong>Evidenz:</strong>
-                  <ul>
-                    <li v-for="(evidence, evidenceIndex) in issue.evidence" :key="evidenceIndex">
-                      {{ evidence }}
-                    </li>
-                  </ul>
-                </div>
-                <p class="issue-details"><strong>Prüfung:</strong> {{ issue.check }}</p>
-              </IonLabel>
-            </IonItem>
-          </IonList>
-          <p v-else class="warning-without-issues">
-            Die Prüfung hat eine Warnung gemeldet, aber keine Details zurückgegeben.
-          </p>
-        </template>
-      </IonContent>
-    </IonModal>
+    <DodoProtocolCheckModal
+      :is-open="isCheckModalOpen"
+      :is-checking="isChecking"
+      :result="checkResult"
+      :check-error="checkError"
+      @close="closeCheckModal"
+      @retry="checkProtocol"
+    />
   </IonPage>
 </template>
 <script setup lang="ts">
 
 import { onIonViewDidEnter } from '@ionic/vue'
-import { alertCircleOutline, checkmarkCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons'
+import { shieldCheckmarkOutline } from 'ionicons/icons'
 
 import protocolCheckService, {
-  type ProtocolCheckIssueSeverity,
-  type ProtocolCheckIssueType,
   type ProtocolCheckResult,
 } from '@/services/protocol-check'
 import { useDokuStore } from '@/store/doku'
@@ -109,23 +56,6 @@ const checkError = ref(false)
 onIonViewDidEnter(() => {
   localPreview.value = store.generatedProtocol
 })
-
-const isSuccessfulCheck = computed(() =>
-  checkResult.value?.status === 'ok' && checkResult.value.issues.length === 0,
-)
-
-const issueTypeLabels: Record<ProtocolCheckIssueType, string> = {
-  contradiction: 'Widerspruch',
-  possible_default_value: 'Möglicher Standardwert',
-  context_gap: 'Kontextlücke',
-  incomplete_protocol: 'Unvollständiges Protokoll',
-}
-
-const severityLabels: Record<ProtocolCheckIssueSeverity, string> = {
-  low: 'Niedrig',
-  medium: 'Mittel',
-  high: 'Hoch',
-}
 
 const checkProtocol = async () => {
   if (isChecking.value) return
@@ -151,14 +81,7 @@ const closeCheckModal = () => {
   isCheckModalOpen.value = false
 }
 
-const issueTypeLabel = (type: ProtocolCheckIssueType) => issueTypeLabels[type]
-const severityLabel = (severity: ProtocolCheckIssueSeverity) => severityLabels[severity]
-
-const severityColor = (severity: ProtocolCheckIssueSeverity) => {
-  if (severity === 'high') return 'danger'
-  if (severity === 'medium') return 'warning'
-  return 'medium'
-}
+const hasntPlaceholders = computed(() => !localPreview.value.includes('['))
 
 </script>
 <style scoped lang="scss">
@@ -177,55 +100,6 @@ const severityColor = (severity: ProtocolCheckIssueSeverity) => {
 
   ion-fab {
     margin-bottom: 0.5rem;
-  }
-
-  .check-state {
-    min-height: 50vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
-
-  .check-state > ion-icon {
-    font-size: 4rem;
-  }
-
-  .check-success > ion-icon {
-    color: var(--ion-color-success);
-  }
-
-  .check-error > ion-icon {
-    color: var(--ion-color-danger);
-  }
-
-  .issues-heading {
-    margin: 0 0 1rem;
-  }
-
-  .protocol-issue + .protocol-issue {
-    margin-top: 0.5rem;
-  }
-
-  .issue-labels {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .issue-details {
-    white-space: normal;
-  }
-
-  .issue-details ul {
-    margin: 0.25rem 0 0.75rem;
-    padding-left: 1.25rem;
-  }
-
-  .warning-without-issues {
-    color: var(--ion-color-warning-shade);
   }
 
 </style>
