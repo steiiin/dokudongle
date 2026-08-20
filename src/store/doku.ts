@@ -643,7 +643,7 @@ export const useDokuStore = defineStore('doku', {
       const isTransport: boolean = state.doku.course == ProtocolCourse.TRANSPORT
       const requireSceneDetails: boolean = isTransport && !isVerlegung && !isEinweisung
       const requireFlavors: boolean = state.doku.course == ProtocolCourse.TRANSPORT
-      const requireABCDE: boolean = !isNoEmergencyCall && isTransport && !isVerlegung
+      const requireABCDE: boolean = isTransport && !isNoEmergencyCall && !isVerlegung
       const requireSampler: boolean = isTransport && !isVerlegung
       const requireSampleSymptoms: boolean = requireSampler && !isNoEmergencyCall
       const requireSaamed: boolean = !isNoEmergencyCall
