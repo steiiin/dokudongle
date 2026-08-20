@@ -5,7 +5,7 @@
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
       assist-context-id="sampler.symptoms"
       title="Symptome" placeholder="Beschreibe ..."
-      :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
+      :quickieKeys="quickieKeys">
       Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>
       Infos ergänzen.
     </DodoInputTextArea>
@@ -15,8 +15,6 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-
-import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
 import { QU_SYM_AbdominalPain, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST, QU_SCHWINDEL } from '@/data/quickies'

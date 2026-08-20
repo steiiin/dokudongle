@@ -8,7 +8,7 @@
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
         assist-context-id="sampler.pler"
         title="PLER" placeholder="Beschreibe ..."
-        :quickieKeys="quickieKeys" :enhance-fn="enhanceGeneral">
+        :quickieKeys="quickieKeys">
         <p><b>(P)</b> Beschreibung von:</p>
         <ul>
           <li>Vorerkrankungen</li>
@@ -27,8 +27,6 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-
-import { enhanceGeneral } from '@/utils/gpt/general'
 
 import { useDokuStore } from '@/store/doku'
 import { QU_PLER_Schwangerschaft } from '@/data/quickies'

@@ -7,8 +7,7 @@
 
       <DodoInputTextArea v-model="store.doku.situation"
         assist-context-id="situation"
-        title="Situation" placeholder="Beschreibe ..."
-        :enhance-fn="enhanceGeneral" mandatory
+        title="Situation" placeholder="Beschreibe ..." mandatory
         :quickieKeys="quickieKeys">
         Beschreibe die <b>Situation</b> vor Ort. <br>
         <template v-if="ctx.isTrauma">
@@ -24,7 +23,6 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import { enhanceGeneral } from '@/utils/gpt/general'
 import { QU_SIT_Einweisung, QU_SIT_Verlegung } from '@/data/quickies'
 
 import { useDokuStore } from '@/store/doku'

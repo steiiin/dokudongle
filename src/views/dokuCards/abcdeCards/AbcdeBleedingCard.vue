@@ -9,8 +9,7 @@
         <DodoInputTextArea v-model="store.doku.Xabcde.description"
           assist-context-id="abcde.bleeding"
           ref="bleedingInput" inherit-style
-          title="Kritische Blutung" placeholder="z.B. Schnittverletzung Arm: Tourniquet"
-          :enhance-fn="enhanceBleeding">
+          title="Kritische Blutung" placeholder="z.B. Schnittverletzung Arm: Tourniquet">
           Beschreibe ganz kurz die <b>kritischen Blutungen</b>
           und deine <b>Behandlung</b>.
         </DodoInputTextArea>
@@ -23,7 +22,6 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import { enhanceBleeding } from '@/utils/gpt/bleeding'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

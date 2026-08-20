@@ -7,7 +7,7 @@
 
       <DodoInputTextArea v-model="store.doku.treatment"
         assist-context-id="treatment.tasks"
-        title="Maßnahmen" placeholder="Beschreibe ..." :enhance-fn="enhanceGeneral" :mandatory="!(ctx.isEinweisung || ctx.isVerlegung)">
+        title="Maßnahmen" placeholder="Beschreibe ..." :mandatory="!(ctx.isEinweisung || ctx.isVerlegung)">
         <p><b>Arbeitsdiagnose</b></p>
         <p><b>Maßnahmen</b></p>
         <p>Ergriffene Maßnahmen + Begründung <i>(außer Medis)</i></p>
@@ -21,11 +21,9 @@
 
 <script setup lang="ts">
 
-import { enhanceGeneral } from '@/utils/gpt/general';
 import { computed } from 'vue';
 
 import { useDokuStore } from '@/store/doku'
-
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

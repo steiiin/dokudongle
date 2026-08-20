@@ -34,11 +34,6 @@
               Speichern
             </IonButton>
           </IonButtons>
-          <IonButtons slot="end" v-if="false">
-            <IonButton color="success" :disabled="isEnhanceDisabled" @click="enhance">
-              Korrigieren
-            </IonButton>
-          </IonButtons>
         </IonToolbar>
         <IonProgressBar v-if="modelValue.isEnhancing" type="indeterminate" />
       </IonHeader>
@@ -153,7 +148,6 @@ const props = defineProps<{
   mandatory?: boolean
   inheritStyle?: boolean
   quickieKeys?: string[]
-  enhanceFn: (draft: string) => Promise<string | null>
   assistContextId: string
 }>()
 
@@ -720,46 +714,6 @@ const closeQuickieDialog = () => {
 const acceptQuickieDialog = async (insertedText: string) => {
   closeQuickieDialog()
   await insertQuickieText(insertedText)
-}
-
-//#endregion
-
-//#region Enhancement
-
-const enhance = async () => {
-  commitOpenEditIfNeeded()
-
-  let updated = cloneModelValue()
-  updated.isEnhancing = true
-  emitUpdated(updated)
-
-  const response = await props.enhanceFn(updated.value)
-
-  updated = cloneModelValue()
-  updated.isEnhancing = false
-
-  if (!response || response.trim().length === 0) {
-    emitUpdated(updated)
-    await showEnhanceError()
-    return
-  }
-
-  updated.applyEnhanced(response)
-  emitUpdated(updated)
-
-  draft.value = updated.value
-}
-
-const showEnhanceError = async () => {
-  const toast = await toastController.create({
-    message: 'Die Verbesserung konnte nicht erstellt werden.',
-    color: 'danger',
-    icon: warningOutline,
-    duration: 2200,
-    position: 'bottom',
-  })
-
-  await toast.present()
 }
 
 //#endregion

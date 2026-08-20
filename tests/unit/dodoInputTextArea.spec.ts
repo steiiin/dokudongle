@@ -21,7 +21,6 @@ const mountTextarea = (modelValue = new EnhanceableText(''), attachTo?: HTMLElem
     title: 'Situation',
     assistContextId: 'test.situation',
     placeholder: 'Text eingeben ...',
-    enhanceFn: vi.fn().mockResolvedValue('Verbessert'),
   },
   global: {
     renderStubDefaultSlot: true,
