@@ -60,7 +60,6 @@
     <IonFooter v-if="showSendActions">
       <IonToolbar>
         <div class="send-actions">
-          <IonButton fill="clear" color="medium" @click="emitClose">Zurück</IonButton>
           <IonButton v-if="checkError" fill="outline" @click="$emit('retry')">
             Erneut prüfen
           </IonButton>
