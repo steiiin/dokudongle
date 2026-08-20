@@ -128,8 +128,8 @@
 <script setup lang="ts">
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin, warningOutline } from 'ionicons/icons'
-import { alertController, toastController } from '@ionic/core'
+import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin } from 'ionicons/icons'
+import { alertController } from '@ionic/core'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { DATA_Quickies, type Quickie } from '@/data/quickies'
@@ -212,7 +212,7 @@ const triggerColor = computed(() => {
   return props.inheritStyle ? 'dark' : 'light'
 })
 const triggerFill = computed(() => props.inheritStyle ? 'clear' : 'solid')
-const isEnhanceDisabled = computed(() => props.modelValue.isEnhancing || draft.value.trim().length === 0)
+
 const activeWordRange = computed(() => {
   if (!isEditing.value || isComposing.value || lastCursorStart.value !== lastCursorEnd.value) return null
   const previousCharacter = Array.from(draft.value.slice(0, lastCursorStart.value)).at(-1) ?? ''

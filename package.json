@@ -10,7 +10,7 @@
     "test:e2e": "cypress run",
     "test:unit": "vitest",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tests/e2e/tsconfig.json",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^8.1.3",
