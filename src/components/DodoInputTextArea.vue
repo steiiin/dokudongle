@@ -513,14 +513,15 @@ const handleSelectionInteraction = (event: Event) => {
 }
 
 const applyTextSuggestion = async (suggestion: TextSuggestion) => {
+  const snapshot = snapshotTextarea()
   const mutation = textAssistService.applySuggestion(
     assistSessionId,
     props.assistContextId,
-    snapshotTextarea(),
+    snapshot,
     suggestion,
   )
   assistRevision += 1
-  await applyAssistMutation(mutation)
+  if (mutation) await applyAssistMutation(mutation)
   await refreshTextSuggestions()
 }
 

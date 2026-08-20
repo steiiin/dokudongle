@@ -169,14 +169,32 @@ export class TextAssistService {
     return this.suggestions.getSuggestions(context)
   }
 
-  applySuggestion(sessionId: string, contextId: string, snapshot: TextInputSnapshot, suggestion: TextSuggestion): TextMutation {
+  applySuggestion(
+    sessionId: string,
+    contextId: string,
+    snapshot: TextInputSnapshot,
+    suggestion: TextSuggestion,
+  ): TextMutation | null {
     this.acceptPendingAutomaticChange(sessionId, snapshot)
-    this.recordSuggestionUsage(contextId, snapshot, suggestion)
+
+    let currentSuggestion = suggestion
+    if (suggestion.type === 'snippet') {
+      if (snapshot.isComposing || snapshot.selectionStart !== snapshot.selectionEnd) return null
+      const characterAfterCursor = Array.from(snapshot.text.slice(snapshot.selectionStart)).at(0) ?? ''
+      if (characterAfterCursor && !isCompletionDelimiter(characterAfterCursor)) return null
+      const currentSnippet = this.snippets
+        .getSuggestions(snapshot.text, snapshot.selectionStart)
+        .find(candidate => candidate.id === suggestion.id)
+      if (!currentSnippet) return null
+      currentSuggestion = currentSnippet
+    }
+
+    this.recordSuggestionUsage(contextId, snapshot, currentSuggestion)
     return {
-      start: suggestion.start,
-      end: suggestion.end,
-      replacement: suggestion.replacement,
-      cursor: suggestion.start + suggestion.replacement.length,
+      start: currentSuggestion.start,
+      end: currentSuggestion.end,
+      replacement: currentSuggestion.replacement,
+      cursor: currentSuggestion.start + currentSuggestion.replacement.length,
     }
   }
 

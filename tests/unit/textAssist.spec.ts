@@ -479,6 +479,56 @@ describe('snippets and usage learning', () => {
     expect(filtered[0]).toMatchObject({ start: 5, end: 9, replacement: 'Uniklinik Dresden' })
   })
 
+  test('resolves a stale @ suggestion against the complete live query before applying it', () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const staleSuggestion = service.snippets
+      .getSuggestions('@', 1)
+      .find(candidate => candidate.label === 'KH Radebeul')!
+    const liveText = '@radebe'
+
+    const mutation = service.applySuggestion(
+      'stale-snippet',
+      'situation',
+      snapshot(liveText),
+      staleSuggestion,
+    )
+
+    expect(mutation).toMatchObject({ start: 0, end: liveText.length, replacement: 'KH Radebeul' })
+    expect(applyMutation(liveText, mutation!)).toBe('KH Radebeul')
+  })
+
+  test('ignores a stale @ suggestion when it no longer matches the live input', () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const staleSuggestion = service.snippets
+      .getSuggestions('@', 1)
+      .find(candidate => candidate.label === 'KH Radebeul')!
+
+    expect(service.applySuggestion(
+      'obsolete-snippet',
+      'situation',
+      snapshot('Unrelated text'),
+      staleSuggestion,
+    )).toBeNull()
+    expect(service.applySuggestion(
+      'composing-snippet',
+      'situation',
+      snapshot('@radebe', '@radebe'.length, true),
+      staleSuggestion,
+    )).toBeNull()
+    expect(service.applySuggestion(
+      'moved-caret-snippet',
+      'situation',
+      snapshot('@radebe', 3),
+      staleSuggestion,
+    )).toBeNull()
+    expect(service.applySuggestion(
+      'selected-text-snippet',
+      'situation',
+      { ...snapshot('@radebe'), selectionStart: 0 },
+      staleSuggestion,
+    )).toBeNull()
+  })
+
   test('automatically applies a unique @ location when space is inserted', async () => {
     const service = new TextAssistService(new MemoryRepository())
     const update = await service.processInput(change(

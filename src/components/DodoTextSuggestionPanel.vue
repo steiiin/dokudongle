@@ -6,8 +6,8 @@
       type="button"
       class="dd-suggestion"
       role="option"
-      @pointerdown.prevent="selectFromPointer(suggestion)"
-      @click="selectFromClick(suggestion)"
+      @pointerdown.prevent
+      @click="selectSuggestion(suggestion)"
     >
       {{ suggestion.label }}
     </button>
@@ -23,21 +23,7 @@ const emit = defineEmits<{
   (event: 'select', suggestion: TextSuggestion): void
 }>()
 
-let suppressCompatibilityClick = false
-
-const selectFromPointer = (suggestion: TextSuggestion) => {
-  suppressCompatibilityClick = true
-  emit('select', suggestion)
-  setTimeout(() => { suppressCompatibilityClick = false }, 0)
-}
-
-const selectFromClick = (suggestion: TextSuggestion) => {
-  if (suppressCompatibilityClick) {
-    suppressCompatibilityClick = false
-    return
-  }
-  emit('select', suggestion)
-}
+const selectSuggestion = (suggestion: TextSuggestion) => emit('select', suggestion)
 </script>
 
 <style scoped>

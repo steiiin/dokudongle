@@ -41,6 +41,22 @@ const HostHarness = defineComponent({
   `,
 })
 
+describe('text suggestion panel interactions', () => {
+  test('preserves input focus on pointerdown and selects once on click', async () => {
+    const item = suggestion('candidate')
+    const wrapper = mount(DodoTextSuggestionPanel, {
+      props: { suggestions: [item] },
+    })
+    const button = wrapper.get('button')
+
+    await button.trigger('pointerdown')
+    expect(wrapper.emitted('select')).toBeUndefined()
+
+    await button.trigger('click')
+    expect(wrapper.emitted('select')).toEqual([[item]])
+  })
+})
+
 describe('scoped text suggestion hosts', () => {
   test('keeps nested modal suggestions separate and ignores stale owners', async () => {
     const wrapper = mount(HostHarness)

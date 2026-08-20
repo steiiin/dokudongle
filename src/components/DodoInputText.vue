@@ -220,7 +220,7 @@ const applyTextSuggestion = async (suggestion: TextSuggestion) => {
     suggestion,
   )
   assistRevision += 1
-  await applyAssistMutation(mutation, snapshot.text)
+  if (mutation) await applyAssistMutation(mutation, snapshot.text)
   await refreshTextSuggestions()
 }
 
