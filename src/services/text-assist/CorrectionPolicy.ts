@@ -32,7 +32,7 @@ export class ConservativeCorrectionPolicy implements CorrectionPolicy {
 
     const length = Math.max(Array.from(original).length, Array.from(selected.replacement).length)
     const confidence = length === 0 ? 0 : 1 - selected.distance / length
-    if (confidence < 0.85) return null
+    if (confidence < 0.8) return null
 
     return { original, replacement: selected.replacement, confidence }
   }
