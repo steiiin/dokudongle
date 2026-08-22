@@ -58,6 +58,9 @@ ion-header ion-buttons {
   padding-inline: .5rem;
 }
 
-ion-alert.protocol-reset-alert .alert-wrapper {
-  outline: none;
+ion-toast.protocol-reset-toast {
+  --background: var(--ion-toolbar-background, #1f1f1f);
+  --color: var(--ion-text-color, #fff);
+  --button-color: var(--ion-color-primary, #4d8dff);
+  --box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
 }

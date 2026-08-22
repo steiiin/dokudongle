@@ -2,7 +2,7 @@
   <IonPage>
     <IonTabs :class="{ blurry: store.isDongleTransmitting }">
       <IonRouterOutlet></IonRouterOutlet>
-      <IonTabBar slot="bottom">
+      <IonTabBar id="main-tab-bar" slot="bottom">
         <IonTabButton tab="connect" href="/tabs/connect">
           <IonIcon aria-hidden="true" :icon="wifi" />
           <IonLabel>Dongle</IonLabel>

@@ -9,6 +9,7 @@ import type { ProtocolCheckResult } from '@/services/protocol-check'
 const mocks = vi.hoisted(() => ({
   getNetworkStatus: vi.fn(),
   checkProtocol: vi.fn(),
+  markProtocolSent: vi.fn(),
   sendProtocol: vi.fn(),
   scrollToTop: vi.fn(),
   createAlert: vi.fn(),
@@ -42,6 +43,7 @@ vi.mock('@/services/protocol-check', () => ({
 vi.mock('@/store/doku', () => ({
   useDokuStore: () => ({
     ...mocks.store,
+    markProtocolSent: mocks.markProtocolSent,
     sendProtocol: mocks.sendProtocol,
   }),
 }))
@@ -87,6 +89,7 @@ describe('DodoSendAction protocol check', () => {
     mocks.store.connection.isTransmitting = false
     mocks.getNetworkStatus.mockResolvedValue({ connected: true, connectionType: 'wifi' })
     mocks.checkProtocol.mockResolvedValue(cleanResult)
+    mocks.markProtocolSent.mockResolvedValue(undefined)
     mocks.sendProtocol.mockResolvedValue(true)
     mocks.scrollToTop.mockResolvedValue(undefined)
     mocks.createAlert.mockResolvedValue({
@@ -105,7 +108,19 @@ describe('DodoSendAction protocol check', () => {
     expect(mocks.checkProtocol).toHaveBeenCalledOnce()
     expect(mocks.checkProtocol).toHaveBeenCalledWith('Generated protocol text')
     expect(mocks.sendProtocol).toHaveBeenCalledOnce()
+    expect(mocks.markProtocolSent).toHaveBeenCalledOnce()
     expect(mocks.scrollToTop).toHaveBeenCalledOnce()
+  })
+
+  test('does not expire the protocol when Bluetooth transmission fails', async () => {
+    mocks.sendProtocol.mockResolvedValue(false)
+    const wrapper = mountAction()
+
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+
+    expect(mocks.sendProtocol).toHaveBeenCalledOnce()
+    expect(mocks.markProtocolSent).not.toHaveBeenCalled()
   })
 
   test('shows findings and sends only after the explicit bypass', async () => {

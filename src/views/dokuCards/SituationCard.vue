@@ -9,11 +9,12 @@
         assist-context-id="situation"
         title="Situation" placeholder="Beschreibe ..." mandatory
         :quickieKeys="quickieKeys">
-        Beschreibe die <b>Situation</b> vor Ort. <br>
+        Beschreibe das <b>Notfallgeschehen</b> und die <b>Auffindesituation</b> vor Ort. <br>
         <template v-if="ctx.isTrauma">
+          <br>
+          <b>Verletzungen</b> gehören in die STU.<br>
           Denke an den <b>Unfallzeitpunkt</b>.
         </template>
-        <template v-else>Wenn möglich auch den <i>Grund für den Notruf</i>.</template>
       </DodoInputTextArea>
 
     </IonCardContent>

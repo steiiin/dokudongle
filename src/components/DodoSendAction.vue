@@ -117,7 +117,10 @@ const transmitProtocol = async () => {
 
   try {
     await tryScrollingToTop()
-    await store.sendProtocol()
+    const sent = await store.sendProtocol()
+    if (sent) {
+      await store.markProtocolSent()
+    }
   }
   finally {
     resetCheckState()

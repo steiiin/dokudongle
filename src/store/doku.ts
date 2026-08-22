@@ -136,10 +136,9 @@ function resetProtocolState(): Protocol {
   return resetProtocol()
 }
 
-const AUTO_RESET_PROMPT_THRESHOLD_MS = 10 * 60 * 1000
-const AUTO_RESET_THRESHOLD_MS = 30 * 60 * 1000
+const AUTO_RESET_THRESHOLD_MS = 60 * 60 * 1000
 
-export type AutoProtocolResetAction = 'none' | 'prompt' | 'reset'
+export type AutoProtocolResetAction = 'none' | 'reset'
 
 const LEGACY_ANDROID_MAX_SDK = 30
 
@@ -189,7 +188,7 @@ export const useDokuStore = defineStore('doku', {
 
     doku: resetProtocolState(),
     lastProtocolResetAt: new Date().toISOString(),
-    lastAutoProtocolResetPromptAt: null as string | null,
+    lastProtocolSentAt: null as string | null,
 
   }),
   actions: {
@@ -334,7 +333,7 @@ export const useDokuStore = defineStore('doku', {
       await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
       this.doku = resetProtocolState()
       this.lastProtocolResetAt = new Date().toISOString()
-      this.lastAutoProtocolResetPromptAt = null
+      this.lastProtocolSentAt = null
       await this.persistToStorage()
     },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
@@ -390,9 +389,18 @@ export const useDokuStore = defineStore('doku', {
       link.remove()
       URL.revokeObjectURL(url)
     },
-    async markAutoProtocolResetPrompted(referenceTime: number = Date.now()) {
-      this.lastAutoProtocolResetPromptAt = new Date(referenceTime).toISOString()
+    async markProtocolSent(referenceTime: number = Date.now()) {
+      this.lastProtocolSentAt = new Date(referenceTime).toISOString()
       await this.persistToStorage()
+    },
+    wasCurrentProtocolSent(): boolean {
+      if (!this.lastProtocolSentAt) return false
+
+      const lastResetAtMs = Date.parse(this.lastProtocolResetAt)
+      const lastSentAtMs = Date.parse(this.lastProtocolSentAt)
+      return !Number.isNaN(lastResetAtMs)
+        && !Number.isNaN(lastSentAtMs)
+        && lastSentAtMs >= lastResetAtMs
     },
     async autoResetProtocol() {
       await saveTemporaryProtocolState({
@@ -424,7 +432,7 @@ export const useDokuStore = defineStore('doku', {
       resetQuickies()
       this.doku = hydratedProtocol
       this.lastProtocolResetAt = new Date().toISOString()
-      this.lastAutoProtocolResetPromptAt = null
+      this.lastProtocolSentAt = null
       await this.persistToStorage()
       await removeTemporaryProtocolState()
       return true
@@ -437,7 +445,7 @@ export const useDokuStore = defineStore('doku', {
       if (!persistedState || persistedState.schemaVersion !== DOKU_SCHEMA_VERSION) {
         this.doku = resetProtocolState()
         this.lastProtocolResetAt = new Date().toISOString()
-        this.lastAutoProtocolResetPromptAt = null
+        this.lastProtocolSentAt = null
         await this.persistToStorage()
         return
       }
@@ -446,7 +454,7 @@ export const useDokuStore = defineStore('doku', {
       if (!hydratedProtocol) {
         this.doku = resetProtocolState()
         this.lastProtocolResetAt = new Date().toISOString()
-        this.lastAutoProtocolResetPromptAt = null
+        this.lastProtocolSentAt = null
         await this.persistToStorage()
         return
       }
@@ -454,7 +462,11 @@ export const useDokuStore = defineStore('doku', {
       resetQuickies()
       this.doku = hydratedProtocol
       this.lastProtocolResetAt = persistedState.lastProtocolResetAt ?? persistedState.updatedAt ?? new Date().toISOString()
-      this.lastAutoProtocolResetPromptAt = persistedState.lastAutoProtocolResetPromptAt ?? null
+      this.lastProtocolSentAt = persistedState.lastProtocolSentAt ?? null
+
+      if (!this.wasCurrentProtocolSent()) {
+        this.lastProtocolSentAt = null
+      }
     },
     getAutoProtocolResetAction(referenceTime: number = Date.now()): AutoProtocolResetAction {
       const lastResetAtMs = Date.parse(this.lastProtocolResetAt)
@@ -466,29 +478,14 @@ export const useDokuStore = defineStore('doku', {
       if (protocolAgeMs >= AUTO_RESET_THRESHOLD_MS) {
         return 'reset'
       }
-      if (protocolAgeMs < AUTO_RESET_PROMPT_THRESHOLD_MS) {
-        return 'none'
-      }
-
-      const lastPromptAtMs = this.lastAutoProtocolResetPromptAt
-        ? Date.parse(this.lastAutoProtocolResetPromptAt)
-        : Number.NaN
-      if (
-        !Number.isNaN(lastPromptAtMs)
-        && lastPromptAtMs >= lastResetAtMs
-        && referenceTime - lastPromptAtMs < AUTO_RESET_PROMPT_THRESHOLD_MS
-      ) {
-        return 'none'
-      }
-
-      return 'prompt'
+      return 'none'
     },
     async persistToStorage() {
       await saveDokuState({
         schemaVersion: DOKU_SCHEMA_VERSION,
         updatedAt: new Date().toISOString(),
         lastProtocolResetAt: this.lastProtocolResetAt,
-        lastAutoProtocolResetPromptAt: this.lastAutoProtocolResetPromptAt ?? undefined,
+        lastProtocolSentAt: this.lastProtocolSentAt ?? undefined,
         doku: toPersistable(this.doku),
       })
     },

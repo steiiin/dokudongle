@@ -1,6 +1,6 @@
 import { App as CapacitorApp } from '@capacitor/app'
 import type { PluginListenerHandle } from '@capacitor/core'
-import { alertController, toastController } from '@ionic/vue'
+import { toastController } from '@ionic/vue'
 import { reactive, readonly, type DeepReadonly } from 'vue'
 
 import { useDokuStore, type AutoProtocolResetAction } from '@/store/doku'
@@ -23,11 +23,11 @@ interface StartupStore {
   autoResetProtocol: DokuStore['autoResetProtocol']
   discardTemporaryProtocol: DokuStore['discardTemporaryProtocol']
   getAutoProtocolResetAction: DokuStore['getAutoProtocolResetAction']
-  markAutoProtocolResetPrompted: DokuStore['markAutoProtocolResetPrompted']
   newProtocol: DokuStore['newProtocol']
   persistToStorage: DokuStore['persistToStorage']
   restoreTemporaryProtocol: DokuStore['restoreTemporaryProtocol']
   hydrateFromStorage: DokuStore['hydrateFromStorage']
+  wasCurrentProtocolSent: DokuStore['wasCurrentProtocolSent']
 }
 
 type AppStateChangeHandler = (isActive: boolean) => void
@@ -36,7 +36,6 @@ export interface AppStartupDependencies {
   getStore: () => StartupStore
   hasTemporaryProtocol: () => Promise<boolean>
   initializeStorage: () => Promise<void>
-  presentProtocolResetPrompt: () => Promise<'reset' | 'cancel'>
   presentTemporaryProtocolRestore: () => Promise<'restore' | 'dismiss'>
   registerAppStateChange: (handler: AppStateChangeHandler) => Promise<void>
   scheduleAfterPaint: (callback: () => void) => void
@@ -58,11 +57,13 @@ async function showErrorToast(message: string): Promise<void> {
   await toast.present()
 }
 
-async function presentTemporaryProtocolRestore(): Promise<'restore' | 'dismiss'> {
+export async function presentTemporaryProtocolRestore(): Promise<'restore' | 'dismiss'> {
   const toast = await toastController.create({
-    message: 'Das Protokoll wurde nach 30 Minuten automatisch zurückgesetzt.',
+    message: 'Protokoll zurückgesetzt.',
+    cssClass: 'protocol-reset-toast',
     duration: 5000,
     position: 'bottom',
+    positionAnchor: 'main-tab-bar',
     buttons: [
       {
         text: 'Wiederherstellen',
@@ -74,28 +75,6 @@ async function presentTemporaryProtocolRestore(): Promise<'restore' | 'dismiss'>
   await toast.present()
   const { role } = await toast.onDidDismiss()
   return role === 'restore' ? 'restore' : 'dismiss'
-}
-
-async function presentProtocolResetPrompt(): Promise<'reset' | 'cancel'> {
-  const alert = await alertController.create({
-    cssClass: 'protocol-reset-alert',
-    header: 'Protokoll zurücksetzen?',
-    message: 'Das letzte Zurücksetzen liegt mehr als 10 Minuten zurück. Möchtest du ein neues Protokoll starten?',
-    buttons: [
-      {
-        text: 'Später',
-        role: 'cancel',
-      },
-      {
-        text: 'Zurücksetzen',
-        role: 'reset',
-      },
-    ],
-  })
-
-  await alert.present()
-  const { role } = await alert.onDidDismiss()
-  return role === 'reset' ? 'reset' : 'cancel'
 }
 
 async function registerAppStateChange(handler: AppStateChangeHandler): Promise<void> {
@@ -115,7 +94,6 @@ const defaultDependencies: AppStartupDependencies = {
   getStore: () => useDokuStore(),
   hasTemporaryProtocol: hasTemporaryProtocolState,
   initializeStorage: initStorage,
-  presentProtocolResetPrompt,
   presentTemporaryProtocolRestore,
   registerAppStateChange,
   scheduleAfterPaint,
@@ -210,23 +188,10 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
 
     isResetFlowOpen = true
     try {
-      if (action === 'reset') {
-        await store.autoResetProtocol()
-        await offerTemporaryProtocolRestore()
-        return
-      }
-
-      const role = await dependencies.presentProtocolResetPrompt()
-      if (role === 'reset') {
-        await store.newProtocol()
-      } else {
-        await store.markAutoProtocolResetPrompted()
-      }
+      await store.autoResetProtocol()
+      await offerTemporaryProtocolRestore()
     } catch (error) {
-      const message = action === 'reset'
-        ? 'Das Protokoll konnte nicht automatisch zurückgesetzt werden.'
-        : 'Das Protokoll konnte nicht zurückgesetzt werden.'
-      await reportNonFatalError(message, error)
+      await reportNonFatalError('Das Protokoll konnte nicht automatisch zurückgesetzt werden.', error)
     } finally {
       isResetFlowOpen = false
     }
@@ -238,7 +203,7 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
     if (pendingResetError) {
       const message = pendingResetError
       pendingResetError = null
-      await reportNonFatalError(message, new Error('Automatic reset failed during startup.'))
+      await reportNonFatalError(message, new Error('Protocol reset failed during startup.'))
     }
 
     if (pendingRestore) {
@@ -287,8 +252,23 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
       logStartupStage('hydrating protocol state')
       await withStartupTimeout('Protocol hydration', store.hydrateFromStorage())
 
-      pendingRestore = await withStartupTimeout('Temporary protocol lookup', dependencies.hasTemporaryProtocol())
-      pendingResetAction = pendingRestore ? 'none' : store.getAutoProtocolResetAction()
+      let sentProtocolResetFailed = false
+      if (store.wasCurrentProtocolSent()) {
+        try {
+          logStartupStage('resetting successfully sent protocol')
+          await withStartupTimeout('Sent protocol reset', store.newProtocol())
+          await withStartupTimeout('Temporary protocol cleanup', store.discardTemporaryProtocol())
+        } catch (error) {
+          console.error('[startup] Sent protocol reset failed.', error)
+          pendingResetError = 'Das gesendete Protokoll konnte beim Start nicht zurückgesetzt werden.'
+          sentProtocolResetFailed = true
+        }
+      }
+
+      if (!sentProtocolResetFailed) {
+        pendingRestore = await withStartupTimeout('Temporary protocol lookup', dependencies.hasTemporaryProtocol())
+        pendingResetAction = pendingRestore ? 'none' : store.getAutoProtocolResetAction()
+      }
 
       if (pendingResetAction === 'reset') {
         try {

@@ -1,20 +1,22 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
+import { toastController } from '@ionic/vue'
 
 import {
   createAppStartup,
+  presentTemporaryProtocolRestore,
   type AppStartupDependencies,
 } from '@/services/app-startup'
 
-const createStore = (action: 'none' | 'prompt' | 'reset' = 'none') => ({
+const createStore = (action: 'none' | 'reset' = 'none') => ({
   $subscribe: vi.fn(() => vi.fn()),
   autoResetProtocol: vi.fn().mockResolvedValue(undefined),
   discardTemporaryProtocol: vi.fn().mockResolvedValue(undefined),
   getAutoProtocolResetAction: vi.fn(() => action),
   hydrateFromStorage: vi.fn().mockResolvedValue(undefined),
-  markAutoProtocolResetPrompted: vi.fn().mockResolvedValue(undefined),
   newProtocol: vi.fn().mockResolvedValue(undefined),
   persistToStorage: vi.fn().mockResolvedValue(undefined),
   restoreTemporaryProtocol: vi.fn().mockResolvedValue(true),
+  wasCurrentProtocolSent: vi.fn().mockReturnValue(false),
 })
 
 const createDependencies = (
@@ -24,7 +26,6 @@ const createDependencies = (
   getStore: () => store,
   hasTemporaryProtocol: vi.fn().mockResolvedValue(false),
   initializeStorage: vi.fn().mockResolvedValue(undefined),
-  presentProtocolResetPrompt: vi.fn().mockResolvedValue('cancel'),
   presentTemporaryProtocolRestore: vi.fn().mockResolvedValue('dismiss'),
   registerAppStateChange: vi.fn().mockResolvedValue(undefined),
   scheduleAfterPaint: callback => callback(),
@@ -123,23 +124,33 @@ describe('application startup', () => {
     expect(store.discardTemporaryProtocol).not.toHaveBeenCalled()
   })
 
-  test('presents the 10-minute prompt only after the application is ready', async () => {
-    const store = createStore('prompt')
-    const startupRef: { current?: ReturnType<typeof createAppStartup> } = {}
-    const presentPrompt = vi.fn(async () => {
-      expect(startupRef.current?.state.status).toBe('ready')
-      return 'cancel' as const
-    })
-    const dependencies = createDependencies(store, {
-      presentProtocolResetPrompt: presentPrompt,
-    })
+  test('clears a successfully sent protocol on cold start without offering restore', async () => {
+    const store = createStore()
+    store.wasCurrentProtocolSent.mockReturnValue(true)
+    const dependencies = createDependencies(store)
     const startup = createAppStartup(dependencies)
-    startupRef.current = startup
 
     await startup.start()
-    await vi.waitFor(() => expect(store.markAutoProtocolResetPrompted).toHaveBeenCalledOnce())
 
-    expect(presentPrompt).toHaveBeenCalledOnce()
+    expect(store.hydrateFromStorage).toHaveBeenCalledOnce()
+    expect(store.newProtocol).toHaveBeenCalledOnce()
+    expect(store.discardTemporaryProtocol).toHaveBeenCalledOnce()
+    expect(store.autoResetProtocol).not.toHaveBeenCalled()
+    expect(dependencies.presentTemporaryProtocolRestore).not.toHaveBeenCalled()
+    expect(startup.state.status).toBe('ready')
+  })
+
+  test('deletes an interrupted-reset snapshot when the restore toast is dismissed', async () => {
+    const store = createStore()
+    const dependencies = createDependencies(store, {
+      hasTemporaryProtocol: vi.fn().mockResolvedValue(true),
+      presentTemporaryProtocolRestore: vi.fn().mockResolvedValue('dismiss'),
+    })
+
+    await createAppStartup(dependencies).start()
+    await vi.waitFor(() => expect(store.discardTemporaryProtocol).toHaveBeenCalledOnce())
+
+    expect(store.restoreTemporaryProtocol).not.toHaveBeenCalled()
   })
 
   test('does not rehydrate on resume and still evaluates automatic reset', async () => {
@@ -161,5 +172,25 @@ describe('application startup', () => {
     await vi.waitFor(() => expect(store.autoResetProtocol).toHaveBeenCalledOnce())
 
     expect(store.hydrateFromStorage).toHaveBeenCalledOnce()
+  })
+
+  test('configures the restore toast with dark styling above the tab bar', async () => {
+    const present = vi.fn().mockResolvedValue(undefined)
+    const onDidDismiss = vi.fn().mockResolvedValue({ role: 'restore' })
+    const createToast = vi.spyOn(toastController, 'create').mockResolvedValue({
+      present,
+      onDidDismiss,
+    } as unknown as HTMLIonToastElement)
+
+    await expect(presentTemporaryProtocolRestore()).resolves.toBe('restore')
+
+    expect(createToast).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'Protokoll zurückgesetzt.',
+      cssClass: 'protocol-reset-toast',
+      duration: 5000,
+      position: 'bottom',
+      positionAnchor: 'main-tab-bar',
+    }))
+    expect(present).toHaveBeenCalledOnce()
   })
 })
