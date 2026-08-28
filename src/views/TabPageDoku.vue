@@ -9,7 +9,7 @@
         <DodoSendAction></DodoSendAction>
       </IonToolbar>
     </IonHeader>
-    <IonContent :fullscreen="true">
+    <IonContent ref="dokuContent" :fullscreen="true">
 
       <div id="container">
 
@@ -62,7 +62,7 @@ import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
 
 // ############################################################################
 
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 import { ProtocolCourse } from '@/types/protocol'
 import { provideTextSuggestionScope } from '@/services/text-suggestions'
@@ -70,6 +70,13 @@ import { provideTextSuggestionScope } from '@/services/text-suggestions'
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+const dokuContent = ref<{ $el?: HTMLIonContentElement } | null>(null)
+
+watch(() => store.lastProtocolResetAt, async () => {
+  await nextTick()
+  await dokuContent.value?.$el?.scrollToTop(300)
+})
+
 provideTextSuggestionScope()
 
 </script>

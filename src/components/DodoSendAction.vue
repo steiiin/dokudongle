@@ -68,8 +68,7 @@ const reset = async () => {
       {
         text: 'Ja',
         handler: async () => {
-          store.newProtocol()
-          await tryScrollingToTop()
+          await store.newProtocol()
         }
       }
     ]
