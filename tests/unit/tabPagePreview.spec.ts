@@ -1,5 +1,6 @@
-import { IonFabButton } from '@ionic/vue'
+import { IonContent, IonFabButton } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
@@ -8,6 +9,13 @@ import TabPagePreview from '@/views/TabPagePreview.vue'
 
 const generatedProtocol = 'Generated protocol text'
 
+const mocks = vi.hoisted(() => ({
+  store: {
+    generatedProtocol: 'Generated protocol text',
+    isDongleConnecting: false,
+  },
+}))
+
 vi.mock('@/services/protocol-check', () => ({
   default: {
     checkProtocol: vi.fn(),
@@ -15,9 +23,7 @@ vi.mock('@/services/protocol-check', () => ({
 }))
 
 vi.mock('@/store/doku', () => ({
-  useDokuStore: () => ({
-    generatedProtocol,
-  }),
+  useDokuStore: () => reactive(mocks.store),
 }))
 
 const mountPreview = () => shallowMount(TabPagePreview, {
@@ -31,6 +37,8 @@ const successfulResult: ProtocolCheckResult = { status: 'ok', issues: [] }
 describe('TabPagePreview protocol check', () => {
   beforeEach(() => {
     vi.mocked(protocolCheckService.checkProtocol).mockReset()
+    mocks.store.generatedProtocol = generatedProtocol
+    mocks.store.isDongleConnecting = false
   })
 
   test('sends the displayed protocol and prevents duplicate checks while loading', async () => {
@@ -124,5 +132,18 @@ describe('TabPagePreview protocol check', () => {
     await wrapper.vm.$nextTick()
 
     expect(modal.props('isOpen')).toBe(false)
+  })
+
+  test('blurs only its content while dongle dialogs are active', async () => {
+    const wrapper = mountPreview()
+    const content = wrapper.getComponent(IonContent)
+
+    expect(content.classes()).not.toContain('dongle-connecting')
+
+    reactive(mocks.store).isDongleConnecting = true
+    await wrapper.vm.$nextTick()
+
+    expect(content.classes()).toContain('dongle-connecting')
+    expect(wrapper.classes()).not.toContain('dongle-connecting')
   })
 })

@@ -10,7 +10,10 @@
       </IonToolbar>
     </IonHeader>
 
-    <IonContent :fullscreen="true">
+    <IonContent
+      :fullscreen="true"
+      :class="{ 'dongle-connecting': store.isDongleConnecting }"
+    >
       <textarea readonly :value="localPreview"></textarea>
       <IonFab slot="fixed" vertical="bottom" horizontal="end" v-if="hasntPlaceholders">
         <IonFabButton
@@ -100,6 +103,10 @@ const hasntPlaceholders = computed(() => !localPreview.value.includes('['))
 
   ion-fab {
     margin-bottom: 0.5rem;
+  }
+
+  .dongle-connecting {
+    filter: blur(4px);
   }
 
 </style>

@@ -4,11 +4,6 @@
       <IonToolbar>
         <IonTitle>Verbindung</IonTitle>
         <IonProgressBar v-if="store.isDongleTransmitting" type="indeterminate"></IonProgressBar>
-        <IonButtons slot="primary">
-          <IonButton fill="clear" @click="downloadProtocolAudit" aria-label="Audit herunterladen">
-            <IonIcon :src="downloadSharp" slot="icon-only"></IonIcon>
-          </IonButton>
-        </IonButtons>
         <DodoConnectionRename></DodoConnectionRename>
       </IonToolbar>
     </IonHeader>

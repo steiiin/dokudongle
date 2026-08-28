@@ -3,7 +3,17 @@
     <IonButton fill="solid" color="primary" @click="reset">
       Neu
     </IonButton>
-    <IonButton fill="solid" :color="isAvailable ? 'success' : 'medium'" :disabled="!isAvailable" @click="send">
+    <IonButton
+      v-if="!store.isDongleConnected"
+      fill="solid"
+      color="light"
+      :disabled="store.isDongleConnecting"
+      @click="connectDongle"
+    >
+      <IonSpinner v-if="store.isDongleConnecting" name="crescent" slot="start"></IonSpinner>
+      Verbinden
+    </IonButton>
+    <IonButton v-else fill="solid" :color="isAvailable ? 'success' : 'medium'" :disabled="!isAvailable" @click="send">
       Senden
       <IonIcon :src="paperPlaneSharp" slot="end"></IonIcon>
     </IonButton>
@@ -54,6 +64,11 @@ const isAvailable = computed(() =>
 
 const OFFLINE_MESSAGE = 'Es besteht keine Internetverbindung. Das Protokoll konnte nicht geprüft werden.'
 const CHECK_FAILED_MESSAGE = 'Das Protokoll konnte nicht geprüft werden. Prüfe die Internetverbindung oder versuche es erneut.'
+
+const connectDongle = async () => {
+  if (store.isDongleConnected || store.isDongleConnecting) return
+  await store.connectDongle()
+}
 
 const reset = async () => {
 

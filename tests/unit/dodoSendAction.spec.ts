@@ -1,5 +1,6 @@
-import { IonButton } from '@ionic/vue'
+import { IonButton, IonSpinner } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
@@ -9,12 +10,15 @@ import type { ProtocolCheckResult } from '@/services/protocol-check'
 const mocks = vi.hoisted(() => ({
   getNetworkStatus: vi.fn(),
   checkProtocol: vi.fn(),
+  connectDongle: vi.fn(),
   markProtocolSent: vi.fn(),
   sendProtocol: vi.fn(),
   scrollToTop: vi.fn(),
   createAlert: vi.fn(),
   store: {
     generatedProtocol: 'Generated protocol text',
+    isDongleConnected: true,
+    isDongleConnecting: false,
     connection: {
       isConnected: true,
       isTransmitting: false,
@@ -41,8 +45,8 @@ vi.mock('@/services/protocol-check', () => ({
 }))
 
 vi.mock('@/store/doku', () => ({
-  useDokuStore: () => ({
-    ...mocks.store,
+  useDokuStore: () => Object.assign(reactive(mocks.store), {
+    connectDongle: mocks.connectDongle,
     markProtocolSent: mocks.markProtocolSent,
     sendProtocol: mocks.sendProtocol,
   }),
@@ -78,6 +82,13 @@ const sendButton = (wrapper: ReturnType<typeof mountAction>) => {
   return button
 }
 
+const connectButton = (wrapper: ReturnType<typeof mountAction>) => {
+  const button = wrapper.findAllComponents(IonButton)
+    .find(candidate => candidate.text().includes('Verbinden'))
+  if (!button) throw new Error('Connect button not found')
+  return button
+}
+
 const modal = (wrapper: ReturnType<typeof mountAction>) =>
   wrapper.getComponent(DodoProtocolCheckModal)
 
@@ -85,6 +96,8 @@ describe('DodoSendAction protocol check', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.store.generatedProtocol = 'Generated protocol text'
+    mocks.store.isDongleConnected = true
+    mocks.store.isDongleConnecting = false
     mocks.store.connection.isConnected = true
     mocks.store.connection.isTransmitting = false
     mocks.getNetworkStatus.mockResolvedValue({ connected: true, connectionType: 'wifi' })
@@ -92,6 +105,7 @@ describe('DodoSendAction protocol check', () => {
     mocks.markProtocolSent.mockResolvedValue(undefined)
     mocks.sendProtocol.mockResolvedValue(true)
     mocks.scrollToTop.mockResolvedValue(undefined)
+    mocks.connectDongle.mockResolvedValue(undefined)
     mocks.createAlert.mockResolvedValue({
       present: vi.fn().mockResolvedValue(undefined),
       onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
@@ -110,6 +124,42 @@ describe('DodoSendAction protocol check', () => {
     expect(mocks.sendProtocol).toHaveBeenCalledOnce()
     expect(mocks.markProtocolSent).toHaveBeenCalledOnce()
     expect(mocks.scrollToTop).toHaveBeenCalledOnce()
+  })
+
+  test('replaces sending with a white connection shortcut while disconnected', () => {
+    mocks.store.isDongleConnected = false
+    mocks.store.connection.isConnected = false
+    const wrapper = mountAction()
+    const button = connectButton(wrapper)
+
+    expect(button.props('color')).toBe('light')
+    expect(button.props('fill')).toBe('solid')
+    expect(wrapper.text()).not.toContain('Senden')
+  })
+
+  test('shows connecting state and prevents duplicate connection attempts', async () => {
+    mocks.store.isDongleConnected = false
+    mocks.store.connection.isConnected = false
+    let resolveConnection!: () => void
+    mocks.connectDongle.mockImplementation(() => {
+      reactive(mocks.store).isDongleConnecting = true
+      return new Promise<void>(resolve => {
+        resolveConnection = resolve
+      })
+    })
+    const wrapper = mountAction()
+    const button = connectButton(wrapper)
+
+    await button.trigger('click')
+    await wrapper.vm.$nextTick()
+    await button.trigger('click')
+
+    expect(mocks.connectDongle).toHaveBeenCalledOnce()
+    expect(button.props('disabled')).toBe(true)
+    expect(button.findComponent(IonSpinner).exists()).toBe(true)
+
+    resolveConnection()
+    await flushPromises()
   })
 
   test('does not expire the protocol when Bluetooth transmission fails', async () => {

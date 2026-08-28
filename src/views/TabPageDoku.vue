@@ -9,7 +9,11 @@
         <DodoSendAction></DodoSendAction>
       </IonToolbar>
     </IonHeader>
-    <IonContent ref="dokuContent" :fullscreen="true">
+    <IonContent
+      ref="dokuContent"
+      :fullscreen="true"
+      :class="{ 'dongle-connecting': store.isDongleConnecting }"
+    >
 
       <div id="container">
 
@@ -84,6 +88,10 @@ provideTextSuggestionScope()
 
   #container {
     position: relative;
+  }
+
+  .dongle-connecting {
+    filter: blur(4px);
   }
 
 </style>
