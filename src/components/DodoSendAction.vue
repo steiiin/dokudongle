@@ -6,11 +6,11 @@
     <IonButton
       v-if="!store.isDongleConnected"
       fill="solid"
-      color="light"
+      color="dark"
       :disabled="store.isDongleConnecting"
       @click="connectDongle"
     >
-      <IonSpinner v-if="store.isDongleConnecting" name="crescent" slot="start"></IonSpinner>
+      <IonSpinner v-if="store.isDongleConnecting" name="dots" slot="start" style="width:16px;margin-right:.5rem"></IonSpinner>
       Verbinden
     </IonButton>
     <IonButton v-else fill="solid" :color="isAvailable ? 'success' : 'medium'" :disabled="!isAvailable" @click="send">
