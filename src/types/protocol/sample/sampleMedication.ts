@@ -60,7 +60,7 @@ export class SampleMedication {
       const flagsText = flags.filter(e=>e).join(' ')
 
       const planMedicationtext = (this.isPlanAvailable
-        ? `MedPlan vorhanden. ${tetanusSeg} ${flagsText}`
+        ? `MedPlan vorhanden. ${flagsText} ${tetanusSeg}`
         : `Dauermedikation: ${tetanusSeg} ${flagsText} \n` + (this.PlanMedication.length>0
           ? this.PlanMedication.map(e => e.getProtocolLabel).join('\n')
           : '[DAUERMED]')
