@@ -7,7 +7,7 @@
 
       <DodoInputTextArea v-model="store.doku.treatment"
         assist-context-id="treatment.tasks"
-        title="Maßnahmen" placeholder="Beschreibe ..." :mandatory="!(ctx.isEinweisung || ctx.isVerlegung)">
+        title="Maßnahmen" placeholder="Beschreibe ..." :mandatory="ctx.requireTasks">
         <p><b>Arbeitsdiagnose</b></p>
         <p><b>Maßnahmen</b></p>
         <p>Ergriffene Maßnahmen + Begründung <i>(außer Medis)</i></p>

@@ -645,6 +645,7 @@ export const useDokuStore = defineStore('doku', {
       const requireSampleSymptoms: boolean = requireSampler && !isNoEmergencyCall
       const requireSaamed: boolean = !isNoEmergencyCall
       const requireRedflags: boolean = !isNoEmergencyCall && isTransport && !isVerlegung
+      const requireTasks: boolean = !(isEinweisung || isVerlegung)
       const isPediatric: boolean = state.doku.ident.age?.totalYears <= 4
 
       const nothingToTreat: boolean = (
@@ -710,6 +711,7 @@ export const useDokuStore = defineStore('doku', {
         requireSampleSymptoms,
         requireSaamed,
         requireRedflags,
+        requireTasks,
 
         isVerlegung,
         isEinweisung,
@@ -801,7 +803,10 @@ export const useDokuStore = defineStore('doku', {
 
       // TREATMENT
       text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
-      text += breakDoku(placeholder(state.doku.treatment.value, 'Maßnahmen'), true)
+      text += breakDoku(
+        this.context.requireTasks
+        ? placeholder(state.doku.treatment.value, 'Maßnahmen')
+        : state.doku.treatment.value.trim(), true)
       text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
       text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
 

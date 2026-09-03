@@ -148,6 +148,7 @@ export interface ProtocolContext {
   requireSampleSymptoms: boolean,
   requireSaamed: boolean,
   requireRedflags: boolean,
+  requireTasks: boolean,
 
   isVerlegung: boolean,
   isEinweisung: boolean,
