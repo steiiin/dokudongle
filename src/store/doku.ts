@@ -241,7 +241,8 @@ export const useDokuStore = defineStore('doku', {
         if (this.isDongleConnected) { return }
 
         const device = await BleClient.requestDevice({
-          services: [ ServiceUUID ],
+          namePrefix: 'DokuDongle',
+          optionalServices: [ ServiceUUID ],
         })
 
         this.connection.device = {

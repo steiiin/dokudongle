@@ -103,6 +103,19 @@ describe('DokuDongle Android BLE initialization', () => {
     expect(store.connection.lastError).toContain('Bluetooth wurde nicht aktiviert')
   })
 
+  it('discovers dongles by name without a native service UUID scan filter', async () => {
+    bluetooth.requestDevice.mockRejectedValue(new Error('requestDevice cancelled.'))
+    const store = useDokuStore()
+
+    await store.connectDongle()
+
+    expect(bluetooth.requestDevice).toHaveBeenCalledWith({
+      namePrefix: 'DokuDongle',
+      optionalServices: ['00001888-0000-1000-8000-00805f9b34fb'],
+    })
+    expect(bluetooth.requestDevice.mock.calls[0]?.[0]).not.toHaveProperty('services')
+  })
+
   it('cleans up after denied permissions and succeeds on retry', async () => {
     bluetooth.initialize.mockRejectedValueOnce(new Error('Permission denied.'))
     const store = useDokuStore()
