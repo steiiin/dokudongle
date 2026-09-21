@@ -16,6 +16,9 @@ const char* BASE_NAME = "DokuDongle";
 static constexpr size_t MAX_CUSTOM_NAME_BYTES = 18;
 static char fullName[30]; // MAX_CUSTOM_NAME_BYTE + strlen("DokuDongle-") + 1
 
+static constexpr uint8_t ADVERTISE_MAX_ATTEMPTS = 3;
+static constexpr uint32_t ADVERTISE_RETRY_INTERVAL_MS = 250;
+
 #define SERVICE_UUID   "00001888-0000-1000-8000-00805f9b34fb"
 #define SENDTEXT_UUID  "00000881-0000-1000-8000-00805f9b34fb"
 #define SENDACK_UUID   "00000882-0000-1000-8000-00805f9b34fb"
@@ -204,13 +207,35 @@ bool configureName()
 
 void advertise() {
 
-  BLE.stopAdvertise();
-  BLE.setDeviceName(fullName);
-  BLE.setLocalName(fullName);
+  BLE.poll();
+  if (BLE.connected()) { return; }
 
-  if (!BLE.advertise()) {
-    error();
+  BLE.stopAdvertise();
+
+  for (uint8_t attempt = 0; attempt < ADVERTISE_MAX_ATTEMPTS; ++attempt) {
+    BLE.poll();
+    if (BLE.connected()) { return; }
+
+    BLE.setDeviceName(fullName);
+    if (BLE.setLocalName(fullName) && BLE.advertise()) {
+      return;
+    }
+
+    if (attempt + 1 < ADVERTISE_MAX_ATTEMPTS) {
+      const uint32_t retryStartedAt = millis();
+      while (static_cast<uint32_t>(millis() - retryStartedAt) < ADVERTISE_RETRY_INTERVAL_MS) {
+        BLE.poll();
+        if (BLE.connected()) { return; }
+        delay(1);
+      }
+    }
   }
+
+  // A failed command may still have allowed a central to connect.
+  BLE.poll();
+  if (BLE.connected()) { return; }
+
+  NVIC_SystemReset();
 
 }
 
