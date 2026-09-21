@@ -148,45 +148,46 @@ const transmitProtocol = async () => {
 const checkBeforeSend = async () => {
   if (isChecking.value || pendingProtocolText.value === null) return
 
-  isCheckModalOpen.value = true
+  const protocolText = pendingProtocolText.value
   isChecking.value = true
   checkResult.value = null
   checkError.value = false
   checkErrorMessage.value = ''
 
   try {
-    let isOnline = false
+    const cachedResult = await protocolCheckService.getCachedResult(protocolText)
+    if (cachedResult) {
+      if (cachedResult.issues.length === 0) {
+        await transmitProtocol()
+        return
+      }
 
-    try {
-      const networkStatus = await Network.getStatus()
-      isOnline = networkStatus.connected
-    }
-    catch {
-      checkErrorMessage.value = CHECK_FAILED_MESSAGE
-      checkError.value = true
+      checkResult.value = cachedResult
+      isCheckModalOpen.value = true
       return
     }
 
-    if (!isOnline) {
+    isCheckModalOpen.value = true
+    const networkStatus = await Network.getStatus()
+    if (!networkStatus.connected) {
       checkErrorMessage.value = OFFLINE_MESSAGE
       checkError.value = true
       return
     }
 
-    try {
-      const result = await protocolCheckService.checkProtocol(pendingProtocolText.value)
+    const result = await protocolCheckService.checkProtocol(protocolText)
 
-      if (result.issues.length === 0) {
-        await transmitProtocol()
-        return
-      }
+    if (result.issues.length === 0) {
+      await transmitProtocol()
+      return
+    }
 
-      checkResult.value = result
-    }
-    catch {
-      checkErrorMessage.value = CHECK_FAILED_MESSAGE
-      checkError.value = true
-    }
+    checkResult.value = result
+  }
+  catch {
+    isCheckModalOpen.value = true
+    checkErrorMessage.value = CHECK_FAILED_MESSAGE
+    checkError.value = true
   }
   finally {
     isChecking.value = false

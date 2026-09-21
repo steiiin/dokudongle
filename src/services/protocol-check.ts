@@ -144,12 +144,50 @@ export class ProtocolCheckError extends Error {
 
 export class ProtocolCheckService {
   private client?: Pick<OpenAI, 'responses'>
+  private cachedCheck?: { hash: string; result: ProtocolCheckResult; requestId: number }
+  private pendingChecks = new Map<string, Promise<ProtocolCheckResult>>()
+  private nextRequestId = 0
 
   constructor(client?: Pick<OpenAI, 'responses'>) {
     this.client = client
   }
 
   async checkProtocol(protocolText: string): Promise<ProtocolCheckResult> {
+    const requestId = ++this.nextRequestId
+    const hash = await this.hashProtocol(protocolText)
+
+    if (this.cachedCheck?.hash === hash) return this.cachedCheck.result
+
+    const pendingCheck = this.pendingChecks.get(hash)
+    if (pendingCheck) return pendingCheck
+
+    const check = this.requestProtocolCheck(protocolText)
+      .then(result => {
+        // A slower, older check must not replace a newer completed result.
+        if (!this.cachedCheck || requestId > this.cachedCheck.requestId) {
+          this.cachedCheck = { hash, result, requestId }
+        }
+        return result
+      })
+      .finally(() => {
+        this.pendingChecks.delete(hash)
+      })
+
+    this.pendingChecks.set(hash, check)
+    return check
+  }
+
+  async getCachedResult(protocolText: string): Promise<ProtocolCheckResult | null> {
+    const hash = await this.hashProtocol(protocolText)
+    return this.cachedCheck?.hash === hash ? this.cachedCheck.result : null
+  }
+
+  private async hashProtocol(protocolText: string): Promise<string> {
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(protocolText))
+    return Array.from(new Uint8Array(hash), byte => byte.toString(16).padStart(2, '0')).join('')
+  }
+
+  private async requestProtocolCheck(protocolText: string): Promise<ProtocolCheckResult> {
     let responseText: string
 
     try {

@@ -1,5 +1,6 @@
 import type OpenAI from 'openai'
-import { describe, expect, test, vi } from 'vitest'
+import { webcrypto } from 'node:crypto'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   ProtocolCheckError,
@@ -36,6 +37,83 @@ const createService = (outputText: string) => {
 }
 
 describe('ProtocolCheckService', () => {
+  beforeEach(() => {
+    vi.stubGlobal('crypto', webcrypto)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  test.each([
+    { status: 'ok', issues: [] },
+    validResult,
+  ])('reuses a completed $status check for identical text', async result => {
+    const { service, create } = createService(JSON.stringify(result))
+
+    expect(await service.getCachedResult('Protocol text')).toBeNull()
+    await expect(service.checkProtocol('Protocol text')).resolves.toEqual(result)
+    await expect(service.getCachedResult('Protocol text')).resolves.toEqual(result)
+    await expect(service.checkProtocol('Protocol text')).resolves.toEqual(result)
+
+    expect(create).toHaveBeenCalledOnce()
+  })
+
+  test.each(['Protocol text ', 'Protocol text\n', 'Changed protocol', 'Prötokoll 🩺'])(
+    'checks changed text exactly as provided: %j', async changedText => {
+      const { service, create } = createService(JSON.stringify(validResult))
+      await service.checkProtocol('Protocol text')
+
+      expect(await service.getCachedResult(changedText)).toBeNull()
+      await service.checkProtocol(changedText)
+
+      expect(create).toHaveBeenCalledTimes(2)
+      expect(create).toHaveBeenLastCalledWith(expect.objectContaining({ input: changedText }))
+      expect(await service.getCachedResult('Protocol text')).toBeNull()
+      expect(await service.getCachedResult(changedText)).toEqual(validResult)
+    },
+  )
+
+  test('shares pending requests for identical text', async () => {
+    const { service, create } = createService('')
+    let resolveCheck!: (response: { output_text: string }) => void
+    create.mockReturnValue(new Promise(resolve => { resolveCheck = resolve }))
+
+    const first = service.checkProtocol('Protocol text')
+    await vi.waitFor(() => expect(create).toHaveBeenCalledOnce())
+    const second = service.checkProtocol('Protocol text')
+    expect(await service.getCachedResult('Protocol text')).toBeNull()
+
+    resolveCheck({ output_text: JSON.stringify(validResult) })
+    await expect(Promise.all([first, second])).resolves.toEqual([validResult, validResult])
+    expect(create).toHaveBeenCalledOnce()
+  })
+
+  test('an older response cannot overwrite the latest completed check', async () => {
+    const { service, create } = createService(JSON.stringify(validResult))
+    let resolveOlder!: (response: { output_text: string }) => void
+    create.mockReturnValueOnce(new Promise(resolve => { resolveOlder = resolve }))
+
+    const older = service.checkProtocol('Older text')
+    await vi.waitFor(() => expect(create).toHaveBeenCalledOnce())
+    await service.checkProtocol('Newer text')
+    resolveOlder({ output_text: JSON.stringify({ status: 'ok', issues: [] }) })
+    await older
+
+    expect(await service.getCachedResult('Newer text')).toEqual(validResult)
+    expect(await service.getCachedResult('Older text')).toBeNull()
+  })
+
+  test('retries a failed request for unchanged text', async () => {
+    const { service, create } = createService(JSON.stringify(validResult))
+    create.mockRejectedValueOnce(new Error('timeout'))
+
+    await expect(service.checkProtocol('Protocol text')).rejects.toBeInstanceOf(ProtocolCheckError)
+    expect(await service.getCachedResult('Protocol text')).toBeNull()
+    await expect(service.checkProtocol('Protocol text')).resolves.toEqual(validResult)
+    expect(create).toHaveBeenCalledTimes(2)
+  })
+
   test('sends the protocol with the configured prompt and exact strict response schema', async () => {
     const { service, create } = createService(JSON.stringify({ status: 'ok', issues: [] }))
 
@@ -134,8 +212,12 @@ describe('ProtocolCheckService', () => {
       issues: [{ ...validResult.issues[0], detail: 'unexpected' }],
     })],
   ])('rejects %s', async (_label, outputText) => {
-    const { service } = createService(outputText)
+    const { service, create } = createService(outputText)
     await expect(service.checkProtocol('Protocol')).rejects.toBeInstanceOf(ProtocolCheckError)
+    expect(await service.getCachedResult('Protocol')).toBeNull()
+    create.mockResolvedValue({ output_text: JSON.stringify(validResult) })
+    await expect(service.checkProtocol('Protocol')).resolves.toEqual(validResult)
+    expect(create).toHaveBeenCalledTimes(2)
   })
 
   test('rejects non-finite confidence values after runtime validation', async () => {

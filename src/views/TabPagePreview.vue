@@ -62,13 +62,15 @@ onIonViewDidEnter(() => {
 const checkProtocol = async () => {
   if (isChecking.value) return
 
+  const protocolText = localPreview.value
   isCheckModalOpen.value = true
   isChecking.value = true
   checkResult.value = null
   checkError.value = false
 
   try {
-    checkResult.value = await protocolCheckService.checkProtocol(localPreview.value)
+    checkResult.value = await protocolCheckService.getCachedResult(protocolText)
+      ?? await protocolCheckService.checkProtocol(protocolText)
   }
   catch {
     checkError.value = true

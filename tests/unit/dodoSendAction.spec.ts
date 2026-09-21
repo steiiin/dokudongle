@@ -1,15 +1,19 @@
-import { IonButton, IonSpinner } from '@ionic/vue'
+import { IonButton, IonFabButton, IonSpinner } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { reactive } from 'vue'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import type OpenAI from 'openai'
+import { webcrypto } from 'node:crypto'
+import { reactive, watch } from 'vue'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
 import DodoSendAction from '@/components/DodoSendAction.vue'
-import type { ProtocolCheckResult } from '@/services/protocol-check'
+import { ProtocolCheckService, type ProtocolCheckResult } from '@/services/protocol-check'
+import TabPagePreview from '@/views/TabPagePreview.vue'
 
 const mocks = vi.hoisted(() => ({
   getNetworkStatus: vi.fn(),
   checkProtocol: vi.fn(),
+  getCachedResult: vi.fn(),
   connectDongle: vi.fn(),
   markProtocolSent: vi.fn(),
   sendProtocol: vi.fn(),
@@ -38,9 +42,11 @@ vi.mock('@ionic/core', () => ({
   },
 }))
 
-vi.mock('@/services/protocol-check', () => ({
+vi.mock('@/services/protocol-check', async importOriginal => ({
+  ...await importOriginal<typeof import('@/services/protocol-check')>(),
   default: {
     checkProtocol: mocks.checkProtocol,
+    getCachedResult: mocks.getCachedResult,
   },
 }))
 
@@ -92,9 +98,19 @@ const connectButton = (wrapper: ReturnType<typeof mountAction>) => {
 const modal = (wrapper: ReturnType<typeof mountAction>) =>
   wrapper.getComponent(DodoProtocolCheckModal)
 
+const useRealCheckCache = (result: ProtocolCheckResult) => {
+  const create = vi.fn().mockResolvedValue({ output_text: JSON.stringify(result) })
+  const client = { responses: { create } } as unknown as Pick<OpenAI, 'responses'>
+  const service = new ProtocolCheckService(client)
+  mocks.checkProtocol.mockImplementation(text => service.checkProtocol(text))
+  mocks.getCachedResult.mockImplementation(text => service.getCachedResult(text))
+  return { service, create }
+}
+
 describe('DodoSendAction protocol check', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
+    vi.stubGlobal('crypto', webcrypto)
     mocks.store.generatedProtocol = 'Generated protocol text'
     mocks.store.isDongleConnected = true
     mocks.store.isDongleConnecting = false
@@ -102,6 +118,7 @@ describe('DodoSendAction protocol check', () => {
     mocks.store.connection.isTransmitting = false
     mocks.getNetworkStatus.mockResolvedValue({ connected: true, connectionType: 'wifi' })
     mocks.checkProtocol.mockResolvedValue(cleanResult)
+    mocks.getCachedResult.mockResolvedValue(null)
     mocks.markProtocolSent.mockResolvedValue(undefined)
     mocks.sendProtocol.mockResolvedValue(true)
     mocks.scrollToTop.mockResolvedValue(undefined)
@@ -110,6 +127,91 @@ describe('DodoSendAction protocol check', () => {
       present: vi.fn().mockResolvedValue(undefined),
       onDidDismiss: vi.fn().mockResolvedValue({ role: 'confirm' }),
     })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  test('reuses a manual check across preview and send components, even offline', async () => {
+    const { create } = useRealCheckCache(cleanResult)
+    const preview = shallowMount(TabPagePreview, { global: { renderStubDefaultSlot: true } })
+    await preview.getComponent(IonFabButton).trigger('click')
+    await vi.waitFor(() => expect(preview.getComponent(DodoProtocolCheckModal).props('result')).toEqual(cleanResult))
+    preview.getComponent(DodoProtocolCheckModal).vm.$emit('close')
+
+    mocks.getNetworkStatus.mockResolvedValue({ connected: false, connectionType: 'none' })
+    const wrapper = mountAction()
+    const openedModal = vi.fn()
+    const stopWatching = watch(() => modal(wrapper).props('isOpen'), openedModal, { flush: 'sync' })
+    await sendButton(wrapper).trigger('click')
+    await vi.waitFor(() => expect(mocks.sendProtocol).toHaveBeenCalledOnce())
+
+    expect(create).toHaveBeenCalledOnce()
+    expect(mocks.checkProtocol).toHaveBeenCalledOnce()
+    expect(mocks.getNetworkStatus).not.toHaveBeenCalled()
+    expect(modal(wrapper).props('isOpen')).toBe(false)
+    expect(openedModal).not.toHaveBeenCalled()
+    stopWatching()
+  })
+
+  test('checks and caches the text captured before asynchronous work', async () => {
+    const { service, create } = useRealCheckCache(findingResult)
+    let resolveNetwork!: (status: { connected: boolean }) => void
+    mocks.getNetworkStatus.mockReturnValue(new Promise(resolve => { resolveNetwork = resolve }))
+    const originalText = mocks.store.generatedProtocol
+    const wrapper = mountAction()
+
+    await sendButton(wrapper).trigger('click')
+    await vi.waitFor(() => expect(mocks.getNetworkStatus).toHaveBeenCalledOnce())
+    reactive(mocks.store).generatedProtocol = 'Edited while checking'
+    resolveNetwork({ connected: true })
+    await vi.waitFor(() => expect(modal(wrapper).props('result')).toEqual(findingResult))
+
+    expect(create).toHaveBeenCalledWith(expect.objectContaining({ input: originalText }))
+    expect(await service.getCachedResult(originalText)).toEqual(findingResult)
+    expect(await service.getCachedResult(mocks.store.generatedProtocol)).toBeNull()
+  })
+
+  test('reuses a clean result on repeated sends and checks again after text changes', async () => {
+    const { create } = useRealCheckCache(cleanResult)
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await vi.waitFor(() => expect(mocks.sendProtocol).toHaveBeenCalledOnce())
+
+    await sendButton(wrapper).trigger('click')
+    await vi.waitFor(() => expect(mocks.sendProtocol).toHaveBeenCalledTimes(2))
+    expect(create).toHaveBeenCalledOnce()
+    expect(mocks.getNetworkStatus).toHaveBeenCalledOnce()
+
+    reactive(mocks.store).generatedProtocol += ' '
+    await sendButton(wrapper).trigger('click')
+    await vi.waitFor(() => expect(mocks.sendProtocol).toHaveBeenCalledTimes(3))
+    expect(create).toHaveBeenCalledTimes(2)
+    expect(mocks.getNetworkStatus).toHaveBeenCalledTimes(2)
+  })
+
+  test('requires confirmation for cached findings on every send', async () => {
+    const { service, create } = useRealCheckCache(findingResult)
+    await service.checkProtocol(mocks.store.generatedProtocol)
+    const wrapper = mountAction()
+
+    for (let sendCount = 1; sendCount <= 2; sendCount++) {
+      await sendButton(wrapper).trigger('click')
+      await vi.waitFor(() => expect(modal(wrapper).props()).toMatchObject({
+        isOpen: true,
+        isChecking: false,
+        result: findingResult,
+      }))
+      expect(mocks.sendProtocol).toHaveBeenCalledTimes(sendCount - 1)
+      modal(wrapper).vm.$emit('send-anyway')
+      await flushPromises()
+      expect(mocks.sendProtocol).toHaveBeenCalledTimes(sendCount)
+    }
+
+    expect(create).toHaveBeenCalledOnce()
+    expect(mocks.checkProtocol).not.toHaveBeenCalled()
+    expect(mocks.getNetworkStatus).not.toHaveBeenCalled()
   })
 
   test('checks the current protocol and automatically sends when no issues are found', async () => {

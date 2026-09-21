@@ -67,7 +67,7 @@ describe('DodoProtocolCheckModal', () => {
     expect(sendFlow.emitted('send-anyway')).toHaveLength(1)
   })
 
-  test('offers retry, back, and send-anyway after a send-time check error', () => {
+  test('offers retry, close, and send-anyway after a send-time check error', () => {
     const wrapper = mountModal({
       result: null,
       checkError: true,
@@ -76,7 +76,7 @@ describe('DodoProtocolCheckModal', () => {
     })
 
     expect(wrapper.text()).toContain('Keine Verbindung')
-    expect(wrapper.text()).toContain('Zurück')
+    expect(wrapper.text()).toContain('Schließen')
     expect(wrapper.text()).toContain('Erneut prüfen')
     expect(wrapper.text()).toContain('Trotzdem senden')
   })

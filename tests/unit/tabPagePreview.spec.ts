@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/services/protocol-check', () => ({
   default: {
     checkProtocol: vi.fn(),
+    getCachedResult: vi.fn(),
   },
 }))
 
@@ -37,6 +38,7 @@ const successfulResult: ProtocolCheckResult = { status: 'ok', issues: [] }
 describe('TabPagePreview protocol check', () => {
   beforeEach(() => {
     vi.mocked(protocolCheckService.checkProtocol).mockReset()
+    vi.mocked(protocolCheckService.getCachedResult).mockReset().mockResolvedValue(null)
     mocks.store.generatedProtocol = generatedProtocol
     mocks.store.isDongleConnecting = false
   })
@@ -132,6 +134,26 @@ describe('TabPagePreview protocol check', () => {
     await wrapper.vm.$nextTick()
 
     expect(modal.props('isOpen')).toBe(false)
+  })
+
+  test('reopens a cached result without starting another check', async () => {
+    vi.mocked(protocolCheckService.checkProtocol).mockResolvedValue(successfulResult)
+    const wrapper = mountPreview()
+    const button = wrapper.getComponent(IonFabButton)
+    await button.trigger('click')
+    await flushPromises()
+    wrapper.getComponent(DodoProtocolCheckModal).vm.$emit('close')
+    vi.mocked(protocolCheckService.getCachedResult).mockResolvedValue(successfulResult)
+
+    await button.trigger('click')
+    await flushPromises()
+
+    expect(protocolCheckService.checkProtocol).toHaveBeenCalledOnce()
+    expect(wrapper.getComponent(DodoProtocolCheckModal).props()).toMatchObject({
+      isOpen: true,
+      isChecking: false,
+      result: successfulResult,
+    })
   })
 
   test('blurs only its content while dongle dialogs are active', async () => {
