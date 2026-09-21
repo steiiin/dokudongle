@@ -1,15 +1,12 @@
 <template>
   <IonButtons slot="primary">
-    <IonButton v-if="showReset" fill="solid" color="primary" @click="reset">
-      Neu
+    <IonButton v-if="showReset"
+      fill="solid" color="primary"
+      @click="reset">Neu
     </IonButton>
-    <IonButton
-      v-if="!store.isDongleConnected"
-      :fill="store.isDongleConnecting ? 'clear' : 'solid'"
-      color="dark"
-      :disabled="store.isDongleConnecting"
-      @click="connectDongle"
-    >
+    <IonButton v-if="!store.isDongleConnected"
+      :fill="store.isDongleConnecting ? 'clear' : 'solid'" color="dark" :disabled="store.isDongleConnecting"
+      @click="connectDongle">
       <IonSpinner v-if="store.isDongleConnecting" name="crescent" slot="end" style="width:16px;margin-left:.5rem"></IonSpinner>
       Verbinden
     </IonButton>
@@ -233,3 +230,8 @@ const sendAnyway = async () => {
 }
 
 </script>
+<style scoped>
+ion-buttons {
+  transform:none;
+}
+</style>
