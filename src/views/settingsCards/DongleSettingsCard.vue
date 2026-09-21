@@ -1,5 +1,5 @@
 <template>
-  <IonCard v-if="true">
+  <IonCard v-if="store.isDongleConnected">
     <IonCardHeader>
       <IonCardTitle>Dongle</IonCardTitle>
       <IonCardSubtitle>{{ store.connectedDongleName }}</IonCardSubtitle>
