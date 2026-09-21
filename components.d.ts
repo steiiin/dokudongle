@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
     DodoDongleSettingsCard: typeof import('./src/components/DodoDongleSettingsCard.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']

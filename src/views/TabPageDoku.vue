@@ -4,7 +4,6 @@
       <IonToolbar>
         <div class="with-badge">
           <IonTitle>Eingabe</IonTitle>
-          <DodoConnectionBadge></DodoConnectionBadge>
         </div>
         <DodoSendAction></DodoSendAction>
       </IonToolbar>

@@ -4,7 +4,6 @@ import { cog } from 'ionicons/icons'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoConnectionBadge from '@/components/DodoConnectionBadge.vue'
 import DodoDongleSettingsCard from '@/components/DodoDongleSettingsCard.vue'
 import DodoSendAction from '@/components/DodoSendAction.vue'
 import TabPageSettings from '@/views/TabPageSettings.vue'
@@ -26,7 +25,6 @@ describe('Settings tab', () => {
       global: { renderStubDefaultSlot: true },
     })
     expect(wrapper.text()).toContain('Einstellungen')
-    expect(wrapper.findComponent(DodoConnectionBadge).exists()).toBe(true)
     expect(wrapper.findComponent(DodoSendAction).exists()).toBe(true)
     expect(wrapper.getComponent(IonContent).findComponent(DodoDongleSettingsCard).exists()).toBe(true)
     expect(wrapper.text()).not.toContain('Dongle suchen')
