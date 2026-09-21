@@ -1,8 +1,7 @@
 <template>
   <IonApp>
     <main v-if="startup.state.status === 'loading'" class="startup-screen" role="status" aria-live="polite">
-      <span class="startup-hourglass" aria-hidden="true">⌛</span>
-      <p>DokuDongle wird geladen …</p>
+      <IonIcon class="startup-hourglass" :icon="hourglassOutline" aria-hidden="true" />
     </main>
 
     <main v-else-if="startup.state.status === 'error'" class="startup-screen startup-error" role="alert">
@@ -19,7 +18,8 @@
 import { nextTick, onMounted } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { SplashScreen } from '@capacitor/splash-screen'
-import { IonApp, IonRouterOutlet } from '@ionic/vue'
+import { IonApp, IonIcon, IonRouterOutlet } from '@ionic/vue'
+import { hourglassOutline } from 'ionicons/icons'
 
 import { appStartup } from '@/services/app-startup'
 
@@ -65,7 +65,10 @@ onMounted(async () => {
 }
 
 .startup-hourglass {
-  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: currentColor;
+  opacity: 0.9;
 }
 
 .startup-error h1 {
