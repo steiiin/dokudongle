@@ -5,7 +5,7 @@
         <div class="with-badge">
           <IonTitle>Eingabe</IonTitle>
         </div>
-        <DodoSendAction></DodoSendAction>
+        <DodoSendAction show-reset></DodoSendAction>
       </IonToolbar>
     </IonHeader>
     <IonContent

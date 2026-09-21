@@ -1,6 +1,6 @@
 <template>
   <IonButtons slot="primary">
-    <IonButton fill="solid" color="primary" @click="reset">
+    <IonButton v-if="showReset" fill="solid" color="primary" @click="reset">
       Neu
     </IonButton>
     <IonButton
@@ -43,6 +43,13 @@ import { tryScrollingToTop } from '@/utils/input'
 import protocolCheckService, { type ProtocolCheckResult } from '@/services/protocol-check'
 
 import { useDokuStore } from '@/store/doku'
+
+withDefaults(defineProps<{
+  showReset?: boolean
+}>(), {
+  showReset: false,
+})
+
 const store = useDokuStore()
 
 // ############################################################################
