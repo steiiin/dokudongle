@@ -12,13 +12,13 @@
       :fullscreen="true"
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
     >
-      <DodoDongleSettingsCard />
+      <DongleSettingsCard />
     </IonContent>
   </IonPage>
 </template>
 
 <script setup lang="ts">
-import DodoDongleSettingsCard from '@/components/DodoDongleSettingsCard.vue'
+import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'
 
 const store = useDokuStore()

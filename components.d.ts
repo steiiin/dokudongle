@@ -12,7 +12,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
-    DodoDongleSettingsCard: typeof import('./src/components/DodoDongleSettingsCard.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
     DodoInputContacts: typeof import('./src/components/DodoInputContacts.vue')['default']
@@ -50,6 +49,7 @@ declare module 'vue' {
     DodoToggleChip: typeof import('./src/components/DodoToggleChip.vue')['default']
     DodoToggleGroup: typeof import('./src/components/DodoToggleGroup.vue')['default']
     DodoUserDictionaryModal: typeof import('./src/components/DodoUserDictionaryModal.vue')['default']
+    DongleSettingsCard: typeof import('./src/views/settingsCards/DongleSettingsCard.vue/index.js')['default']
     IonBadge: typeof import('@ionic/vue')['IonBadge']
     IonButton: typeof import('@ionic/vue')['IonButton']
     IonButtons: typeof import('@ionic/vue')['IonButtons']

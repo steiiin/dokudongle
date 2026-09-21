@@ -4,7 +4,7 @@ import { cog } from 'ionicons/icons'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoDongleSettingsCard from '@/components/DodoDongleSettingsCard.vue'
+import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 import DodoSendAction from '@/components/DodoSendAction.vue'
 import TabPageSettings from '@/views/TabPageSettings.vue'
 import TabsPage from '@/views/TabsPage.vue'
@@ -26,7 +26,7 @@ describe('Settings tab', () => {
     })
     expect(wrapper.text()).toContain('Einstellungen')
     expect(wrapper.findComponent(DodoSendAction).exists()).toBe(true)
-    expect(wrapper.getComponent(IonContent).findComponent(DodoDongleSettingsCard).exists()).toBe(true)
+    expect(wrapper.getComponent(IonContent).findComponent(DongleSettingsCard).exists()).toBe(true)
     expect(wrapper.text()).not.toContain('Dongle suchen')
     expect(wrapper.getComponent(IonContent).classes()).not.toContain('dongle-connecting')
 

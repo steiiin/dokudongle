@@ -3,7 +3,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoDongleSettingsCard from '@/components/DodoDongleSettingsCard.vue'
+import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 
 const mocks = vi.hoisted(() => ({
   renameDongle: vi.fn(),
@@ -23,7 +23,7 @@ vi.mock('@/store/doku', () => ({
   }),
 }))
 
-const mountCard = () => shallowMount(DodoDongleSettingsCard, {
+const mountCard = () => shallowMount(DongleSettingsCard, {
   global: { renderStubDefaultSlot: true },
 })
 
