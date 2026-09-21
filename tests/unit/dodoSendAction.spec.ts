@@ -132,7 +132,8 @@ describe('DodoSendAction protocol check', () => {
     const wrapper = mountAction()
     const button = connectButton(wrapper)
 
-    expect(button.props('color')).toBe('light')
+    // Ionic's always-dark palette maps "dark" to the light foreground color.
+    expect(button.props('color')).toBe('dark')
     expect(button.props('fill')).toBe('solid')
     expect(wrapper.text()).not.toContain('Senden')
   })

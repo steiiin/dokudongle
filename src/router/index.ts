@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router'
 import { RouteRecordRaw } from 'vue-router'
 
 import TabsPage from '../views/TabsPage.vue'
-import TabPageConnect from '@/views/TabPageConnect.vue'
+import TabPageSettings from '@/views/TabPageSettings.vue'
 import TabPageDoku from '@/views/TabPageDoku.vue'
 import TabPagePreview from '@/views/TabPagePreview.vue'
 
@@ -11,7 +11,7 @@ import TabPagePreview from '@/views/TabPagePreview.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/connect'
+    redirect: '/tabs/doku'
   },
   {
     path: '/tabs/',
@@ -19,11 +19,15 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        redirect: '/tabs/connect'
+        redirect: '/tabs/doku'
       },
       {
         path: 'connect',
-        component: TabPageConnect
+        redirect: '/tabs/settings'
+      },
+      {
+        path: 'settings',
+        component: TabPageSettings
       },
       {
         path: 'doku',

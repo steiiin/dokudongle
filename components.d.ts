@@ -12,7 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DodoConnectionBadge: typeof import('./src/components/DodoConnectionBadge.vue')['default']
-    DodoConnectionRename: typeof import('./src/components/DodoConnectionRename.vue')['default']
+    DodoDongleSettingsCard: typeof import('./src/components/DodoDongleSettingsCard.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
     DodoInputContacts: typeof import('./src/components/DodoInputContacts.vue')['default']
@@ -56,6 +56,7 @@ declare module 'vue' {
     IonCard: typeof import('@ionic/vue')['IonCard']
     IonCardContent: typeof import('@ionic/vue')['IonCardContent']
     IonCardHeader: typeof import('@ionic/vue')['IonCardHeader']
+    IonCardSubtitle: typeof import('@ionic/vue')['IonCardSubtitle']
     IonCardTitle: typeof import('@ionic/vue')['IonCardTitle']
     IonCheckbox: typeof import('@ionic/vue')['IonCheckbox']
     IonChip: typeof import('@ionic/vue')['IonChip']
@@ -87,6 +88,7 @@ declare module 'vue' {
     IonTabBar: typeof import('@ionic/vue')['IonTabBar']
     IonTabButton: typeof import('@ionic/vue')['IonTabButton']
     IonTabs: typeof import('@ionic/vue')['IonTabs']
+    IonText: typeof import('@ionic/vue')['IonText']
     IonTitle: typeof import('@ionic/vue')['IonTitle']
     IonToggle: typeof import('@ionic/vue')['IonToggle']
     IonToolbar: typeof import('@ionic/vue')['IonToolbar']

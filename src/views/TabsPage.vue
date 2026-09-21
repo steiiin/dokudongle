@@ -3,9 +3,9 @@
     <IonTabs :class="{ blurry: store.isDongleTransmitting }">
       <IonRouterOutlet></IonRouterOutlet>
       <IonTabBar id="main-tab-bar" slot="bottom">
-        <IonTabButton tab="connect" href="/tabs/connect">
-          <IonIcon aria-hidden="true" :icon="wifi" />
-          <IonLabel>Dongle</IonLabel>
+        <IonTabButton tab="settings" href="/tabs/settings">
+          <IonIcon aria-hidden="true" :icon="cog" />
+          <IonLabel>Einstellungen</IonLabel>
         </IonTabButton>
 
         <IonTabButton tab="doku" href="/tabs/doku">
@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 
-import { eye, flask, wifi } from 'ionicons/icons'
+import { cog, eye, flask } from 'ionicons/icons'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
