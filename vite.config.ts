@@ -4,12 +4,12 @@ import vue from '@vitejs/plugin-vue'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { defineConfig } from 'vitest/config'
+import { defineConfig, type Plugin } from 'vitest/config'
 
 const VIRTUAL_DICTIONARY_DE = 'virtual:dictionary-de'
 const RESOLVED_VIRTUAL_DICTIONARY_DE = `\0${VIRTUAL_DICTIONARY_DE}`
 
-const dictionaryDeBrowserPlugin = () => ({
+const dictionaryDeBrowserPlugin = (): Plugin => ({
   name: 'dictionary-de-browser',
   resolveId(id: string) {
     return id === VIRTUAL_DICTIONARY_DE ? RESOLVED_VIRTUAL_DICTIONARY_DE : null
@@ -19,10 +19,17 @@ const dictionaryDeBrowserPlugin = () => ({
 
     const entryUrl = import.meta.resolve('dictionary-de')
     const packageDirectory = new URL('.', entryUrl)
-    const [aff, dic] = await Promise.all([
+    const dictionaryPath = fileURLToPath(new URL('./src/assets/dictionaries/de.dic', import.meta.url))
+    this.addWatchFile(dictionaryPath)
+    const [aff, source] = await Promise.all([
       readFile(fileURLToPath(new URL('index.aff', packageDirectory)), 'utf8'),
-      readFile(fileURLToPath(new URL('index.dic', packageDirectory)), 'utf8'),
+      readFile(dictionaryPath, 'utf8'),
     ])
+    // Keep the editable file in Hunspell format, but update its entry count in
+    // memory so adding/removing words never requires maintaining the header.
+    const [, ...lines] = source.split(/\r?\n/)
+    const count = lines.filter(line => line.length > 0 && !/^\s/.test(line)).length
+    const dic = [String(count), ...lines].join('\n')
 
     return `export default ${JSON.stringify({ aff, dic })}`
   },
