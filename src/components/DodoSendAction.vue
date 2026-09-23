@@ -5,7 +5,7 @@
       @click="reset">Neu
     </IonButton>
     <IonButton v-if="!store.isDongleConnected"
-      :fill="store.isDongleConnecting ? 'clear' : 'solid'" color="dark" :disabled="store.isDongleConnecting"
+      :fill="store.isDongleConnecting ? 'clear' : 'solid'" color="dark" :disabled="store.isDongleConnecting || store.connection.isSavingSettings"
       @click="connectDongle">
       <IonSpinner v-if="store.isDongleConnecting" name="crescent" slot="end" style="width:16px;margin-left:.5rem"></IonSpinner>
       Verbinden
@@ -63,6 +63,7 @@ const pendingProtocolText = ref<string | null>(null)
 const isAvailable = computed(() =>
   store.connection.isConnected
   && !store.connection.isTransmitting
+  && !store.connection.isSavingSettings
   && !isProcessing.value,
 )
 

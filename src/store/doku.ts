@@ -18,7 +18,8 @@ import {
 } from '@/store/persistence'
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { AuditExport } from '@/plugins/audit-export'
-import { Device, DeviceConnection, SendAckUUID, SendTextUUID, ServiceUUID, SetNameUUID } from '@/types/dongle'
+import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/utils/dongle-config'
+import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
@@ -181,7 +182,10 @@ export const useDokuStore = defineStore('doku', {
       isConnected: false,
       lastError: null,
       isTransmitting: false,
-      isRenaming: false,
+      isSavingSettings: false,
+      config: null,
+      configStatus: 'unavailable',
+      session: 0,
       transmissionCurrent: 0, transmissionLength: 0,
       transmissionAbortController: null,
     } as DeviceConnection,
@@ -230,102 +234,160 @@ export const useDokuStore = defineStore('doku', {
 
     },
 
-    async connectDongle() {
+    dongleDisconnected(deviceId: string, session: number) {
+      if (this.connection.device?.id !== deviceId || this.connection.session !== session) return
+      ++this.connection.session
+      this.connection.isConnected = false
+      this.connection.config = null
+      this.connection.configStatus = 'unavailable'
+      void this.cancelSend()
+    },
 
+    async openDongleConnection(deviceId: string, timeout = 3000) {
+      const session = ++this.connection.session
+      await withDongleTimeout(BleClient.connect(
+        deviceId,
+        () => this.dongleDisconnected(deviceId, session),
+        { timeout },
+      ), timeout)
+      if (this.connection.session !== session || this.connection.device?.id !== deviceId) {
+        throw new Error('Dongle-Verbindung wurde unterbrochen.')
+      }
+      this.connection.isConnected = true
+    },
+
+    async refreshDongleConfig() {
+      const deviceId = this.connection.device?.id
+      const session = this.connection.session
+      if (!deviceId || !this.connection.isConnected || this.connection.isSavingSettings) return
+      this.connection.config = null
+      this.connection.configStatus = 'loading'
+      const isCurrent = () => this.connection.device?.id === deviceId
+        && this.connection.session === session && this.connection.isConnected
+      try {
+        const services = await withDongleTimeout(BleClient.getServices(deviceId), 3000)
+        if (!isCurrent()) return
+        const characteristic = services.find(service => service.uuid.toLowerCase() === ServiceUUID)
+          ?.characteristics.find(characteristic => characteristic.uuid.toLowerCase() === ConfigUUID)
+        if (!characteristic?.properties.read || !characteristic.properties.write) {
+          this.connection.configStatus = 'unsupported'
+          return
+        }
+        const config = decodeDongleConfig(await withDongleTimeout(
+          BleClient.read(deviceId, ServiceUUID, ConfigUUID, { timeout: 3000 }), 3000,
+        ))
+        if (!isCurrent()) return
+        this.connection.config = config
+        this.connection.configStatus = 'ready'
+        this.connection.device!.name = DONGLE_NAME_PREFIX + config.name
+      } catch {
+        if (isCurrent()) this.connection.configStatus = 'error'
+      }
+    },
+
+    async connectDongle() {
+      if (this.connection.isConnecting || this.connection.isSavingSettings || this.connection.isTransmitting) return
       this.connection.isConnecting = true
       this.connection.lastError = null
       try {
-
         await this.initDongle()
         await this.checkConnection()
-        if (this.isDongleConnected) { return }
+        if (this.connection.isConnected) {
+          if (!this.connection.config) await this.refreshDongleConfig()
+          return
+        }
 
         const device = await BleClient.requestDevice({
           namePrefix: 'DokuDongle',
           optionalServices: [ ServiceUUID ],
         })
-
+        ++this.connection.session
+        this.connection.config = null
+        this.connection.configStatus = 'unavailable'
         this.connection.device = {
           id: device.deviceId,
           name: device.name ?? 'Unbekannt',
         } as Device
 
         await BleClient.disconnect(device.deviceId)
-        await BleClient.connect(device.deviceId, () => this.checkConnection())
-        await this.checkConnection()
-
-      }
-      catch (e) {
+        await this.openDongleConnection(device.deviceId)
+        await this.refreshDongleConfig()
+      } catch (e) {
         this.connection.isConnected = false
+        this.connection.config = null
+        this.connection.configStatus = 'unavailable'
         this.connection.lastError = connectionErrorMessage(e)
-        console.error('could not connect to dongle')
-        console.error(e)
-      }
-      finally {
+        console.error('could not connect to dongle', e)
+      } finally {
         this.connection.isConnecting = false
       }
-
     },
-    async renameDongle(newName: string) {
 
-      try
-      {
-
-        // cancel if not connected
-        await this.checkConnection()
-        if (!this.isDongleConnected) { return false }
-        this.connection.isRenaming = true
-
-        // convert string to bytes
-        const encoder = new TextEncoder();
-        const data = encoder.encode(newName);
-        const view = new DataView(
-          data.buffer,
-          data.byteOffset,
-          data.byteLength
-        )
-
-        // max length must match firmware
-        if (data.byteLength === 0) {
-          throw new Error("Name darf nicht leer sein")
-        }
-        if (data.byteLength > 18) {
-          throw new Error("Name darf nicht länger als 18 Byte sein");
-        }
-
-        await BleClient.write(
-          this.connection.device!.id,
-          ServiceUUID,
-          SetNameUUID,
-          view,
-        )
-
-        await new Promise(r => setTimeout(r, 500));
-        await BleClient.disconnect(this.connection.device!.id);
-
-        this.initialized = false
-        this.connection.device = null
-
-        await new Promise(r => setTimeout(r, 2000));
-
-      }
-      finally
-      {
-        this.connection.isRenaming = false
-        this.connectDongle()
-      }
-
-    },
-    async checkConnection() {
+    async updateDongleConfig(config: DongleConfig): Promise<boolean> {
+      if (!this.isDongleConnected || !this.connection.config || this.connection.isSavingSettings
+        || this.connection.isTransmitting) return false
+      const requested = { ...config }
+      const payload = encodeDongleConfig(requested)
+      const deviceId = this.connection.device!.id
+      // Lock before the first await, including programmatic callers.
+      this.connection.isSavingSettings = true
+      this.connection.lastError = null
       try {
+        await withDongleTimeout(BleClient.write(deviceId, ServiceUUID, ConfigUUID, payload, { timeout: 3000 }), 3000)
+        await new Promise(resolve => setTimeout(resolve, 2000))
 
+        const deadline = Date.now() + 15000
+        while (Date.now() < deadline) {
+          const attemptDeadline = Math.min(deadline, Date.now() + 3000)
+          const remaining = () => {
+            const timeout = attemptDeadline - Date.now()
+            if (timeout <= 0) throw new Error('Zeitüberschreitung beim Wiederverbinden.')
+            return timeout
+          }
+          try {
+            this.dongleDisconnected(deviceId, this.connection.session)
+            await withDongleTimeout(BleClient.disconnect(deviceId), remaining())
+            await this.openDongleConnection(deviceId, remaining())
+            const session = this.connection.session
+            const saved = decodeDongleConfig(await withDongleTimeout(
+              BleClient.read(deviceId, ServiceUUID, ConfigUUID, { timeout: remaining() }), remaining(),
+            ))
+            if (session !== this.connection.session || !this.connection.isConnected) {
+              throw new Error('Dongle-Verbindung wurde unterbrochen.')
+            }
+            this.connection.config = saved
+            this.connection.configStatus = 'ready'
+            this.connection.device!.name = DONGLE_NAME_PREFIX + saved.name
+            return saved.name === requested.name && saved.keyGapMs === requested.keyGapMs
+          } catch {
+            this.dongleDisconnected(deviceId, this.connection.session)
+            const pause = Math.min(500, deadline - Date.now())
+            if (pause > 0) await new Promise(resolve => setTimeout(resolve, pause))
+          }
+        }
+        throw new Error('Die gespeicherten Dongle-Einstellungen konnten nach dem Neustart nicht bestätigt werden.')
+      } catch (error) {
+        this.connection.lastError = error instanceof Error ? error.message : 'Dongle-Einstellungen konnten nicht gespeichert werden.'
+        return false
+      } finally {
+        this.connection.isSavingSettings = false
+      }
+    },
+
+    async checkConnection() {
+      const deviceId = this.connection.device?.id
+      const session = this.connection.session
+      try {
         await this.initDongle()
         const connected = await BleClient.getConnectedDevices([ ServiceUUID ])
-        this.connection.isConnected = connected.some(device => device.deviceId === this.connection.device?.id)
-
+        if (this.connection.session !== session || this.connection.device?.id !== deviceId) return
+        this.connection.isConnected = connected.some(device => device.deviceId === deviceId)
+        if (!this.connection.isConnected) {
+          this.connection.config = null
+          this.connection.configStatus = 'unavailable'
+        }
       } catch (e) {
-        console.warn('Bluetooth not available')
-        console.warn(e)
+        console.warn('Bluetooth not available', e)
       }
     },
 
@@ -491,6 +553,8 @@ export const useDokuStore = defineStore('doku', {
       })
     },
     async sendProtocol() {
+      if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting) return false
+      this.connection.isTransmitting = true
 
       const protocolText = this.generatedProtocol
 
@@ -612,6 +676,7 @@ export const useDokuStore = defineStore('doku', {
       finally
       {
         this.connection.transmissionAbortController = null
+        this.connection.isTransmitting = false
       }
 
     },
@@ -630,7 +695,7 @@ export const useDokuStore = defineStore('doku', {
     isDongleConnected: (state) => state.connection.isConnected && !state.connection.isConnecting,
     isDongleTransmitting: (state) => state.connection.isConnected && state.connection.isTransmitting,
     transmissionProgress: (state) => (state.connection.isConnected && state.connection.isTransmitting && state.connection.transmissionLength>0) ? (state.connection.transmissionCurrent / state.connection.transmissionLength) : 0,
-    connectedDongleName: (state) => state.connection.isConnected ? state.connection.device?.name ?? 'Unbekanntes Dongle' : '',
+    connectedDongleName: (state) => state.connection.isConnected ? (state.connection.config ? DONGLE_NAME_PREFIX + state.connection.config.name : state.connection.device?.name ?? 'Unbekanntes Dongle') : '',
 
     // context
     context(state): ProtocolContext {

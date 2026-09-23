@@ -78,6 +78,7 @@ declare module 'vue' {
     IonProgressBar: typeof import('@ionic/vue')['IonProgressBar']
     IonRadio: typeof import('@ionic/vue')['IonRadio']
     IonRadioGroup: typeof import('@ionic/vue')['IonRadioGroup']
+    IonRange: typeof import('@ionic/vue')['IonRange']
     IonReorder: typeof import('@ionic/vue')['IonReorder']
     IonReorderGroup: typeof import('@ionic/vue')['IonReorderGroup']
     IonRouterOutlet: typeof import('@ionic/vue')['IonRouterOutlet']

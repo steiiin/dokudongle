@@ -23,7 +23,7 @@
 // =============================================================================
 
 // -----------------------------------------------------------------------------
-// ## 2.1 Device identity and request limits
+// ## Device identity and request limits
 // -----------------------------------------------------------------------------
 
 static constexpr char BASE_NAME[] = "DokuDongle";
@@ -31,26 +31,29 @@ static constexpr size_t MAX_CUSTOM_NAME_BYTES = 18;
 static constexpr size_t CHUNK_BYTES = 20;
 static constexpr uint32_t USB_TIMEOUT_MS = 1500;
 static constexpr uint32_t ACK_TIMEOUT_MS = 1000;
-static constexpr uint32_t KEY_HOLD_MS = 8;
-static constexpr uint32_t KEY_GAP_MS = 30;
 static constexpr UBaseType_t QUEUE_DEPTH = 8;
 
+static constexpr uint32_t DEFAULT_KEY_GAP_MS = 30;
+static constexpr uint32_t MIN_KEY_GAP_MS = 0;
+static constexpr uint32_t MAX_KEY_GAP_MS = 200;
+static constexpr uint32_t KEY_HOLD_MS = 8;
+
 // -----------------------------------------------------------------------------
-// ## 2.2 Bluetooth services and characteristics
+// ## Bluetooth services and characteristics
 // -----------------------------------------------------------------------------
 
 #define SERVICE_UUID  "00001888-0000-1000-8000-00805f9b34fb"
 #define SENDTEXT_UUID "00000881-0000-1000-8000-00805f9b34fb"
 #define SENDACK_UUID  "00000882-0000-1000-8000-00805f9b34fb"
-#define SETNAME_UUID  "00000883-0000-1000-8000-00805f9b34fb"
+#define CONFIG_UUID  "00000883-0000-1000-8000-00805f9b34fb"
 
 BLEService writerService(SERVICE_UUID);
 BLECharacteristic chSendChunk(SENDTEXT_UUID);
 BLECharacteristic chSendAck(SENDACK_UUID);
-BLECharacteristic chSetName(SETNAME_UUID);
+BLECharacteristic chConfig(CONFIG_UUID);
 
 // -----------------------------------------------------------------------------
-// ## 2.3 USB keyboard
+// ## USB keyboard
 // -----------------------------------------------------------------------------
 
 static uint8_t const HID_DESCRIPTOR[] = { TUD_HID_REPORT_DESC_KEYBOARD() };
@@ -59,17 +62,18 @@ Adafruit_USBD_HID usbKeyboard;
 static bool releaseNeeded = false;
 
 // -----------------------------------------------------------------------------
-// ## 2.4 Persistent configuration
+// ## Persistent configuration
 // -----------------------------------------------------------------------------
 
 struct DeviceConfig {
   uint32_t magic;
   uint16_t version;
   char name[32];
+  uint16_t keyGapMs;
 };
 
 static constexpr uint32_t CONFIG_MAGIC = 0x444F444F;
-static constexpr uint16_t CONFIG_VERSION = 1;
+static constexpr uint16_t CONFIG_VERSION = 2;
 
 static constexpr char CONFIG_PATH[] = "/dokudongle.cfg";
 static constexpr char CONFIG_TEMP_PATH[] = "/dokudongle.tmp";
@@ -78,10 +82,10 @@ static DeviceConfig gConfig = {};
 static char fullName[sizeof(BASE_NAME) + 1 + MAX_CUSTOM_NAME_BYTES];
 
 // -----------------------------------------------------------------------------
-// ## 2.5 Request queue and connection state
+// ## Request queue and connection state
 // -----------------------------------------------------------------------------
 
-enum RequestKind : uint8_t { REQUEST_KEYS, REQUEST_NAME };
+enum RequestKind : uint8_t { REQUEST_KEYS, REQUEST_CONFIG };
 
 struct WriteRequest {
   uint32_t session;
@@ -109,12 +113,13 @@ static void fatalError(const char* message);
 // ## Configuration and device name
 // -----------------------------------------------------------------------------
 
-static String truncateUtf8(const String& value, size_t maxBytes);
+static bool validName(const char* name, size_t capacity);
+static bool readStoredConfig(const char* path, DeviceConfig& config);
 static bool validConfig(const DeviceConfig& config);
 static bool readConfig(const char* path, DeviceConfig& config);
 static bool saveConfig(const DeviceConfig& config);
 static void loadOrCreateConfig();
-static void processName(const WriteRequest& request);
+static void processConfig(const WriteRequest& request);
 
 // -----------------------------------------------------------------------------
 // ## Bluetooth sessions and communication
@@ -135,8 +140,10 @@ static void enqueueWrite(RequestKind kind, uint16_t connection,
                          const uint8_t* data, uint16_t length);
 static void keysWritten(uint16_t connection, BLECharacteristic* characteristic,
                         uint8_t* data, uint16_t length);
-static void nameWritten(uint16_t connection, BLECharacteristic* characteristic,
-                        uint8_t* data, uint16_t length);
+static void configWritten(uint16_t connection, BLECharacteristic* characteristic,
+                          uint8_t* data, uint16_t length);
+static void configRead(uint16_t connection, BLECharacteristic* characteristic,
+                       ble_gatts_evt_read_t* request);
 
 // -----------------------------------------------------------------------------
 // ## USB keyboard and key processing
@@ -172,34 +179,41 @@ static void fatalError(const char* message) {
 // ## Name formatting and configuration validation
 // -----------------------------------------------------------------------------
 
-// ### truncateUtf8() - Limit text length in bytes without splitting a UTF-8 character.
-static String truncateUtf8(const String& value, size_t maxBytes) {
-  if (value.length() <= maxBytes) return value;
-  size_t cut = maxBytes;
-  while (cut > 0 && (static_cast<uint8_t>(value[cut]) & 0xC0) == 0x80) --cut;
-  return value.substring(0, cut);
+// ### validName() - Require a terminated, nonempty ASCII alphanumeric suffix.
+static bool validName(const char* name, size_t capacity) {
+  const char* end = static_cast<const char*>(memchr(name, '\0', capacity));
+  if (!end || end == name || static_cast<size_t>(end - name) > MAX_CUSTOM_NAME_BYTES)
+    return false;
+  for (const char* ch = name; ch < end; ++ch) {
+    if (!((*ch >= 'A' && *ch <= 'Z') || (*ch >= 'a' && *ch <= 'z') ||
+          (*ch >= '0' && *ch <= '9'))) return false;
+  }
+  return true;
 }
 
-// ### validConfig() - Check the configuration signature, version, and name length.
+// ### validConfig() - Validate both settings as well as the storage format.
 static bool validConfig(const DeviceConfig& config) {
-  if (config.magic != CONFIG_MAGIC || config.version != CONFIG_VERSION) return false;
-  const char* end = static_cast<const char*>(memchr(config.name, '\0', sizeof(config.name)));
-  return end && end > config.name &&
-         static_cast<size_t>(end - config.name) <= MAX_CUSTOM_NAME_BYTES;
+  return config.magic == CONFIG_MAGIC && config.version == CONFIG_VERSION &&
+         validName(config.name, sizeof(config.name)) &&
+         config.keyGapMs >= MIN_KEY_GAP_MS && config.keyGapMs <= MAX_KEY_GAP_MS;
 }
 
 // -----------------------------------------------------------------------------
 // ## Persistent storage
 // -----------------------------------------------------------------------------
 
-// ### readConfig() - Read a configuration file and validate its contents.
-static bool readConfig(const char* path, DeviceConfig& config) {
+// ### readStoredConfig() - Read the raw record, including legacy version 1.
+static bool readStoredConfig(const char* path, DeviceConfig& config) {
   Adafruit_LittleFS_Namespace::File file(InternalFS);
   if (!file.open(path, Adafruit_LittleFS_Namespace::FILE_O_READ)) return false;
   bool ok = file.size() == sizeof(config) &&
             file.read(&config, sizeof(config)) == static_cast<int>(sizeof(config));
   file.close();
-  return ok && validConfig(config);
+  return ok;
+}
+
+static bool readConfig(const char* path, DeviceConfig& config) {
+  return readStoredConfig(path, config) && validConfig(config);
 }
 
 // ### saveConfig() - Write, verify, and atomically replace the saved configuration.
@@ -227,39 +241,49 @@ static void loadOrCreateConfig() {
   if (!InternalFS.begin()) fatalError("Cannot start InternalFS");
   if (readConfig(CONFIG_PATH, gConfig)) return;
 
+  // The old record and version 1 with keyGapMs have the same size: the field
+  // occupies the old trailing padding. Always migrate v1 with the default gap.
+  DeviceConfig legacy = {};
+  const bool migrateName = readStoredConfig(CONFIG_PATH, legacy) &&
+    legacy.magic == CONFIG_MAGIC && legacy.version == 1 &&
+    validName(legacy.name, sizeof(legacy.name));
   memset(&gConfig, 0, sizeof(gConfig));
   gConfig.magic = CONFIG_MAGIC;
   gConfig.version = CONFIG_VERSION;
-  snprintf(gConfig.name, sizeof(gConfig.name), "sf%08lx",
-           static_cast<unsigned long>(NRF_FICR->DEVICEID[0]));
-  if (!saveConfig(gConfig)) fatalError("Cannot save initial device name");
+  gConfig.keyGapMs = DEFAULT_KEY_GAP_MS;
+  if (migrateName) {
+    memcpy(gConfig.name, legacy.name, sizeof(gConfig.name));
+  } else {
+    snprintf(gConfig.name, sizeof(gConfig.name), "sf%08lx",
+             static_cast<unsigned long>(NRF_FICR->DEVICEID[0]));
+  }
+  if (!saveConfig(gConfig)) fatalError("Cannot save initial device configuration");
 }
 
 // -----------------------------------------------------------------------------
-// ## Name change requests
+// ## Complete configuration requests
 // -----------------------------------------------------------------------------
 
-// ### processName() - Validate and save a requested name, then restart the device.
-static void processName(const WriteRequest& request) {
-  if (!sameSession(request)) return;
-  // Reject embedded NULs instead of silently saving a different name.
-  if (memchr(request.data, '\0', request.length)) return;
-  char buffer[MAX_CUSTOM_NAME_BYTES + 1] = {};
-  memcpy(buffer, request.data, request.length);
-  String name(buffer);
-  name.trim();
-  if (name.length() == 0) return;
-  name = truncateUtf8(name, MAX_CUSTOM_NAME_BYTES);
-
+// ### processConfig() - Commit both settings atomically, then restart the device.
+static void processConfig(const WriteRequest& request) {
+  if (!sameSession(request) || request.length < 3 ||
+      request.length > 2 + MAX_CUSTOM_NAME_BYTES) return;
+  // Wire format: uint16 little-endian gap, followed by the name without a NUL.
+  if (memchr(request.data + 2, '\0', request.length - 2)) return;
   DeviceConfig updated = {};
   updated.magic = CONFIG_MAGIC;
   updated.version = CONFIG_VERSION;
-  name.toCharArray(updated.name, sizeof(updated.name));
+  updated.keyGapMs = static_cast<uint16_t>(request.data[0]) |
+                    (static_cast<uint16_t>(request.data[1]) << 8);
+  memcpy(updated.name, request.data + 2, request.length - 2);
+  if (!validConfig(updated)) return;
   if (!saveConfig(updated)) {
-    Serial.println("Could not save new device name");
+    Serial.println("Could not save device configuration");
     return;
   }
+  taskENTER_CRITICAL();
   gConfig = updated;
+  taskEXIT_CRITICAL();
   releaseKeys();
   Bluefruit.Advertising.restartOnDisconnect(false);
   Bluefruit.Advertising.stop();
@@ -363,7 +387,7 @@ static void startAdvertising() {
 // ### enqueueWrite() - Validate and queue an incoming write; disconnect on oversize data or a full queue.
 static void enqueueWrite(RequestKind kind, uint16_t connection,
                          const uint8_t* data, uint16_t length) {
-  const size_t limit = kind == REQUEST_KEYS ? CHUNK_BYTES : MAX_CUSTOM_NAME_BYTES;
+  const size_t limit = kind == REQUEST_KEYS ? CHUNK_BYTES : 2 + MAX_CUSTOM_NAME_BYTES;
   if (length > limit) {
     Bluefruit.disconnect(connection);
     return;
@@ -395,11 +419,38 @@ static void keysWritten(uint16_t connection, BLECharacteristic* characteristic,
   enqueueWrite(REQUEST_KEYS, connection, data, length);
 }
 
-// ### nameWritten() - Queue an incoming BLE write as a device name request.
-static void nameWritten(uint16_t connection, BLECharacteristic* characteristic,
+// ### configWritten() - Queue a complete configuration update.
+static void configWritten(uint16_t connection, BLECharacteristic* characteristic,
                         uint8_t* data, uint16_t length) {
   (void)characteristic;
-  enqueueWrite(REQUEST_NAME, connection, data, length);
+  enqueueWrite(REQUEST_CONFIG, connection, data, length);
+}
+
+// ### configRead() - Return only committed settings, not the GATT write buffer.
+static void configRead(uint16_t connection, BLECharacteristic* characteristic,
+                       ble_gatts_evt_read_t* request) {
+  (void)characteristic;
+  DeviceConfig snapshot = {};
+  taskENTER_CRITICAL();
+  snapshot = gConfig;
+  taskEXIT_CRITICAL();
+  uint8_t data[2 + MAX_CUSTOM_NAME_BYTES] = {};
+  data[0] = static_cast<uint8_t>(snapshot.keyGapMs);
+  data[1] = static_cast<uint8_t>(snapshot.keyGapMs >> 8);
+  const size_t nameLength = strlen(snapshot.name);
+  memcpy(data + 2, snapshot.name, nameLength);
+  ble_gatts_rw_authorize_reply_params_t reply = {};
+  reply.type = BLE_GATTS_AUTHORIZE_TYPE_READ;
+  if (request->offset > nameLength + 2) {
+    reply.params.read.gatt_status = BLE_GATT_STATUS_ATTERR_INVALID_OFFSET;
+  } else {
+    reply.params.read.gatt_status = BLE_GATT_STATUS_SUCCESS;
+    reply.params.read.update = 1;
+    reply.params.read.offset = 0;
+    reply.params.read.len = nameLength + 2;
+    reply.params.read.p_data = data;
+  }
+  sd_ble_gatts_rw_authorize_reply(connection, &reply);
 }
 
 // =============================================================================
@@ -494,7 +545,7 @@ static void processKeys(const WriteRequest& request) {
       abortRequest(request, "USB keyboard unavailable or BLE disconnected; chunk not acknowledged");
       return;
     }
-    delay(KEY_GAP_MS);
+    if (isSafeKey(key, modifier)) delay(gConfig.keyGapMs);
   }
   if (!sendAck(request)) abortRequest(request, "Could not send chunk ACK");
 }
@@ -553,12 +604,13 @@ void setup() {
   chSendAck.setFixedLen(1);
   if (chSendAck.begin() != ERROR_NONE) fatalError("Cannot start ACK characteristic");
 
-  // ### Device name characteristic
-  chSetName.setProperties(CHR_PROPS_WRITE);
-  chSetName.setPermission(SECMODE_NO_ACCESS, SECMODE_OPEN);
-  chSetName.setMaxLen(MAX_CUSTOM_NAME_BYTES);
-  chSetName.setWriteCallback(nameWritten);
-  if (chSetName.begin() != ERROR_NONE) fatalError("Cannot start name characteristic");
+  // ### Complete configuration characteristic
+  chConfig.setProperties(CHR_PROPS_READ | CHR_PROPS_WRITE);
+  chConfig.setPermission(SECMODE_OPEN, SECMODE_OPEN);
+  chConfig.setMaxLen(2 + MAX_CUSTOM_NAME_BYTES);
+  chConfig.setWriteCallback(configWritten);
+  chConfig.setReadAuthorizeCallback(configRead);
+  if (chConfig.begin() != ERROR_NONE) fatalError("Cannot start configuration characteristic");
 
   // ### Start BLE advertising
   startAdvertising();
@@ -575,7 +627,7 @@ void loop() {
   WriteRequest request = {};
   if (xQueueReceive(requests, &request, 0) == pdPASS && sameSession(request)) {
     if (request.kind == REQUEST_KEYS) processKeys(request);
-    else processName(request);
+    else processConfig(request);
   }
   delay(1); // USB/BLE tasks are maintained by the Seeed core; no BLE.poll().
 }
