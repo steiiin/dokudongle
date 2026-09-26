@@ -73,6 +73,14 @@ const CHECK_FAILED_MESSAGE = 'Das Protokoll konnte nicht geprüft werden. Prüfe
 const connectDongle = async () => {
   if (store.isDongleConnected || store.isDongleConnecting) return
   await store.connectDongle()
+  if (!store.isDongleConnected && store.connection.lastError) {
+    const alert = await alertController.create({
+      header: 'Dongle-Verbindung fehlgeschlagen',
+      message: store.connection.lastError,
+      buttons: ['OK'],
+    })
+    await alert.present()
+  }
 }
 
 const reset = async () => {

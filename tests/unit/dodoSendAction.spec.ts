@@ -26,6 +26,7 @@ const mocks = vi.hoisted(() => ({
     connection: {
       isConnected: true,
       isTransmitting: false,
+      lastError: null as string | null,
     },
   },
 }))
@@ -116,6 +117,7 @@ describe('DodoSendAction protocol check', () => {
     mocks.store.isDongleConnecting = false
     mocks.store.connection.isConnected = true
     mocks.store.connection.isTransmitting = false
+    mocks.store.connection.lastError = null
     mocks.getNetworkStatus.mockResolvedValue({ connected: true, connectionType: 'wifi' })
     mocks.checkProtocol.mockResolvedValue(cleanResult)
     mocks.getCachedResult.mockResolvedValue(null)
@@ -263,6 +265,23 @@ describe('DodoSendAction protocol check', () => {
 
     resolveConnection()
     await flushPromises()
+  })
+
+  test('shows the connection error instead of silently returning to Verbinden', async () => {
+    mocks.store.isDongleConnected = false
+    mocks.store.connection.isConnected = false
+    mocks.connectDongle.mockImplementation(async () => {
+      mocks.store.connection.lastError = 'Die Dongle-Verbindung hat zu lange gedauert.'
+    })
+    const wrapper = mountAction()
+    await connectButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(mocks.createAlert).toHaveBeenCalledWith({
+      header: 'Dongle-Verbindung fehlgeschlagen',
+      message: mocks.store.connection.lastError,
+      buttons: ['OK'],
+    })
+    expect((await mocks.createAlert.mock.results[0].value).present).toHaveBeenCalledOnce()
   })
 
   test('does not expire the protocol when Bluetooth transmission fails', async () => {

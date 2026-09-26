@@ -31,7 +31,7 @@ public class DongleFirmwarePlugin extends Plugin {
             JSObject state = FirmwareUpdateState.read(getContext());
             String phase = state.optString("phase");
             if (!FirmwareUpdateState.busy && (phase.equals("preparing") || phase.equals("transferring") || phase.equals("restarting"))) {
-                state.put("phase", "error").put("error", "Aktualisierung durch App-Neustart unterbrochen. Erneut verbinden oder über USB wiederherstellen.");
+                state.put("phase", "error").put("error", "Aktualisierung durch App-Neustart unterbrochen. Bitte das Update erneut versuchen. Dongle angeschlossen lassen und Bluetooth einschalten.");
                 FirmwareUpdateState.write(getContext(), state);
             }
             call.resolve(FirmwareUpdateState.read(getContext()));
@@ -48,20 +48,29 @@ public class DongleFirmwarePlugin extends Plugin {
 
     private void begin(PluginCall call) {
         String address = call.getString("deviceId");
+        String dfuAddress = call.getString("dfuDeviceId");
+        final String jobId = UUID.randomUUID().toString();
         // Firmware versions are uint32; getLong handles the complete supported range.
         Object versionValue = call.getData().opt("version");
         Long expectedVersion = versionValue instanceof Number ? ((Number) versionValue).longValue() : null;
-        if (address == null || !BluetoothAdapter.checkBluetoothAddress(address) || expectedVersion == null || expectedVersion < 1 || expectedVersion > 0xfffffffeL
+        if (address == null || !BluetoothAdapter.checkBluetoothAddress(address)
+            || (dfuAddress != null && !FirmwareRecoveryPolicy.matchesAddress(address, dfuAddress)) || expectedVersion == null || expectedVersion < 1 || expectedVersion > 0xfffffffeL
             || ((Number) versionValue).doubleValue() != expectedVersion.doubleValue()) {
             call.reject("Ungültiges Update-Ziel."); return;
         }
         synchronized (FirmwareUpdateState.class) {
-            if (FirmwareUpdateState.busy) { call.reject("Eine Aktualisierung läuft bereits."); return; }
+            if (FirmwareUpdateState.busy || FirmwareUpdateState.serviceRunning || FirmwareUpdateState.read(getContext()).optString("phase").equals("transferred")) { call.reject("Eine Aktualisierung läuft bereits."); return; }
             FirmwareUpdateState.busy = true;
-            JSObject state = new JSObject().put("jobId", UUID.randomUUID().toString()).put("deviceId", address)
+            JSObject state = new JSObject().put("jobId", jobId).put("deviceId", address)
                 .put("deviceName", call.getString("deviceName", "DokuDongle")).put("version", expectedVersion)
                 .put("phase", "preparing").put("progress", 0);
-            FirmwareUpdateState.write(getContext(), state);
+            if (dfuAddress != null) state.put("dfuDeviceId", dfuAddress);
+            state.put("recovery", FirmwareUpdateState.recoveryFor(state));
+            try { FirmwareUpdateState.write(getContext(), state); }
+            catch (Exception error) {
+                FirmwareUpdateState.busy = false;
+                call.reject("Update-Status konnte nicht gespeichert werden.", error); return;
+            }
         }
         execute(() -> {
             try {
@@ -84,14 +93,18 @@ public class DongleFirmwarePlugin extends Plugin {
                 for (byte b : digest.digest()) hash.append(String.format("%02x", b & 255));
                 if (!hash.toString().equals(manifest.getString("packageSha256"))) throw new Exception("Firmware-Prüfsumme stimmt nicht überein.");
                 DfuServiceInitiator.createDfuNotificationChannel(getContext(), "Dongle-Aktualisierung", "Fortschritt der Dongle-Aktualisierung", false);
-                new DfuServiceInitiator(address).setDeviceName(call.getString("deviceName", "DokuDongle"))
+                FirmwareUpdateState.serviceRunning = true;
+                new DfuServiceInitiator(dfuAddress != null ? dfuAddress : address).setDeviceName(call.getString("deviceName", "DokuDongle"))
                     .setZip(file.getAbsolutePath()).setScope(DfuServiceInitiator.SCOPE_APPLICATION).setForeground(true)
                     .setPacketsReceiptNotificationsEnabled(true).setPacketsReceiptNotificationsValue(8)
                     .disableMtuRequest().setNumberOfRetries(1).setKeepBond(false)
+                    // OTAFIX may advertise at the incremented address after entering DFU.
+                    .setForceScanningForNewAddressInLegacyDfu(true)
                     .start(getContext(), FirmwareDfuService.class);
                 call.resolve(FirmwareUpdateState.read(getContext()));
             } catch (Exception error) {
-                FirmwareUpdateState.phase(getContext(), "error", 0, "Aktualisierung konnte nicht gestartet werden: " + error.getMessage());
+                FirmwareUpdateState.serviceRunning = false;
+                FirmwareUpdateState.phase(getContext(), jobId, "error", 0, "Aktualisierung konnte nicht gestartet werden: " + error.getMessage());
                 call.reject("Aktualisierung konnte nicht gestartet werden.", error);
             }
         });
@@ -109,9 +122,26 @@ public class DongleFirmwarePlugin extends Plugin {
                 call.reject("Aktualisierung kann noch nicht bestätigt werden."); return;
             }
             boolean verified = Boolean.TRUE.equals(call.getBoolean("verified"));
-            state.put("phase", verified ? "done" : "error").put("error", verified ? null : "Installation konnte nach dem Neustart nicht bestätigt werden. Bitte erneut verbinden oder über USB wiederherstellen.");
+            state.put("phase", verified ? "done" : "error").put("error", verified ? null : "Installation konnte nach dem Neustart nicht bestätigt werden. Bitte das Update erneut versuchen. Dongle angeschlossen lassen und Bluetooth einschalten.");
             FirmwareUpdateState.write(getContext(), state);
-            call.resolve(state);
+            call.resolve(FirmwareUpdateState.read(getContext()));
+        }
+    }
+    /** Called only after the app read the exact attempted version from the original application. */
+    @PluginMethod public void clearRecovery(PluginCall call) {
+        synchronized (FirmwareUpdateState.class) {
+            JSObject state = FirmwareUpdateState.read(getContext());
+            org.json.JSONObject recovery = state.optJSONObject("recovery");
+            if (FirmwareUpdateState.busy || FirmwareUpdateState.serviceRunning || recovery == null
+                || !recovery.optString("jobId").equals(call.getString("jobId"))
+                || recovery.optLong("version") != call.getData().optLong("version", -1)) {
+                call.reject("Veraltete oder noch laufende Wiederherstellung."); return;
+            }
+            JSObject done = new JSObject().put("phase", "done").put("jobId", recovery.optString("jobId"))
+                .put("deviceId", recovery.optString("deviceId")).put("deviceName", recovery.optString("deviceName"))
+                .put("version", recovery.optLong("version"));
+            FirmwareUpdateState.write(getContext(), done);
+            call.resolve(FirmwareUpdateState.read(getContext()));
         }
     }
     @PluginMethod public void dismiss(PluginCall call) {

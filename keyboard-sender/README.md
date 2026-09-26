@@ -165,11 +165,29 @@ prerequisite, not something the Android app updates.
    Keep the initial ZIP for recovery. Do not erase the whole chip; that also
    removes the saved dongle configuration.
 
-If an interrupted update leaves the dongle in its bootloader, the app does not
-pick a device by the shared `XIAO_DFU` name. Try reconnecting to the original
-application; if unavailable, double-reset and repeat the USB application flash.
-There is no automatic rollback guarantee. See the
-[bootloader instructions](https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX)
+If an interrupted update leaves the dongle in its bootloader, choose **Update
+erneut versuchen** in the Android app. Recovery first checks the original
+application address, then scans the legacy DFU service for up to 15 seconds at
+that address or the address with its final byte incremented (FF wraps to 00).
+It validates the DFU GATT service, restarts the application-only transfer from
+the beginning, and verifies the installed version at the original address.
+Recovery information survives closing the dialog and restarting the app or
+phone. The currently bundled firmware must not be older than the interrupted
+target. No automatic retry loop runs after reopening the app.
+
+Without saved history, use **Dongle wiederherstellen** in Android Settings,
+which is available without a normal dongle connection. Unplug/replug the affected
+dongle before scanning, then explicitly select its `XIAO_DFU` entry and Bluetooth
+address. Selection starts the update. This flow supports the pinned OTAFIX
+bootloader: on a cold start without a valid application it advertises at the
+application address with the final byte incremented. Other bootloaders and board
+types are not supported. The shared name alone does not identify a particular
+dongle or authenticate its hardware; only select your previously provisioned XIAO.
+
+Keep the dongle powered and the phone nearby. Bluetooth interruptions can be
+retried while DFU remains available. If no supported DFU device is reachable,
+double-reset and repeat the USB application flash. There is no automatic rollback
+guarantee. See the [bootloader instructions](https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX)
 for board identification and recovery.
 
 ### Firmware information and update interface
@@ -186,12 +204,20 @@ Service `00001888-0000-1000-8000-00805f9b34fb` exposes read-only characteristic
 The persisted configuration's `CONFIG_VERSION` remains independent. The
 Bluefruit DFU service uses Nordic legacy UUIDs (`00001530-1212-efde-1523-785feabcd123`).
 The local Capacitor `DongleFirmware` plugin provides `start`, `getStatus`,
-`finish` (post-restart verification), `dismiss`, and `status` events. Native status
-includes job ID, original device address, target version, phase, progress, and a
+`finish` (post-restart verification), `clearRecovery`, `dismiss`, and `status` events. Native status
+includes job ID, original application address, optional DFU transport address, a
+persisted recovery record, target version, phase, progress, and a
 monotonic update timestamp. A foreground service owns transfer independently of
 the WebView; persisted status detects interrupted processes. App resume restores
 that status. PRN is 8, high-MTU negotiation is disabled, and one native retry is
 allowed. Legacy DFU retries start over.
+
+Legacy bootloader scanning is forced because OTAFIX can advertise at an
+incremented Bluetooth address after entering DFU. Reconnecting directly to the
+application address can time out before transfer starts. Nordic's default
+selector accepts only the original address or its incremented bootloader address;
+it does not select a dongle by the shared `XIAO_DFU` name. This follows the
+[OTAFIX recommendation to enable force scanning](https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#recommended-ota-dfu-settings).
 
 ### Verification and release gate
 
@@ -212,8 +238,14 @@ Before distributing an OTA-enabled app, test on the actual provisioned hardware:
   computer's USB port. Verify automatic restart, version readback, keyboard
   output, saved name, and saved key gap after unplugging and reconnecting.
 - Interrupt Bluetooth and power during transfer. Verify bounded error handling,
-  retry behavior, and USB recovery. Repeat with the phone backgrounded, screen
+  wireless recovery using **Update erneut versuchen**, and USB recovery. Repeat with the phone backgrounded, screen
   locked, WebView recreated, and app process terminated.
+- Clear app data on a test phone and recover a stuck dongle using Settings after
+  unplug/replug. Confirm the selected DFU address maps back to the correct
+  application address, including after a dongle power cycle. This address mapping
+  must be qualified on the pinned bootloader before release.
+- Close the error dialog and restart the phone; confirm the remembered recovery
+  action remains available. Cancel discovery and retry after a scan timeout.
 - Place two dongles nearby and confirm only the selected device is updated;
   test both the default and a customized dongle name.
 - Test denied Bluetooth/notification permissions, Bluetooth disabled, corrupt

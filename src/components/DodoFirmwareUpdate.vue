@@ -8,13 +8,19 @@
         <p v-if="firmware.active">Dongle angeschlossen lassen und das Smartphone in der Nähe behalten.</p>
         <IonProgressBar v-if="firmware.active" :type="firmware.status.phase === 'transferring' ? 'determinate' : 'indeterminate'"
           :value="(firmware.status.progress ?? 0) / 100" aria-label="Update-Fortschritt" />
+        <template v-if="firmware.status.phase === 'searching'">
+          <p v-if="firmware.manualRecovery">Den zuvor aus- und wieder eingesteckten Dongle auswählen. Die Auswahl startet das Update.</p>
+          <IonButton v-for="device in firmware.recoveryDevices" :key="device.deviceId"
+            @click="firmware.selectRecoveryDevice(device.deviceId)">{{ device.name }} · {{ device.deviceId }}</IonButton>
+          <IonButton @click="firmware.cancelDiscovery()">Suche abbrechen</IonButton>
+        </template>
         <p v-if="firmware.status.phase === 'transferring'">{{ firmware.status.progress ?? 0 }} %</p>
         <p v-if="firmware.status.phase === 'done'">Dongle-Version {{ firmware.status.version }} wurde installiert und bestätigt.</p>
         <p v-if="firmware.status.error" role="alert">{{ firmware.status.error }}</p>
         <p v-if="firmware.nativeError" role="alert">{{ firmware.nativeError }}</p>
         <IonButton v-if="firmware.nativeError" @click="firmware.restore()">Update-Status erneut laden</IonButton>
         <template v-else-if="!firmware.active">
-          <IonButton v-if="firmware.status.phase === 'error'" @click="firmware.retry()">Erneut verbinden</IonButton>
+          <IonButton v-if="firmware.status.phase === 'error'" :disabled="!firmware.canRecover" @click="firmware.retry()">Update erneut versuchen</IonButton>
           <IonButton @click="firmware.dismiss()">Schließen</IonButton>
         </template>
       </div>
@@ -26,7 +32,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { IonButton, IonContent, IonHeader, IonModal, IonProgressBar, IonTitle, IonToolbar } from '@ionic/vue'
 import { useFirmwareStore } from '@/store/firmware'
 const firmware = useFirmwareStore()
-const title = computed(() => ({ idle: 'Update-Status', preparing: 'Vorbereiten', transferring: 'Übertragen',
+const title = computed(() => ({ idle: 'Update-Status', searching: 'Dongle suchen', preparing: 'Vorbereiten', transferring: 'Übertragen',
   restarting: 'Neustarten', transferred: 'Neustarten', verifying: 'Version prüfen', done: 'Fertig', error: 'Aktualisierung fehlgeschlagen',
 })[firmware.status.phase])
 onMounted(() => { void firmware.initialize() })

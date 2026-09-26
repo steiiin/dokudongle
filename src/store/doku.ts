@@ -21,6 +21,7 @@ import {
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { AuditExport } from '@/plugins/audit-export'
 import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/utils/dongle-config'
+import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { EnhanceableText } from '@/types/protocol/input'
@@ -169,6 +170,10 @@ function connectionErrorMessage(error: unknown): string {
     return 'Bluetooth Low Energy ist auf diesem Gerät nicht verfügbar.'
   }
 
+  if (normalizedMessage.includes('timeout') || normalizedMessage.includes('zeitüberschreitung')) {
+    return `Die Dongle-Verbindung hat zu lange gedauert. Bitte erneut verbinden. (${message})`
+  }
+
   return 'Die Dongle-Suche ist fehlgeschlagen. Prüfe Bluetooth und die App-Berechtigung „Geräte in der Nähe“ und versuche es erneut.'
 }
 
@@ -252,9 +257,9 @@ export const useDokuStore = defineStore('doku', {
       void this.cancelSend()
     },
 
-    async openDongleConnection(deviceId: string, timeout = 3000) {
+    async openDongleConnection(deviceId: string, timeout = dongleConnectionTimeout()) {
       const session = ++this.connection.session
-      await withDongleTimeout(BleClient.connect(
+      await awaitBleOperation(BleClient.connect(
         deviceId,
         () => this.dongleDisconnected(deviceId, session),
         { timeout },
@@ -349,11 +354,12 @@ export const useDokuStore = defineStore('doku', {
           name: device.name ?? 'Unbekannt',
         } as Device
 
-        await BleClient.disconnect(device.deviceId)
+        await disconnectDongle(device.deviceId)
         await this.openDongleConnection(device.deviceId)
         await this.refreshDongleConfig()
         await this.refreshDongleFirmware()
       } catch (e) {
+        this.dongleDisconnected(this.connection.device?.id ?? '', this.connection.session)
         this.connection.isConnected = false
         this.connection.config = null
         this.connection.configStatus = 'unavailable'
@@ -382,18 +388,18 @@ export const useDokuStore = defineStore('doku', {
 
         const deadline = Date.now() + 15000
         while (Date.now() < deadline) {
-          const attemptDeadline = Math.min(deadline, Date.now() + 3000)
+          const attemptDeadline = Capacitor.getPlatform() === 'android' ? deadline : Math.min(deadline, Date.now() + 3000)
           const remaining = () => {
-            const timeout = attemptDeadline - Date.now()
+            const timeout = Math.min(3000, attemptDeadline - Date.now())
             if (timeout <= 0) throw new Error('Zeitüberschreitung beim Wiederverbinden.')
             return timeout
           }
           try {
             this.dongleDisconnected(deviceId, this.connection.session)
-            await withDongleTimeout(BleClient.disconnect(deviceId), remaining())
+            await disconnectDongle(deviceId, { deadline: attemptDeadline })
             await this.openDongleConnection(deviceId, remaining())
             const session = this.connection.session
-            const saved = decodeDongleConfig(await withDongleTimeout(
+            const saved = decodeDongleConfig(await awaitBleOperation(
               BleClient.read(deviceId, ServiceUUID, ConfigUUID, { timeout: remaining() }), remaining(),
             ))
             if (session !== this.connection.session || !this.connection.isConnected) {
@@ -426,8 +432,15 @@ export const useDokuStore = defineStore('doku', {
       try {
         await this.initDongle()
         const connected = await BleClient.getConnectedDevices([ ServiceUUID ])
+        let isConnected = connected.some(device => device.deviceId === deviceId)
+        if (isConnected && deviceId && Capacitor.getPlatform() === 'android') {
+          // Android reports system-wide links, including a link whose local
+          // GATT client was closed on timeout. Only adopt a usable app client.
+          try { await BleClient.getServices(deviceId) }
+          catch { isConnected = false }
+        }
         if (this.connection.session !== session || this.connection.device?.id !== deviceId) return
-        this.connection.isConnected = connected.some(device => device.deviceId === deviceId)
+        this.connection.isConnected = isConnected
         if (!this.connection.isConnected) {
           this.connection.config = null
           this.connection.configStatus = 'unavailable'

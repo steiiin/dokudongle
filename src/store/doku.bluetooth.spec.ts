@@ -122,6 +122,48 @@ describe('DokuDongle Android BLE initialization', () => {
     expect(bluetooth.requestDevice.mock.calls[0]?.[0]).not.toHaveProperty('services')
   })
 
+  it('reconnects after a native connection timeout leaves a closed GATT handle', async () => {
+    vi.useFakeTimers()
+    try {
+      bluetooth.requestDevice.mockResolvedValue({ deviceId: 'AA:BB:CC:DD:EE:FF', name: 'DokuDongle-Test' })
+      bluetooth.disconnect.mockResolvedValueOnce(undefined).mockImplementationOnce(() => new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Disconnection timeout.')), 5000)
+      }))
+      bluetooth.connect.mockImplementationOnce(() => new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timeout.')), 10000)
+      })).mockResolvedValue(undefined)
+      const store = useDokuStore()
+      const first = store.connectDongle()
+      await vi.advanceTimersByTimeAsync(9999)
+      expect(store.connection.isConnecting).toBe(true)
+      await vi.advanceTimersByTimeAsync(1)
+      await first
+      expect(store.connection.lastError).toContain('Connection timeout.')
+      const retry = store.connectDongle()
+      await vi.advanceTimersByTimeAsync(4999)
+      expect(bluetooth.connect).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(1)
+      await retry
+      expect(bluetooth.connect).toHaveBeenCalledTimes(2)
+      expect(bluetooth.connect).toHaveBeenLastCalledWith('AA:BB:CC:DD:EE:FF', expect.any(Function), { timeout: 10000 })
+      expect(store.connection.isConnected).toBe(true)
+      expect(store.connection.lastError).toBeNull()
+      // A callback associated with the failed attempt cannot invalidate the new link.
+      bluetooth.connect.mock.calls[0][1]()
+      expect(store.connection.isConnected).toBe(true)
+    } finally { vi.useRealTimers() }
+  })
+
+  it('does not adopt a system BLE link after its app GATT client has closed', async () => {
+    const store = useDokuStore()
+    store.connection.device = { id: 'AA:BB:CC:DD:EE:FF', name: 'DokuDongle-Test' }
+    bluetooth.getConnectedDevices.mockResolvedValue([{ deviceId: 'AA:BB:CC:DD:EE:FF' }])
+    bluetooth.getServices.mockRejectedValue(new Error('Not connected to device.'))
+    await store.checkConnection()
+    expect(store.connection.isConnected).toBe(false)
+    expect(store.connection.config).toBeNull()
+  })
+
   it('cleans up after denied permissions and succeeds on retry', async () => {
     bluetooth.initialize.mockRejectedValueOnce(new Error('Permission denied.'))
     const store = useDokuStore()
@@ -285,6 +327,24 @@ describe('complete dongle settings', () => {
     await vi.advanceTimersByTimeAsync(2500)
     expect(await saving).toBe(true)
     expect(bluetooth.connect).toHaveBeenCalledTimes(3)
+  })
+
+  test('settings reconnection tolerates only a confirmed stale Android handle', async () => {
+    const store = await connect()
+    capacitor.getPlatform.mockReturnValue('android')
+    bluetooth.isEnabled.mockResolvedValue(true)
+    const requested = { ...initial, keyGapMs: 40 }
+    bluetooth.read.mockResolvedValue(encodeDongleConfig(requested))
+    bluetooth.disconnect.mockImplementationOnce(() => new Promise((_, reject) => {
+      connected = false
+      setTimeout(() => reject(new Error('Disconnection timeout.')), 5000)
+    }))
+    const saving = store.updateDongleConfig(requested)
+    await vi.advanceTimersByTimeAsync(6999)
+    expect(bluetooth.connect).toHaveBeenCalledOnce()
+    await vi.advanceTimersByTimeAsync(1)
+    expect(await saving).toBe(true)
+    expect(store.connection.config).toEqual(requested)
   })
 
   test('recovers settings on an existing BLE connection after a verification timeout', async () => {

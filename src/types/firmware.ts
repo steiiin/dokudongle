@@ -9,7 +9,14 @@ export interface FirmwareManifest extends FirmwareInfo {
   packageFilename: string
   packageSha256: string
 }
-export type UpdatePhase = 'idle' | 'preparing' | 'transferring' | 'restarting' | 'transferred' | 'verifying' | 'done' | 'error'
+export type UpdatePhase = 'idle' | 'searching' | 'preparing' | 'transferring' | 'restarting' | 'transferred' | 'verifying' | 'done' | 'error'
+export interface FirmwareRecovery {
+  jobId: string
+  deviceId: string
+  deviceName: string
+  version: number
+  dfuDeviceId?: string
+}
 export interface FirmwareUpdateStatus {
   phase: UpdatePhase
   updatedAt: number
@@ -19,4 +26,6 @@ export interface FirmwareUpdateStatus {
   version?: number
   progress?: number
   error?: string
+  dfuDeviceId?: string
+  recovery?: FirmwareRecovery
 }

@@ -2,9 +2,10 @@ import { registerPlugin, type PluginListenerHandle } from '@capacitor/core'
 import type { FirmwareUpdateStatus } from '@/types/firmware'
 
 interface DongleFirmwarePlugin {
-  start(options: { deviceId: string; deviceName: string; version: number }): Promise<FirmwareUpdateStatus>
+  start(options: { deviceId: string; deviceName: string; version: number; dfuDeviceId?: string }): Promise<FirmwareUpdateStatus>
   getStatus(): Promise<FirmwareUpdateStatus>
   finish(options: { jobId: string; verified: boolean }): Promise<FirmwareUpdateStatus>
+  clearRecovery(options: { jobId: string; version: number }): Promise<FirmwareUpdateStatus>
   dismiss(options: { jobId: string }): Promise<void>
   addListener(event: 'status', listener: (status: FirmwareUpdateStatus) => void): Promise<PluginListenerHandle>
 }
