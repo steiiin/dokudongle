@@ -52,22 +52,50 @@ export function check(root) {
   return manifest
 }
 
+function runTool(tool, args, options) {
+  try {
+    return execFileSync(tool.path, args, options)
+  } catch (error) {
+    const command = `${tool.name} (${JSON.stringify(tool.path)})`
+    if (error.code === 'ENOENT') {
+      throw new Error(`${command} was not found or its interpreter is missing. ${tool.hint} See keyboard-sender/README.md.`, { cause: error })
+    }
+    if (error.code === 'EACCES' || error.code === 'EPERM') {
+      throw new Error(`${command} could not be executed: permission denied. Check file and directory permissions and allow execution. ${tool.hint}`, { cause: error })
+    }
+    throw new Error(`${command} failed: ${error.message}`, { cause: error })
+  }
+}
+
 function compile(root, temp, version) {
-  const cli = process.env.ARDUINO_CLI || 'arduino-cli'
-  const nrfutil = process.env.ADAFRUIT_NRFUTIL || 'adafruit-nrfutil'
-  const cores = JSON.parse(execFileSync(cli, ['core', 'list', '--format', 'json'], { encoding: 'utf8' }))
+  const cli = {
+    name: 'Arduino CLI', path: process.env.ARDUINO_CLI || 'arduino-cli',
+    hint: 'Install Arduino CLI on PATH or set ARDUINO_CLI to its executable path.',
+  }
+  const nrfutil = {
+    name: 'adafruit-nrfutil', path: process.env.ADAFRUIT_NRFUTIL || 'adafruit-nrfutil',
+    hint: 'Install with "pipx install adafruit-nrfutil" and add its bin directory to PATH, or set ADAFRUIT_NRFUTIL to its executable path.',
+  }
+  const python = {
+    name: 'Python 3', path: 'python3',
+    hint: 'Install Python 3 and make python3 available on PATH.',
+  }
+  for (const [tool, args] of [[cli, ['version']], [nrfutil, ['version']], [python, ['--version']]]) {
+    runTool(tool, args, { encoding: 'utf8', stdio: 'pipe' })
+  }
+  const cores = JSON.parse(runTool(cli, ['core', 'list', '--format', 'json'], { encoding: 'utf8' }))
   const installed = Array.isArray(cores) ? cores : cores.platforms ?? []
   if (!installed.some(core => core.id === buildConfig.core && (core.installed_version ?? core.installed) === buildConfig.coreVersion)) {
     throw new Error(`Install ${buildConfig.core}@${buildConfig.coreVersion} with Arduino CLI first.`)
   }
-  execFileSync(cli, ['compile', '--fqbn', buildConfig.fqbn, '--build-path', temp,
+  runTool(cli, ['compile', '--fqbn', buildConfig.fqbn, '--build-path', temp,
     '--build-property', `compiler.cpp.extra_flags=-DDOKU_FIRMWARE_VERSION=${version}UL`,
     join(root, 'keyboard-sender/xiao_sketch')], { stdio: 'inherit' })
   const output = join(temp, 'application.zip')
-  execFileSync(nrfutil, ['dfu', 'genpkg', '--dev-type', '0x0052', '--sd-req', buildConfig.softdevice,
+  runTool(nrfutil, ['dfu', 'genpkg', '--dev-type', '0x0052', '--sd-req', buildConfig.softdevice,
     '--application-version', String(version), '--application', join(temp, 'xiao_sketch.ino.hex'), output], { stdio: 'inherit' })
   // Reject wrong package types and verify init-packet version, target stack, and CRC.
-  execFileSync('python3', ['-c', `
+  runTool(python, ['-c', `
 import json, struct, sys, zipfile, binascii
 with zipfile.ZipFile(sys.argv[1]) as z:
  m = json.loads(z.read('manifest.json'))['manifest']

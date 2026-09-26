@@ -82,6 +82,48 @@ Alternatively run the VSCode task **Prepare dongle firmware**. `ARDUINO_CLI` and
 Android Gradle build. No bootloader installation or flashing is performed by the
 preparation task.
 
+#### Toolchain paths and troubleshooting
+
+On Linux, keep the extracted Arduino CLI executable in a persistent directory,
+not `/tmp`. For example, replace the source path below with your downloaded
+Arduino CLI executable:
+
+```sh
+mkdir -p "$HOME/.local/bin"
+install -m 0755 /path/to/extracted/arduino-cli "$HOME/.local/bin/arduino-cli"
+export PATH="$HOME/.local/bin:$PATH"
+arduino-cli version
+adafruit-nrfutil version
+python3 --version
+```
+
+If `~/.local/bin` is not already on your login `PATH`, add the export to your
+shell startup configuration. Fully close and reopen VSCode after changing its
+inherited environment. In a VSCode terminal, `command -v arduino-cli` should
+resolve to the persistent executable before running **Prepare dongle firmware**.
+A `spawnSync arduino-cli ENOENT` error means the tool could not be launched,
+usually because it is missing from that environment's `PATH`.
+
+You can also specify executable paths for an individual invocation:
+
+```sh
+ARDUINO_CLI="$HOME/.local/bin/arduino-cli" \
+ADAFRUIT_NRFUTIL="$HOME/.local/bin/adafruit-nrfutil" \
+npm run firmware:prepare
+```
+
+For task-specific overrides, set `ARDUINO_CLI` and `ADAFRUIT_NRFUTIL` in the
+VSCode task's `options.env` using absolute executable paths. These values are
+paths, not shell commands: do not include arguments or a literal `~`.
+
+Before a rebuild, preparation checks all three tools. Missing-tool errors name
+the attempted executable and explain how to install or configure it. For
+permission errors, check executable permissions and directory access. A tool
+that starts but fails retains its own diagnostics; fix that reported error
+before retrying. Preparation does not install tools automatically. Unchanged,
+valid bundled firmware skips these checks, and `firmware:check` never requires
+the firmware toolchain.
+
 `firmware-version.json` records the last successful build. The task hashes the
 sketch and fingerprints all sketch files, the pinned board configuration, and the
 build script. Changed inputs increment the version once; unchanged inputs do
