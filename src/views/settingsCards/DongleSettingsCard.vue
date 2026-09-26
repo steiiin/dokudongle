@@ -6,7 +6,7 @@
     <IonCardContent>
       <ul class="current-settings">
         <li><b>Name:</b> DokuDongle-<i>{{ store.connectedDongleName }}</i></li>
-        <li><b>Tastenanschlag:</b> <i>{{ store.connection.config?.keyGapMs }}</i></li>
+        <li><b>Tastenanschlag:</b> <i>{{ store.connection.config?.keyGapMs }} ms</i></li>
       </ul>
       <IonButton v-if="store.connection.configStatus === 'error'" expand="block" color="danger" @click="store.refreshDongleConfig()">Erneut laden</IonButton>
       <IonButton expand="block" :disabled="!canEdit" @click="openSettings">Einstellungen ändern</IonButton>
@@ -187,12 +187,8 @@ ion-card-subtitle {
 {
 
   margin: 0;
-  padding: 0;
+  padding: 0 0 .5rem 0;
   list-style: none;
-
-  & li {
-
-  }
 
   & li i
   {
