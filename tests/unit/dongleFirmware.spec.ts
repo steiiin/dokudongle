@@ -9,7 +9,7 @@ import { encodeDongleConfig } from '@/utils/dongle-config'
 
 const mocks = vi.hoisted(() => ({
   platform: 'android',
-  ble: { connect: vi.fn(), disconnect: vi.fn(), getServices: vi.fn(), getConnectedDevices: vi.fn(), discoverServices: vi.fn(), read: vi.fn(), initialize: vi.fn(), requestLEScan: vi.fn(), stopLEScan: vi.fn() },
+  ble: { connect: vi.fn(), disconnect: vi.fn(), getServices: vi.fn(), getConnectedDevices: vi.fn(), discoverServices: vi.fn(), read: vi.fn(), requestDevice: vi.fn(), initialize: vi.fn(), requestLEScan: vi.fn(), stopLEScan: vi.fn() },
   native: { start: vi.fn(), getStatus: vi.fn(), finish: vi.fn(), clearRecovery: vi.fn(), dismiss: vi.fn(), addListener: vi.fn() },
   app: { addListener: vi.fn() },
 }))
@@ -248,6 +248,11 @@ describe('settings and overlay', () => {
     firmware = useFirmwareStore(); await firmware.initialize()
     const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
     expect(wrapper.text()).toContain('Android-App')
+    doku.connection.failedConnectionAttempts = 2
+    firmware.status = { phase: 'error', updatedAt: 1 }
+    await wrapper.vm.$nextTick()
+    expect(firmware.showRecovery).toBe(false)
+    expect(wrapper.text()).not.toContain('Dongle wiederherstellen')
     expect(firmware.canInstall).toBe(false)
     await firmware.install(); expect(mocks.native.start).not.toHaveBeenCalled()
     wrapper.unmount()
@@ -387,6 +392,7 @@ describe('DFU recovery', () => {
     expect(mocks.native.start).not.toHaveBeenCalled()
     expect(firmware.status.phase).toBe('done')
     expect(firmware.recovery).toBeUndefined()
+    expect(firmware.showRecovery).toBe(false)
     expect(doku.connection.config).toEqual({ name: 'Restored', keyGapMs: 50 })
   })
   test('refuses a bundled version older than the interrupted target', async () => {
@@ -409,6 +415,11 @@ describe('DFU recovery', () => {
     expect(firmware.status.phase).toBe('idle')
     expect(firmware.recovery?.deviceId).toBe(applicationAddress)
     expect(firmware.canRecover).toBe(true)
+    expect(firmware.showRecovery).toBe(true)
+    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    expect(wrapper.text()).toContain('Dongle wiederherstellen')
+    expect(wrapper.text()).toContain('Update erneut versuchen')
+    wrapper.unmount()
   })
   test('manual recovery requires selecting a supported device and derives its application address', async () => {
     doku.connection.isConnected = false
@@ -438,12 +449,78 @@ describe('DFU recovery', () => {
     await attempt
     expect(mocks.ble.stopLEScan).toHaveBeenCalledOnce()
   })
-  test('Settings offers recovery without a normal dongle connection', async () => {
+  test('Settings reveals recovery after two cancelled searches and hides it after connecting', async () => {
     doku.connection.isConnected = false
+    mocks.ble.requestDevice.mockRejectedValue(new Error('requestDevice cancelled.'))
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
     const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    await doku.connectDongle()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    await doku.connectDongle()
+    await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Dongle wiederherstellen')
     expect(wrapper.text()).toContain('aus- und wieder einstecken')
+    mocks.ble.requestDevice.mockResolvedValue({ deviceId: applicationAddress, name: 'DokuDongle-Test' })
+    await doku.connectDongle()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('Installierte Version: 1')
+    expect(wrapper.text()).not.toContain('Dongle wiederherstellen')
+    doku.dongleDisconnected(applicationAddress, doku.connection.session)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
     wrapper.unmount()
+  })
+  test('connected firmware information stays visible without recovery controls', () => {
+    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    expect(wrapper.text()).toContain('Installierte Version: 1')
+    expect(wrapper.text()).toContain('Installieren')
+    expect(wrapper.text()).not.toContain('Dongle wiederherstellen')
+    expect(wrapper.text()).not.toContain('aus- und wieder einstecken')
+    wrapper.unmount()
+  })
+  test('an initial update in progress does not reveal recovery', async () => {
+    await firmware.install()
+    expect(firmware.active).toBe(true)
+    expect(firmware.recovery).toBeDefined()
+    expect(firmware.showRecovery).toBe(false)
+    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+  test('preflight failure keeps recovery visible after dismissal until verified success', async () => {
+    mocks.ble.disconnect.mockRejectedValueOnce(new Error('Disconnection timeout.'))
+    await firmware.install()
+    expect(firmware.status.phase).toBe('error')
+    expect(firmware.recovery).toBeUndefined()
+    expect(firmware.showRecovery).toBe(true)
+    await firmware.dismiss()
+    expect(firmware.status.phase).toBe('idle')
+    expect(firmware.showRecovery).toBe(true)
+    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    expect(wrapper.text()).toContain('Dongle wiederherstellen')
+    await firmware.install()
+    mocks.ble.read.mockImplementation(async (_id, _service, characteristic) => characteristic === ConfigUUID
+      ? encodeDongleConfig({ name: 'Test', keyGapMs: 30 }) : wire(2))
+    nativeStatus = { ...nativeStatus, phase: 'transferred', updatedAt: nativeStatus.updatedAt + 1 }
+    emit(nativeStatus)
+    await flushPromises()
+    expect(mocks.native.finish).toHaveBeenCalledWith({ jobId: 'job-1', verified: true })
+    expect(firmware.showRecovery).toBe(false)
+    expect(wrapper.text()).not.toContain('Dongle wiederherstellen')
+    wrapper.unmount()
+  })
+  test('preflight failure without a saved update is forgotten after restart', async () => {
+    mocks.ble.disconnect.mockRejectedValueOnce(new Error('Disconnection timeout.'))
+    await firmware.install()
+    await firmware.dismiss()
+    expect(firmware.showRecovery).toBe(true)
+    await firmware.dispose()
+    setActivePinia(createPinia())
+    firmware = useFirmwareStore()
+    await firmware.initialize()
+    expect(firmware.showRecovery).toBe(false)
   })
   test('recovered transfers still require exact application version confirmation', async () => {
     const { attempt } = await startDfuRetry()

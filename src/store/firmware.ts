@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { Capacitor, type PluginListenerHandle } from '@capacitor/core'
 import { App } from '@capacitor/app'
@@ -24,8 +24,17 @@ export const useFirmwareStore = defineStore('firmware', () => {
   const android = Capacitor.getPlatform() === 'android'
   const recoveryDevices = ref<Array<{ deviceId: string; name: string }>>([])
   const manualRecovery = ref(false)
+  const hasFailedUpdate = ref(false)
   const recovery = computed(() => status.value.recovery)
   const active = computed(() => ['searching', 'preparing', 'transferring', 'restarting', 'transferred', 'verifying'].includes(status.value.phase))
+  const showRecovery = computed(() => android && (doku.connection.failedConnectionAttempts >= 2
+    || hasFailedUpdate.value || (!!recovery.value && !active.value)))
+  // Keep failures visible after dismissing the dialog, including preflight failures
+  // that have not created a native recovery record yet.
+  watch(() => status.value.phase, phase => {
+    if (phase === 'error') hasFailedUpdate.value = true
+    else if (phase === 'done') hasFailedUpdate.value = false
+  }, { flush: 'sync' })
   const available = computed(() => updateAvailable(doku.connection.firmware, manifest.value))
   const canInstall = computed(() => android && initialized.value && !nativeError.value && available.value
     && doku.isDongleConnected && doku.connection.hasDfu && doku.connection.firmwareStatus === 'ready'
@@ -422,6 +431,6 @@ export const useFirmwareStore = defineStore('firmware', () => {
     initialization = null
   }
   return { manifest, manifestError, status, initialized, nativeError, android, active, available, canInstall,
-    recovery, recoveryDevices, manualRecovery, canRecover, cancelDiscovery, selectRecoveryDevice, recoverManually,
+    recovery, recoveryDevices, manualRecovery, hasFailedUpdate, showRecovery, canRecover, cancelDiscovery, selectRecoveryDevice, recoverManually,
     loadManifest, initialize, restore, install, dismiss, retry, dispose }
 })

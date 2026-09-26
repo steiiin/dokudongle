@@ -188,6 +188,7 @@ export const useDokuStore = defineStore('doku', {
       isConnecting: false,
       isConnected: false,
       lastError: null,
+      failedConnectionAttempts: 0,
       isTransmitting: false,
       isSavingSettings: false,
       isUpdatingFirmware: false,
@@ -268,6 +269,7 @@ export const useDokuStore = defineStore('doku', {
         throw new Error('Dongle-Verbindung wurde unterbrochen.')
       }
       this.connection.isConnected = true
+      this.connection.failedConnectionAttempts = 0
     },
 
     async refreshDongleConfig() {
@@ -330,10 +332,13 @@ export const useDokuStore = defineStore('doku', {
       if (this.connection.isUpdatingFirmware || this.connection.isConnecting || this.connection.isSavingSettings || this.connection.isTransmitting) return
       this.connection.isConnecting = true
       this.connection.lastError = null
+      let connected = false
       try {
         await this.initDongle()
         await this.checkConnection()
         if (this.connection.isConnected) {
+          connected = true
+          this.connection.failedConnectionAttempts = 0
           if (!this.connection.config) await this.refreshDongleConfig()
           await this.refreshDongleFirmware()
           return
@@ -356,9 +361,11 @@ export const useDokuStore = defineStore('doku', {
 
         await disconnectDongle(device.deviceId)
         await this.openDongleConnection(device.deviceId)
+        connected = true
         await this.refreshDongleConfig()
         await this.refreshDongleFirmware()
       } catch (e) {
+        if (!connected) ++this.connection.failedConnectionAttempts
         this.dongleDisconnected(this.connection.device?.id ?? '', this.connection.session)
         this.connection.isConnected = false
         this.connection.config = null
@@ -441,6 +448,7 @@ export const useDokuStore = defineStore('doku', {
         }
         if (this.connection.session !== session || this.connection.device?.id !== deviceId) return
         this.connection.isConnected = isConnected
+        if (isConnected) this.connection.failedConnectionAttempts = 0
         if (!this.connection.isConnected) {
           this.connection.config = null
           this.connection.configStatus = 'unavailable'

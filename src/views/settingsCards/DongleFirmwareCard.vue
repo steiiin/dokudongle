@@ -1,5 +1,5 @@
 <template>
-  <IonCard v-if="store.isDongleConnected || firmware.android" data-testid="dongle-firmware">
+  <IonCard v-if="store.isDongleConnected || firmware.showRecovery" data-testid="dongle-firmware">
     <IonCardHeader><IonCardTitle>Dongle-Firmware</IonCardTitle></IonCardHeader>
     <IonCardContent>
       <template v-if="store.isDongleConnected">
@@ -20,7 +20,7 @@
         </template>
         <p v-else-if="store.connection.firmwareStatus === 'ready' && firmware.manifest">Die Dongle-Firmware ist aktuell.</p>
       </template>
-      <template v-if="firmware.android">
+      <template v-if="firmware.showRecovery">
         <template v-if="firmware.recovery">
           <p>Ein Update für {{ firmware.recovery.deviceName }} wurde noch nicht bestätigt.</p>
           <IonButton :disabled="!firmware.canRecover" @click="firmware.retry()">Update erneut versuchen</IonButton>

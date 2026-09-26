@@ -122,6 +122,65 @@ describe('DokuDongle Android BLE initialization', () => {
     expect(bluetooth.requestDevice.mock.calls[0]?.[0]).not.toHaveProperty('services')
   })
 
+  it('counts cancelled searches once per attempt and starts fresh with a new store', async () => {
+    bluetooth.requestDevice.mockRejectedValue(new Error('requestDevice cancelled.'))
+    const store = useDokuStore()
+    expect(store.connection.failedConnectionAttempts).toBe(0)
+    await store.connectDongle()
+    expect(store.connection.failedConnectionAttempts).toBe(1)
+    await store.connectDongle()
+    expect(store.connection.failedConnectionAttempts).toBe(2)
+    setActivePinia(createPinia())
+    expect(useDokuStore().connection.failedConnectionAttempts).toBe(0)
+  })
+
+  it.each(['isConnecting', 'isUpdatingFirmware', 'isSavingSettings', 'isTransmitting'] as const)(
+    'does not count a connection attempt blocked by %s', async busy => {
+      const store = useDokuStore()
+      store.connection.failedConnectionAttempts = 1
+      store.connection[busy] = true
+      await store.connectDongle()
+      expect(store.connection.failedConnectionAttempts).toBe(1)
+      expect(bluetooth.requestDevice).not.toHaveBeenCalled()
+    },
+  )
+
+  it('does not count failed automatic connections and resets after a successful one', async () => {
+    const store = useDokuStore()
+    store.connection.device = { id: 'dongle-1', name: 'DokuDongle-Test' }
+    store.connection.failedConnectionAttempts = 1
+    bluetooth.connect.mockRejectedValueOnce(new Error('Connection timeout.')).mockResolvedValue(undefined)
+    await expect(store.openDongleConnection('dongle-1')).rejects.toThrow('Connection timeout.')
+    expect(store.connection.failedConnectionAttempts).toBe(1)
+    await store.openDongleConnection('dongle-1')
+    expect(store.connection.failedConnectionAttempts).toBe(0)
+  })
+
+  it('resets failures when adopting an existing connection', async () => {
+    const store = useDokuStore()
+    store.connection.device = { id: 'dongle-1', name: 'DokuDongle-Test' }
+    store.connection.failedConnectionAttempts = 2
+    bluetooth.getConnectedDevices.mockResolvedValue([{ deviceId: 'dongle-1' }])
+    await store.connectDongle()
+    expect(store.connection.isConnected).toBe(true)
+    expect(store.connection.failedConnectionAttempts).toBe(0)
+    expect(bluetooth.requestDevice).not.toHaveBeenCalled()
+  })
+
+  it('does not count settings or firmware read errors after a successful connection', async () => {
+    const store = useDokuStore()
+    store.connection.failedConnectionAttempts = 2
+    bluetooth.requestDevice.mockResolvedValue({ deviceId: 'dongle-1', name: 'DokuDongle-Test' })
+    bluetooth.disconnect.mockResolvedValue(undefined)
+    bluetooth.connect.mockResolvedValue(undefined)
+    bluetooth.getServices.mockRejectedValue(new Error('Read failed'))
+    await store.connectDongle()
+    expect(store.connection.isConnected).toBe(true)
+    expect(store.connection.configStatus).toBe('error')
+    expect(store.connection.firmwareStatus).toBe('error')
+    expect(store.connection.failedConnectionAttempts).toBe(0)
+  })
+
   it('reconnects after a native connection timeout leaves a closed GATT handle', async () => {
     vi.useFakeTimers()
     try {
@@ -139,6 +198,7 @@ describe('DokuDongle Android BLE initialization', () => {
       await vi.advanceTimersByTimeAsync(1)
       await first
       expect(store.connection.lastError).toContain('Connection timeout.')
+      expect(store.connection.failedConnectionAttempts).toBe(1)
       const retry = store.connectDongle()
       await vi.advanceTimersByTimeAsync(4999)
       expect(bluetooth.connect).toHaveBeenCalledTimes(1)
@@ -148,6 +208,7 @@ describe('DokuDongle Android BLE initialization', () => {
       expect(bluetooth.connect).toHaveBeenLastCalledWith('AA:BB:CC:DD:EE:FF', expect.any(Function), { timeout: 10000 })
       expect(store.connection.isConnected).toBe(true)
       expect(store.connection.lastError).toBeNull()
+      expect(store.connection.failedConnectionAttempts).toBe(0)
       // A callback associated with the failed attempt cannot invalidate the new link.
       bluetooth.connect.mock.calls[0][1]()
       expect(store.connection.isConnected).toBe(true)

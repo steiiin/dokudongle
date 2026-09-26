@@ -22,6 +22,7 @@ export interface DeviceConnection {
   isConnecting: boolean,
   isConnected: boolean,
   lastError: string | null,
+  failedConnectionAttempts: number,
   isTransmitting: boolean,
   isSavingSettings: boolean,
   isUpdatingFirmware: boolean,
