@@ -117,7 +117,7 @@ describe('DokuDongle Android BLE initialization', () => {
 
     expect(bluetooth.requestDevice).toHaveBeenCalledWith({
       namePrefix: 'DokuDongle',
-      optionalServices: ['00001888-0000-1000-8000-00805f9b34fb'],
+      optionalServices: ['00001888-0000-1000-8000-00805f9b34fb', '00001530-1212-efde-1523-785feabcd123'],
     })
     expect(bluetooth.requestDevice.mock.calls[0]?.[0]).not.toHaveProperty('services')
   })

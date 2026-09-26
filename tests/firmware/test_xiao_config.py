@@ -9,7 +9,7 @@ import re
 import subprocess
 import tempfile
 
-sketch = (Path(__file__).resolve().parents[2] / 'keyboard-sender/xiao_sketch.ino').read_text()
+sketch = (Path(__file__).resolve().parents[2] / 'keyboard-sender/xiao_sketch/xiao_sketch.ino').read_text()
 
 
 def function(name):
@@ -124,7 +124,7 @@ static void abortRequest(const WriteRequest&, const char* message) { throw std::
 functions = '\n'.join(function(name) for name in [
     'validName', 'validConfig', 'readStoredConfig', 'readConfig', 'saveConfig',
     'loadOrCreateConfig', 'isSafeKey', 'waitForUsb', 'releaseKeys', 'sendRawKey',
-    'processKeys', 'processConfig', 'configRead',
+    'processKeys', 'processConfig', 'configRead', 'encodeFirmwareInfo',
 ])
 
 cases = r'''
@@ -147,6 +147,9 @@ static void writeLegacy(const string& name, uint16_t padding) {
   InternalFS.files[CONFIG_PATH] = vector<uint8_t>(bytes, bytes + sizeof(legacy));
 }
 int main() {
+  uint8_t firmware[6] = {};
+  encodeFirmwareInfo(firmware);
+  assert((vector<uint8_t>(firmware, firmware + 6) == vector<uint8_t>{1, 1, 0x78, 0x56, 0x34, 0x12}));
   // First boot creates a persistent default; v1 trailing bytes are never a gap.
   loadOrCreateConfig();
   assert(validConfig(gConfig) && gConfig.keyGapMs == 30);
@@ -229,5 +232,5 @@ with tempfile.TemporaryDirectory(prefix='dokudongle-xiao-host-') as temp:
     source = Path(temp) / 'test.cpp'
     binary = Path(temp) / 'test'
     source.write_text(fake_io + constants + kinds + structures + support + functions + cases)
-    subprocess.run(['g++', '-std=c++17', '-Wall', '-Wextra', str(source), '-o', str(binary)], check=True)
+    subprocess.run(['g++', '-std=c++17', '-DDOKU_FIRMWARE_VERSION=0x12345678UL', '-Wall', '-Wextra', str(source), '-o', str(binary)], check=True)
     subprocess.run([str(binary)], check=True)

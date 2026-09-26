@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { defineConfig, type Plugin } from 'vitest/config'
+import { configDefaults, defineConfig, type Plugin } from 'vitest/config'
 
 const VIRTUAL_DICTIONARY_DE = 'virtual:dictionary-de'
 const RESOLVED_VIRTUAL_DICTIONARY_DE = `\0${VIRTUAL_DICTIONARY_DE}`
@@ -64,6 +64,7 @@ export default defineConfig({
     plugins: () => [dictionaryDeBrowserPlugin()],
   },
   test: {
+    exclude: [...configDefaults.exclude, 'tests/build/**'],
     globals: true,
     environment: 'jsdom'
   }

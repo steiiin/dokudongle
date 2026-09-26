@@ -13,11 +13,13 @@
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
     >
       <DongleSettingsCard />
+      <DongleFirmwareCard />
     </IonContent>
   </IonPage>
 </template>
 
 <script setup lang="ts">
+import DongleFirmwareCard from '@/views/settingsCards/DongleFirmwareCard.vue'
 import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'
 

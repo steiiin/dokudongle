@@ -1,3 +1,5 @@
+import { FirmwareUUID, DfuUUID } from '@/types/firmware'
+import { decodeFirmwareInfo, isCompatibleFirmware } from '@/utils/dongle-firmware'
 import { BleClient } from '@capacitor-community/bluetooth-le'
 import { Capacitor } from '@capacitor/core'
 import { Device as CapacitorDevice } from '@capacitor/device'
@@ -183,6 +185,10 @@ export const useDokuStore = defineStore('doku', {
       lastError: null,
       isTransmitting: false,
       isSavingSettings: false,
+      isUpdatingFirmware: false,
+      firmware: null,
+      firmwareStatus: 'unavailable',
+      hasDfu: false,
       config: null,
       configStatus: 'unavailable',
       session: 0,
@@ -240,6 +246,9 @@ export const useDokuStore = defineStore('doku', {
       this.connection.isConnected = false
       this.connection.config = null
       this.connection.configStatus = 'unavailable'
+      this.connection.firmware = null
+      this.connection.firmwareStatus = 'unavailable'
+      this.connection.hasDfu = false
       void this.cancelSend()
     },
 
@@ -259,7 +268,7 @@ export const useDokuStore = defineStore('doku', {
     async refreshDongleConfig() {
       const deviceId = this.connection.device?.id
       const session = this.connection.session
-      if (!deviceId || !this.connection.isConnected || this.connection.isSavingSettings) return
+      if (!deviceId || !this.connection.isConnected || this.connection.isSavingSettings || this.connection.isUpdatingFirmware) return
       this.connection.config = null
       this.connection.configStatus = 'loading'
       const isCurrent = () => this.connection.device?.id === deviceId
@@ -285,8 +294,35 @@ export const useDokuStore = defineStore('doku', {
       }
     },
 
+    async refreshDongleFirmware() {
+      const deviceId = this.connection.device?.id
+      const session = this.connection.session
+      if (!deviceId || !this.connection.isConnected || this.connection.isUpdatingFirmware) return
+      this.connection.firmware = null
+      this.connection.hasDfu = false
+      this.connection.firmwareStatus = 'loading'
+      const current = () => this.connection.device?.id === deviceId && this.connection.session === session && this.connection.isConnected
+      try {
+        const services = await withDongleTimeout(BleClient.getServices(deviceId), 3000)
+        if (!current()) return
+        this.connection.hasDfu = services.some(service => service.uuid.toLowerCase() === DfuUUID)
+        const characteristic = services.find(service => service.uuid.toLowerCase() === ServiceUUID)
+          ?.characteristics.find(characteristic => characteristic.uuid.toLowerCase() === FirmwareUUID)
+        if (!characteristic?.properties.read) {
+          this.connection.firmwareStatus = 'unsupported'
+          return
+        }
+        const info = decodeFirmwareInfo(await withDongleTimeout(BleClient.read(deviceId, ServiceUUID, FirmwareUUID, { timeout: 3000 }), 3000))
+        if (!current()) return
+        this.connection.firmware = info
+        this.connection.firmwareStatus = isCompatibleFirmware(info) ? 'ready' : 'unsupported'
+      } catch {
+        if (current()) this.connection.firmwareStatus = 'error'
+      }
+    },
+
     async connectDongle() {
-      if (this.connection.isConnecting || this.connection.isSavingSettings || this.connection.isTransmitting) return
+      if (this.connection.isUpdatingFirmware || this.connection.isConnecting || this.connection.isSavingSettings || this.connection.isTransmitting) return
       this.connection.isConnecting = true
       this.connection.lastError = null
       try {
@@ -294,16 +330,20 @@ export const useDokuStore = defineStore('doku', {
         await this.checkConnection()
         if (this.connection.isConnected) {
           if (!this.connection.config) await this.refreshDongleConfig()
+          await this.refreshDongleFirmware()
           return
         }
 
         const device = await BleClient.requestDevice({
           namePrefix: 'DokuDongle',
-          optionalServices: [ ServiceUUID ],
+          optionalServices: [ ServiceUUID, DfuUUID ],
         })
         ++this.connection.session
         this.connection.config = null
         this.connection.configStatus = 'unavailable'
+        this.connection.firmware = null
+        this.connection.firmwareStatus = 'unavailable'
+        this.connection.hasDfu = false
         this.connection.device = {
           id: device.deviceId,
           name: device.name ?? 'Unbekannt',
@@ -312,10 +352,14 @@ export const useDokuStore = defineStore('doku', {
         await BleClient.disconnect(device.deviceId)
         await this.openDongleConnection(device.deviceId)
         await this.refreshDongleConfig()
+        await this.refreshDongleFirmware()
       } catch (e) {
         this.connection.isConnected = false
         this.connection.config = null
         this.connection.configStatus = 'unavailable'
+        this.connection.firmware = null
+        this.connection.firmwareStatus = 'unavailable'
+        this.connection.hasDfu = false
         this.connection.lastError = connectionErrorMessage(e)
         console.error('could not connect to dongle', e)
       } finally {
@@ -325,7 +369,7 @@ export const useDokuStore = defineStore('doku', {
 
     async updateDongleConfig(config: DongleConfig): Promise<boolean> {
       if (!this.isDongleConnected || !this.connection.config || this.connection.isSavingSettings
-        || this.connection.isTransmitting) return false
+        || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
       const requested = { ...config }
       const payload = encodeDongleConfig(requested)
       const deviceId = this.connection.device!.id
@@ -358,6 +402,7 @@ export const useDokuStore = defineStore('doku', {
             this.connection.config = saved
             this.connection.configStatus = 'ready'
             this.connection.device!.name = DONGLE_NAME_PREFIX + saved.name
+            await this.refreshDongleFirmware()
             return saved.name === requested.name && saved.keyGapMs === requested.keyGapMs
           } catch {
             this.dongleDisconnected(deviceId, this.connection.session)
@@ -375,6 +420,7 @@ export const useDokuStore = defineStore('doku', {
     },
 
     async checkConnection() {
+      if (this.connection.isUpdatingFirmware) return
       const deviceId = this.connection.device?.id
       const session = this.connection.session
       try {
@@ -385,6 +431,9 @@ export const useDokuStore = defineStore('doku', {
         if (!this.connection.isConnected) {
           this.connection.config = null
           this.connection.configStatus = 'unavailable'
+          this.connection.firmware = null
+          this.connection.firmwareStatus = 'unavailable'
+          this.connection.hasDfu = false
         }
       } catch (e) {
         console.warn('Bluetooth not available', e)
@@ -553,7 +602,7 @@ export const useDokuStore = defineStore('doku', {
       })
     },
     async sendProtocol() {
-      if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting) return false
+      if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
       this.connection.isTransmitting = true
 
       const protocolText = this.generatedProtocol

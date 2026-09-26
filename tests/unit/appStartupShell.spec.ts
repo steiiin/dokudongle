@@ -35,6 +35,7 @@ vi.mock('@ionic/vue', () => ({
   IonApp: {
     template: '<div class="ion-app"><slot /></div>',
   },
+  IonIcon: { template: '<span class="ion-icon" />' },
   IonRouterOutlet: {
     template: '<div class="router-outlet" />',
   },
@@ -54,7 +55,7 @@ describe('application startup shell', () => {
   test('renders loading content before startup settles or routes mount', async () => {
     const wrapper = mount(App)
 
-    expect(wrapper.text()).toContain('DokuDongle wird geladen')
+    expect(wrapper.find('.startup-hourglass').exists()).toBe(true)
     expect(wrapper.find('[role="status"]').exists()).toBe(true)
     expect(wrapper.find('.router-outlet').exists()).toBe(false)
     await vi.waitFor(() => expect(mocks.start).toHaveBeenCalledOnce())

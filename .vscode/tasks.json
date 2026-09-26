@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "tasks": [{
+    "label": "Prepare dongle firmware",
+    "type": "npm",
+    "script": "firmware:prepare",
+    "problemMatcher": [],
+    "group": "build"
+  },
+  {
+      "label": "Ionic: Serve (Dev)",
+      "type": "shell",
+      "command": "ionic serve",
+      "options": {
+        "env": {
+          "ENV_MODE": "dev"
+        }
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Ionic: Build Android",
+      "type": "shell",
+      "command": "/usr/bin/bash",
+      "args": [
+        "-l",
+        "-c",
+        "source ~/.nvm/nvm.sh && nvm use 24 && ionic build && npx cap copy && npx cap sync && npx cap open android"
+      ],
+      "options": {
+        "env": {
+          "ENV_MODE": "prod"
+        }
+      },
+      "problemMatcher": [],
+      "group": "build"
+    }
+    ]
+}

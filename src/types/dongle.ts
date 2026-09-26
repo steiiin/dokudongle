@@ -1,3 +1,5 @@
+import type { FirmwareInfo } from './firmware'
+
 export interface Device {
   id: string
   name: string
@@ -22,6 +24,10 @@ export interface DeviceConnection {
   lastError: string | null,
   isTransmitting: boolean,
   isSavingSettings: boolean,
+  isUpdatingFirmware: boolean,
+  firmware: FirmwareInfo | null,
+  firmwareStatus: 'unavailable' | 'loading' | 'ready' | 'unsupported' | 'error',
+  hasDfu: boolean,
   config: DongleConfig | null,
   configStatus: 'unavailable' | 'loading' | 'ready' | 'unsupported' | 'error',
   session: number,

@@ -26,7 +26,7 @@ export default withVueTs(
     },
   },
   {
-    files: ['*.config.{js,mjs,ts}', 'eslint.config.js', 'vite.config.ts'],
+    files: ['*.config.{js,mjs,ts}', 'eslint.config.js', 'vite.config.ts', 'scripts/**/*.mjs', 'tests/build/**/*.mjs'],
     languageOptions: {
       globals: globals.node,
     },

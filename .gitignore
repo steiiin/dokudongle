@@ -27,6 +27,8 @@ npm-debug.log*
 /.versions
 /.vscode/*
 !/.vscode/extensions.json
+!/.vscode/tasks.json
+/.firmware-build.lock
 /coverage
 /dist
 /node_modules

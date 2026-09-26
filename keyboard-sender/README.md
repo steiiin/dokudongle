@@ -52,3 +52,131 @@ Physical checks after flashing:
   keys; disconnect during transmission and confirm pending keys are released.
 - Send malformed settings and verify neither saved field changes and the dongle
   does not restart.
+
+## Bluetooth firmware updates (Android)
+
+Firmware is bundled with the app; no server or internet connection is needed to
+install it. Settings compares the connected dongle's integer version with the
+bundled version. Installation enters the Nordic legacy DFU bootloader, transfers
+an **application-only** ZIP, restarts, and reconnects to the original Bluetooth
+address. The app reports success only after reading the exact expected version.
+The browser can show version information but cannot install firmware.
+
+### Prepare an app release
+
+Use Node.js 22 or newer for Capacitor. Install Arduino CLI (verified with 1.3.1),
+Python 3, and `adafruit-nrfutil`. Install
+the pinned Seeed core using its package index:
+
+```sh
+arduino-cli core update-index --additional-urls https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json
+arduino-cli core install Seeeduino:nrf52@1.1.13 --additional-urls https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json
+pipx install adafruit-nrfutil
+npm run firmware:prepare
+npm run build
+npx cap sync android
+```
+
+Alternatively run the VSCode task **Prepare dongle firmware**. `ARDUINO_CLI` and
+`ADAFRUIT_NRFUTIL` may specify executable paths. Use JDK 21 **with javac** for the
+Android Gradle build. No bootloader installation or flashing is performed by the
+preparation task.
+
+`firmware-version.json` records the last successful build. The task hashes the
+sketch and fingerprints all sketch files, the pinned board configuration, and the
+build script. Changed inputs increment the version once; unchanged inputs do
+nothing. A missing/corrupt artifact rebuilds the existing version. The same
+version is compiled into the sketch and encoded in the DFU init packet.
+Generated version definitions do not modify the sketch.
+
+Commit the manifest and `public/firmware/` together with the source changes.
+Compilation/package validation happens before publication; errors retain the
+previous package. An interrupted publication is detected by `firmware:check`.
+The npm app build runs this check and refuses stale or corrupt artifacts without
+requiring the firmware toolchain. After an interrupted preparation, remove
+`.firmware-build.lock` only when no preparation process remains, then rerun it.
+Prepare firmware releases serially on the release branch; resolve version
+manifest conflicts by preparing a new version above the last released version.
+
+### One-time USB setup and recovery
+
+Existing sketches do not expose a version or enabled DFU service. They require
+USB provisioning before the app offers updates. Use the XIAO bootloader from
+[OTAFIX 2.3 / BP1.4](https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX/releases/tag/0.9.2-OTAFIX2.3-BP1.4),
+keeping SoftDevice S140 7.3.0. This is a hardware-qualified deployment
+prerequisite, not something the Android app updates.
+
+1. Double-press reset to expose the UF2 drive. Read `INFO_UF2.TXT` and record the
+   Board-ID. Some non-Sense boards ship with the Sense bootloader: select the
+   **matching installed variant**, not just the product label.
+2. Download that variant's `update-..._nosd.uf2` from the pinned release and verify
+   its published checksum. Copy it to the UF2 drive. The `nosd` updater retains
+   the installed SoftDevice; do not substitute a combined image for another board.
+3. Prepare version 1, re-enter USB bootloader mode, and flash the generated
+   application package to the dongle's actual serial port:
+
+   ```sh
+   adafruit-nrfutil dfu serial --package public/firmware/<packageFilename-from-manifest> -p <dongle-port> -b 115200 --singlebank
+   ```
+
+4. Connect from Android and verify the displayed version and existing settings.
+   Keep the initial ZIP for recovery. Do not erase the whole chip; that also
+   removes the saved dongle configuration.
+
+If an interrupted update leaves the dongle in its bootloader, the app does not
+pick a device by the shared `XIAO_DFU` name. Try reconnecting to the original
+application; if unavailable, double-reset and repeat the USB application flash.
+There is no automatic rollback guarantee. See the
+[bootloader instructions](https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX)
+for board identification and recovery.
+
+### Firmware information and update interface
+
+Service `00001888-0000-1000-8000-00805f9b34fb` exposes read-only characteristic
+`00000884-0000-1000-8000-00805f9b34fb`:
+
+| Bytes | Value |
+| --- | --- |
+| 0 | Protocol revision: 1 |
+| 1 | Target: 1 = XIAO nRF52840 |
+| 2–5 | Firmware version, uint32 little-endian, 1–4294967294 |
+
+The persisted configuration's `CONFIG_VERSION` remains independent. The
+Bluefruit DFU service uses Nordic legacy UUIDs (`00001530-1212-efde-1523-785feabcd123`).
+The local Capacitor `DongleFirmware` plugin provides `start`, `getStatus`,
+`finish` (post-restart verification), `dismiss`, and `status` events. Native status
+includes job ID, original device address, target version, phase, progress, and a
+monotonic update timestamp. A foreground service owns transfer independently of
+the WebView; persisted status detects interrupted processes. App resume restores
+that status. PRN is 8, high-MTU negotiation is disabled, and one native retry is
+allowed. Legacy DFU retries start over.
+
+### Verification and release gate
+
+```sh
+npm run test:firmware-build
+python3 tests/firmware/test_xiao_config.py
+npx vitest run tests/unit/dongleFirmware.spec.ts src/store/doku.bluetooth.spec.ts
+npm run typecheck
+npm run build
+npx cap sync android
+cd android
+./gradlew assembleDebug
+```
+
+Before distributing an OTA-enabled app, test on the actual provisioned hardware:
+
+- Prepare version 2 after a sketch change and update 1 → 2 while plugged into a
+  computer's USB port. Verify automatic restart, version readback, keyboard
+  output, saved name, and saved key gap after unplugging and reconnecting.
+- Interrupt Bluetooth and power during transfer. Verify bounded error handling,
+  retry behavior, and USB recovery. Repeat with the phone backgrounded, screen
+  locked, WebView recreated, and app process terminated.
+- Place two dongles nearby and confirm only the selected device is updated;
+  test both the default and a customized dongle name.
+- Test denied Bluetooth/notification permissions, Bluetooth disabled, corrupt
+  assets, same/newer device versions, legacy firmware, and a wrong target ID.
+
+Automated tests do not qualify bootloader compatibility, flash preservation,
+physical USB behavior, or BLE radio reliability. Keep OTA distribution gated on
+these hardware checks.

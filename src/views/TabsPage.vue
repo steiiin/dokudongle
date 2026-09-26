@@ -1,5 +1,6 @@
 <template>
   <IonPage>
+    <DodoFirmwareUpdate />
     <IonTabs :class="{ blurry: store.isDongleTransmitting }">
       <IonRouterOutlet></IonRouterOutlet>
       <IonTabBar id="main-tab-bar" slot="bottom">
@@ -32,6 +33,7 @@
 
 <script setup lang="ts">
 
+import DodoFirmwareUpdate from '@/components/DodoFirmwareUpdate.vue'
 import { cog, eye, flask } from 'ionicons/icons'
 
 import { useDokuStore } from '@/store/doku'

@@ -10,7 +10,11 @@
     "test:e2e": "cypress run",
     "test:unit": "vitest",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tests/e2e/tsconfig.json",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "firmware:prepare": "node scripts/firmware.mjs prepare",
+    "firmware:check": "node scripts/firmware.mjs check",
+    "test:firmware-build": "node --test tests/build/firmware.test.mjs",
+    "prebuild": "npm run firmware:check"
   },
   "dependencies": {
     "@capacitor-community/bluetooth-le": "^8.1.3",

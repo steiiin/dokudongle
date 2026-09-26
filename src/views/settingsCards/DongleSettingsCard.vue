@@ -5,9 +5,10 @@
     </IonCardHeader>
     <IonCardContent>
       <ul class="current-settings">
-        <li><b>Name:</b> DokuDongle-<i>{{ store.connectedDongleName }}</i></li>
-        <li><b>Tastenanschlag:</b> <i>{{ store.connection.config?.keyGapMs }} ms</i></li>
+        <li><b>Name:</b> <i>{{ store.connectedDongleName }}</i></li>
+        <li><b>Tastenabstand:</b> <i>{{ store.connection.config ? `${store.connection.config.keyGapMs} ms` : 'nicht verfügbar' }}</i></li>
       </ul>
+      <p v-if="store.connection.configStatus === 'unsupported'">Für diese Einstellungen bitte die aktuelle XIAO-Firmware über USB einrichten.</p>
       <IonButton v-if="store.connection.configStatus === 'error'" expand="block" color="danger" @click="store.refreshDongleConfig()">Erneut laden</IonButton>
       <IonButton expand="block" :disabled="!canEdit" @click="openSettings">Einstellungen ändern</IonButton>
     </IonCardContent>
@@ -94,7 +95,7 @@ const isSaving = ref(false)
 const saveError = ref('')
 const isBusy = computed(() => isSaving.value || store.connection.isSavingSettings)
 const canEdit = computed(() => store.isDongleConnected && !!store.connection.config
-  && !isBusy.value && !store.connection.isTransmitting)
+  && !isBusy.value && !store.connection.isTransmitting && !store.connection.isUpdatingFirmware)
 const canSave = computed(() => isOpen.value && canEdit.value
   && isValidDongleConfig({ name: newName.value, keyGapMs: newGapMs.value })
   && (newName.value !== store.connection.config?.name || newGapMs.value !== store.connection.config?.keyGapMs))

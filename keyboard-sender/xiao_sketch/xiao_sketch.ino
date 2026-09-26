@@ -18,6 +18,10 @@
 #include <queue.h>
 #include <task.h>
 
+#ifndef DOKU_FIRMWARE_VERSION
+#error "Build with npm run firmware:prepare to supply DOKU_FIRMWARE_VERSION"
+#endif
+
 // =============================================================================
 // # Constants, types, and shared state
 // =============================================================================
@@ -46,11 +50,22 @@ static constexpr uint32_t KEY_HOLD_MS = 8;
 #define SENDTEXT_UUID "00000881-0000-1000-8000-00805f9b34fb"
 #define SENDACK_UUID  "00000882-0000-1000-8000-00805f9b34fb"
 #define CONFIG_UUID  "00000883-0000-1000-8000-00805f9b34fb"
+#define FIRMWARE_UUID "00000884-0000-1000-8000-00805f9b34fb"
 
 BLEService writerService(SERVICE_UUID);
 BLECharacteristic chSendChunk(SENDTEXT_UUID);
 BLECharacteristic chSendAck(SENDACK_UUID);
 BLECharacteristic chConfig(CONFIG_UUID);
+BLECharacteristic chFirmware(FIRMWARE_UUID);
+BLEDfu firmwareUpdate;
+
+// Protocol revision 1, target 1 (XIAO nRF52840), uint32 LE version.
+static void encodeFirmwareInfo(uint8_t* data) {
+  data[0] = 1;
+  data[1] = 1;
+  const uint32_t version = DOKU_FIRMWARE_VERSION;
+  for (uint8_t i = 0; i < 4; ++i) data[i + 2] = (version >> (8 * i)) & 0xff;
+}
 
 // -----------------------------------------------------------------------------
 // ## USB keyboard
@@ -584,10 +599,8 @@ void setup() {
   if (length < 0 || static_cast<size_t>(length) >= sizeof(fullName)) fatalError("Device name too long");
   Bluefruit.setName(fullName);
 
-  // ### Optional firmware update service
-#if ENABLE_BLE_DFU
+  // ### Nordic legacy buttonless firmware update service
   if (firmwareUpdate.begin() != ERROR_NONE) fatalError("Cannot start DFU service");
-#endif
   // ### Writer service
   if (writerService.begin() != ERROR_NONE) fatalError("Cannot start writer service");
 
@@ -611,6 +624,14 @@ void setup() {
   chConfig.setWriteCallback(configWritten);
   chConfig.setReadAuthorizeCallback(configRead);
   if (chConfig.begin() != ERROR_NONE) fatalError("Cannot start configuration characteristic");
+
+  chFirmware.setProperties(CHR_PROPS_READ);
+  chFirmware.setPermission(SECMODE_OPEN, SECMODE_NO_ACCESS);
+  chFirmware.setFixedLen(6);
+  if (chFirmware.begin() != ERROR_NONE) fatalError("Cannot start firmware characteristic");
+  uint8_t firmwareInfo[6];
+  encodeFirmwareInfo(firmwareInfo);
+  chFirmware.write(firmwareInfo, sizeof(firmwareInfo));
 
   // ### Start BLE advertising
   startAdvertising();
