@@ -28,20 +28,6 @@ not the hold duration. New configurations default to 30 ms. Persisted format v2
 migrates v1 by retaining a valid name and setting this default: the gap field in
 v1 is indistinguishable from padding in the original name-only structure.
 
-## Verification
-
-Run `python3 tests/firmware/test_xiao_config.py` from the repository root for
-host regression checks (Python 3 and g++ required). They compile the production
-configuration and key-processing functions against simulated storage, BLE, and
-USB calls. They do not emulate the Nordic BLE stack or physical USB timing.
-
-Build the XIAO sketch in its own sketch directory, separate from
-`arduino_sketch.ino`, with Seeed nRF52 core 1.1.13, board `xiaonRF52840`, and
-SoftDevice option `s140v6` (S140 7.3.0). The installed legacy `arduino-builder`
-needs the core's precompiled nRFCrypto library explicitly added to
-`compiler.libraries.ldflags`; modern Arduino tooling reads that library's
-`library.properties`.
-
 ### USB device name
 
 `npm run firmware:prepare` sets `build.usb_product="DokuDongle"` and
@@ -61,17 +47,6 @@ manufacturer `STEIIIN`, and `/proc/bus/input/devices` contains
 `N: Name="STEIIIN DokuDongle"`. KDE should display
 **STEIIIN DokuDongle eingesteckt**. The ordinary `lsusb` summary can still show the vendor name from its numeric-ID database.
 Reconnect over Bluetooth and send text to verify keyboard operation as well.
-
-Physical checks after flashing:
-
-- Connect, read settings, and save name-only, gap-only, and combined changes.
-  Check the readback and advertised name after restart, then unplug and reconnect
-  to confirm persistence.
-- Upgrade a v1 device and verify its valid name survives with a 30 ms gap.
-- Send repeated characters at 0, 30, and 200 ms and check for missing or stuck
-  keys; disconnect during transmission and confirm pending keys are released.
-- Send malformed settings and verify neither saved field changes and the dongle
-  does not restart.
 
 ## Bluetooth firmware updates (Android)
 
@@ -102,64 +77,6 @@ Alternatively run the VSCode task **Prepare dongle firmware**. `ARDUINO_CLI` and
 Android Gradle build. No bootloader installation or flashing is performed by the
 preparation task.
 
-#### Toolchain paths and troubleshooting
-
-On Linux, keep the extracted Arduino CLI executable in a persistent directory,
-not `/tmp`. For example, replace the source path below with your downloaded
-Arduino CLI executable:
-
-```sh
-mkdir -p "$HOME/.local/bin"
-install -m 0755 /path/to/extracted/arduino-cli "$HOME/.local/bin/arduino-cli"
-export PATH="$HOME/.local/bin:$PATH"
-arduino-cli version
-adafruit-nrfutil version
-python3 --version
-```
-
-If `~/.local/bin` is not already on your login `PATH`, add the export to your
-shell startup configuration. Fully close and reopen VSCode after changing its
-inherited environment. In a VSCode terminal, `command -v arduino-cli` should
-resolve to the persistent executable before running **Prepare dongle firmware**.
-A `spawnSync arduino-cli ENOENT` error means the tool could not be launched,
-usually because it is missing from that environment's `PATH`.
-
-You can also specify executable paths for an individual invocation:
-
-```sh
-ARDUINO_CLI="$HOME/.local/bin/arduino-cli" \
-ADAFRUIT_NRFUTIL="$HOME/.local/bin/adafruit-nrfutil" \
-npm run firmware:prepare
-```
-
-For task-specific overrides, set `ARDUINO_CLI` and `ADAFRUIT_NRFUTIL` in the
-VSCode task's `options.env` using absolute executable paths. These values are
-paths, not shell commands: do not include arguments or a literal `~`.
-
-Before a rebuild, preparation checks all three tools. Missing-tool errors name
-the attempted executable and explain how to install or configure it. For
-permission errors, check executable permissions and directory access. A tool
-that starts but fails retains its own diagnostics; fix that reported error
-before retrying. Preparation does not install tools automatically. Unchanged,
-valid bundled firmware skips these checks, and `firmware:check` never requires
-the firmware toolchain.
-
-`firmware-version.json` records the last successful build. The task hashes the
-sketch and fingerprints all sketch files, the pinned board configuration, and the
-build script. Changed inputs increment the version once; unchanged inputs do
-nothing. A missing/corrupt artifact rebuilds the existing version. The same
-version is compiled into the sketch and encoded in the DFU init packet.
-Generated version definitions do not modify the sketch.
-
-Commit the manifest and `public/firmware/` together with the source changes.
-Compilation/package validation happens before publication; errors retain the
-previous package. An interrupted publication is detected by `firmware:check`.
-The npm app build runs this check and refuses stale or corrupt artifacts without
-requiring the firmware toolchain. After an interrupted preparation, remove
-`.firmware-build.lock` only when no preparation process remains, then rerun it.
-Prepare firmware releases serially on the release branch; resolve version
-manifest conflicts by preparing a new version above the last released version.
-
 ### One-time USB setup and recovery
 
 Existing sketches do not expose a version or enabled DFU service. They require
@@ -178,7 +95,7 @@ prerequisite, not something the Android app updates.
    application package to the dongle's actual serial port:
 
    ```sh
-   adafruit-nrfutil dfu serial --package public/firmware/<packageFilename-from-manifest> -p <dongle-port> -b 115200 --singlebank
+   adafruit-nrfutil dfu serial -p /dev/ttyACM0 -b 115200 --singlebank --package public/firmware/<packageFilename-from-manifest>
    ```
 
 4. Connect from Android and verify the displayed version and existing settings.
@@ -238,39 +155,3 @@ application address can time out before transfer starts. Nordic's default
 selector accepts only the original address or its incremented bootloader address;
 it does not select a dongle by the shared `XIAO_DFU` name. This follows the
 [OTAFIX recommendation to enable force scanning](https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#recommended-ota-dfu-settings).
-
-### Verification and release gate
-
-```sh
-npm run test:firmware-build
-python3 tests/firmware/test_xiao_config.py
-npx vitest run tests/unit/dongleFirmware.spec.ts src/store/doku.bluetooth.spec.ts
-npm run typecheck
-npm run build
-npx cap sync android
-cd android
-./gradlew assembleDebug
-```
-
-Before distributing an OTA-enabled app, test on the actual provisioned hardware:
-
-- Prepare version 2 after a sketch change and update 1 → 2 while plugged into a
-  computer's USB port. Verify automatic restart, version readback, keyboard
-  output, saved name, and saved key gap after unplugging and reconnecting.
-- Interrupt Bluetooth and power during transfer. Verify bounded error handling,
-  wireless recovery using **Update erneut versuchen**, and USB recovery. Repeat with the phone backgrounded, screen
-  locked, WebView recreated, and app process terminated.
-- Clear app data on a test phone and recover a stuck dongle using Settings after
-  unplug/replug. Confirm the selected DFU address maps back to the correct
-  application address, including after a dongle power cycle. This address mapping
-  must be qualified on the pinned bootloader before release.
-- Close the error dialog and restart the phone; confirm the remembered recovery
-  action remains available. Cancel discovery and retry after a scan timeout.
-- Place two dongles nearby and confirm only the selected device is updated;
-  test both the default and a customized dongle name.
-- Test denied Bluetooth/notification permissions, Bluetooth disabled, corrupt
-  assets, same/newer device versions, legacy firmware, and a wrong target ID.
-
-Automated tests do not qualify bootloader compatibility, flash preservation,
-physical USB behavior, or BLE radio reliability. Keep OTA distribution gated on
-these hardware checks.
