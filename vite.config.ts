@@ -37,6 +37,25 @@ const dictionaryDeBrowserPlugin = (): Plugin => ({
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    cssMinify: 'esbuild',
+    rolldownOptions: {
+      onLog(level, log, defaultHandler) {
+        if (level === 'warn' && log.plugin === 'rolldown:vite-resolve') {
+          const match = log.message.replace(/\\/g, '/').match(
+            /^Module "([^"]+)" has been externalized for browser compatibility, imported by "[^"]*\/node_modules\/hunspell-wasm\/([^"]+)"\./,
+          )
+          // We load dictionaries from strings, so Hunspell's filesystem APIs are
+          // unused. Its WASM loader only imports `module` in the Node.js branch.
+          if (match && (
+            (match[1] === 'fs/promises' && match[2] === 'dist/Hunspell.js') ||
+            (match[1] === 'module' && match[2] === 'wasm/hunspell.js')
+          )) return
+        }
+        defaultHandler(level, log)
+      },
+    },
+  },
   plugins: [
     dictionaryDeBrowserPlugin(),
     vue(),
