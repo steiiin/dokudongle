@@ -1,4 +1,9 @@
 {
   "lt": "laut",
-  "pat": "Patient"
+
+  "pat": "Patient",
+  "patn": "Patientin",
+
+  "fw": "Feuerwehr",
+  "pol": "Polizei"
 }
