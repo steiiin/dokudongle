@@ -38,9 +38,9 @@
         <IonProgressBar v-if="modelValue.isEnhancing" type="indeterminate" />
       </IonHeader>
       <IonContent class="dd-modal-content ion-padding">
-        <div class="dd-modal-hint" v-if="$slots.default">
+        <DodoHint class="dd-modal-hint" v-if="$slots.default">
           <slot />
-        </div>
+        </DodoHint>
         <div class="dd-modal-data">
           <div class="dd-modal-textarea-wrap">
             <div
@@ -126,6 +126,7 @@
 </template>
 
 <script setup lang="ts">
+import DodoHint from '@/components/DodoHint.vue'
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin } from 'ionicons/icons'
@@ -753,14 +754,6 @@ defineExpose({
   display: flex;
   flex-direction: column;
   position: relative;
-}
-
-.dd-modal-content .dd-modal-hint {
-  font-size: 0.9em;
-  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
-  border-left: 2px solid white;
-  letter-spacing: 1px;
-  margin-bottom: 1rem;
 }
 
 .dd-modal-data {

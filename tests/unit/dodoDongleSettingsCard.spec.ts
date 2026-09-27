@@ -8,6 +8,7 @@ import type { DongleConfig } from '@/types/dongle'
 const mocks = vi.hoisted(() => ({
   updateDongleConfig: vi.fn(),
   refreshDongleConfig: vi.fn(),
+  firmware: { android: false, available: false, showRecovery: false },
   store: {
     isDongleConnected: true,
     connectedDongleName: 'DokuDongle-Test123',
@@ -29,7 +30,9 @@ vi.mock('@/store/doku', () => ({
   }),
 }))
 
-const mountCard = () => shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true } })
+vi.mock('@/store/firmware', () => ({ useFirmwareStore: () => reactive(mocks.firmware) }))
+
+const mountCard = () => shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
 type Card = ReturnType<typeof mountCard>
 const button = (wrapper: Card, text: string) => wrapper.findAllComponents(IonButton).find(button => button.text() === text)!
 const open = async (wrapper: Card) => { await button(wrapper, 'Einstellungen ändern').trigger('click') }

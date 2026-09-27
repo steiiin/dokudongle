@@ -19,8 +19,8 @@ vi.mock('@/plugins/dongle-firmware', () => ({ DongleFirmware: mocks.native }))
 vi.mock('@capacitor/app', () => ({ App: mocks.app }))
 import { useDokuStore } from '@/store/doku'
 import { useFirmwareStore } from '@/store/firmware'
-import DongleFirmwareCard from '@/views/settingsCards/DongleFirmwareCard.vue'
-import DodoFirmwareUpdate from '@/components/DodoFirmwareUpdate.vue'
+import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
+import DodoFirmwareUpdate from '@/views/settingsCards/DodoFirmwareUpdate.vue'
 
 const manifest = { version: 2, protocolRevision: 1, targetId: 1, target: 'xiao-nrf52840',
   packageFilename: 'dongle-v2-0123456789abcdef.zip', packageSha256: 'a'.repeat(64), sketchSha256: 'b'.repeat(64), buildFingerprint: 'c'.repeat(64) }
@@ -232,12 +232,152 @@ describe('update lifecycle', () => {
 })
 
 describe('settings and overlay', () => {
+  const mountCard = () => shallowMount(DongleSettingsCard, {
+    global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } },
+  })
+  const findButton = (wrapper: ReturnType<typeof mountCard>, label: string) =>
+    wrapper.findAllComponents(IonButton).find(button => button.text() === label)
+
+  test('replaces settings with installation and restores editing when current', async () => {
+    const wrapper = mountCard()
+    expect(wrapper.get('.current-settings').text()).toContain('Version: v1 (v2 verfügbar)')
+    expect(findButton(wrapper, 'Einstellungen ändern')).toBeUndefined()
+    await findButton(wrapper, 'Neue Dongle-Version installieren')!.trigger('click')
+    expect(firmware.pendingUpdate).toBe('install')
+    expect(mocks.native.start).not.toHaveBeenCalled()
+    doku.connection.firmware!.version = 2
+    await wrapper.vm.$nextTick()
+    expect(wrapper.get('.current-settings').text()).toContain('Version: v2')
+    expect(wrapper.get('.current-settings').text()).not.toContain('verfügbar')
+    expect(findButton(wrapper, 'Neue Dongle-Version installieren')).toBeUndefined()
+    expect(findButton(wrapper, 'Einstellungen ändern')!.props('disabled')).toBe(false)
+    wrapper.unmount()
+  })
+
+  test.each(['isTransmitting', 'isSavingSettings', 'isUpdatingFirmware'] as const)(
+    'keeps installation visible but disabled while %s', async busyFlag => {
+      const wrapper = mountCard()
+      doku.connection[busyFlag] = true
+      await wrapper.vm.$nextTick()
+      expect(findButton(wrapper, 'Neue Dongle-Version installieren')!.props('disabled')).toBe(true)
+      expect(findButton(wrapper, 'Einstellungen ändern')).toBeUndefined()
+      doku.connection[busyFlag] = false
+      await wrapper.vm.$nextTick()
+      expect(findButton(wrapper, 'Neue Dongle-Version installieren')!.props('disabled')).toBe(false)
+      wrapper.unmount()
+    },
+  )
+
+  test('blocks saving an open settings draft when an installable update appears', async () => {
+    firmware.manifest = null
+    const wrapper = mountCard()
+    await findButton(wrapper, 'Einstellungen ändern')!.trigger('click')
+    wrapper.getComponent({ name: 'IonInput' }).vm.$emit('ionInput', { detail: { value: 'Changed' } })
+    await wrapper.vm.$nextTick()
+    expect(findButton(wrapper, 'Speichern')!.props('disabled')).toBe(false)
+    await firmware.loadManifest()
+    await wrapper.vm.$nextTick()
+    expect(findButton(wrapper, 'Speichern')!.props('disabled')).toBe(true)
+    const save = vi.spyOn(doku, 'updateDongleConfig').mockResolvedValue(true)
+    await findButton(wrapper, 'Speichern')!.trigger('click')
+    expect(save).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  test('uses shared error hints in the update overlay', async () => {
+    firmware.status = { phase: 'error', updatedAt: 1, error: 'Installation fehlgeschlagen' }
+    firmware.nativeError = 'Status konnte nicht geladen werden'
+    const wrapper = shallowMount(DodoFirmwareUpdate, {
+      global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } },
+    })
+    expect(wrapper.findAll('.dd-hint--error[role="alert"]').map(hint => hint.text())).toEqual([
+      'Installation fehlgeschlagen', 'Status konnte nicht geladen werden',
+    ])
+    wrapper.unmount()
+  })
+
+  test('shows loading and unavailable versions and retries a read failure', async () => {
+    doku.connection.firmware = null
+    doku.connection.firmwareStatus = 'loading'
+    const wrapper = mountCard()
+    expect(wrapper.get('.current-settings').text()).toContain('Version: wird gelesen …')
+    doku.connection.firmwareStatus = 'unavailable'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.get('.current-settings').text()).toContain('Version: nicht verfügbar')
+    doku.connection.firmwareStatus = 'error'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.get('[role="alert"]').text()).toContain('Dongle-Version konnte nicht gelesen')
+    const refresh = vi.spyOn(doku, 'refreshDongleFirmware').mockResolvedValue(undefined)
+    await findButton(wrapper, 'Version erneut laden')!.trigger('click')
+    expect(refresh).toHaveBeenCalledOnce()
+    doku.connection.isUpdatingFirmware = true
+    await wrapper.vm.$nextTick()
+    expect(findButton(wrapper, 'Version erneut laden')!.props('disabled')).toBe(true)
+    wrapper.unmount()
+  })
+
+  test('retains settings and USB warning for firmware without DFU', () => {
+    doku.connection.hasDfu = false
+    const wrapper = mountCard()
+    expect(wrapper.get('.current-settings').text()).toContain('Version: v1 (v2 verfügbar)')
+    expect(wrapper.get('.dd-hint--warning').text()).toContain('Einrichtung über USB')
+    expect(findButton(wrapper, 'Neue Dongle-Version installieren')).toBeUndefined()
+    expect(findButton(wrapper, 'Einstellungen ändern')!.props('disabled')).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('renders settings, manifest and native failures with their retry actions', async () => {
+    doku.connection.configStatus = 'error'
+    firmware.manifestError = 'Firmware fehlt'
+    firmware.nativeError = 'Status fehlt'
+    const wrapper = mountCard()
+    expect(wrapper.findAll('[role="alert"]').map(hint => hint.text())).toEqual([
+      'Die Dongle-Einstellungen konnten nicht gelesen werden.', 'Firmware fehlt', 'Status fehlt',
+    ])
+    const refresh = vi.spyOn(doku, 'refreshDongleConfig').mockResolvedValue(undefined)
+    const load = vi.spyOn(firmware, 'loadManifest').mockResolvedValue(undefined)
+    const restore = vi.spyOn(firmware, 'restore').mockResolvedValue(undefined)
+    await findButton(wrapper, 'Einstellungen erneut laden')!.trigger('click')
+    await findButton(wrapper, 'Firmware erneut laden')!.trigger('click')
+    await findButton(wrapper, 'Update-Status erneut laden')!.trigger('click')
+    expect(refresh).toHaveBeenCalledOnce()
+    expect(load).toHaveBeenCalledOnce()
+    expect(restore).toHaveBeenCalledOnce()
+    expect(findButton(wrapper, 'Neue Dongle-Version installieren')!.props('disabled')).toBe(true)
+    wrapper.unmount()
+  })
+
+  test('keeps recovery actions without connected-device settings', async () => {
+    doku.connection.isConnected = false
+    firmware.status = { phase: 'idle', updatedAt: 1, recovery: {
+      jobId: 'interrupted', deviceId: 'AA:BB:CC:DD:EE:FF', deviceName: 'DokuDongle-Test', version: 2,
+    } }
+    const wrapper = mountCard()
+    expect(wrapper.find('[data-testid="dongle-settings"]').exists()).toBe(true)
+    expect(wrapper.find('.current-settings').exists()).toBe(false)
+    expect(findButton(wrapper, 'Einstellungen ändern')).toBeUndefined()
+    expect(findButton(wrapper, 'Neue Dongle-Version installieren')).toBeUndefined()
+    expect(wrapper.get('.dd-hint--warning').text()).toContain('noch nicht bestätigt')
+    await findButton(wrapper, 'Update erneut versuchen')!.trigger('click')
+    expect(firmware.pendingUpdate).toBe('retry')
+    firmware.cancelUpdate()
+    await findButton(wrapper, 'Dongle wiederherstellen')!.trigger('click')
+    expect(firmware.pendingUpdate).toBe('recoverManually')
+    expect(mocks.native.start).not.toHaveBeenCalled()
+    expect(mocks.ble.requestLEScan).not.toHaveBeenCalled()
+    doku.connection.isConnecting = true
+    await wrapper.vm.$nextTick()
+    expect(findButton(wrapper, 'Update erneut versuchen')!.props('disabled')).toBe(true)
+    expect(findButton(wrapper, 'Dongle wiederherstellen')!.props('disabled')).toBe(true)
+    wrapper.unmount()
+  })
+
   test('offers only compatible upgrades and displays legacy setup instructions', async () => {
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
-    expect(wrapper.text()).toContain('Neue Dongle-Version verfügbar.')
-    expect(wrapper.findAllComponents(IonButton).some(button => button.text() === 'Installieren')).toBe(true)
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
+    expect(wrapper.text()).toContain('Version: v1 (v2 verfügbar)')
+    expect(wrapper.findAllComponents(IonButton).some(button => button.text() === 'Neue Dongle-Version installieren')).toBe(true)
     doku.connection.firmware!.version = 3; await wrapper.vm.$nextTick()
-    expect(wrapper.text()).not.toContain('Installieren')
+    expect(wrapper.text()).not.toContain('Neue Dongle-Version installieren')
     doku.connection.firmwareStatus = 'unsupported'; await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Einrichtung über USB')
     wrapper.unmount()
@@ -246,8 +386,11 @@ describe('settings and overlay', () => {
     await firmware.dispose(); mocks.platform = 'web'; setActivePinia(createPinia())
     doku = useDokuStore(); Object.assign(doku.connection, { isConnected: true, firmware: decodeFirmwareInfo(wire(1)), firmwareStatus: 'ready', hasDfu: true })
     firmware = useFirmwareStore(); await firmware.initialize()
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
     expect(wrapper.text()).toContain('Android-App')
+    expect(wrapper.text()).toContain('Version: v1 (v2 verfügbar)')
+    expect(findButton(wrapper, 'Neue Dongle-Version installieren')).toBeUndefined()
+    expect(findButton(wrapper, 'Einstellungen ändern')).toBeDefined()
     doku.connection.failedConnectionAttempts = 2
     firmware.status = { phase: 'error', updatedAt: 1 }
     await wrapper.vm.$nextTick()
@@ -257,8 +400,57 @@ describe('settings and overlay', () => {
     await firmware.install(); expect(mocks.native.start).not.toHaveBeenCalled()
     wrapper.unmount()
   })
-  test('overlay stays open during a bootloader disconnect', async () => {
+  test('confirms before updating, cancels without side effects, and starts only once on proceed', async () => {
+    const card = mountCard()
     const wrapper = shallowMount(DodoFirmwareUpdate, { global: { renderStubDefaultSlot: true } })
+    const modal = wrapper.getComponent({ name: 'IonModal' })
+    expect(modal.props('isOpen')).toBe(false)
+    await findButton(card, 'Neue Dongle-Version installieren')!.trigger('click')
+    expect(modal.props('isOpen')).toBe(true)
+    expect(wrapper.text()).toContain('dauert einige Minuten')
+    expect(wrapper.text()).toContain('nicht abziehen')
+    expect(wrapper.text()).toContain('Smartphone eingeschaltet')
+    expect(wrapper.text()).toContain('Bildschirm eingeschaltet')
+    const cancel = findButton(wrapper, 'Abbrechen')!
+    const proceed = findButton(wrapper, 'Fortfahren')!
+    expect(cancel.element.parentElement?.getAttribute('slot')).toBe('start')
+    expect(proceed.element.parentElement?.getAttribute('slot')).toBe('end')
+    expect(mocks.native.start).not.toHaveBeenCalled()
+    expect(mocks.ble.disconnect).not.toHaveBeenCalled()
+    await cancel.trigger('click')
+    expect(modal.props('isOpen')).toBe(false)
+    expect(firmware.status.phase).toBe('idle')
+    expect(mocks.native.start).not.toHaveBeenCalled()
+    await findButton(card, 'Neue Dongle-Version installieren')!.trigger('click')
+    await findButton(wrapper, 'Fortfahren')!.trigger('click')
+    await firmware.confirmUpdate()
+    await flushPromises()
+    expect(mocks.native.start).toHaveBeenCalledOnce()
+    expect(modal.props('isOpen')).toBe(true)
+    expect(modal.props('canDismiss')).toBe(false)
+    expect(findButton(wrapper, 'Abbrechen')).toBeUndefined()
+    expect(findButton(wrapper, 'Fortfahren')).toBeUndefined()
+    card.unmount()
+    wrapper.unmount()
+  })
+
+  test('blocks proceeding when the dongle disconnects during confirmation', async () => {
+    const wrapper = shallowMount(DodoFirmwareUpdate, { global: { renderStubDefaultSlot: true } })
+    firmware.requestUpdate('install')
+    doku.connection.isConnected = false
+    await wrapper.vm.$nextTick()
+    const proceed = findButton(wrapper, 'Fortfahren')!
+    expect(proceed.props('disabled')).toBe(true)
+    await proceed.trigger('click')
+    expect(mocks.native.start).not.toHaveBeenCalled()
+    expect(mocks.ble.disconnect).not.toHaveBeenCalled()
+    await findButton(wrapper, 'Abbrechen')!.trigger('click')
+    expect(wrapper.getComponent({ name: 'IonModal' }).props('isOpen')).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('overlay stays open during a bootloader disconnect', async () => {
+    const wrapper = shallowMount(DodoFirmwareUpdate, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
     await firmware.install(); await wrapper.vm.$nextTick()
     expect(wrapper.findComponent({ name: 'IonModal' }).props('isOpen')).toBe(true)
     expect(wrapper.findComponent({ name: 'IonModal' }).props('canDismiss')).toBe(false)
@@ -416,7 +608,7 @@ describe('DFU recovery', () => {
     expect(firmware.recovery?.deviceId).toBe(applicationAddress)
     expect(firmware.canRecover).toBe(true)
     expect(firmware.showRecovery).toBe(true)
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
     expect(wrapper.text()).toContain('Dongle wiederherstellen')
     expect(wrapper.text()).toContain('Update erneut versuchen')
     wrapper.unmount()
@@ -453,11 +645,11 @@ describe('DFU recovery', () => {
     doku.connection.isConnected = false
     mocks.ble.requestDevice.mockRejectedValue(new Error('requestDevice cancelled.'))
     vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
-    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
+    expect(wrapper.find('[data-testid="dongle-settings"]').exists()).toBe(false)
     await doku.connectDongle()
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="dongle-settings"]').exists()).toBe(false)
     await doku.connectDongle()
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('Dongle wiederherstellen')
@@ -465,17 +657,17 @@ describe('DFU recovery', () => {
     mocks.ble.requestDevice.mockResolvedValue({ deviceId: applicationAddress, name: 'DokuDongle-Test' })
     await doku.connectDongle()
     await wrapper.vm.$nextTick()
-    expect(wrapper.text()).toContain('Installierte Version: 1')
+    expect(wrapper.text()).toContain('Version: v1')
     expect(wrapper.text()).not.toContain('Dongle wiederherstellen')
     doku.dongleDisconnected(applicationAddress, doku.connection.session)
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="dongle-settings"]').exists()).toBe(false)
     wrapper.unmount()
   })
   test('connected firmware information stays visible without recovery controls', () => {
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
-    expect(wrapper.text()).toContain('Installierte Version: 1')
-    expect(wrapper.text()).toContain('Installieren')
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
+    expect(wrapper.text()).toContain('Version: v1')
+    expect(wrapper.text()).toContain('Neue Dongle-Version installieren')
     expect(wrapper.text()).not.toContain('Dongle wiederherstellen')
     expect(wrapper.text()).not.toContain('aus- und wieder einstecken')
     wrapper.unmount()
@@ -485,8 +677,8 @@ describe('DFU recovery', () => {
     expect(firmware.active).toBe(true)
     expect(firmware.recovery).toBeDefined()
     expect(firmware.showRecovery).toBe(false)
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
-    expect(wrapper.find('[data-testid="dongle-firmware"]').exists()).toBe(false)
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
+    expect(wrapper.find('[data-testid="dongle-settings"]').exists()).toBe(false)
     wrapper.unmount()
   })
   test('preflight failure keeps recovery visible after dismissal until verified success', async () => {
@@ -498,7 +690,7 @@ describe('DFU recovery', () => {
     await firmware.dismiss()
     expect(firmware.status.phase).toBe('idle')
     expect(firmware.showRecovery).toBe(true)
-    const wrapper = shallowMount(DongleFirmwareCard, { global: { renderStubDefaultSlot: true } })
+    const wrapper = shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
     expect(wrapper.text()).toContain('Dongle wiederherstellen')
     await firmware.install()
     mocks.ble.read.mockImplementation(async (_id, _service, characteristic) => characteristic === ConfigUUID

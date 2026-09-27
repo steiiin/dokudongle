@@ -3,6 +3,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import DodoHint from '@/components/DodoHint.vue'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
 import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import DodoQuickieTemplate from '@/components/quickie-components/DodoQuickieTemplate.vue'
@@ -40,6 +41,22 @@ const lastModelUpdate = (wrapper: ReturnType<typeof mountTextarea>): Enhanceable
 describe('DodoInputTextArea native textarea', () => {
   beforeEach(() => {
     vi.mocked(setInputSuggestionsDisabled).mockClear()
+  })
+
+  test('renders optional help through the shared hint', () => {
+    const wrapper = shallowMount(DodoInputTextArea, {
+      props: { modelValue: new EnhanceableText(''), title: 'Situation', assistContextId: 'test.hint' },
+      slots: { default: '<strong>Hinweis</strong> zur Eingabe' },
+      global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } },
+    })
+    expect(wrapper.getComponent(DodoHint).props('variant')).toBe('info')
+    expect(wrapper.get('.dd-modal-hint strong').text()).toBe('Hinweis')
+    expect(wrapper.get('.dd-modal-hint').text()).toContain('zur Eingabe')
+    expect(wrapper.get('.dd-modal-hint').attributes('role')).toBeUndefined()
+    wrapper.unmount()
+    const withoutHint = mountTextarea()
+    expect(withoutHint.findComponent(DodoHint).exists()).toBe(false)
+    withoutHint.unmount()
   })
 
   test('uses a multiline native control with correction disabled', () => {

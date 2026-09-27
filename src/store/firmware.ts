@@ -43,6 +43,26 @@ export const useFirmwareStore = defineStore('firmware', () => {
   const canRecover = computed(() => android && initialized.value && !nativeError.value && !!manifest.value
     && !active.value && !doku.connection.isUpdatingFirmware && !doku.connection.isSavingSettings
     && !doku.connection.isTransmitting && !doku.connection.isConnecting)
+  const pendingUpdate = ref<'install' | 'retry' | 'recoverManually' | null>(null)
+  const canConfirmUpdate = computed(() => pendingUpdate.value === 'install' ? canInstall.value
+    : !!pendingUpdate.value && canRecover.value)
+
+  function requestUpdate(action: NonNullable<typeof pendingUpdate.value>) {
+    if (action === 'install' ? !canInstall.value : !canRecover.value) return
+    pendingUpdate.value = action
+  }
+
+  function cancelUpdate() { pendingUpdate.value = null }
+
+  async function confirmUpdate() {
+    if (!canConfirmUpdate.value) return
+    const action = pendingUpdate.value
+    cancelUpdate()
+    if (action === 'install') await install()
+    else if (action === 'retry') await retry()
+    else if (action === 'recoverManually') await recoverManually()
+  }
+
   type Discovery = { cancelled: boolean; cancelScan?: () => void; select?: (deviceId: string) => void }
   let discovery: Discovery | null = null
   let verification: Promise<void> | null = null
@@ -210,6 +230,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
 
   async function dismiss() {
     if (active.value) return
+    cancelUpdate()
     if (status.value.jobId) {
       try { await DongleFirmware.dismiss({ jobId: status.value.jobId }) }
       catch { await restore(); return }
@@ -431,6 +452,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
     initialization = null
   }
   return { manifest, manifestError, status, initialized, nativeError, android, active, available, canInstall,
+    pendingUpdate, canConfirmUpdate, requestUpdate, cancelUpdate, confirmUpdate,
     recovery, recoveryDevices, manualRecovery, hasFailedUpdate, showRecovery, canRecover, cancelDiscovery, selectRecoveryDevice, recoverManually,
     loadManifest, initialize, restore, install, dismiss, retry, dispose }
 })

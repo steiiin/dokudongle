@@ -27,6 +27,8 @@ describe('Settings tab', () => {
     expect(wrapper.text()).toContain('Einstellungen')
     expect(wrapper.findComponent(DodoSendAction).exists()).toBe(true)
     expect(wrapper.getComponent(IonContent).findComponent(DongleSettingsCard).exists()).toBe(true)
+    expect(wrapper.getComponent(IonContent).findAllComponents(DongleSettingsCard)).toHaveLength(1)
+    expect(wrapper.find('dongle-firmware-card-stub').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('Dongle suchen')
     expect(wrapper.getComponent(IonContent).classes()).not.toContain('dongle-connecting')
 

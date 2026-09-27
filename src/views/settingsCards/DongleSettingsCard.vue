@@ -1,16 +1,47 @@
 <template>
-  <IonCard v-if="store.isDongleConnected" data-testid="dongle-settings">
+  <IonCard v-if="store.isDongleConnected || firmware.showRecovery" data-testid="dongle-settings">
     <IonCardHeader>
       <IonCardTitle>Dongle</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
-      <ul class="current-settings">
-        <li><b>Name:</b> <i>{{ store.connectedDongleName }}</i></li>
-        <li><b>Tastenabstand:</b> <i>{{ store.connection.config ? `${store.connection.config.keyGapMs} ms` : 'nicht verfügbar' }}</i></li>
-      </ul>
-      <p v-if="store.connection.configStatus === 'unsupported'">Für diese Einstellungen bitte die aktuelle XIAO-Firmware über USB einrichten.</p>
-      <IonButton v-if="store.connection.configStatus === 'error'" expand="block" color="danger" @click="store.refreshDongleConfig()">Erneut laden</IonButton>
-      <IonButton expand="block" :disabled="!canEdit" @click="openSettings">Einstellungen ändern</IonButton>
+      <template v-if="store.isDongleConnected">
+        <ul class="current-settings">
+          <li><b>Name:</b> <i>{{ store.connectedDongleName }}</i></li>
+          <li><b>Tastenabstand:</b> <i>{{ store.connection.config ? `${store.connection.config.keyGapMs} ms` : 'nicht verfügbar' }}</i></li>
+          <li><b>Version:</b> <i>{{ versionLabel }}<template v-if="firmware.available"> (v{{ firmware.manifest?.version }} verfügbar)</template></i></li>
+        </ul>
+        <DodoHint v-if="store.connection.configStatus === 'unsupported'" variant="warning">Für diese Einstellungen bitte die aktuelle XIAO-Firmware über USB einrichten.</DodoHint>
+        <template v-if="store.connection.configStatus === 'error'">
+          <DodoHint variant="error">Die Dongle-Einstellungen konnten nicht gelesen werden.</DodoHint>
+          <IonButton expand="block" color="danger" @click="store.refreshDongleConfig()">Einstellungen erneut laden</IonButton>
+        </template>
+        <template v-if="store.connection.firmwareStatus === 'error'">
+          <DodoHint variant="error">Die Dongle-Version konnte nicht gelesen werden.</DodoHint>
+          <IonButton expand="block" :disabled="store.connection.isUpdatingFirmware" @click="store.refreshDongleFirmware()">Version erneut laden</IonButton>
+        </template>
+        <DodoHint v-else-if="store.connection.firmwareStatus === 'unsupported' || (store.connection.firmwareStatus === 'ready' && !store.connection.hasDfu)" variant="warning">
+          Dieser Dongle benötigt eine einmalige Einrichtung über USB, bevor Bluetooth-Updates möglich sind.
+        </DodoHint>
+        <DodoHint v-else-if="firmware.available && !firmware.android">Zum Installieren bitte die Android-App verwenden.</DodoHint>
+        <IonButton v-if="showInstall" class="install-button" expand="block" :disabled="!firmware.canInstall" @click="firmware.requestUpdate('install')">Neue Dongle-Version installieren</IonButton>
+        <IonButton v-else expand="block" :disabled="!canEdit" @click="openSettings">Einstellungen ändern</IonButton>
+      </template>
+      <template v-if="firmware.showRecovery">
+        <template v-if="firmware.recovery">
+          <DodoHint variant="warning">Ein Update für {{ firmware.recovery.deviceName }} wurde noch nicht bestätigt.</DodoHint>
+          <IonButton :disabled="!firmware.canRecover" @click="firmware.requestUpdate('retry')">Update erneut versuchen</IonButton>
+        </template>
+        <DodoHint>Dongle nach einem unterbrochenen Update nicht erreichbar? Den betroffenen Dongle aus- und wieder einstecken und anschließend hier auswählen.</DodoHint>
+        <IonButton :disabled="!firmware.canRecover" @click="firmware.requestUpdate('recoverManually')">Dongle wiederherstellen</IonButton>
+      </template>
+      <template v-if="firmware.manifestError">
+        <DodoHint variant="error">{{ firmware.manifestError }}</DodoHint>
+        <IonButton @click="firmware.loadManifest()">Firmware erneut laden</IonButton>
+      </template>
+      <template v-if="firmware.nativeError">
+        <DodoHint variant="error">{{ firmware.nativeError }}</DodoHint>
+        <IonButton @click="firmware.restore()">Update-Status erneut laden</IonButton>
+      </template>
     </IonCardContent>
   </IonCard>
 
@@ -71,14 +102,17 @@
           </IonRange>
         </IonCardContent>
       </IonCard>
-      <IonText v-if="saveError" color="danger"><p class="save-error" role="alert">{{ saveError }}</p></IonText>
+      <DodoHint v-if="saveError" class="save-error" variant="error">{{ saveError }}</DodoHint>
     </IonContent>
   </IonModal>
+
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useDokuStore } from '@/store/doku'
+import { useFirmwareStore } from '@/store/firmware'
+import DodoHint from '@/components/DodoHint.vue'
 import { setNativeValue } from '@/utils/input'
 import { isValidDongleConfig } from '@/utils/dongle-config'
 import {
@@ -87,6 +121,13 @@ import {
 } from '@/types/dongle'
 
 const store = useDokuStore()
+const firmware = useFirmwareStore()
+const versionLabel = computed(() => {
+  if (store.connection.firmwareStatus === 'loading') return 'wird gelesen …'
+  return store.connection.firmware ? `v${store.connection.firmware.version}` : 'nicht verfügbar'
+})
+const showInstall = computed(() => firmware.android && firmware.available
+  && store.connection.firmwareStatus === 'ready' && store.connection.hasDfu)
 const nameRef = ref<{ $el: HTMLIonInputElement } | null>(null)
 const isOpen = ref(false)
 const newName = ref('')
@@ -95,7 +136,7 @@ const isSaving = ref(false)
 const saveError = ref('')
 const isBusy = computed(() => isSaving.value || store.connection.isSavingSettings)
 const canEdit = computed(() => store.isDongleConnected && !!store.connection.config
-  && !isBusy.value && !store.connection.isTransmitting && !store.connection.isUpdatingFirmware)
+  && !showInstall.value && !isBusy.value && !store.connection.isTransmitting && !store.connection.isUpdatingFirmware)
 const canSave = computed(() => isOpen.value && canEdit.value
   && isValidDongleConfig({ name: newName.value, keyGapMs: newGapMs.value })
   && (newName.value !== store.connection.config?.name || newGapMs.value !== store.connection.config?.keyGapMs))
@@ -176,6 +217,14 @@ ion-card-subtitle {
 }
 .save-error {
   margin: 1rem;
+}
+
+.install-button {
+  white-space: normal;
+  height: auto;
+  min-height: 36px;
+  --padding-top: 0.75rem;
+  --padding-bottom: 0.75rem;
 }
 
 @media (max-width: 360px) {

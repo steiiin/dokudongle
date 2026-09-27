@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 
-import DodoFirmwareUpdate from '@/components/DodoFirmwareUpdate.vue'
+import DodoFirmwareUpdate from '@/views/settingsCards/DodoFirmwareUpdate.vue'
 import { cog, eye, flask } from 'ionicons/icons'
 
 import { useDokuStore } from '@/store/doku'
