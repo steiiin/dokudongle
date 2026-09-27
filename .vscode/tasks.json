@@ -8,7 +8,7 @@
     "group": "build"
   },
   {
-      "label": "Ionic: Serve (Dev)",
+      "label": "Serve (Dev)",
       "type": "shell",
       "command": "ionic serve",
       "options": {
@@ -23,7 +23,7 @@
       }
     },
     {
-      "label": "Ionic: Build Android",
+      "label": "Serve (Android)",
       "type": "shell",
       "command": "/usr/bin/bash",
       "args": [
