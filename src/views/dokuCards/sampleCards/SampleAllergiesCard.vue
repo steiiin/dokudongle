@@ -8,6 +8,7 @@
 
         <DodoInputSelect label="Allergien" v-model="store.doku.sampler.allergies.level" lines="none"
           :options="[
+            { value: 'n/a', label: 'Keine Angabe'},
             { value: '', label: 'Keine' },
             { value: 'unknown', label: 'Unklar' },
             { value: 'minor', label: 'Nicht-Medikamentös' },

@@ -3,7 +3,7 @@ import { prefixAllergie } from "@/utils/prefix/sample"
 
 export class SampleAllergies {
 
-  public level: '' | 'unknown' | 'minor' | 'major'
+  public level: 'n/a' | '' | 'unknown' | 'minor' | 'major'
   public description: string
 
   constructor()
@@ -14,11 +14,14 @@ export class SampleAllergies {
 
   public generateText(): string
   {
-    if (this.level == 'unknown') {
-      return onNormal(`Allergien unklar (keine Angaben).`)
+    if (this.level == 'n/a') {
+      return ''
+    }
+    else if (this.level == 'unknown') {
+      return `Allergien unklar (keine Angaben).`
     }
     else if (this.level == '') {
-      return onNormal('Keine Allergien.')
+      return 'Keine Allergien.'
     }
     else if (this.level == 'minor') {
       return prefixAllergie(`${this.description}, sonst keine Med.-Unverträglichkeiten.`)

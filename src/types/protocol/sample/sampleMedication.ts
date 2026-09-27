@@ -7,7 +7,7 @@ function getCtx() { return useDokuStore().context }
 
 export class SampleMedication {
 
-  public level: '' | 'unknown' | 'minor' | 'major'
+  public level: 'n/a' | '' | 'unknown' | 'minor' | 'major'
   public Flags: {
     oak: string,
     tah: string,
@@ -38,8 +38,10 @@ export class SampleMedication {
       else if (this.TetanusStatus == 'nein') { tetanusSeg = 'Tetanusschutz veraltet.' }
     }
 
+    if (this.level === 'n/a') { return '' }
+
     if (this.level == 'unknown') {
-      return onNormal(`Medikamenteneinnahme unklar (kein Plan/keine Angaben). ${tetanusSeg}`)
+      return `Medikamenteneinnahme unklar (kein Plan/keine Angaben). ${tetanusSeg}`
     }
     else if (this.level == 'minor') {
       return `${this.MinormedDescription}, sonst keine Dauermedikation. ${tetanusSeg}`
@@ -70,7 +72,7 @@ export class SampleMedication {
 
     }
     else {
-      return onNormal(`Keine Medikamenteneinnahme. ${tetanusSeg}`)
+      return `Keine Medikamenteneinnahme. ${tetanusSeg}`
     }
 
   }

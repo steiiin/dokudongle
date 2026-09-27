@@ -6,7 +6,7 @@
     <IonCardContent>
       <IonList>
 
-        <IonItem lines="full" v-if="ctx.isTrauma">
+        <IonItem lines="full" v-if="ctx.isTrauma && store.doku.sampler.medication.level !== 'n/a'">
           <IonSelect label="Tetanus" interface="popover" v-model="store.doku.sampler.medication.TetanusStatus">
             <IonSelectOption value="">Keine Wunden</IonSelectOption>
             <IonSelectOption value="unklar">Unklar</IonSelectOption>
@@ -17,6 +17,7 @@
 
         <IonItem :lines="sampleMedOnMajor ? 'full' : 'none'">
           <IonSelect label="Medikamente" interface="popover" v-model="store.doku.sampler.medication.level">
+            <IonSelectOption value="n/a">Keine Angabe</IonSelectOption>
             <IonSelectOption value="">Keine</IonSelectOption>
             <IonSelectOption value="unknown">Unklar</IonSelectOption>
             <IonSelectOption value="minor">Alltagsmedikation</IonSelectOption>
