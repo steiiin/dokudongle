@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process'
 export const buildConfig = {
   core: 'Seeeduino:nrf52', coreVersion: '1.1.13',
   fqbn: 'Seeeduino:nrf52:xiaonRF52840:softdevice=s140v6,debug=l0',
+  usbProduct: 'DokuDongle', usbManufacturer: '',
   softdevice: '0x0123', target: 'xiao-nrf52840', targetId: 1, protocolRevision: 1,
   packageFormat: 'nordic-legacy-application',
 }
@@ -90,6 +91,8 @@ function compile(root, temp, version) {
   }
   runTool(cli, ['compile', '--fqbn', buildConfig.fqbn, '--build-path', temp,
     '--build-property', `compiler.cpp.extra_flags=-DDOKU_FIRMWARE_VERSION=${version}UL`,
+    '--build-property', `build.usb_product="${buildConfig.usbProduct}"`,
+    '--build-property', `build.usb_manufacturer="${buildConfig.usbManufacturer}"`,
     join(root, 'keyboard-sender/xiao_sketch')], { stdio: 'inherit' })
   const output = join(temp, 'application.zip')
   runTool(nrfutil, ['dfu', 'genpkg', '--dev-type', '0x0052', '--sd-req', buildConfig.softdevice,

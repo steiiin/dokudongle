@@ -1,8 +1,7 @@
 /**
  * DokuDongle
- * Version: 2.0
+ * Version: 4.0
  *
- * Heading levels: # section, ## subsection, ### function or setup step.
  */
 
 // =============================================================================

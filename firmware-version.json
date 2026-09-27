@@ -1,10 +1,10 @@
 {
-  "version": 3,
-  "sketchSha256": "aeb9a7be44681bc5d45e4bb7c629b941410d2558e55b7402f878c9ae62885bee",
-  "buildFingerprint": "487d353d784f4bd7acc250159e7d4ebe329bda12726bb9ad6d9bfe666e3f0c25",
+  "version": 4,
+  "sketchSha256": "67f1d5dd48d30130ca3caf4b3db1413a0b8a3393735aca2fc9a2964f51aa73b8",
+  "buildFingerprint": "a822414c46e0274de9f5df4df53b6e8239319bd5ba087130beef5ae235b463b0",
   "target": "xiao-nrf52840",
   "targetId": 1,
   "protocolRevision": 1,
-  "packageFilename": "dongle-v3-f42ccdad24a1b0b1.zip",
-  "packageSha256": "f42ccdad24a1b0b1ebffeb7a63e0ed1546b7c112e12a726ae4a7ede2b4af0a8b"
+  "packageFilename": "dongle-v4-a71ce22742081267.zip",
+  "packageSha256": "a71ce22742081267f4c38cda8363e6c8255b6f58278f8591f504c1d648ed0423"
 }
