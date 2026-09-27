@@ -12,6 +12,10 @@ export const normalizeKey = (value: string): string => value
 
 export const normalizeDictionaryWord = (value: string): string => value.trim().normalize('NFC')
 
+export const normalizeDictionaryEntry = (value: string): string => normalizeDictionaryWord(value).replace(/\s+/gu, ' ')
+
+export const isDictionaryEntry = (value: string): boolean => /\p{L}/u.test(value)
+
 export const isDictionaryWord = (value: string): boolean => SINGLE_WORD_PATTERN.test(value)
 
 export interface WordRange {

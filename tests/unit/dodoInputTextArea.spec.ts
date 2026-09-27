@@ -1,8 +1,10 @@
-import { IonButton, IonModal } from '@ionic/vue'
+import { IonButton, IonModal, toastController } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { textAssistService } from '@/services/text-assist'
+import DodoUserDictionaryModal from '@/components/DodoUserDictionaryModal.vue'
 import DodoHint from '@/components/DodoHint.vue'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
 import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
@@ -430,5 +432,111 @@ describe('DodoInputTextArea native textarea', () => {
 
     expect(textarea.element.value).toBe('Patietn')
     expect(textarea.element.selectionStart).toBe('Patietn'.length)
+  })
+})
+
+
+describe('textarea dictionary quick-add', () => {
+  beforeEach(() => {
+    vi.spyOn(toastController, 'create').mockResolvedValue({ present: vi.fn().mockResolvedValue(undefined) } as unknown as HTMLIonToastElement)
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  const selectText = async (text: string) => {
+    const wrapper = mountTextarea(new EnhanceableText(text), document.body)
+    wrapper.vm.openModal()
+    await flushPromises()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    textarea.element.focus()
+    textarea.element.setSelectionRange(0, text.length, 'backward')
+    await textarea.trigger('select')
+    await flushPromises()
+    return { wrapper, textarea }
+  }
+  const quickAdd = (wrapper: ReturnType<typeof mountTextarea>) => wrapper.get('[aria-label="Auswahl zum Wörterbuch hinzufügen"]')
+
+  test.each(['Not-Arzt', 'Patient ist beschwerdefrei'])('saves %s without opening the dictionary or changing the editor', async text => {
+    const add = vi.spyOn(textAssistService, 'addUserWord').mockResolvedValue('added')
+    const { wrapper, textarea } = await selectText(text)
+    textarea.element.scrollTop = 50
+    textarea.element.scrollLeft = 3
+    const pointer = new Event('pointerdown', { bubbles: true, cancelable: true })
+    quickAdd(wrapper).element.dispatchEvent(pointer)
+    expect(pointer.defaultPrevented).toBe(true)
+    await quickAdd(wrapper).trigger('click')
+    await flushPromises()
+    expect(add).toHaveBeenCalledWith(text)
+    expect(textarea.element.value).toBe(text)
+    expect(textarea.element.selectionStart).toBe(0)
+    expect(textarea.element.selectionEnd).toBe(text.length)
+    expect(textarea.element.selectionDirection).toBe('backward')
+    expect(textarea.element.scrollTop).toBe(50)
+    expect(textarea.element.scrollLeft).toBe(3)
+    expect(document.activeElement).toBe(textarea.element)
+    expect(wrapper.getComponent(DodoUserDictionaryModal).props('isOpen')).toBe(false)
+    expect(toastController.create).toHaveBeenCalledWith(expect.objectContaining({ message: 'Zum Wörterbuch hinzugefügt.' }))
+    textarea.element.setSelectionRange(0, 0)
+    document.dispatchEvent(new Event('selectionchange'))
+    await nextTick()
+    expect(wrapper.find('[aria-label="Eigenes Wörterbuch"]').exists()).toBe(true)
+    wrapper.unmount()
+  })
+
+  test('ignores whitespace and punctuation selections and disables quick-add during composition', async () => {
+    const { wrapper, textarea } = await selectText('123 ! Alpha')
+    textarea.element.setSelectionRange(0, 5)
+    await textarea.trigger('select')
+    expect(wrapper.find('[aria-label="Eigenes Wörterbuch"]').exists()).toBe(true)
+    textarea.element.setSelectionRange(6, 11)
+    await textarea.trigger('select')
+    await textarea.trigger('compositionstart')
+    expect(quickAdd(wrapper).attributes('disabled')).toBe('true')
+    wrapper.unmount()
+  })
+
+  test('captures the selection before saving and ignores repeated activation', async () => {
+    let finish!: (result: 'added') => void
+    const add = vi.spyOn(textAssistService, 'addUserWord').mockImplementation(() => new Promise(resolve => { finish = resolve }))
+    const { wrapper, textarea } = await selectText('Patient ist beschwerdefrei')
+    await quickAdd(wrapper).trigger('click')
+    expect(quickAdd(wrapper).attributes('disabled')).toBe('true')
+    await quickAdd(wrapper).trigger('click')
+    expect(add).toHaveBeenCalledTimes(1)
+    textarea.element.setSelectionRange(8, 11)
+    await textarea.trigger('select')
+    finish('added')
+    await flushPromises()
+    expect(add).toHaveBeenCalledWith('Patient ist beschwerdefrei')
+    expect(textarea.element.selectionStart).toBe(8)
+    expect(textarea.element.selectionEnd).toBe(11)
+    wrapper.unmount()
+  })
+
+  test('reports duplicates and failed saves, then allows retry', async () => {
+    vi.spyOn(textAssistService, 'addUserWord').mockResolvedValueOnce('already-present').mockRejectedValueOnce(new Error('Full')).mockResolvedValue('added')
+    const { wrapper } = await selectText('Patient ist beschwerdefrei')
+    for (const message of ['Bereits im Wörterbuch vorhanden.', 'Die Auswahl konnte nicht hinzugefügt werden. Bitte erneut versuchen.', 'Zum Wörterbuch hinzugefügt.']) {
+      await quickAdd(wrapper).trigger('click')
+      await flushPromises()
+      expect(toastController.create).toHaveBeenLastCalledWith(expect.objectContaining({ message }))
+      expect(quickAdd(wrapper).attributes('disabled')).toBe('false')
+    }
+    wrapper.unmount()
+  })
+
+  test('restores focus for keyboard activation and resets the selection when reopening', async () => {
+    vi.spyOn(textAssistService, 'addUserWord').mockResolvedValue('added')
+    const { wrapper, textarea } = await selectText('Not-Arzt')
+    textarea.element.blur()
+    await quickAdd(wrapper).trigger('click')
+    await flushPromises()
+    expect(document.activeElement).toBe(textarea.element)
+    expect(textarea.element.selectionEnd).toBe(8)
+    wrapper.getComponent(IonModal).vm.$emit('willDismiss')
+    await nextTick()
+    wrapper.vm.openModal()
+    await nextTick()
+    expect(wrapper.find('[aria-label="Eigenes Wörterbuch"]').exists()).toBe(true)
+    wrapper.unmount()
   })
 })

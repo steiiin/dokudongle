@@ -1,19 +1,27 @@
 import type { AutocorrectService } from './AutocorrectService'
 import type { SnippetService } from './SnippetService'
+import type { UserDictionaryService } from './UserDictionaryService'
 import type { TextLearningService } from './TextLearningService'
 import type { TextContext, TextSuggestion } from './types'
-import { normalizeKey, wordAtCursor, wordsBefore } from './text'
+import { isDictionaryWord, normalizeKey, wordAtCursor, wordsBefore } from './text'
 
 const recencyScore = (timestamp: number): number => {
   const age = Math.max(0, Date.now() - timestamp)
   return 2 * Math.exp(-age / (30 * 24 * 60 * 60 * 1000))
 }
 
+const dictionaryPriority = (suggestion: TextSuggestion): number =>
+  'source' in suggestion && suggestion.source === 'dictionary' ? 1 : 0
+
+const compareSuggestions = (a: TextSuggestion, b: TextSuggestion): number =>
+  dictionaryPriority(b) - dictionaryPriority(a) || b.score - a.score || a.label.localeCompare(b.label, 'de')
+
 export class SuggestionService {
   constructor(
     private readonly autocorrect: AutocorrectService,
     private readonly snippets: SnippetService,
     private readonly learning: TextLearningService,
+    private readonly dictionary: UserDictionaryService,
   ) {}
 
   async getSuggestions(context: TextContext): Promise<TextSuggestion[]> {
@@ -25,7 +33,17 @@ export class SuggestionService {
     const currentRange = wordAtCursor(context.text, context.cursor)
     const currentWord = currentRange?.word ?? ''
     const history = wordsBefore(context.text, currentRange?.start ?? context.cursor, 5)
-    const suggestions: TextSuggestion[] = []
+    const suggestions: TextSuggestion[] = this.dictionary.getCompletions(context.text, context.cursor)
+      .map(({ entry, start, end }) => ({
+        id: `dictionary:${entry.normalized}`,
+        label: entry.word,
+        replacement: entry.word,
+        type: isDictionaryWord(entry.word) ? 'word' : 'phrase',
+        source: 'dictionary',
+        score: 10,
+        start,
+        end,
+      }))
 
     if (currentRange && currentWord.length >= 2) {
       const spelling = await this.autocorrect.getSpellingCandidates(currentWord)
@@ -104,10 +122,10 @@ export class SuggestionService {
     for (const suggestion of suggestions) {
       const key = `${suggestion.start}:${suggestion.end}:${normalizeKey(suggestion.replacement)}`
       const existing = deduplicated.get(key)
-      if (!existing || suggestion.score > existing.score) deduplicated.set(key, suggestion)
+      if (!existing || compareSuggestions(suggestion, existing) < 0) deduplicated.set(key, suggestion)
     }
     return [...deduplicated.values()]
-      .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label, 'de'))
+      .sort(compareSuggestions)
       .slice(0, 5)
   }
 }

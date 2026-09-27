@@ -61,7 +61,8 @@ export class TextAssistStateRepository implements TextAssistStateRepositoryLike 
       this.saveTimer = null
     }
     const snapshot = structuredClone(this.state)
-    this.saveChain = this.saveChain.then(() => saveStoredValue(STORAGE_KEY, snapshot))
+    // A failed write must not prevent a later explicit retry from saving.
+    this.saveChain = this.saveChain.catch(() => undefined).then(() => saveStoredValue(STORAGE_KEY, snapshot))
     await this.saveChain
   }
 

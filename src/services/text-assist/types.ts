@@ -63,6 +63,8 @@ export interface RejectedCorrection {
   rejectionCount: number
 }
 
+export type AddUserWordResult = 'added' | 'already-present'
+
 export type UserDictionaryWordSource = 'manual' | 'learned'
 
 export interface UserDictionaryEntry {
@@ -93,12 +95,12 @@ export interface BaseTextSuggestion {
 
 export interface WordSuggestion extends BaseTextSuggestion {
   type: 'word'
-  source: 'spelling' | 'learned' | 'medical'
+  source: 'spelling' | 'learned' | 'medical' | 'dictionary'
 }
 
 export interface PhraseSuggestion extends BaseTextSuggestion {
   type: 'phrase'
-  source: 'learned'
+  source: 'learned' | 'dictionary'
 }
 
 export interface SnippetSuggestion extends BaseTextSuggestion {

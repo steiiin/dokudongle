@@ -9,6 +9,7 @@ import { UserDictionaryService } from './UserDictionaryService'
 import type {
   AppliedCorrection,
   ImeAutocorrectFlag,
+  AddUserWordResult,
   ImeDictionary,
   TextAssistUpdate,
   TextContext,
@@ -52,7 +53,7 @@ export class TextAssistService {
     this.snippets = new SnippetService()
     this.shortcutReplacements = new ShortcutReplacementService()
     this.learning = new TextLearningService(repository)
-    this.suggestions = new SuggestionService(this.autocorrect, this.snippets, this.learning)
+    this.suggestions = new SuggestionService(this.autocorrect, this.snippets, this.learning, this.userDictionary)
   }
 
   initialize(): Promise<void> {
@@ -189,6 +190,14 @@ export class TextAssistService {
       currentSuggestion = currentSnippet
     }
 
+    if ('source' in suggestion && suggestion.source === 'dictionary') {
+      if (snapshot.isComposing || snapshot.selectionStart !== snapshot.selectionEnd) return null
+      const match = this.userDictionary.getCompletions(snapshot.text, snapshot.selectionStart)
+        .find(({ entry }) => `dictionary:${entry.normalized}` === suggestion.id)
+      if (!match) return null
+      currentSuggestion = { ...suggestion, start: match.start, end: match.end, replacement: match.entry.word }
+    }
+
     this.recordSuggestionUsage(contextId, snapshot, currentSuggestion)
     return {
       start: currentSuggestion.start,
@@ -209,8 +218,8 @@ export class TextAssistService {
     return this.userDictionary.getEntries()
   }
 
-  async addUserWord(word: string): Promise<void> {
-    await this.userDictionary.addWord(word)
+  async addUserWord(word: string): Promise<AddUserWordResult> {
+    return this.userDictionary.addWord(word)
   }
 
   async removeUserWord(word: string): Promise<void> {

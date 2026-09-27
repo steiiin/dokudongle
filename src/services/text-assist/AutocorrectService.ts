@@ -11,7 +11,7 @@ import type {
   TextMutation,
 } from './types'
 import type { TextAssistStateRepositoryLike } from './persistence'
-import { isCompletionDelimiter, normalizeDictionaryWord, normalizeKey, wordImmediatelyBefore } from './text'
+import { isCompletionDelimiter, isDictionaryWord, normalizeDictionaryWord, normalizeKey, wordImmediatelyBefore } from './text'
 
 const preserveInitialCapitalization = (original: string, replacement: string): string => {
   if (!/^\p{Lu}/u.test(original) || !/^\p{Ll}/u.test(replacement)) return replacement
@@ -34,7 +34,7 @@ export class AutocorrectService {
       this.initialization = this.repository.initialize().then(state => {
         const additionalWords = [
           ...medicalWords,
-          ...state.userDictionary.map(entry => entry.word),
+          ...state.userDictionary.map(entry => entry.word).filter(isDictionaryWord),
         ]
         return this.spell.initialize(additionalWords)
       })
@@ -68,7 +68,7 @@ export class AutocorrectService {
 
   async addUserWord(word: string): Promise<void> {
     await this.initialize()
-    await this.spell.addWord(word)
+    if (isDictionaryWord(word)) await this.spell.addWord(word)
   }
 
   async rebuildUserWords(): Promise<void> {
@@ -76,7 +76,7 @@ export class AutocorrectService {
     const state = this.repository.getState()
     await this.spell.rebuild([
       ...medicalWords,
-      ...state.userDictionary.map(entry => entry.word),
+      ...state.userDictionary.map(entry => entry.word).filter(isDictionaryWord),
     ])
   }
 

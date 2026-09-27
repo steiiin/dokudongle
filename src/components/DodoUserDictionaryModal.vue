@@ -12,7 +12,7 @@
       <form class="dd-dictionary-form" @submit.prevent="addWord">
         <IonInput
           v-model="newWord"
-          placeholder="Wort hinzufügen"
+          placeholder="Wort oder Wortgruppe"
           autocomplete="off"
           autocapitalize="sentences"
           :disabled="busy"
@@ -39,7 +39,7 @@
           </IonButton>
         </IonItem>
       </IonList>
-      <p v-else class="dd-dictionary-empty">Noch keine eigenen Wörter.</p>
+      <p v-else class="dd-dictionary-empty">Noch keine eigenen Wörter oder Wortgruppen.</p>
     </IonContent>
   </IonModal>
 </template>

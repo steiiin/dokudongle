@@ -109,8 +109,18 @@
             </IonButton>
           </IonButtons>
           <IonButtons slot="end">
-            <IonButton @click="openDictionary" aria-label="Eigenes Wörterbuch">
-              <IonIcon :src="bookOutline" slot="icon-only"></IonIcon>
+            <IonButton
+              :aria-label="selectedDictionaryText ? 'Auswahl zum Wörterbuch hinzufügen' : 'Eigenes Wörterbuch'"
+              :title="selectedDictionaryText ? 'Auswahl zum Wörterbuch hinzufügen' : 'Eigenes Wörterbuch'"
+              :disabled="isDictionaryBusy || isComposing || !isTextAssistReady || !isTextAssistAvailable"
+              @pointerdown.prevent
+              @click="handleDictionaryAction"
+            >
+              <span v-if="selectedDictionaryText" slot="icon-only" class="dd-dictionary-add-icon" aria-hidden="true">
+                <IonIcon :src="bookOutline" />
+                <IonIcon :src="add" class="dd-dictionary-add-plus" />
+              </span>
+              <IonIcon v-else :src="bookOutline" slot="icon-only" aria-hidden="true" />
             </IonButton>
             <IonButton @click="deleteText" v-if="!modelValue.isEmpty">
               <IonIcon :src="trashBin" color="danger" slot="icon-only"></IonIcon>
@@ -145,9 +155,10 @@
 <script setup lang="ts">
 import DodoHint from '@/components/DodoHint.vue'
 
-import { computed, nextTick, onBeforeUnmount, ref, useId, useSlots, watch } from 'vue'
-import { alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useSlots, watch } from 'vue'
+import { add, alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
+import { toastController } from '@ionic/vue'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { DATA_Quickies, type Quickie } from '@/data/quickies'
@@ -155,7 +166,7 @@ import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { provideTextSuggestionScope } from '@/services/text-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
-import { isCompletionDelimiter, wordAroundCursor } from '@/services/text-assist/text'
+import { isCompletionDelimiter, isDictionaryEntry, wordAroundCursor } from '@/services/text-assist/text'
 
 // ############################################################################
 
@@ -224,6 +235,11 @@ const isDictionaryOpen = ref(false)
 const isDictionaryBusy = ref(false)
 const dictionaryError = ref('')
 const dictionaryEntries = ref<UserDictionaryEntry[]>([])
+const selectedDictionaryText = computed(() => {
+  if (!isModalOpen.value || isDictionaryOpen.value || isQuickieModalOpen.value) return ''
+  const selection = draft.value.slice(lastCursorStart.value, lastCursorEnd.value)
+  return isDictionaryEntry(selection) ? selection : ''
+})
 
 // ############################################################################
 
@@ -272,6 +288,8 @@ watch(
 )
 
 const openModal = () => {
+  lastCursorStart.value = 0
+  lastCursorEnd.value = 0
   isHelpExpanded.value = true
   canAutoCollapseHelp = true
   draft.value = props.modelValue.value
@@ -304,6 +322,9 @@ const closeModal = () => {
   void textAssistService.flush()
   setSuggestionSuppression(false)
   isModalOpen.value = false
+  lastCursorStart.value = 0
+  lastCursorEnd.value = 0
+  isComposing.value = false
 }
 
 
@@ -607,6 +628,14 @@ const handleSelectionInteraction = (event: Event) => {
   void refreshTextSuggestions()
 }
 
+const handleDocumentSelectionChange = () => {
+  if (isModalOpen.value && document.activeElement === inputTextarea.value) {
+    handleSelectionInteraction(new Event('selectionchange'))
+  }
+}
+
+onMounted(() => document.addEventListener('selectionchange', handleDocumentSelectionChange))
+
 const applyTextSuggestion = async (suggestion: TextSuggestion) => {
   const snapshot = snapshotTextarea()
   const mutation = textAssistService.applySuggestion(
@@ -672,6 +701,43 @@ const closeDictionary = async () => {
   dictionaryError.value = ''
   focusTextarea()
   await setCursorPosition(lastCursorStart.value)
+}
+
+const handleDictionaryAction = async () => {
+  if (isDictionaryBusy.value || isComposing.value || !isTextAssistReady.value || !isTextAssistAvailable.value) return
+  // Capture before awaiting storage; later typing must not change what is saved.
+  const selectedText = selectedDictionaryText.value
+  if (!selectedText) {
+    await openDictionary()
+    return
+  }
+
+  const textarea = inputTextarea.value
+  if (textarea && document.activeElement !== textarea) {
+    const { scrollTop, scrollLeft } = textarea
+    const start = lastCursorStart.value
+    const end = lastCursorEnd.value
+    const direction = textarea.selectionDirection
+    textarea.focus({ preventScroll: true })
+    textarea.setSelectionRange(start, end, direction)
+    textarea.scrollTop = scrollTop
+    textarea.scrollLeft = scrollLeft
+  }
+
+  isDictionaryBusy.value = true
+  let message: string
+  try {
+    const result = await textAssistService.addUserWord(selectedText)
+    message = result === 'already-present' ? 'Bereits im Wörterbuch vorhanden.' : 'Zum Wörterbuch hinzugefügt.'
+  }
+  catch {
+    message = 'Die Auswahl konnte nicht hinzugefügt werden. Bitte erneut versuchen.'
+  }
+  finally {
+    isDictionaryBusy.value = false
+  }
+  const toast = await toastController.create({ message, duration: 2200, position: 'top' })
+  await toast.present()
 }
 
 const addDictionaryWord = async (word: string) => {
@@ -763,6 +829,9 @@ const deleteText = async () => {
   isEditing.value = false
 
   isModalOpen.value = false
+  lastCursorStart.value = 0
+  lastCursorEnd.value = 0
+  isComposing.value = false
 }
 
 //#endregion
@@ -820,6 +889,7 @@ const acceptQuickieDialog = async (insertedText: string) => {
 //#endregion
 
 onBeforeUnmount(() => {
+  document.removeEventListener('selectionchange', handleDocumentSelectionChange)
   stopObservingTextarea()
   clearTypingSnapshotTimeout()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
@@ -835,6 +905,21 @@ defineExpose({
 </script>
 
 <style scoped>
+.dd-dictionary-add-icon {
+  position: relative;
+  display: inline-flex;
+  font-size: 24px;
+}
+
+.dd-dictionary-add-plus {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
+  border-radius: 50%;
+  background: var(--ion-toolbar-background, var(--ion-background-color));
+  font-size: 15px;
+}
+
 .dd-input-textarea {
   width: 100%;
 }

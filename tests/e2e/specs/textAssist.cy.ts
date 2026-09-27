@@ -133,3 +133,34 @@ describe('Bounded multiline editor', () => {
     cy.get('.dd-modal-header-toolbar .dd-modal-help-toggle').shadow().find('button').should('have.attr', 'aria-expanded', 'false')
   })
 })
+
+
+describe('Dictionary quick-add', () => {
+  it('saves a selected phrase and completes it after reloading', () => {
+    const phrase = 'Patient ist beschwerdefrei'
+    const editor = () => cy.get<HTMLTextAreaElement>('textarea.dd-modal-textarea')
+    cy.visit('/tabs/doku')
+    openSituation()
+    editor().should('be.visible').and(($textarea) => { expect($textarea[0].hasAttribute('readonly')).to.eq(false) }).clear().type(phrase)
+    editor().then(($textarea) => {
+      $textarea[0].setSelectionRange(0, phrase.length)
+      $textarea[0].dispatchEvent(new Event('select', { bubbles: true }))
+    })
+    cy.get('ion-button[aria-label="Auswahl zum Wörterbuch hinzufügen"]').click()
+    cy.get('ion-toast').shadow().should('contain.text', 'Zum Wörterbuch hinzugefügt.')
+    editor().should('have.value', phrase).and('be.focused').and(($textarea) => {
+      expect($textarea[0].selectionStart).to.eq(0)
+      expect($textarea[0].selectionEnd).to.eq(phrase.length)
+    })
+    cy.get('ion-modal.dd-dictionary-modal').should('not.be.visible')
+    cy.contains('ion-modal ion-button', 'Speichern').click()
+    cy.reload()
+    openSituation()
+    editor().should('be.visible').and(($textarea) => { expect($textarea[0].hasAttribute('readonly')).to.eq(false) }).clear().type('Patient ist')
+    cy.contains('.dd-suggestion', phrase).click()
+    editor().should('have.value', phrase)
+    editor().type('{selectall}')
+    cy.get('ion-button[aria-label="Auswahl zum Wörterbuch hinzufügen"]').click()
+    cy.get('ion-toast').shadow().should('contain.text', 'Bereits im Wörterbuch vorhanden.')
+  })
+})
