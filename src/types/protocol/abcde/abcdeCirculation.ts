@@ -149,7 +149,7 @@ export class AbcdeCirculation {
       && this.pulse.rate == 'normofrequent'
       && this.pulse.peripheralStrength == 'gut'
     ) { return 'Puls iO' }
-    return concatDoku([[
+    return 'Puls ' + concatDoku([[
       this.pulseStrengthText,
       this.pulse.rate,
       this.pulse.rhythmic ? 'rhythmisch' : 'arrhythmisch'
