@@ -1,5 +1,5 @@
 <template>
-  <IonModal :is-open="!!firmware.pendingUpdate || firmware.status.phase !== 'idle' || !!firmware.nativeError" :can-dismiss="!firmware.active && !firmware.nativeError"
+  <IonModal :is-open="true||!!firmware.pendingUpdate || firmware.status.phase !== 'idle' || !!firmware.nativeError" :can-dismiss="!firmware.active && !firmware.nativeError"
     :backdrop-dismiss="false" aria-label="Dongle-Aktualisierung" @did-dismiss="firmware.dismiss()">
     <IonHeader>
       <IonToolbar>
@@ -25,28 +25,47 @@
       <div v-else class="update-content" role="status" aria-live="polite">
 
         <h3>{{ title }}<span v-if="firmware.status.phase === 'transferring'">&nbsp;• {{ firmware.status.progress ?? 0 }}%</span></h3>
+
         <IonProgressBar v-if="firmware.active" :type="firmware.status.phase === 'transferring' ? 'determinate' : 'indeterminate'"
           :value="(firmware.status.progress ?? 0) / 100" aria-label="Update-Fortschritt" />
+
         <DodoHint variant="none" v-if="firmware.active">
           Dongle angeschlossen lassen. Smartphone und Bildschirm eingeschaltet, diese App geöffnet und das Smartphone in der Nähe behalten.
         </DodoHint>
 
         <template v-if="firmware.status.phase === 'searching'">
-          <p v-if="firmware.manualRecovery">Den zuvor aus- und wieder eingesteckten Dongle auswählen. Die Auswahl startet das Update.</p>
+
+          <DodoHint variant="none" v-if="firmware.manualRecovery">
+            Den zuvor aus- und wieder eingesteckten Dongle auswählen. <br>
+            Die Auswahl startet das Update.
+          </DodoHint>
+
           <IonButton v-for="device in firmware.recoveryDevices" :key="device.deviceId"
             @click="firmware.selectRecoveryDevice(device.deviceId)">{{ device.name }} · {{ device.deviceId }}</IonButton>
+
+          <br>
           <IonButton @click="firmware.cancelDiscovery()">Suche abbrechen</IonButton>
+
         </template>
 
-        <DodoHint v-if="firmware.status.phase === 'done'" variant="none">Dongle-Version {{ firmware.status.version }} wurde installiert und bestätigt.</DodoHint>
+        <DodoHint v-if="firmware.status.phase === 'done'" variant="success">
+          Dongle-Version <b>v{{ firmware.status.version }}</b> wurde erfolgreich installiert.
+        </DodoHint>
+
         <DodoHint v-if="firmware.status.error" variant="error">{{ firmware.status.error }}</DodoHint>
         <DodoHint v-if="firmware.nativeError" variant="error">{{ firmware.nativeError }}</DodoHint>
-        <IonButton v-if="firmware.nativeError" @click="firmware.restore()">Update-Status erneut laden</IonButton>
+        <IonButton v-if="firmware.nativeError" @click="firmware.restore()" color="danger">Update-Status erneut laden</IonButton>
 
-        <template v-else-if="!firmware.active">
-          <IonButton v-if="firmware.status.phase === 'error'" :disabled="!firmware.canRecover" @click="firmware.requestUpdate('retry')">Update erneut versuchen</IonButton>
-          <IonButton @click="firmware.dismiss()">Schließen</IonButton>
-        </template>
+        <div v-else-if="!firmware.active" style="margin-top: .5rem">
+          <IonButton v-if="firmware.status.phase === 'error'"
+            :disabled="!firmware.canRecover"
+            @click="firmware.requestUpdate('retry')">
+            Update erneut versuchen
+          </IonButton>
+          <IonButton @click="firmware.dismiss()" :color="firmware.status.phase === 'done' ? 'success' : ''">
+            Schließen
+          </IonButton>
+        </div>
 
       </div>
     </IonContent>
@@ -82,7 +101,8 @@ ion-modal { --width: 100%; --height: 100%; --border-radius: 0; }
   }
 
   & .dd-hint {
-    margin: 0 0 .25rem 0;
+    margin: 0 auto .25rem auto;
+    max-width: 400px;
   }
 
 }
