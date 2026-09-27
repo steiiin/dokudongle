@@ -8,7 +8,7 @@ export class SampleAllergies {
 
   constructor()
   {
-    this.level = ''
+    this.level = 'n/a'
     this.description = ''
   }
 

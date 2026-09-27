@@ -20,7 +20,7 @@ export class SampleMedication {
 
   constructor()
   {
-    this.level = ''
+    this.level = 'n/a'
     this.Flags = { oak: '', tah: '', insulin: false}
     this.isPlanAvailable = false
     this.PlanMedication = []

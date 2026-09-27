@@ -106,6 +106,9 @@ watch(() => store.doku.sampler.medication.level, async (newV, oldV) => {
   if (newV == 'minor') {
     setTimeout(() => { inputMinormedDescription.value?.$el.setFocus() }, 300)
   }
+  if (newV == 'n/a') {
+    store.doku.sampler.medication.TetanusStatus = ''
+  }
 })
 
 const sampleMedOnMinor = computed(() => store.doku.sampler.medication.level == 'minor')
