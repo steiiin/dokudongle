@@ -28,26 +28,42 @@
         <IonToolbar>
           <IonTitle>{{ title }}</IonTitle>
         </IonToolbar>
-        <IonToolbar>
+        <IonToolbar class="dd-modal-header-toolbar">
           <IonButtons slot="start">
             <IonButton :disabled="modelValue.isEnhancing" @click="closeModal">
               Speichern
             </IonButton>
           </IonButtons>
+          <IonButtons slot="end">
+            <IonButton v-if="$slots.default && !isHelpExpanded" class="dd-modal-help-toggle"
+              aria-label="Hinweise anzeigen" title="Hinweise anzeigen"
+              :aria-expanded="false" :aria-controls="helpId"
+              @pointerdown.prevent @click="toggleHelp">
+              <IonIcon :src="helpCircleOutline" slot="icon-only" aria-hidden="true" />
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
         <IonProgressBar v-if="modelValue.isEnhancing" type="indeterminate" />
       </IonHeader>
-      <IonContent class="dd-modal-content ion-padding">
-        <DodoHint class="dd-modal-hint" v-if="$slots.default">
-          <slot />
-        </DodoHint>
+      <IonContent class="dd-modal-content ion-padding" :scroll-y="false">
+        <div v-if="$slots.default" v-show="isHelpExpanded" class="dd-modal-help">
+          <DodoHint :id="helpId" class="dd-modal-hint">
+            <slot />
+          </DodoHint>
+          <button v-if="isHelpExpanded" type="button" class="dd-modal-help-toggle dd-modal-help-collapse"
+            aria-label="Hinweise einklappen" title="Hinweise einklappen"
+            :aria-expanded="true" :aria-controls="helpId"
+            @pointerdown.prevent @click="toggleHelp">
+            <IonIcon :src="caretUpCircleOutline" aria-hidden="true" />
+          </button>
+        </div>
         <div class="dd-modal-data">
           <div class="dd-modal-textarea-wrap">
             <div
-              v-show="activeWordRange"
+              ref="textareaMirror"
               class="dd-modal-textarea-mirror"
               aria-hidden="true"
-            ><span>{{ draft.slice(0, activeWordRange?.start ?? 0) }}</span><span class="dd-active-word">{{ activeWordRange?.word ?? '' }}</span><span>{{ draft.slice(activeWordRange?.end ?? 0) }}</span></div>
+            ><span>{{ draft.slice(0, activeWordRange?.start ?? 0) }}</span><span class="dd-active-word">{{ activeWordRange?.word ?? '' }}</span><span>{{ draft.slice(activeWordRange?.end ?? 0) }}</span>{{ '\u200b' }}</div>
             <textarea
               ref="inputTextarea"
               v-model="draft"
@@ -69,6 +85,7 @@
               @click="handleSelectionInteraction"
               @select="handleSelectionInteraction"
               @keyup="handleSelectionInteraction"
+              @scroll="syncTextareaMirror"
             />
           </div>
 
@@ -128,8 +145,8 @@
 <script setup lang="ts">
 import DodoHint from '@/components/DodoHint.vue'
 
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { alertCircle, arrowRedo, arrowUndo, bookOutline, trashBin } from 'ionicons/icons'
+import { computed, nextTick, onBeforeUnmount, ref, useId, useSlots, watch } from 'vue'
+import { alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
@@ -183,6 +200,15 @@ const lastCursorStart = ref(0)
 const lastCursorEnd = ref(0)
 const pendingCursorPosition = ref<number|null>(null)
 const inputTextarea = ref<HTMLTextAreaElement | null>(null)
+const textareaMirror = ref<HTMLDivElement | null>(null)
+const slots = useSlots()
+const helpId = `textarea-help-${useId()}`
+const isHelpExpanded = ref(true)
+let canAutoCollapseHelp = true
+let isModalPresented = false
+let textareaResizeObserver: ResizeObserver | null = null
+let textareaResizeFrame: number | null = null
+let focusTimeout: ReturnType<typeof setTimeout> | null = null
 const textSuggestions = ref<TextSuggestion[]>([])
 const isComposing = ref(false)
 const pendingBeforeInput = ref<TextInputSnapshot | null>(null)
@@ -246,17 +272,31 @@ watch(
 )
 
 const openModal = () => {
+  isHelpExpanded.value = true
+  canAutoCollapseHelp = true
   draft.value = props.modelValue.value
   isModalOpen.value = true
 }
 
 const handleModalDidPresent = async () => {
-  await resizeTextarea()
+  isModalPresented = true
+  textareaResizeObserver?.disconnect()
+  textareaResizeObserver = new ResizeObserver(() => {
+    // Collapsing help resizes the observed editor; defer it out of this delivery.
+    if (textareaResizeFrame !== null) return
+    textareaResizeFrame = requestAnimationFrame(() => {
+      textareaResizeFrame = null
+      void updateTextareaLayout(true)
+    })
+  })
+  if (inputTextarea.value) textareaResizeObserver.observe(inputTextarea.value)
+  await updateTextareaLayout()
   await textAssistInitialization
-  focusTextarea()
+  if (isModalPresented) focusTextarea()
 }
 
 const closeModal = () => {
+  stopObservingTextarea()
   saveDraft()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
   textSuggestions.value = []
@@ -273,21 +313,83 @@ const setSuggestionSuppression = (disabled: boolean) => {
   void setInputSuggestionsDisabled(disabled)
 }
 
-const resizeTextarea = async () => {
-  await nextTick()
+const syncTextareaMirror = () => {
   const textarea = inputTextarea.value
-  if (!textarea) { return }
+  const mirror = textareaMirror.value
+  if (!textarea || !mirror) return
+  // clientWidth excludes the native scrollbar, keeping line wrapping identical.
+  mirror.style.width = `${textarea.clientWidth}px`
+  mirror.scrollTop = textarea.scrollTop
+  mirror.scrollLeft = textarea.scrollLeft
+}
 
-  textarea.style.height = 'auto'
-  textarea.style.height = `${Math.max(textarea.scrollHeight, 44)}px`
+const keepCaretVisible = () => {
+  const textarea = inputTextarea.value
+  const mirror = textareaMirror.value
+  if (!textarea || !mirror || document.activeElement !== textarea || !textarea.clientHeight) return
+
+  // Measure without changing the visible overlay or scrolling any ancestor.
+  const measurement = mirror.cloneNode(false) as HTMLDivElement
+  measurement.style.visibility = 'hidden'
+  const caret = document.createElement('span')
+  caret.textContent = '\u200b'
+  const position = textarea.selectionDirection === 'backward' ? textarea.selectionStart : textarea.selectionEnd
+  measurement.append(textarea.value.slice(0, position), caret, textarea.value.slice(position), '\u200b')
+  mirror.parentElement?.append(measurement)
+  measurement.scrollTop = textarea.scrollTop
+  const caretBounds = caret.getBoundingClientRect()
+  const bounds = textarea.getBoundingClientRect()
+  if (caretBounds.height > 0) {
+    const bottom = bounds.top + textarea.clientHeight - 8
+    if (caretBounds.bottom > bottom) textarea.scrollTop += caretBounds.bottom - bottom
+    else if (caretBounds.top < bounds.top) textarea.scrollTop -= bounds.top - caretBounds.top
+  }
+  measurement.remove()
+  syncTextareaMirror()
+}
+
+const updateTextareaLayout = async (revealCaret = false) => {
+  await nextTick()
+  if (!isModalPresented) return
+  const textarea = inputTextarea.value
+  if (!textarea) return
+  if (slots.default && canAutoCollapseHelp && draft.value.length > 0 && textarea.clientHeight > 0
+    && textarea.scrollHeight > textarea.clientHeight + 1) {
+    canAutoCollapseHelp = false
+    isHelpExpanded.value = false
+    await nextTick()
+  }
+  syncTextareaMirror()
+  if (revealCaret) keepCaretVisible()
+}
+
+const toggleHelp = () => {
+  canAutoCollapseHelp = false
+  isHelpExpanded.value = !isHelpExpanded.value
+  void updateTextareaLayout(true)
+}
+
+const stopObservingTextarea = () => {
+  if (textareaResizeFrame !== null) cancelAnimationFrame(textareaResizeFrame)
+  textareaResizeFrame = null
+  if (focusTimeout) clearTimeout(focusTimeout)
+  focusTimeout = null
+  isModalPresented = false
+  textareaResizeObserver?.disconnect()
+  textareaResizeObserver = null
 }
 
 const focusTextarea = () => {
   setSuggestionSuppression(true)
-  setTimeout(() => inputTextarea.value?.focus(), 300)
+  if (focusTimeout) clearTimeout(focusTimeout)
+  focusTimeout = setTimeout(() => {
+    focusTimeout = null
+    inputTextarea.value?.focus()
+  }, 300)
 }
 
-watch(draft, resizeTextarea, { flush: 'post' })
+watch(draft, () => { void updateTextareaLayout() }, { flush: 'post' })
+watch(activeWordRange, () => { void nextTick(syncTextareaMirror) }, { flush: 'post' })
 
 const rememberCursorPosition = async () => {
   const textarea = inputTextarea.value
@@ -308,6 +410,8 @@ const setCursorPosition = async (position: number) => {
       lastCursorStart.value = boundedPosition
       lastCursorEnd.value = boundedPosition
       pendingCursorPosition.value = null
+      syncTextareaMirror()
+      keepCaretVisible()
       return
     }
     await new Promise((resolve) => setTimeout(resolve, 60))
@@ -325,16 +429,13 @@ const snapshotTextarea = (): TextInputSnapshot => {
 }
 
 const applyAssistMutation = async (mutation: TextMutation) => {
-  const textarea = inputTextarea.value
-  const scrollTop = textarea?.scrollTop ?? 0
   isApplyingAssistMutation.value = true
   draft.value = draft.value.slice(0, mutation.start) + mutation.replacement + draft.value.slice(mutation.end)
   lastCursorStart.value = mutation.cursor
   lastCursorEnd.value = mutation.cursor
   scheduleTypingSnapshot()
-  await resizeTextarea()
+  await nextTick()
   await setCursorPosition(mutation.cursor)
-  if (inputTextarea.value) inputTextarea.value.scrollTop = scrollTop
   setTimeout(() => { isApplyingAssistMutation.value = false }, 0)
 }
 
@@ -426,7 +527,6 @@ const handleBeforeInput = (event: InputEvent) => {
 }
 
 const handleInput = (event: Event) => {
-  resizeTextarea()
   void rememberCursorPosition()
 
   if (!isEditing.value) {
@@ -720,6 +820,7 @@ const acceptQuickieDialog = async (insertedText: string) => {
 //#endregion
 
 onBeforeUnmount(() => {
+  stopObservingTextarea()
   clearTypingSnapshotTimeout()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
   suggestionScope.clear(suggestionOwner)
@@ -751,18 +852,58 @@ defineExpose({
 }
 
 .dd-modal-content {
+  min-height: 0;
+  --overflow: hidden;
+}
+
+.dd-modal-content::part(scroll) {
   display: flex;
   flex-direction: column;
-  position: relative;
+  overflow: hidden;
+}
+
+.dd-modal-help {
+  display: flex;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 33.333%;
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.dd-modal-help-collapse {
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-left: var(--padding-end);
+  background: transparent;
+  color: var(--ion-color-medium);
+}
+
+.dd-modal-help-collapse ion-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.dd-modal-hint {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  margin-bottom: 0;
+  overflow-y: auto;
 }
 
 .dd-modal-data {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
 .dd-modal-textarea-wrap {
+  flex: 1;
+  min-height: 0;
   position: relative;
   width: 100%;
 }
@@ -780,7 +921,8 @@ defineExpose({
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
-  min-height: 44px;
+  height: 100%;
+  min-height: 0;
   margin: 0;
   padding: 0 0 8px;
   border: 0;
@@ -807,6 +949,7 @@ defineExpose({
 }
 
 .dd-modal-textarea {
+  overflow-y: auto;
   position: relative;
   z-index: 1;
   appearance: none;

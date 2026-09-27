@@ -1,7 +1,7 @@
 import { IonButton, IonModal } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DodoHint from '@/components/DodoHint.vue'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
@@ -15,8 +15,9 @@ vi.mock('@/plugins/input-suggestions', () => ({
   setInputSuggestionsDisabled: vi.fn().mockResolvedValue(undefined),
 }))
 
-const mountTextarea = (modelValue = new EnhanceableText(''), attachTo?: HTMLElement) => shallowMount(DodoInputTextArea, {
+const mountTextarea = (modelValue = new EnhanceableText(''), attachTo?: HTMLElement, hint?: string) => shallowMount(DodoInputTextArea, {
   ...(attachTo ? { attachTo } : {}),
+  ...(hint ? { slots: { default: hint } } : {}),
   props: {
     modelValue,
     title: 'Situation',
@@ -38,10 +39,20 @@ const lastModelUpdate = (wrapper: ReturnType<typeof mountTextarea>): Enhanceable
   return updates![updates!.length - 1][0] as EnhanceableText
 }
 
+const resizeObservers: Array<{ callback: () => void; observe: ReturnType<typeof vi.fn>; disconnect: ReturnType<typeof vi.fn> }> = []
+
 describe('DodoInputTextArea native textarea', () => {
   beforeEach(() => {
     vi.mocked(setInputSuggestionsDisabled).mockClear()
+    resizeObservers.length = 0
+    vi.stubGlobal('ResizeObserver', class {
+      observe = vi.fn()
+      disconnect = vi.fn()
+      constructor(readonly callback: () => void) { resizeObservers.push(this) }
+    })
   })
+
+  afterEach(() => { vi.unstubAllGlobals() })
 
   test('renders optional help through the shared hint', () => {
     const wrapper = shallowMount(DodoInputTextArea, {
@@ -107,47 +118,118 @@ describe('DodoInputTextArea native textarea', () => {
     expect(lastModelUpdate(wrapper).value).toBe('Erste Zeile  \nZweite Zeile')
   })
 
-  test('auto-grows to its native scroll height', async () => {
-    const wrapper = mountTextarea()
-    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
-    Object.defineProperty(textarea.element, 'scrollHeight', { configurable: true, value: 96 })
-
-    await textarea.setValue('Erste Zeile\nZweite Zeile')
-    await nextTick()
-
-    expect(textarea.element.style.height).toBe('96px')
-  })
-
-  test('remeasures its height whenever the modal is presented', async () => {
+  test('leaves height to layout when typing and reopening', async () => {
     const wrapper = mountTextarea(new EnhanceableText('Erste Zeile\nZweite Zeile'))
     const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
-    let scrollHeight = 96
-    Object.defineProperty(textarea.element, 'scrollHeight', {
-      configurable: true,
-      get: () => scrollHeight,
-    })
+    Object.defineProperty(textarea.element, 'scrollHeight', { configurable: true, value: 960 })
 
+    for (let opening = 0; opening < 2; opening++) {
+      wrapper.vm.openModal()
+      wrapper.getComponent(IonModal).vm.$emit('didPresent')
+      await flushPromises()
+      await textarea.setValue('Zeile\n'.repeat(100))
+      expect(textarea.element.style.height).toBe('')
+      wrapper.getComponent(IonModal).vm.$emit('willDismiss')
+      await nextTick()
+    }
+    expect(resizeObservers).toHaveLength(2)
+    for (const observer of resizeObservers) {
+      expect(observer.observe).toHaveBeenCalledWith(textarea.element)
+      expect(observer.disconnect).toHaveBeenCalledOnce()
+    }
+    wrapper.unmount()
+  })
+
+  test('collapses help once on overflow, honors manual expansion, and resets on reopening', async () => {
+    const wrapper = mountTextarea(new EnhanceableText(''), undefined, 'Hinweis')
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    let scrollHeight = 100
+    Object.defineProperties(textarea.element, {
+      clientHeight: { configurable: true, value: 100 },
+      scrollHeight: { configurable: true, get: () => scrollHeight },
+    })
     wrapper.vm.openModal()
     wrapper.getComponent(IonModal).vm.$emit('didPresent')
     await flushPromises()
-    expect(textarea.element.style.height).toBe('96px')
+    const toggle = () => wrapper.get('.dd-modal-help-toggle')
+    expect(toggle().attributes('aria-expanded')).toBe('true')
+    expect(wrapper.get('.dd-modal-help .dd-modal-help-collapse').attributes('aria-label')).toBe('Hinweise einklappen')
+    expect(toggle().attributes('aria-controls')).toBe(wrapper.get('.dd-modal-hint').attributes('id'))
+    await textarea.setValue('Kurzer Text')
+    expect(toggle().attributes('aria-expanded')).toBe('true')
+
+    scrollHeight = 200
+    resizeObservers[0].callback()
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+    await flushPromises()
+    expect(toggle().attributes('aria-expanded')).toBe('false')
+    expect(wrapper.get('.dd-modal-help').isVisible()).toBe(false)
+    expect(wrapper.find('.dd-modal-help-collapse').exists()).toBe(false)
+    expect(wrapper.get('.dd-modal-header-toolbar .dd-modal-help-toggle').attributes('aria-label')).toBe('Hinweise anzeigen')
+    scrollHeight = 100
+    await textarea.setValue('Kurz')
+    expect(toggle().attributes('aria-expanded')).toBe('false')
+
+    await toggle().trigger('click')
+    scrollHeight = 300
+    await textarea.setValue('Viel Text\n'.repeat(30))
+    resizeObservers[0].callback()
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+    await flushPromises()
+    expect(toggle().attributes('aria-expanded')).toBe('true')
 
     wrapper.getComponent(IonModal).vm.$emit('willDismiss')
     await nextTick()
-    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(false)
-    scrollHeight = 128
-
+    await wrapper.setProps({ modelValue: lastModelUpdate(wrapper) })
     wrapper.vm.openModal()
     await nextTick()
-    const reopenedTextarea = wrapper.get<HTMLTextAreaElement>('textarea')
-    Object.defineProperty(reopenedTextarea.element, 'scrollHeight', {
-      configurable: true,
-      get: () => scrollHeight,
-    })
-    reopenedTextarea.element.style.height = '44px'
+    expect(toggle().attributes('aria-expanded')).toBe('true')
     wrapper.getComponent(IonModal).vm.$emit('didPresent')
     await flushPromises()
-    expect(reopenedTextarea.element.style.height).toBe('128px')
+    // The existing long draft is also checked when opening.
+    expect(toggle().attributes('aria-expanded')).toBe('false')
+    wrapper.unmount()
+    expect(resizeObservers[1].disconnect).toHaveBeenCalledOnce()
+  })
+
+  test('does not collapse empty help and respects a manual toggle before overflow', async () => {
+    const wrapper = mountTextarea(new EnhanceableText(''), undefined, 'Hinweis')
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    Object.defineProperties(textarea.element, {
+      clientHeight: { configurable: true, value: 30 },
+      scrollHeight: { configurable: true, value: 100 },
+    })
+    wrapper.vm.openModal()
+    wrapper.getComponent(IonModal).vm.$emit('didPresent')
+    await flushPromises()
+    const toggle = () => wrapper.get('.dd-modal-help-toggle')
+    expect(toggle().attributes('aria-expanded')).toBe('true')
+    await toggle().trigger('click')
+    await toggle().trigger('click')
+    await textarea.setValue('Text that overflows')
+    await flushPromises()
+    expect(toggle().attributes('aria-expanded')).toBe('true')
+    wrapper.unmount()
+  })
+
+  test('synchronizes the underline with native scrolling and available width', async () => {
+    const wrapper = mountTextarea()
+    const textarea = wrapper.get<HTMLTextAreaElement>('textarea')
+    const mirror = wrapper.get<HTMLDivElement>('.dd-modal-textarea-mirror')
+    Object.defineProperty(textarea.element, 'clientWidth', { configurable: true, value: 240 })
+    textarea.element.scrollTop = 120
+    textarea.element.scrollLeft = 3
+    await textarea.trigger('scroll')
+    expect(mirror.element.scrollTop).toBe(120)
+    expect(mirror.element.scrollLeft).toBe(3)
+    expect(mirror.element.style.width).toBe('240px')
+    await textarea.setValue('Alpha Beta')
+    await textarea.trigger('focus')
+    textarea.element.setSelectionRange(10, 10)
+    await textarea.trigger('select')
+    await nextTick()
+    expect(mirror.element.scrollTop).toBe(120)
+    wrapper.unmount()
   })
 
   test('underlines the complete active word without exposing the mirror to assistive technology', async () => {
@@ -177,23 +259,23 @@ describe('DodoInputTextArea native textarea', () => {
 
     textarea.element.setSelectionRange(6, 10)
     await textarea.trigger('select')
-    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+    expect(wrapper.get('.dd-active-word').text()).toBe('')
 
     textarea.element.setSelectionRange(10, 10)
     await textarea.trigger('select')
     expect(wrapper.get('.dd-active-word').text()).toBe('Beta')
 
     await textarea.trigger('compositionstart')
-    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+    expect(wrapper.get('.dd-active-word').text()).toBe('')
 
     await textarea.trigger('compositionend', { data: 'Beta' })
     await flushPromises()
     await textarea.setValue('Alpha ')
     await flushPromises()
-    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+    expect(wrapper.get('.dd-active-word').text()).toBe('')
 
     await textarea.trigger('blur')
-    expect(wrapper.get('.dd-modal-textarea-mirror').isVisible()).toBe(false)
+    expect(wrapper.get('.dd-active-word').text()).toBe('')
   })
 
   test('suppresses suggestions only for the textarea focus lifecycle', async () => {
