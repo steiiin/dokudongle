@@ -13,6 +13,8 @@
     "lint": "eslint .",
     "firmware:prepare": "node scripts/firmware.mjs prepare",
     "firmware:check": "node scripts/firmware.mjs check",
+    "dongle:init": "node scripts/dongleinit.mjs",
+    "test:dongle-init": "node --test tests/build/dongleinit.test.mjs",
     "test:firmware-build": "node --test tests/build/firmware.test.mjs",
     "prebuild": "npm run firmware:check"
   },

@@ -1,11 +1,22 @@
 {
   "version": "2.0.0",
   "tasks": [{
-    "label": "Prepare dongle firmware",
+    "label": "Prepare Dongle Firmware",
     "type": "npm",
     "script": "firmware:prepare",
     "problemMatcher": [],
     "group": "build"
+  },
+  {
+    "label": "Initialize Dongle Device",
+    "type": "npm",
+    "script": "dongle:init",
+    "problemMatcher": [],
+    "presentation": {
+      "reveal": "always",
+      "focus": true,
+      "panel": "dedicated"
+    }
   },
   {
       "label": "Serve (Dev)",

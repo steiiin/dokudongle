@@ -77,6 +77,41 @@ Alternatively run the VSCode task **Prepare dongle firmware**. `ARDUINO_CLI` and
 Android Gradle build. No bootloader installation or flashing is performed by the
 preparation task.
 
+### Initialize a dongle over USB (Linux)
+
+Run the VS Code task **Initialize Dongle Device** or `npm run dongle:init` in an
+interactive terminal. Install `adafruit-nrfutil` and Python 3 first; the script
+honors `ADAFRUIT_NRFUTIL` for a custom executable path. Your user must have read
+and write access to the selected serial device.
+
+The script validates the bundled bootloader ZIP and the firmware selected by
+`firmware-version.json`. If firmware is missing or stale, run
+`npm run firmware:prepare` first. Initialization does not build firmware.
+
+1. Double-tap the XIAO reset button to enter flash mode, then enter its serial
+   address. Press Enter to accept `/dev/ttyACM0`.
+2. After bootloader flashing finishes, **double-tap reset again**. Wait for the
+   serial device to reappear and confirm its address; change it if Linux assigned
+   a different address. Keep the dongle in the same physical USB port.
+3. The script flashes the manifest-selected application package and waits up to
+   30 seconds for `2886:8044`, manufacturer `STEIIIN`, product `DokuDongle`, and a
+   HID keyboard interface at that USB location. It prints the detected USB
+   identity and serial port. The package version is reported separately: USB
+   detection does not read the installed firmware version over Bluetooth.
+
+The bundled combined bootloader/SoftDevice ZIP is for the XIAO nRF52840 BLE.
+For other installed board variants, use the manual recovery procedure below.
+Ctrl+C cancels the task and stops the active flashing process; if interrupted,
+double-tap reset and restart initialization. Failed transfers or USB verification
+produce a nonzero exit status with diagnostic output.
+
+Manual hardware acceptance: run the task on a XIAO, confirm both reset prompts
+block until you proceed, and verify the final USB identity and keyboard interface.
+If its serial address changes between stages, enter the new address. Then connect
+from Android, verify the firmware version, and send sample text to confirm keyboard
+operation. Automated checks (`npm run test:dongle-init`) use simulated hardware
+and do not flash attached devices.
+
 ### One-time USB setup and recovery
 
 Existing sketches do not expose a version or enabled DFU service. They require
