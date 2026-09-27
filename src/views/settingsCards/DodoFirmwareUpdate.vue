@@ -1,5 +1,5 @@
 <template>
-  <IonModal :is-open="true||!!firmware.pendingUpdate || firmware.status.phase !== 'idle' || !!firmware.nativeError" :can-dismiss="!firmware.active && !firmware.nativeError"
+  <IonModal :is-open="!!firmware.pendingUpdate || firmware.status.phase !== 'idle' || !!firmware.nativeError" :can-dismiss="!firmware.active && !firmware.nativeError"
     :backdrop-dismiss="false" aria-label="Dongle-Aktualisierung" @did-dismiss="firmware.dismiss()">
     <IonHeader>
       <IonToolbar>
