@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    DodoFirmwareUpdate: typeof import('./src/components/DodoFirmwareUpdate.vue')['default']
     DodoHint: typeof import('./src/components/DodoHint.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
@@ -88,7 +87,6 @@ declare module 'vue' {
     IonTabBar: typeof import('@ionic/vue')['IonTabBar']
     IonTabButton: typeof import('@ionic/vue')['IonTabButton']
     IonTabs: typeof import('@ionic/vue')['IonTabs']
-    IonText: typeof import('@ionic/vue')['IonText']
     IonTitle: typeof import('@ionic/vue')['IonTitle']
     IonToggle: typeof import('@ionic/vue')['IonToggle']
     IonToolbar: typeof import('@ionic/vue')['IonToolbar']

@@ -45,21 +45,21 @@ needs the core's precompiled nRFCrypto library explicitly added to
 ### USB device name
 
 `npm run firmware:prepare` sets `build.usb_product="DokuDongle"` and
-`build.usb_manufacturer=""` through Arduino CLI build properties. Both settings
+`build.usb_manufacturer="STEIIIN"` through Arduino CLI build properties. Both settings
 are included in the build fingerprint and apply before USB enumeration. Linux
-combines the manufacturer and product strings for the keyboard name; the empty
-manufacturer prevents a `Seeed` prefix. Manual builds must supply the same
-properties to get the same name.
+combines the manufacturer and product strings into the keyboard name
+`STEIIIN DokuDongle`. Manual builds must supply the same properties to get the
+same name.
 
-The USB name is always `DokuDongle`, independent of the configurable Bluetooth
-name suffix. USB VID/PID, serial identity, and keyboard interfaces remain the
+The USB product name is always `DokuDongle`, independent of the configurable
+Bluetooth name suffix. USB VID/PID, serial identity, and keyboard interfaces remain the
 same. Bootloader/recovery mode retains its own device names.
 
 After installing the prepared firmware, unplug and reconnect the dongle. On
-Linux, verify `lsusb -v -d 2886:8044` reports `iProduct` as `DokuDongle` and an
-empty manufacturer, and `/proc/bus/input/devices` contains
-`N: Name="DokuDongle"`. KDE should display **DokuDongle eingesteckt**. The ordinary
-`lsusb` summary can still show the vendor name from its numeric-ID database.
+Linux, verify `lsusb -v -d 2886:8044` reports `iProduct` as `DokuDongle` and
+manufacturer `STEIIIN`, and `/proc/bus/input/devices` contains
+`N: Name="STEIIIN DokuDongle"`. KDE should display
+**STEIIIN DokuDongle eingesteckt**. The ordinary `lsusb` summary can still show the vendor name from its numeric-ID database.
 Reconnect over Bluetooth and send text to verify keyboard operation as well.
 
 Physical checks after flashing:

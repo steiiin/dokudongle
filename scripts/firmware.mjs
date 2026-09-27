@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process'
 export const buildConfig = {
   core: 'Seeeduino:nrf52', coreVersion: '1.1.13',
   fqbn: 'Seeeduino:nrf52:xiaonRF52840:softdevice=s140v6,debug=l0',
-  usbProduct: 'DokuDongle', usbManufacturer: '',
+  usbProduct: 'DokuDongle', usbManufacturer: 'STEIIIN',
   softdevice: '0x0123', target: 'xiao-nrf52840', targetId: 1, protocolRevision: 1,
   packageFormat: 'nordic-legacy-application',
 }
