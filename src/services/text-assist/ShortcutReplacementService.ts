@@ -13,7 +13,13 @@ interface AppliedShortcutReplacement {
 export class ShortcutReplacementService {
   private readonly lastReplacements = new Map<string, AppliedShortcutReplacement>()
 
-  constructor(private readonly replacements: Readonly<Record<string, string>> = shortcutReplacements) {}
+  constructor(
+    private readonly source: Readonly<Record<string, string>> | (() => Readonly<Record<string, string>>) = shortcutReplacements,
+  ) {}
+
+  private get replacements(): Readonly<Record<string, string>> {
+    return typeof this.source === 'function' ? this.source() : this.source
+  }
 
   replaceAfterDelimiter(
     change: TextInputChange,

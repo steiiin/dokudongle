@@ -25,14 +25,6 @@
     "category": "hospital"
   },
   {
-    "id": "hospital-dd-neustadt",
-    "trigger": "@",
-    "label": "KH DD-Neustadt",
-    "replacement": "KH DD-Neustadt",
-    "keywords": [ "krankenhaus", "neustadt" ],
-    "category": "hospital"
-  },
-  {
     "id": "hospital-dd-josephstift",
     "trigger": "@",
     "label": "KH DD-StJosephStift",

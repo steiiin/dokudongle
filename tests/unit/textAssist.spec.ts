@@ -473,7 +473,7 @@ describe('text assist integration', () => {
 describe('snippets and usage learning', () => {
   test('filters @ locations and replaces the complete trigger expression', () => {
     const snippets = new SnippetService()
-    expect(snippets.getSuggestions('@', 1)).toHaveLength(14)
+    expect(snippets.getSuggestions('@', 1)).toHaveLength(13)
     const filtered = snippets.getSuggestions('Ziel @uni jetzt', 9)
     expect(filtered.map(item => item.label)).toEqual(['Uniklinik Dresden'])
     expect(filtered[0]).toMatchObject({ start: 5, end: 9, replacement: 'Uniklinik Dresden' })

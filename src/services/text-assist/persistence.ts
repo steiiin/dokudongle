@@ -1,3 +1,5 @@
+import defaultShortcuts from '@/assets/text-assist/shortcut-replacements.json'
+import defaultLocations from '@/assets/snippets/locations.json'
 import { loadStoredValue, saveStoredValue } from '@/store/persistence'
 import type { LearningScopeState, TextAssistPersistedState } from './types'
 
@@ -11,6 +13,8 @@ export const emptyLearningScope = (): LearningScopeState => ({
 
 export const emptyTextAssistState = (): TextAssistPersistedState => ({
   schemaVersion: 1,
+  shortcutReplacements: { ...defaultShortcuts },
+  locationSnippets: structuredClone(defaultLocations),
   userDictionary: [],
   rejectedCorrections: [],
   learning: {
@@ -37,6 +41,9 @@ export class TextAssistStateRepository implements TextAssistStateRepositoryLike 
       this.initialization = loadStoredValue<TextAssistPersistedState>(STORAGE_KEY).then((stored) => {
         if (stored?.schemaVersion === 1) this.state = this.sanitize(stored)
         return this.state
+      }).catch(error => {
+        this.initialization = undefined
+        throw error
       })
     }
     return this.initialization
@@ -69,6 +76,17 @@ export class TextAssistStateRepository implements TextAssistStateRepositoryLike 
   private sanitize(stored: TextAssistPersistedState): TextAssistPersistedState {
     return {
       schemaVersion: 1,
+      shortcutReplacements: stored.shortcutReplacements && typeof stored.shortcutReplacements === 'object'
+        && !Array.isArray(stored.shortcutReplacements)
+        ? Object.fromEntries(Object.entries(stored.shortcutReplacements).filter(([, value]) => typeof value === 'string'))
+        : { ...defaultShortcuts },
+      locationSnippets: Array.isArray(stored.locationSnippets)
+        ? stored.locationSnippets.filter(entry => entry && typeof entry.id === 'string'
+          && typeof entry.trigger === 'string' && typeof entry.label === 'string'
+          && typeof entry.replacement === 'string'
+          && (entry.category === undefined || typeof entry.category === 'string')
+          && (entry.keywords === undefined || (Array.isArray(entry.keywords) && entry.keywords.every(word => typeof word === 'string'))))
+        : structuredClone(defaultLocations),
       userDictionary: Array.isArray(stored.userDictionary) ? stored.userDictionary : [],
       rejectedCorrections: Array.isArray(stored.rejectedCorrections) ? stored.rejectedCorrections : [],
       learning: {

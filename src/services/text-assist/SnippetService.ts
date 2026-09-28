@@ -10,7 +10,11 @@ interface ActiveSnippetQuery {
 }
 
 export class SnippetService {
-  constructor(private readonly snippets: TextSnippet[] = locations) {}
+  constructor(private readonly source: TextSnippet[] | (() => TextSnippet[]) = locations) {}
+
+  private get snippets(): TextSnippet[] {
+    return typeof this.source === 'function' ? this.source() : this.source
+  }
 
   getActiveQuery(text: string, cursor: number): ActiveSnippetQuery | null {
     const prefix = text.slice(0, cursor)

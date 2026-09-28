@@ -83,6 +83,8 @@ export interface TextSnippet {
   category?: string
 }
 
+export type NewLocationSnippet = Omit<TextSnippet, 'id'>
+
 export interface BaseTextSuggestion {
   id: string
   label: string
@@ -142,6 +144,8 @@ export interface TextLearningState {
 
 export interface TextAssistPersistedState {
   schemaVersion: 1
+  shortcutReplacements: Record<string, string>
+  locationSnippets: TextSnippet[]
   userDictionary: UserDictionaryEntry[]
   rejectedCorrections: RejectedCorrection[]
   learning: TextLearningState

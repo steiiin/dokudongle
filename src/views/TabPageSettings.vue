@@ -13,11 +13,13 @@
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
     >
       <DongleSettingsCard />
+      <SpellcheckerSettingsCard />
     </IonContent>
   </IonPage>
 </template>
 
 <script setup lang="ts">
+import SpellcheckerSettingsCard from '@/views/settingsCards/SpellcheckerSettingsCard.vue'
 import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'
 

@@ -1,3 +1,4 @@
+import { TextAssistSettingsService } from './TextAssistSettingsService'
 import { AutocorrectService } from './AutocorrectService'
 import { ImeAutocorrectService } from './ImeAutocorrectService'
 import { SnippetService } from './SnippetService'
@@ -11,6 +12,8 @@ import type {
   ImeAutocorrectFlag,
   AddUserWordResult,
   ImeDictionary,
+  NewLocationSnippet,
+  TextSnippet,
   TextAssistUpdate,
   TextContext,
   TextInputChange,
@@ -35,6 +38,7 @@ interface ResolvedImeDictionary {
 }
 
 export class TextAssistService {
+  private readonly settings: TextAssistSettingsService
   readonly repository: TextAssistStateRepositoryLike
   readonly autocorrect: AutocorrectService
   readonly imeAutocorrect: ImeAutocorrectService
@@ -50,8 +54,9 @@ export class TextAssistService {
     this.autocorrect = new AutocorrectService(repository)
     this.imeAutocorrect = new ImeAutocorrectService()
     this.userDictionary = new UserDictionaryService(repository, this.autocorrect)
-    this.snippets = new SnippetService()
-    this.shortcutReplacements = new ShortcutReplacementService()
+    this.settings = new TextAssistSettingsService(repository)
+    this.snippets = new SnippetService(() => repository.getState().locationSnippets)
+    this.shortcutReplacements = new ShortcutReplacementService(() => repository.getState().shortcutReplacements)
     this.learning = new TextLearningService(repository)
     this.suggestions = new SuggestionService(this.autocorrect, this.snippets, this.learning, this.userDictionary)
   }
@@ -213,6 +218,15 @@ export class TextAssistService {
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction && snapshot) this.learnAcceptedCorrection(correction, snapshot.text)
   }
+
+  getShortcutReplacements(): Promise<Record<string, string>> { return this.settings.getShortcuts() }
+  addShortcutReplacement(shortcut: string, replacement: string): Promise<void> { return this.settings.addShortcut(shortcut, replacement) }
+  removeShortcutReplacement(shortcut: string): Promise<void> { return this.settings.removeShortcut(shortcut) }
+  resetShortcutReplacements(): Promise<void> { return this.settings.resetShortcuts() }
+  getLocationSnippets(): Promise<TextSnippet[]> { return this.settings.getLocations() }
+  addLocationSnippet(snippet: NewLocationSnippet): Promise<void> { return this.settings.addLocation(snippet) }
+  removeLocationSnippet(id: string): Promise<void> { return this.settings.removeLocation(id) }
+  resetLocationSnippets(): Promise<void> { return this.settings.resetLocations() }
 
   async getUserDictionaryEntries(): Promise<UserDictionaryEntry[]> {
     return this.userDictionary.getEntries()
