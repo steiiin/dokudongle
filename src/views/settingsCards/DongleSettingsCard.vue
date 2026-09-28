@@ -31,7 +31,7 @@
           <DodoHint variant="warning">Ein Update für {{ firmware.recovery.deviceName }} wurde noch nicht bestätigt.</DodoHint>
           <IonButton :disabled="!firmware.canRecover" @click="firmware.requestUpdate('retry')">Update erneut versuchen</IonButton>
         </template>
-        <DodoHint>Dongle nach einem unterbrochenen Update nicht erreichbar? Den betroffenen Dongle aus- und wieder einstecken und anschließend hier auswählen.</DodoHint>
+        <DodoHint style="color: var(--ion-color-light-contrast);">Dongle nach einem unterbrochenen Update nicht erreichbar? Den betroffenen Dongle aus- und wieder einstecken und anschließend hier auswählen.</DodoHint>
         <IonButton :disabled="!firmware.canRecover" @click="firmware.requestUpdate('recoverManually')">Dongle wiederherstellen</IonButton>
       </template>
       <template v-if="firmware.manifestError">

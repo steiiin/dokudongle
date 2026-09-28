@@ -23,6 +23,7 @@ import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { useTextSuggestionScope } from '@/services/text-suggestions'
 
 import { textAssistService } from '@/services/text-assist'
+import { sameInputSnapshot, snapshotBeforeInput, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
 import type { ImeDictionary } from '@/services/text-assist'
 import type { TextInputSnapshot } from '@/services/text-assist'
 import type { TextMutation } from '@/services/text-assist'
@@ -54,6 +55,7 @@ const isTextAssistAvailable = ref(true)
 const isComposing = ref(false)
 const isApplyingAssistMutation = ref(false)
 const pendingBeforeInput = ref<TextInputSnapshot | null>(null)
+let lastInputSnapshot: TextInputSnapshot | null = null
 const compositionBefore = ref<TextInputSnapshot | null>(null)
 const assistSessionId = `dodo-input-${Date.now()}-${Math.random().toString(36).slice(2)}`
 const suggestionOwner = Symbol(assistSessionId)
@@ -162,6 +164,7 @@ const applyAssistMutation = async (mutation: TextMutation, sourceText: string) =
   input.value = updated
   inputRef.value.$el.value = updated
   input.setSelectionRange(mutation.cursor, mutation.cursor)
+  lastInputSnapshot = snapshotInput()
   emit('update:modelValue', updated)
 
   await nextTick()
@@ -227,9 +230,12 @@ const applyTextSuggestion = async (suggestion: TextSuggestion) => {
 const handleBeforeInput = (event: InputEvent) => {
   if (!imeOperational.value) return
 
-  const before = snapshotInput()
+  const current = snapshotInput()
+  const before = snapshotBeforeInput(current, lastInputSnapshot, event.inputType)
   pendingBeforeInput.value = before
-  if (event.isComposing || isComposing.value || event.inputType !== 'deleteContentBackward') return
+  // A native IME selection is verified after deletion, without cancelling it.
+  if (current.selectionStart !== current.selectionEnd) return
+  if (event.isComposing || isComposing.value || event.inputType !== 'deleteContentBackward' || !event.cancelable) return
 
   const mutation = textAssistService.handleBackspace(assistSessionId, before)
   if (!mutation) return
@@ -245,20 +251,30 @@ const handleInput = (event: Event) => {
 
   const inputEvent = event as InputEvent
   const after = snapshotInput()
-  const before = pendingBeforeInput.value ?? { ...after, text: props.modelValue ?? '' }
+  const before = pendingBeforeInput.value ?? lastInputSnapshot ?? after
   pendingBeforeInput.value = null
+  lastInputSnapshot = after
   if (inputEvent.isComposing || isComposing.value) return
+  const mutation = undoAfterBackwardDeletion(before, after, inputEvent.inputType, snapshot =>
+    textAssistService.handleBackspace(assistSessionId, snapshot))
+  if (mutation) {
+    assistRevision += 1
+    void applyAssistMutation(mutation, after.text).then(refreshTextSuggestions)
+    return
+  }
   void processAssistInput(before, inputEvent, after)
 }
 
 const handleFocus = () => {
   if (!imeOperational.value) return
+  lastInputSnapshot = snapshotInput()
   setSuggestionSuppression(true)
   suggestionScope?.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) })
   void refreshTextSuggestions()
 }
 
 const handleNativeBlur = () => {
+  lastInputSnapshot = null
   assistRevision += 1
   pendingBeforeInput.value = null
   compositionBefore.value = null
@@ -284,6 +300,7 @@ const handleCompositionEnd = (event: CompositionEvent) => {
   const before = compositionBefore.value ?? snapshotInput()
   compositionBefore.value = null
   const after = snapshotInput()
+  lastInputSnapshot = after
   void processAssistInput(before, {
     inputType: 'insertCompositionText',
     data: event.data,
@@ -295,8 +312,11 @@ const handleSelectionInteraction = (event: Event) => {
   if (event instanceof KeyboardEvent
     && !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
   if (assistInputsInFlight > 0) return
+  const snapshot = snapshotInput()
+  if (sameInputSnapshot(lastInputSnapshot, snapshot)) return
+  lastInputSnapshot = snapshot
   assistRevision += 1
-  textAssistService.invalidateSession(assistSessionId, snapshotInput())
+  textAssistService.invalidateSession(assistSessionId, snapshot)
   void refreshTextSuggestions()
 }
 

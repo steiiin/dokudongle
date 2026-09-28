@@ -167,6 +167,7 @@ import { provideTextSuggestionScope } from '@/services/text-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
 import { isCompletionDelimiter, isDictionaryEntry, wordAroundCursor } from '@/services/text-assist/text'
+import { sameInputSnapshot, snapshotBeforeInput, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
 
 // ############################################################################
 
@@ -223,6 +224,7 @@ let focusTimeout: ReturnType<typeof setTimeout> | null = null
 const textSuggestions = ref<TextSuggestion[]>([])
 const isComposing = ref(false)
 const pendingBeforeInput = ref<TextInputSnapshot | null>(null)
+let lastInputSnapshot: TextInputSnapshot | null = null
 const compositionBefore = ref<TextInputSnapshot | null>(null)
 const isApplyingAssistMutation = ref(false)
 let assistRevision = 0
@@ -442,7 +444,7 @@ const setCursorPosition = async (position: number) => {
 const snapshotTextarea = (): TextInputSnapshot => {
   const textarea = inputTextarea.value
   return {
-    text: draft.value,
+    text: textarea?.value ?? draft.value,
     selectionStart: textarea?.selectionStart ?? lastCursorStart.value ?? draft.value.length,
     selectionEnd: textarea?.selectionEnd ?? lastCursorEnd.value ?? draft.value.length,
     isComposing: isComposing.value,
@@ -454,6 +456,12 @@ const applyAssistMutation = async (mutation: TextMutation) => {
   draft.value = draft.value.slice(0, mutation.start) + mutation.replacement + draft.value.slice(mutation.end)
   lastCursorStart.value = mutation.cursor
   lastCursorEnd.value = mutation.cursor
+  // Update the native control immediately, including during beforeinput.
+  if (inputTextarea.value) {
+    inputTextarea.value.value = draft.value
+    inputTextarea.value.setSelectionRange(mutation.cursor, mutation.cursor)
+  }
+  lastInputSnapshot = snapshotTextarea()
   scheduleTypingSnapshot()
   await nextTick()
   await setCursorPosition(mutation.cursor)
@@ -534,10 +542,13 @@ const scheduleTypingSnapshot = () => {
 }
 
 const handleBeforeInput = (event: InputEvent) => {
-  const before = snapshotTextarea()
+  const current = snapshotTextarea()
+  const before = snapshotBeforeInput(current, lastInputSnapshot, event.inputType)
   pendingBeforeInput.value = before
+  // A native IME selection is verified after deletion, without cancelling it.
+  if (current.selectionStart !== current.selectionEnd) return
   if (event.isComposing || isComposing.value) return
-  if (event.inputType !== 'deleteContentBackward') return
+  if (event.inputType !== 'deleteContentBackward' || !event.cancelable) return
 
   const mutation = textAssistService.handleBackspace(assistSessionId, before)
   if (!mutation) return
@@ -556,19 +567,26 @@ const handleInput = (event: Event) => {
 
   scheduleTypingSnapshot()
   const inputEvent = event as InputEvent
-  const before = pendingBeforeInput.value ?? {
-    ...snapshotTextarea(),
-    text: draft.value,
-  }
+  const after = snapshotTextarea()
+  const before = pendingBeforeInput.value ?? lastInputSnapshot ?? after
   pendingBeforeInput.value = null
+  lastInputSnapshot = after
   if (inputEvent.isComposing || isComposing.value) {
     textSuggestions.value = []
     return
   }
-  void processAssistInput(before, inputEvent)
+  const mutation = undoAfterBackwardDeletion(before, after, inputEvent.inputType, snapshot =>
+    textAssistService.handleBackspace(assistSessionId, snapshot))
+  if (mutation) {
+    assistRevision += 1
+    void applyAssistMutation(mutation).then(refreshTextSuggestions)
+    return
+  }
+  void processAssistInput(before, inputEvent, after)
 }
 
 const handleFocus = async () => {
+  lastInputSnapshot = snapshotTextarea()
   setSuggestionSuppression(true)
   isEditing.value = true
   suggestionScope.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) })
@@ -583,6 +601,8 @@ const handleFocus = async () => {
 }
 
 const handleBlur = () => {
+  pendingBeforeInput.value = null
+  lastInputSnapshot = null
   clearTypingSnapshotTimeout()
   rememberCursorPosition()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
@@ -601,6 +621,8 @@ const handleBlur = () => {
 const handleCompositionStart = () => {
   compositionBefore.value = snapshotTextarea()
   isComposing.value = true
+  pendingBeforeInput.value = null
+  assistRevision += 1
   textAssistService.invalidateSession(assistSessionId, compositionBefore.value)
   textSuggestions.value = []
 }
@@ -610,12 +632,14 @@ const handleCompositionEnd = async (event: CompositionEvent) => {
   await nextTick()
   const before = compositionBefore.value ?? snapshotTextarea()
   compositionBefore.value = null
+  const after = snapshotTextarea()
+  lastInputSnapshot = after
   const inputEvent = new InputEvent('input', {
     data: event.data,
     inputType: 'insertCompositionText',
     isComposing: false,
   })
-  await processAssistInput(before, inputEvent)
+  await processAssistInput(before, inputEvent, after)
 }
 
 const handleSelectionInteraction = (event: Event) => {
@@ -624,6 +648,9 @@ const handleSelectionInteraction = (event: Event) => {
   void rememberCursorPosition()
   if (assistInputsInFlight > 0) return
   const snapshot = snapshotTextarea()
+  if (sameInputSnapshot(lastInputSnapshot, snapshot)) return
+  lastInputSnapshot = snapshot
+  assistRevision += 1
   textAssistService.invalidateSession(assistSessionId, snapshot)
   void refreshTextSuggestions()
 }
