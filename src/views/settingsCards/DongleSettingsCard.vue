@@ -10,7 +10,7 @@
           <li><b>Tastenabstand:</b> <i>{{ store.connection.config ? `${store.connection.config.keyGapMs} ms` : 'nicht verfügbar' }}</i></li>
           <li><b>Version:</b> <i>{{ versionLabel }}<template v-if="firmware.available"> (v{{ firmware.manifest?.version }} verfügbar)</template></i></li>
         </ul>
-        <DodoHint v-if="store.connection.configStatus === 'unsupported'" variant="warning">Für diese Einstellungen bitte die aktuelle XIAO-Firmware über USB einrichten.</DodoHint>
+        <DodoHint v-if="store.connection.configStatus === 'unsupported'" variant="warning">Veraltetes DokuDongle.</DodoHint>
         <template v-if="store.connection.configStatus === 'error'">
           <DodoHint variant="error">Die Dongle-Einstellungen konnten nicht gelesen werden.</DodoHint>
           <IonButton expand="block" color="danger" @click="store.refreshDongleConfig()">Einstellungen erneut laden</IonButton>
