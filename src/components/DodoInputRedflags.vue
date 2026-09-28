@@ -44,13 +44,13 @@
   </IonCard>
   <IonModal :is-open="isModalOpen" @did-present="focusRedSearchbar" @will-dismiss="closeModal">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle type="ios">RedFlag-Szenarien & Warnzeichen hinzufügen</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="closeModal">Zurück</IonButton>
+          <IonButton @click="closeModal" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle type="ios">RedFlag-Szenarien & Warnzeichen hinzufügen</IonTitle>
       </IonToolbar>
     </IonHeader>
     <IonContent>
@@ -93,7 +93,7 @@
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
 
-import { addCircle, closeCircle } from 'ionicons/icons'
+import { closeOutline, addCircle, closeCircle } from 'ionicons/icons'
 
 import { RedflagApplication, RedflagScenario, RedflagSignal, DATA_Scenarios, DATA_Signals } from '@/data/redflags'
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags'

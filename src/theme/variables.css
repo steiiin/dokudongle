@@ -64,3 +64,16 @@ ion-toast.protocol-reset-toast {
   --button-color: var(--ion-color-primary, #4d8dff);
   --box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
 }
+
+/* Keep modal navigation and actions visible, including on compact/iOS layouts. */
+.dd-modal-header-toolbar ion-title {
+  position: static;
+  min-width: 0;
+  width: auto;
+  padding-inline: 8px;
+  text-align: start;
+}
+
+.dd-modal-header-toolbar ion-buttons {
+  flex-shrink: 0;
+}

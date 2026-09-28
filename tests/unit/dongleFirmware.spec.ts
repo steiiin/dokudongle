@@ -236,7 +236,7 @@ describe('settings and overlay', () => {
     global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } },
   })
   const findButton = (wrapper: ReturnType<typeof mountCard>, label: string) =>
-    wrapper.findAllComponents(IonButton).find(button => button.text() === label)
+    wrapper.findAllComponents(IonButton).find(button => (button.attributes('aria-label') ?? button.text()) === label)
 
   test('replaces settings with installation and restores editing when current', async () => {
     const wrapper = mountCard()
@@ -407,10 +407,10 @@ describe('settings and overlay', () => {
     expect(modal.props('isOpen')).toBe(false)
     await findButton(card, 'Neue Dongle-Version installieren')!.trigger('click')
     expect(modal.props('isOpen')).toBe(true)
-    expect(wrapper.text()).toContain('dauert einige Minuten')
-    expect(wrapper.text()).toContain('nicht abziehen')
-    expect(wrapper.text()).toContain('Smartphone eingeschaltet')
-    expect(wrapper.text()).toContain('Bildschirm eingeschaltet')
+    expect(wrapper.text()).toContain('1-3min')
+    expect(wrapper.text()).toContain('nicht nutzbar')
+    expect(wrapper.text()).toContain('Lass den Dongle angesteckt')
+    expect(wrapper.text()).toContain('Telefon in der Nähe und eingeschaltet')
     const cancel = findButton(wrapper, 'Abbrechen')!
     const proceed = findButton(wrapper, 'Fortfahren')!
     expect(cancel.element.parentElement?.getAttribute('slot')).toBe('start')
@@ -446,6 +446,35 @@ describe('settings and overlay', () => {
     expect(mocks.ble.disconnect).not.toHaveBeenCalled()
     await findButton(wrapper, 'Abbrechen')!.trigger('click')
     expect(wrapper.getComponent({ name: 'IonModal' }).props('isOpen')).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('dismisses a completed update and retains retry confirmation after failure', async () => {
+    const wrapper = shallowMount(DodoFirmwareUpdate, { global: { renderStubDefaultSlot: true } })
+    firmware.status = { phase: 'done', version: 2, updatedAt: 1 }
+    await wrapper.vm.$nextTick()
+    await findButton(wrapper, 'Schließen')!.trigger('click')
+    expect(firmware.status.phase).toBe('idle')
+
+    firmware.status = { phase: 'error', error: 'Übertragung fehlgeschlagen', updatedAt: 2 }
+    await wrapper.vm.$nextTick()
+    await findButton(wrapper, 'Update erneut versuchen')!.trigger('click')
+    expect(firmware.pendingUpdate).toBe('retry')
+    expect(mocks.native.start).not.toHaveBeenCalled()
+    await findButton(wrapper, 'Abbrechen')!.trigger('click')
+    expect(firmware.pendingUpdate).toBeNull()
+    expect(findButton(wrapper, 'Schließen')).toBeDefined()
+    wrapper.unmount()
+  })
+
+  test('offers no general close action while native update status is unknown', async () => {
+    const wrapper = shallowMount(DodoFirmwareUpdate, { global: { renderStubDefaultSlot: true } })
+    firmware.nativeError = 'Status konnte nicht geladen werden'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.getComponent({ name: 'IonModal' }).props('canDismiss')).toBe(false)
+    expect(findButton(wrapper, 'Schließen')).toBeUndefined()
+    expect(findButton(wrapper, 'Abbrechen')).toBeUndefined()
+    expect(findButton(wrapper, 'Update-Status erneut laden')).toBeDefined()
     wrapper.unmount()
   })
 

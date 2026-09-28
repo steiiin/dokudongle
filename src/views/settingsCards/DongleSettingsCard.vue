@@ -47,11 +47,13 @@
 
   <IonModal :is-open="isOpen" :can-dismiss="!isBusy" aria-label="Dongle-Einstellungen" @did-dismiss="closeSettings">
     <IonHeader>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton :disabled="isBusy" data-testid="cancel-settings" @click="closeSettings">Abbrechen</IonButton>
+          <IonButton :disabled="isBusy" data-testid="cancel-settings" @click="closeSettings" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
-        <IonTitle class="modal-title">Dongle</IonTitle>
+        <IonTitle>Dongle</IonTitle>
         <IonButtons slot="end">
           <IonButton :disabled="!canSave" data-testid="save-settings" @click="saveSettings">Speichern</IonButton>
         </IonButtons>
@@ -109,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import { closeOutline } from 'ionicons/icons'
 import { computed, ref, watch } from 'vue'
 import { useDokuStore } from '@/store/doku'
 import { useFirmwareStore } from '@/store/firmware'
@@ -225,12 +228,6 @@ ion-card-subtitle {
   min-height: 36px;
   --padding-top: 0.75rem;
   --padding-bottom: 0.75rem;
-}
-
-@media (max-width: 360px) {
-  .modal-title {
-    display: none;
-  }
 }
 
 .current-settings

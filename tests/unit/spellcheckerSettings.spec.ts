@@ -22,7 +22,7 @@ const mountModal = (kind: 'shortcuts' | 'locations') => shallowMount(DodoTextAss
   props: { kind, isOpen: true }, global: { renderStubDefaultSlot: true },
 })
 type ModalWrapper = ReturnType<typeof mountModal>
-const button = (wrapper: ModalWrapper, text: string) => wrapper.findAllComponents(IonButton).find(node => text === 'Entfernen' ? node.attributes('aria-label')?.endsWith(' entfernen') : node.text() === text)!
+const button = (wrapper: ModalWrapper, text: string) => wrapper.findAllComponents(IonButton).find(node => text === 'Entfernen' ? node.attributes('aria-label')?.endsWith(' entfernen') : (node.attributes('aria-label') ?? node.text()) === text)!
 const field = (wrapper: ModalWrapper, label: string) => wrapper.findAllComponents(IonInput).find(node => node.props('label') === label)!
 const fill = async (wrapper: ModalWrapper, label: string, text: string) => {
   field(wrapper, label).vm.$emit('update:modelValue', text)
@@ -93,7 +93,7 @@ describe.each(['shortcuts', 'locations'] as const)('%s editor', kind => {
     await flushPromises()
     if (kind === 'shortcuts') expect(textAssistService.removeShortcutReplacement).toHaveBeenCalledWith('lt')
     else expect(textAssistService.removeLocationSnippet).toHaveBeenCalledWith('local')
-    await button(wrapper, 'Fertig').trigger('click')
+    await button(wrapper, 'Zurück').trigger('click')
     expect(wrapper.emitted('close')).toHaveLength(1)
   })
 

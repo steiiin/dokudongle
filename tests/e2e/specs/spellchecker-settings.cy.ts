@@ -1,5 +1,5 @@
 describe('Spellchecker settings on mobile', () => {
-  for (const width of [320, 375]) {
+  for (const width of [320, 375, 1024]) {
     it(`manages persistent shortcuts and locations at ${width}px`, () => {
       cy.viewport(width, 812)
       cy.visit('/tabs/settings')
@@ -11,13 +11,16 @@ describe('Spellchecker settings on mobile', () => {
         })
       }
       const close = () => {
-        cy.contains('ion-modal:visible ion-button', 'Fertig').click()
+        cy.get('ion-modal:visible ion-button[title="Zurück"]').shadow().find('button[aria-label="Zurück"]').click()
         cy.get('ion-modal:visible').should('not.exist')
       }
       const fill = (name: string, value: string) => {
         cy.get('ion-modal:visible ion-input').filter((_index, element) => (element as HTMLElement & { label?: string }).label === name).find('input').clear().type(value)
       }
       const checkLayout = () => {
+        cy.get('ion-modal:visible ion-title').should('be.visible').then(title => {
+          expect(title[0].getBoundingClientRect().width).to.be.greaterThan(0)
+        })
         cy.get('ion-modal:visible ion-toolbar ion-button, ion-modal:visible form ion-input').each(element => {
           const bounds = element[0].getBoundingClientRect()
           expect(bounds.left).to.be.at.least(0)

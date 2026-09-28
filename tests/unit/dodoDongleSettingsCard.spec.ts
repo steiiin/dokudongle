@@ -34,7 +34,7 @@ vi.mock('@/store/firmware', () => ({ useFirmwareStore: () => reactive(mocks.firm
 
 const mountCard = () => shallowMount(DongleSettingsCard, { global: { renderStubDefaultSlot: true, stubs: { DodoHint: false } } })
 type Card = ReturnType<typeof mountCard>
-const button = (wrapper: Card, text: string) => wrapper.findAllComponents(IonButton).find(button => button.text() === text)!
+const button = (wrapper: Card, text: string) => wrapper.findAllComponents(IonButton).find(button => (button.attributes('aria-label') ?? button.text()) === text)!
 const open = async (wrapper: Card) => { await button(wrapper, 'Einstellungen ändern').trigger('click') }
 const enterName = async (wrapper: Card, value: string) => {
   wrapper.getComponent(IonInput).vm.$emit('ionInput', { detail: { value } })

@@ -7,13 +7,13 @@
 
   <ion-modal :is-open="isOpen">
     <ion-header>
-      <ion-toolbar>
-        <ion-title type="ios">{{ label }}</ion-title>
-      </ion-toolbar>
-      <ion-toolbar>
+      <ion-toolbar class="dd-modal-header-toolbar">
         <ion-buttons slot="start">
-          <ion-button @click="isOpen = false">Zurück</ion-button>
+          <ion-button @click="isOpen = false" aria-label="Zurück" title="Zurück">
+            <ion-icon slot="icon-only" :icon="chevronBackOutline" aria-hidden="true" />
+          </ion-button>
         </ion-buttons>
+        <ion-title type="ios">{{ label }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -56,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { chevronBackOutline } from 'ionicons/icons'
 
 import { computed, ref, watch } from 'vue'
 

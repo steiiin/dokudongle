@@ -22,13 +22,13 @@
 
   <ion-modal :is-open="isModalOpen" @did-present="focusNameInput" @did-dismiss="suggestionScope.reset()">
     <ion-header>
-      <ion-toolbar>
-        <ion-title type="ios">{{ modalTitle }}</ion-title>
-      </ion-toolbar>
-      <ion-toolbar>
+      <ion-toolbar class="dd-modal-header-toolbar">
         <ion-buttons slot="start">
-          <ion-button @click="cancelEdit">Zurück</ion-button>
+          <ion-button @click="cancelEdit" aria-label="Abbrechen" title="Abbrechen">
+            <ion-icon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </ion-button>
         </ion-buttons>
+        <ion-title type="ios">{{ modalTitle }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="saveContact" color="success" :disabled="!modalValid">{{ modalSaveLabel }}</ion-button>
         </ion-buttons>
@@ -77,7 +77,7 @@ import DodoTextSuggestionHost from './DodoTextSuggestionHost.vue'
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
 
-import { addCircle } from 'ionicons/icons'
+import { closeOutline, addCircle } from 'ionicons/icons'
 
 import { provideTextSuggestionScope } from '@/services/text-suggestions'
 

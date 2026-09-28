@@ -1,13 +1,13 @@
 <template>
   <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false" @did-dismiss="suggestionScope.reset()">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>OPQRST</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="handleCancel">Abbrechen</IonButton>
+          <IonButton @click="handleCancel" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle>OPQRST</IonTitle>
         <IonButtons slot="end">
           <IonButton :disabled="!isValid" color="primary" @click="handleAccept">Einfügen</IonButton>
         </IonButtons>
@@ -83,7 +83,7 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { bodyOutline, playOutline, pulseOutline, speedometerOutline, timeOutline, trendingDownOutline, trendingUpOutline } from 'ionicons/icons'
+import { closeOutline, bodyOutline, playOutline, pulseOutline, speedometerOutline, timeOutline, trendingDownOutline, trendingUpOutline } from 'ionicons/icons'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { QuickieOPQRST } from '@/data/quickies'

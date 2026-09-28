@@ -274,13 +274,13 @@
 
     <IonModal :is-open="isInjuryModalOpen" @did-present="focusInjuryInput" @will-dismiss="cancelInjuryEdit">
       <IonHeader>
-        <IonToolbar>
-          <IonTitle type="ios">{{ injuryModalTitle }}</IonTitle>
-        </IonToolbar>
-        <IonToolbar>
+        <IonToolbar class="dd-modal-header-toolbar">
           <IonButtons slot="start">
-            <IonButton @click="cancelInjuryEdit">Zurück</IonButton>
+            <IonButton @click="cancelInjuryEdit" aria-label="Abbrechen" title="Abbrechen">
+              <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+            </IonButton>
           </IonButtons>
+          <IonTitle type="ios">{{ injuryModalTitle }}</IonTitle>
           <IonButtons slot="end">
             <IonButton color="success" :disabled="!isInjuryValid" @click="saveInjury">
               {{ isNewInjury ? 'Hinzufügen' : 'Speichern' }}
@@ -311,7 +311,7 @@
 
 <script setup lang="ts">
 
-import { addCircle } from 'ionicons/icons'
+import { closeOutline, addCircle } from 'ionicons/icons'
 import { computed, ref } from 'vue'
 
 import { basicCap } from '@/utils/autocorrect/basic'

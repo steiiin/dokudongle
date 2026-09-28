@@ -24,13 +24,13 @@
 
   <IonModal :is-open="isSelectModalOpen" @did-present="gainFocus(selectSearchbar)" @will-dismiss="closeSelectModal">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle type="ios">Medikament auswählen</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="closeSelectModal">Zurück</IonButton>
+          <IonButton @click="closeSelectModal" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle type="ios">Medikament auswählen</IonTitle>
       </IonToolbar>
     </IonHeader>
     <IonContent>
@@ -54,13 +54,13 @@
 
   <IonModal :is-open="isEditModalOpen" @will-dismiss="cancelEdit">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle type="ios">{{ modalTitle }}</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="cancelEdit">Zurück</IonButton>
+          <IonButton @click="cancelEdit" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle type="ios">{{ modalTitle }}</IonTitle>
         <IonButtons slot="end">
           <IonButton @click="saveItem" color="success" :disabled="!currentOption">Speichern</IonButton>
         </IonButtons>
@@ -113,7 +113,7 @@
 <script setup lang="ts">
 
 import { computed, ref } from 'vue'
-import { addCircle } from 'ionicons/icons'
+import { closeOutline, addCircle } from 'ionicons/icons'
 
 import type { ItemReorderEventDetail } from '@ionic/core'
 import { ConsentMedOption, ConsentMedTask, DATA_SaamedOptions } from '@/data/meds'

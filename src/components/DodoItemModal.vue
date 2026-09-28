@@ -13,13 +13,13 @@
   </IonItem>
   <IonModal :is-open="isModalOpen" @will-dismiss="closeModal">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle type="ios">{{ modalLabel ?? label }}</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="closeModal">Zurück</IonButton>
+          <IonButton @click="closeModal" aria-label="Zurück" title="Zurück">
+            <IonIcon slot="icon-only" :icon="chevronBackOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle type="ios">{{ modalLabel ?? label }}</IonTitle>
       </IonToolbar>
     </IonHeader>
     <IonContent>
@@ -31,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import { chevronBackOutline } from 'ionicons/icons'
 
 import { computed, ref } from 'vue'
 

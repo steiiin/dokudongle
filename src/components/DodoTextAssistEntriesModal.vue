@@ -1,12 +1,16 @@
 <template>
   <IonModal :is-open="isOpen" :can-dismiss="!busy" :aria-label="title" @did-dismiss="emit('close')">
     <IonHeader>
-      <IonToolbar><IonTitle>{{ title }}</IonTitle></IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
+          <IonButton :disabled="busy" @click="emit('close')" aria-label="Zurück" title="Zurück">
+            <IonIcon slot="icon-only" :icon="chevronBackOutline" aria-hidden="true" />
+          </IonButton>
+        </IonButtons>
+        <IonTitle>{{ title }}</IonTitle>
+        <IonButtons slot="end">
           <IonButton :disabled="busy || !ready" @click="reset">Zurücksetzen</IonButton>
         </IonButtons>
-        <IonButtons slot="end"><IonButton :disabled="busy" @click="emit('close')">Fertig</IonButton></IonButtons>
       </IonToolbar>
       <IonProgressBar v-if="busy" type="indeterminate" aria-label="Einträge werden gespeichert oder geladen" />
     </IonHeader>
@@ -49,7 +53,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { trashOutline } from 'ionicons/icons'
+import { chevronBackOutline, trashOutline } from 'ionicons/icons'
 import { textAssistService, type TextSnippet } from '@/services/text-assist'
 
 const props = defineProps<{ isOpen: boolean; kind: 'shortcuts' | 'locations' }>()

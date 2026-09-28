@@ -1,13 +1,13 @@
 <template>
   <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>{{ quickie?.label }}</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="handleCancel">Abbrechen</IonButton>
+          <IonButton @click="handleCancel" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle>{{ quickie?.label }}</IonTitle>
         <IonButtons slot="end">
           <IonButton color="primary" :disabled="containsEmptyText" @click="handleAccept">Einfügen</IonButton>
         </IonButtons>
@@ -44,9 +44,10 @@
 </template>
 
 <script setup lang="ts">
+import { closeOutline } from 'ionicons/icons'
 
 import { computed, ref, watch } from 'vue'
-import { IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonFooter, IonList, IonItem } from '@ionic/vue'
+import { IonIcon, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonFooter, IonList, IonItem } from '@ionic/vue'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { QuickieTemplate } from '@/data/quickies'

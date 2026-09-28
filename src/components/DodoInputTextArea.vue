@@ -25,15 +25,13 @@
       @will-dismiss="closeModal"
     >
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>{{ title }}</IonTitle>
-        </IonToolbar>
         <IonToolbar class="dd-modal-header-toolbar">
           <IonButtons slot="start">
-            <IonButton :disabled="modelValue.isEnhancing" @click="closeModal">
-              Speichern
+            <IonButton :disabled="modelValue.isEnhancing" @click="closeModal" aria-label="Zurück" title="Zurück">
+              <IonIcon slot="icon-only" :icon="chevronBackOutline" aria-hidden="true" />
             </IonButton>
           </IonButtons>
+          <IonTitle>{{ title }}</IonTitle>
           <IonButtons slot="end">
             <IonButton v-if="$slots.default && !isHelpExpanded" class="dd-modal-help-toggle"
               aria-label="Hinweise anzeigen" title="Hinweise anzeigen"
@@ -156,7 +154,7 @@
 import DodoHint from '@/components/DodoHint.vue'
 
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useSlots, watch } from 'vue'
-import { add, alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
+import { chevronBackOutline, add, alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
 import { toastController } from '@ionic/vue'
 
@@ -957,10 +955,6 @@ defineExpose({
   line-height: 1.5;
   color: #999;
   white-space: pre-wrap;
-}
-
-.dd-input-modal ion-title {
-  text-align: center;
 }
 
 .dd-modal-content {

@@ -67,6 +67,18 @@ describe('DodoProtocolCheckModal', () => {
     expect(sendFlow.emitted('send-anyway')).toHaveLength(1)
   })
 
+  test('blocks close and send actions during a check, then allows dismissal', async () => {
+    const wrapper = mountModal({ isChecking: true, allowSendAnyway: true })
+    const close = wrapper.findAllComponents(IonButton).find(button => button.attributes('aria-label') === 'Schließen')!
+    expect(close.props('disabled')).toBe(true)
+    expect(wrapper.text()).not.toContain('Trotzdem senden')
+    await close.trigger('click')
+    expect(wrapper.emitted('close')).toBeUndefined()
+    await wrapper.setProps({ isChecking: false })
+    await close.trigger('click')
+    expect(wrapper.emitted('close')).toHaveLength(1)
+  })
+
   test('offers retry, close, and send-anyway after a send-time check error', () => {
     const wrapper = mountModal({
       result: null,
@@ -76,7 +88,7 @@ describe('DodoProtocolCheckModal', () => {
     })
 
     expect(wrapper.text()).toContain('Keine Verbindung')
-    expect(wrapper.text()).toContain('Schließen')
+    expect(wrapper.find('[aria-label="Schließen"]').exists()).toBe(true)
     expect(wrapper.text()).toContain('Erneut prüfen')
     expect(wrapper.text()).toContain('Trotzdem senden')
   })

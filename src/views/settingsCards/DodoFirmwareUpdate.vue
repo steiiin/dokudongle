@@ -2,13 +2,25 @@
   <IonModal :is-open="!!firmware.pendingUpdate || firmware.status.phase !== 'idle' || !!firmware.nativeError" :can-dismiss="!firmware.active && !firmware.nativeError"
     :backdrop-dismiss="false" aria-label="Dongle-Aktualisierung" @did-dismiss="firmware.dismiss()">
     <IonHeader>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons v-if="confirming" slot="start">
-          <IonButton @click="firmware.cancelUpdate()">Abbrechen</IonButton>
+          <IonButton @click="firmware.cancelUpdate()" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
-        <IonTitle :class="{ 'confirmation-title': confirming }">Dongle-Aktualisierung</IonTitle>
+        <IonButtons v-else-if="!firmware.active && !firmware.nativeError" slot="start">
+          <IonButton @click="firmware.dismiss()" aria-label="Schließen" title="Schließen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
+        </IonButtons>
+        <IonTitle>Dongle-Aktualisierung</IonTitle>
         <IonButtons v-if="confirming" slot="end">
           <IonButton :disabled="!firmware.canConfirmUpdate" color="success" @click="firmware.confirmUpdate()">Fortfahren</IonButton>
+        </IonButtons>
+        <IonButtons v-else-if="!firmware.active && !firmware.nativeError && firmware.status.phase === 'error'" slot="end">
+          <IonButton :disabled="!firmware.canRecover" @click="firmware.requestUpdate('retry')">
+            Update erneut versuchen
+          </IonButton>
         </IonButtons>
       </IonToolbar>
     </IonHeader>
@@ -55,25 +67,14 @@
         <DodoHint v-if="firmware.status.error" variant="error">{{ firmware.status.error }}</DodoHint>
         <DodoHint v-if="firmware.nativeError" variant="error">{{ firmware.nativeError }}</DodoHint>
         <IonButton v-if="firmware.nativeError" @click="firmware.restore()" color="danger">Update-Status erneut laden</IonButton>
-
-        <div v-else-if="!firmware.active" style="margin-top: .5rem">
-          <IonButton v-if="firmware.status.phase === 'error'"
-            :disabled="!firmware.canRecover"
-            @click="firmware.requestUpdate('retry')">
-            Update erneut versuchen
-          </IonButton>
-          <IonButton @click="firmware.dismiss()" :color="firmware.status.phase === 'done' ? 'success' : ''">
-            Schließen
-          </IonButton>
-        </div>
-
       </div>
     </IonContent>
   </IonModal>
 </template>
 <script setup lang="ts">
+import { closeOutline } from 'ionicons/icons'
 import { computed, onMounted, onUnmounted } from 'vue'
-import { IonButton, IonButtons, IonContent, IonHeader, IonModal, IonProgressBar, IonTitle, IonToolbar } from '@ionic/vue'
+import { IonIcon, IonButton, IonButtons, IonContent, IonHeader, IonModal, IonProgressBar, IonTitle, IonToolbar } from '@ionic/vue'
 import { useFirmwareStore } from '@/store/firmware'
 import DodoHint from '@/components/DodoHint.vue'
 const firmware = useFirmwareStore()
@@ -106,9 +107,4 @@ ion-modal { --width: 100%; --height: 100%; --border-radius: 0; }
   }
 
 }
-
-@media (max-width: 540px) {
-  .confirmation-title { display: none; }
-}
-
 </style>

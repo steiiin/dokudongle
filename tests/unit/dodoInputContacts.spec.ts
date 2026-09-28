@@ -24,6 +24,20 @@ describe('DodoInputContacts IME autocorrection', () => {
     expect(inputs[1].props('imeDictionary')).toEqual({ autocorrect: ['phone'] })
   })
 
+  test('cancels a new contact without committing the draft', async () => {
+    const wrapper = mountContacts()
+    await buttonWithText(wrapper, 'Kontakt hinzufügen').trigger('click')
+    const inputs = wrapper.findAllComponents(DodoInputText)
+    inputs[0].vm.$emit('update:modelValue', 'Verworfener Kontakt')
+    inputs[1].vm.$emit('update:modelValue', '0123456789')
+    await nextTick()
+    await wrapper.get('[aria-label="Abbrechen"]').trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    await buttonWithText(wrapper, 'Kontakt hinzufügen').trigger('click')
+    expect(inputs[0].props('modelValue')).toBe('')
+    expect(inputs[1].props('modelValue')).toBe('')
+  })
+
   test('does not normalize contact values again while saving', async () => {
     const wrapper = mountContacts()
     await buttonWithText(wrapper, 'Kontakt hinzufügen').trigger('click')

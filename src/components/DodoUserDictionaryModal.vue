@@ -1,11 +1,13 @@
 <template>
   <IonModal :is-open="isOpen" class="dd-dictionary-modal" @did-dismiss="emit('close')">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>Eigenes Wörterbuch</IonTitle>
-        <IonButtons slot="end">
-          <IonButton @click="emit('close')">Fertig</IonButton>
+      <IonToolbar class="dd-modal-header-toolbar">
+        <IonButtons slot="start">
+          <IonButton @click="emit('close')" aria-label="Zurück" title="Zurück">
+            <IonIcon slot="icon-only" :icon="chevronBackOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle>Eigenes Wörterbuch</IonTitle>
       </IonToolbar>
     </IonHeader>
     <IonContent class="ion-padding">
@@ -45,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+import { chevronBackOutline } from 'ionicons/icons'
 import { ref, watch } from 'vue'
 import type { UserDictionaryEntry } from '@/services/text-assist'
 

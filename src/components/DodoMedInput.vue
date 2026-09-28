@@ -26,13 +26,13 @@
 
   <IonModal :is-open="isModalOpen" @will-dismiss="cancelEdit" @did-dismiss="suggestionScope.reset()">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle type="ios">{{ modalTitle }}</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="cancelEdit">Zurück</IonButton>
+          <IonButton @click="cancelEdit" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle type="ios">{{ modalTitle }}</IonTitle>
         <IonButtons slot="end">
           <IonButton @click="saveItem" color="success" :disabled="!modalValid">{{ modalSaveLabel }}</IonButton>
         </IonButtons>
@@ -96,7 +96,7 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { addCircle } from 'ionicons/icons'
+import { closeOutline, addCircle } from 'ionicons/icons'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { SampleMedicationItem } from '@/types/protocol/sample'

@@ -122,11 +122,11 @@ describe('Bounded multiline editor', () => {
     editor().should('be.visible').and(($textarea) => { expect($textarea[0].hasAttribute('readonly')).to.eq(false) })
       .type('12345{enter}'.repeat(10), { delay: 0 })
     cy.get('.dd-modal-help-toggle').should('have.attr', 'aria-expanded', 'true')
-    cy.viewport(375, 360)
+    cy.viewport(375, 300)
     cy.get('.dd-modal-header-toolbar .dd-modal-help-toggle').shadow().find('button').should('have.attr', 'aria-expanded', 'false')
     cy.get('.dd-modal-help').should('not.be.visible')
     assertBottomVisible()
-    cy.contains('ion-modal ion-button', 'Speichern').click()
+    cy.get('ion-modal.dd-input-modal ion-button[title="Zurück"]').shadow().find('button[aria-label="Zurück"]').click()
     cy.get('textarea.dd-modal-textarea').should('not.exist')
     openSituation()
     editor().should('be.visible')
@@ -153,7 +153,7 @@ describe('Dictionary quick-add', () => {
       expect($textarea[0].selectionEnd).to.eq(phrase.length)
     })
     cy.get('ion-modal.dd-dictionary-modal').should('not.be.visible')
-    cy.contains('ion-modal ion-button', 'Speichern').click()
+    cy.get('ion-modal.dd-input-modal ion-button[title="Zurück"]').shadow().find('button[aria-label="Zurück"]').click()
     cy.reload()
     openSituation()
     editor().should('be.visible').and(($textarea) => { expect($textarea[0].hasAttribute('readonly')).to.eq(false) }).clear().type('Patient ist')
@@ -163,4 +163,39 @@ describe('Dictionary quick-add', () => {
     cy.get('ion-button[aria-label="Auswahl zum Wörterbuch hinzufügen"]').click()
     cy.get('ion-toast').shadow().should('contain.text', 'Bereits im Wörterbuch vorhanden.')
   })
+})
+
+
+describe('Nested dialog navigation', () => {
+  for (const width of [320, 1024]) {
+    it(`cancels Quickies and returns from the dictionary without losing text at ${width}px`, () => {
+      cy.viewport(width, 812)
+      cy.visit('/tabs/doku')
+      cy.contains('ion-chip', 'Verlegung')
+        .then(($chip) => { $chip[0].scrollIntoView({ block: 'center' }) })
+        .click({ scrollBehavior: false })
+      openSituation()
+      const editor = () => cy.get<HTMLTextAreaElement>('textarea.dd-modal-textarea')
+      editor().should('be.visible').and(($textarea) => { expect($textarea[0].hasAttribute('readonly')).to.eq(false) }).type('12345')
+
+      cy.contains('ion-modal.dd-input-modal ion-button', 'Verlegung').click()
+      cy.get('ion-modal.dd-quickie-modal').should('be.visible')
+      cy.get('ion-modal.dd-quickie-modal ion-input input').first().type('Entwurf')
+      cy.get('ion-modal.dd-quickie-modal ion-button[title="Abbrechen"]').shadow().find('button[aria-label="Abbrechen"]').click()
+      cy.get('ion-modal.dd-quickie-modal').should('not.exist')
+      editor().should('have.value', '12345')
+
+      cy.get('ion-modal.dd-input-modal ion-button[title="Eigenes Wörterbuch"]').click()
+      cy.get('ion-modal.dd-dictionary-modal').should('be.visible')
+      cy.get('ion-modal.dd-dictionary-modal ion-button[title="Zurück"]').shadow().find('button[aria-label="Zurück"]').click()
+      cy.get('ion-modal.dd-dictionary-modal').should('not.be.visible')
+      editor().should('have.value', '12345')
+
+      cy.get('ion-modal.dd-input-modal ion-button[title="Zurück"]').shadow().find('button[aria-label="Zurück"]').focus().type('{enter}')
+      cy.get('textarea.dd-modal-textarea').should('not.exist')
+      openSituation()
+      editor().should('have.value', '12345')
+      cy.screenshot(`dialog-editor-${width}`)
+    })
+  }
 })

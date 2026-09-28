@@ -1,5 +1,5 @@
 describe('Dongle settings on mobile', () => {
-  for (const width of [320, 375]) {
+  for (const width of [320, 375, 1024]) {
     it(`reads, cancels, and saves complete settings at ${width}px`, () => {
       cy.viewport(width, 812)
       cy.visit('/tabs/settings', {
@@ -65,6 +65,15 @@ describe('Dongle settings on mobile', () => {
       cy.get('@settingsCard').find('input, ion-range').should('not.exist')
       cy.contains('ion-button', 'Einstellungen ändern').click()
       cy.get('ion-modal').should('be.visible')
+      cy.get('ion-modal:visible ion-title').should('be.visible').then(title => {
+        const toolbar = title[0].closest('ion-toolbar')!
+        const nav = toolbar.querySelector('ion-buttons[slot="start"]')!.getBoundingClientRect()
+        const action = toolbar.querySelector('ion-buttons[slot="end"]')!.getBoundingClientRect()
+        const bounds = title[0].getBoundingClientRect()
+        expect(bounds.width).to.be.greaterThan(0)
+        expect(bounds.left).to.be.at.least(nav.right)
+        expect(bounds.right).to.be.at.most(action.left)
+      })
       cy.get('ion-modal:visible ion-input input').should('have.value', 'Test123').clear().type('Unsaved')
       cy.get('[data-testid="cancel-settings"]').click()
       cy.get('ion-modal:visible').should('not.exist')

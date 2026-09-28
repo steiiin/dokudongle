@@ -1,13 +1,13 @@
 <template>
   <IonModal :is-open="isOpen" class="dd-quickie-modal" :can-dismiss="false">
     <IonHeader>
-      <IonToolbar>
-        <IonTitle>Wasserlassen</IonTitle>
-      </IonToolbar>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="handleCancel">Abbrechen</IonButton>
+          <IonButton @click="handleCancel" aria-label="Abbrechen" title="Abbrechen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
         </IonButtons>
+        <IonTitle>Wasserlassen</IonTitle>
         <IonButtons slot="end">
           <IonButton color="primary" @click="handleAccept">Einfügen</IonButton>
         </IonButtons>
@@ -85,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { closeOutline } from 'ionicons/icons'
 
 import { computed, ref, watch } from 'vue'
 

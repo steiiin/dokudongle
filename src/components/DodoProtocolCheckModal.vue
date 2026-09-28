@@ -1,10 +1,15 @@
 <template>
   <IonModal :is-open="isOpen" class="protocol-check-modal" @did-dismiss="handleDidDismiss">
     <IonHeader>
-      <IonToolbar>
+      <IonToolbar class="dd-modal-header-toolbar">
+        <IonButtons slot="start">
+          <IonButton :disabled="isChecking" @click="emitClose" aria-label="Schließen" title="Schließen">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
+        </IonButtons>
         <IonTitle>Protokollprüfung</IonTitle>
-        <IonButtons slot="end">
-          <IonButton :disabled="isChecking" @click="emitClose">Schließen</IonButton>
+        <IonButtons v-if="showSendActions" slot="end">
+          <IonButton color="success" @click="$emit('send-anyway')">Trotzdem senden</IonButton>
         </IonButtons>
       </IonToolbar>
       <IonProgressBar v-if="isChecking" type="indeterminate"></IonProgressBar>
@@ -20,7 +25,7 @@
         <IonIcon :src="alertCircleOutline"></IonIcon>
         <h2>Prüfung nicht verfügbar</h2>
         <p>{{ errorMessage }}</p>
-        <IonButton v-if="!allowSendAnyway" @click="$emit('retry')">
+        <IonButton @click="$emit('retry')">
           Erneut prüfen
         </IonButton>
       </div>
@@ -56,25 +61,12 @@
         </IonList>
       </template>
     </IonContent>
-
-    <IonFooter v-if="showSendActions">
-      <IonToolbar>
-        <div class="send-actions">
-          <IonButton v-if="checkError" fill="outline" @click="$emit('retry')">
-            Erneut prüfen
-          </IonButton>
-          <IonButton color="success" @click="$emit('send-anyway')">
-            Trotzdem senden
-          </IonButton>
-        </div>
-      </IonToolbar>
-    </IonFooter>
   </IonModal>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { alertCircleOutline, checkmarkCircleOutline } from 'ionicons/icons'
+import { closeOutline, alertCircleOutline, checkmarkCircleOutline } from 'ionicons/icons'
 
 import type {
   ProtocolCheckIssueSeverity,
@@ -185,12 +177,5 @@ const severityColor = (severity: ProtocolCheckIssueSeverity) => {
 .issue-details ul {
   margin: 0.25rem 0 0.75rem;
   padding-left: 1.25rem;
-}
-
-.send-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 0 0.5rem;
 }
 </style>
