@@ -972,7 +972,6 @@ defineExpose({
   display: flex;
   flex: 0 1 auto;
   min-height: 0;
-  max-height: 33.333%;
   margin-bottom: 1rem;
   overflow: hidden;
 }
