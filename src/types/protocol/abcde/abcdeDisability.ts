@@ -193,6 +193,70 @@ export class DisabilityGcs {
 
 // ############################################################################
 
+export class DisabilityPsych {
+
+  public rass: '' | 'unruhig' | 'agitiert' | 'sehr agitiert' | 'streitsüchtig'
+  public disorder: '' | 'Stupor' | 'Delir'
+  public hallucinations: boolean
+  public delusions: boolean
+  public dementia: boolean
+  public perseveration: boolean
+  public behavioralChange: boolean
+  public baseline: boolean
+
+  constructor()
+  {
+    this.rass = ''
+    this.disorder = ''
+    this.hallucinations = false
+    this.delusions = false
+    this.dementia = false
+    this.perseveration = false
+    this.behavioralChange = false
+    this.baseline = false
+  }
+
+  get needTreatment(): boolean {
+    return this.rass != ''
+      || this.disorder != ''
+      || this.hallucinations
+      || this.delusions
+      || this.behavioralChange
+      || this.perseveration
+  }
+
+  get hasAbnormalities(): boolean {
+    return this.needTreatment || this.dementia
+  }
+
+  get disorderText(): string {
+    if (this.disorder == 'Delir') { return 'deliranter Zustand' }
+    else if (this.disorder == 'Stupor') { return 'stuporöser Zustand' }
+    else { return '' }
+  }
+
+  ///////////////////////////////////////////////
+
+  get state(): string {
+    return this.hasAbnormalities ? this.text : 'normal'
+  }
+
+  get text(): string {
+    return concatDoku([
+      this.rass,
+      this.disorderText,
+      textIf('halluziniert', this.hallucinations),
+      textIf('wahnhaft', this.delusions),
+      textIf('wesensverändert', this.behavioralChange),
+      textIf('verbale Perseveration', this.perseveration),
+      textIf('bek. Demenz', this.dementia),
+    ], false)
+  }
+
+}
+
+// ############################################################################
+
 export class AbcdeDisability {
 
   public avpu: 'wach' | 'benommen' | 'somnolent' | 'soporös' | 'bewusstlos'
@@ -207,14 +271,7 @@ export class AbcdeDisability {
 
   public dizziness: 'kein' | 'ungerichteter' | 'gerichteter'
 
-  public psychRass: '' | 'unruhig' | 'agitiert' | 'sehr agitiert' | 'streitsüchtig'
-  public psychDisorder: '' | 'Stupor' | 'Delir'
-  public psychHallucinations: boolean
-  public psychDelusions: boolean
-  public psychDementia: boolean
-  public psychPerseveration: boolean
-  public psychBehavioralChange: boolean
-  public psychBaseline: boolean
+  public psych: DisabilityPsych
 
   public bloodGlucose: '' | 'normal' | 'niedrig' | 'hoch'
 
@@ -234,14 +291,7 @@ export class AbcdeDisability {
     this.paresthesia = OptionalValue.inactive('')
     this.headache = false
     this.dizziness = 'kein'
-    this.psychRass = ''
-    this.psychDisorder = ''
-    this.psychHallucinations = false
-    this.psychDelusions = false
-    this.psychDementia = false
-    this.psychPerseveration = false
-    this.psychBehavioralChange = false
-    this.psychBaseline = false
+    this.psych = new DisabilityPsych()
     this.bloodGlucose = ''
     this.intoxication = OptionalValue.inactive('')
     this.treatment = ''
@@ -253,12 +303,7 @@ export class AbcdeDisability {
     return this.avpu != 'wach'
       || !this.zops.isOriented
       || this.gcs.score < 15
-      || this.psychRass != ''
-      || this.psychDisorder != ''
-      || this.psychHallucinations
-      || this.psychDelusions
-      || this.psychBehavioralChange
-      || this.psychPerseveration
+      || this.psych.needTreatment
       || this.bloodGlucose == 'hoch'
       || this.bloodGlucose == 'niedrig'
       || this.aphasia
@@ -282,56 +327,14 @@ export class AbcdeDisability {
 
   ///////////////////////////////////////////////
 
-  get hasPsychAbnormalities(): boolean {
-    return this.psychRass != ''
-      || this.psychDisorder != ''
-      || this.psychHallucinations
-      || this.psychDelusions
-      || this.psychBehavioralChange
-      || this.psychPerseveration
-      || this.psychDementia
-  }
-
   get couldBeBaseline(): boolean {
     return this.avpu != 'wach'
     || !this.zops.isOriented
     || this.gcsScore < 15
-    || this.hasPsychAbnormalities
+    || this.psych.hasAbnormalities
     || this.aphasia
     || this.paresis.active
     || this.paresthesia.active
-  }
-
-  get psychiatricDisorderText(): string {
-    if (this.psychDisorder == 'Delir') { return 'deliranter Zustand' }
-    else if (this.psychDisorder == 'Stupor') { return 'stuporöser Zustand' }
-    else { return '' }
-  }
-
-  ///////////////////////////////////////////////
-
-  get psychiatricState(): string {
-    if (this.psychRass == ''
-      && this.psychDisorder == ''
-      && !this.psychHallucinations
-      && !this.psychDelusions
-      && !this.psychBehavioralChange
-      && !this.psychPerseveration
-      && !this.psychDementia
-    ) { return 'normal' }
-    return this.psychiatricText
-  }
-
-  get psychiatricText(): string {
-    return concatDoku([
-      this.psychRass,
-      this.psychiatricDisorderText,
-      textIf('halluziniert', this.psychHallucinations),
-      textIf('wahnhaft', this.psychDelusions),
-      textIf('wesensverändert', this.psychBehavioralChange),
-      textIf('verbale Perseveration', this.psychPerseveration),
-      textIf('bek. Demenz', this.psychDementia),
-    ], false)
   }
 
   ///////////////////////////////////////////////
@@ -386,10 +389,10 @@ export class AbcdeDisability {
         textIf(headache, !isNonVerbal),
         textIf(this.dizzinessText, !isNonVerbal),
         this.paresisText,
-        this.psychiatricText,
+        this.psych.text,
         textIf(
           onNormal('baseline: nichts akutes'),
-          this.psychBaseline
+          this.psych.baseline
         ),
         textIf(`BZ ${this.bloodGlucose}`, this.bloodGlucose != ''),
         textIf(prefixIntox(this.intoxication.value), this.intoxication.active),

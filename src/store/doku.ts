@@ -66,7 +66,30 @@ function hydrateProtocol(input: unknown): Protocol | null {
   }
 
   const legacyCourse = input.course
-  const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), input)
+  // Normalize legacy psychiatric fields before hydrating the class instances.
+  let normalizedInput = input
+  if (isRecord(input.xabcDe)) {
+    const disability = input.xabcDe
+    const psych = isRecord(disability.psych) ? { ...disability.psych } : {}
+    const legacyPsychFields = {
+      rass: 'psychRass',
+      disorder: 'psychDisorder',
+      hallucinations: 'psychHallucinations',
+      delusions: 'psychDelusions',
+      dementia: 'psychDementia',
+      perseveration: 'psychPerseveration',
+      behavioralChange: 'psychBehavioralChange',
+      baseline: 'psychBaseline',
+    } as const
+
+    for (const [key, legacyKey] of Object.entries(legacyPsychFields)) {
+      if (psych[key] === undefined) {
+        psych[key] = disability[legacyKey]
+      }
+    }
+    normalizedInput = { ...input, xabcDe: { ...disability, psych } }
+  }
+  const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
 
   if (legacyCourse === 1 || legacyCourse === 2) {
     hydratedProtocol.course = ProtocolCourse.TRANSPORT
@@ -795,7 +818,7 @@ export const useDokuStore = defineStore('doku', {
       )
 
       const gcs: number = state.doku.xabcDe.gcsScore
-      const isBaseline: boolean = state.doku.xabcDe.psychBaseline
+      const isBaseline: boolean = state.doku.xabcDe.psych.baseline
 
       const isTrauma: boolean = requireABCDE && state.doku.flavors.trauma
 
@@ -827,7 +850,7 @@ export const useDokuStore = defineStore('doku', {
 
       const isLowVigilant: boolean =
         (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&
-        (!state.doku.xabcDe.psychBaseline && !state.doku.xabcDe.psychDementia)
+        (!state.doku.xabcDe.psych.baseline && !state.doku.xabcDe.psych.dementia)
 
       const isChildbearingAge: boolean =
         (state.doku.ident.age?.totalYears >= 10) &&

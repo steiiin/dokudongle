@@ -172,12 +172,12 @@
 
         <DodoItemModal
           label="Psych-Befund"
-          :state="store.doku.xabcDe.psychiatricState">
+          :state="store.doku.xabcDe.psych.state">
 
           <IonItemDivider>
             <IonLabel>Abweichungen</IonLabel>
           </IonItemDivider>
-          <DodoInputSelect v-model="store.doku.xabcDe.psychRass"
+          <DodoInputSelect v-model="store.doku.xabcDe.psych.rass"
             label="Agitation" lines="inset"
             :options="[
               { value: '', label: 'Ruhig' },
@@ -191,7 +191,7 @@
             <IonNote slot="start">{{ rassDescription }}</IonNote>
           </IonItem>
 
-          <DodoInputSelect v-model="store.doku.xabcDe.psychDisorder"
+          <DodoInputSelect v-model="store.doku.xabcDe.psych.disorder"
             label="Bewusstseinsstörung" :lines="!disorderDescription ? 'full' : 'inset'"
             :options="[
               { value: '', label: 'Nein' },
@@ -204,22 +204,22 @@
           </IonItem>
 
           <IonItem>
-            <IonToggle v-model="store.doku.xabcDe.psychDelusions" label-placement="end">
+            <IonToggle v-model="store.doku.xabcDe.psych.delusions" label-placement="end">
               Wahnhaft?
             </IonToggle>
           </IonItem>
           <IonItem>
-            <IonToggle v-model="store.doku.xabcDe.psychHallucinations" label-placement="end">
+            <IonToggle v-model="store.doku.xabcDe.psych.hallucinations" label-placement="end">
               Halluzinationen?
             </IonToggle>
           </IonItem>
           <IonItem>
-            <IonToggle v-model="store.doku.xabcDe.psychBehavioralChange" label-placement="end">
+            <IonToggle v-model="store.doku.xabcDe.psych.behavioralChange" label-placement="end">
               Wesensverändert?
             </IonToggle>
           </IonItem>
           <IonItem>
-            <IonToggle v-model="store.doku.xabcDe.psychPerseveration" label-placement="end">
+            <IonToggle v-model="store.doku.xabcDe.psych.perseveration" label-placement="end">
               Verbale Perseveration?
             </IonToggle>
           </IonItem>
@@ -228,12 +228,12 @@
             <IonLabel>Vorbefund</IonLabel>
           </IonItemDivider>
           <IonItem>
-            <IonToggle v-model="store.doku.xabcDe.psychDementia" label-placement="end">
+            <IonToggle v-model="store.doku.xabcDe.psych.dementia" label-placement="end">
               Demenz bekannt?
             </IonToggle>
           </IonItem>
           <IonItem lines="none" v-if="store.doku.xabcDe.couldBeBaseline">
-            <IonToggle v-model="store.doku.xabcDe.psychBaseline" label-placement="end">
+            <IonToggle v-model="store.doku.xabcDe.psych.baseline" label-placement="end">
               Entspricht Baseline?
             </IonToggle>
           </IonItem>
@@ -241,7 +241,7 @@
         </DodoItemModal>
 
         <IonItem lines="full" v-if="store.doku.xabcDe.couldBeBaseline">
-          <IonToggle v-model="store.doku.xabcDe.psychBaseline" label-placement="end">
+          <IonToggle v-model="store.doku.xabcDe.psych.baseline" label-placement="end">
             Entspricht Baseline?
           </IonToggle>
         </IonItem>
@@ -283,13 +283,13 @@ const ctx = computed(() => store.context)
 // ############################################################################
 
 const rassDescription = computed(() => {
-  if (store.doku.xabcDe.psychRass === 'streitsüchtig') {
+  if (store.doku.xabcDe.psych.rass === 'streitsüchtig') {
     return 'Offenkundig aggressiv oder gewalttätig, unmittelbare Gefahr für das Personal'
-  } else if (store.doku.xabcDe.psychRass === 'sehr agitiert') {
+  } else if (store.doku.xabcDe.psych.rass === 'sehr agitiert') {
     return 'Zieht oder entfernt Schläuche oder Katheter, oder zeigt aggressives Verhalten gegenüber Personal'
-  } else if (store.doku.xabcDe.psychRass === 'agitiert') {
+  } else if (store.doku.xabcDe.psych.rass === 'agitiert') {
     return 'Häufige ungezielte Bewegung, atmet gegen das Beatmungsgerät'
-  } else if (store.doku.xabcDe.psychRass === 'unruhig') {
+  } else if (store.doku.xabcDe.psych.rass === 'unruhig') {
     return 'Ängstlich aber Bewegungen nicht aggressiv oder lebhaft'
   } else {
     return 'Aufmerksam und Ruhig'
@@ -297,9 +297,9 @@ const rassDescription = computed(() => {
 })
 
 const disorderDescription = computed(() => {
-  if (store.doku.xabcDe.psychDisorder === 'Delir') {
+  if (store.doku.xabcDe.psych.disorder === 'Delir') {
     return 'Fluktuierende Aufmerksamkeits- und Orientierungsstörung mit möglicher Unruhe, Halluzinationen oder Apathie. Meist organisch bedingt.'
-  } else if (store.doku.xabcDe.psychDisorder === 'Stupor') {
+  } else if (store.doku.xabcDe.psych.disorder === 'Stupor') {
     return 'Der Patient reagiert kaum oder gar nicht auf Reize, zeigt aber offene Augen und scheinbare Wachheit. Meist psychisch bedingt.'
   } else {
     return ''
@@ -329,7 +329,7 @@ watch(() => ctx.value.isNonVerbal, () => {
 })
 
 watch(() => store.doku.xabcDe.couldBeBaseline, () => {
-  store.doku.xabcDe.psychBaseline = false
+  store.doku.xabcDe.psych.baseline = false
 })
 
 </script>
