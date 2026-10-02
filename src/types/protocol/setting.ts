@@ -34,13 +34,17 @@ export class Setting {
 
   public generateText(): string
   {
+    const helpers = this.helpers === 'nursing'
+      ? (this.location === 'Pflegeheim' ? 'Pflegepersonal' : 'Pflegedienst')
+      : this.helpers
+
     return capitalizeBegin(
       concatDoku([
         this.location,
         textIf('alleinlebend', this.isAlone),
         this.mobility,
         textIf('Notfalltüröffnung', this.isForcedEntry),
-        suffix(this.helpers, 'vor Ort'),
+        suffix(helpers, 'vor Ort'),
       ])
     )
   }

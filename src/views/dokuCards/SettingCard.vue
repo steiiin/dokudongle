@@ -48,8 +48,7 @@
         <DodoInputSelect label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
           empty-label="Keiner / k.A."
           :options="[
-            'Pflegedienst',
-            'Pflegepersonal',
+            { value: 'nursing', label: 'Pflege' },
             'Angehörige',
             'Ehepartner',
             'Lebenspartner',
