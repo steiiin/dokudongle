@@ -11,7 +11,7 @@
 
           <IonItem :lines="fullIf(store.doku.sampler.symptoms.trauma.head.isInjured)">
             <IonToggle v-model="store.doku.sampler.symptoms.trauma.head.isInjured" label-placement="end">
-              Verletzungen sichtbar?
+              Kopftrauma plausibel?
             </IonToggle>
           </IonItem>
 
@@ -26,7 +26,7 @@
             <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.head.Amnesia"
               label="Amnesie" :lines="isSHTStateVisible ? (store.context.hasHeadache ? 'inset' : 'full') : 'none'"
               :options="[
-                { value: '', label: 'Keine' },
+                { value: '', label: 'Keine/Unklar' },
                 { value: 'retrograd', label: 'Retrograd' },
                 { value: 'anterograd', label: 'Anterograd' },
                 { value: 'beides', label: 'Beides' },
@@ -131,7 +131,7 @@
             <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.spine.usedImmo"
               label="Immobilisierung" lines="inset"
               :options="[
-                { value: '', label: 'Gar nicht' },
+                { value: '', label: 'Keine' },
                 { value: 'Vakuummatratze/Headblock', label: 'VM+Headblock' },
                 { value: 'Vakuummatratze/StifNeck', label: 'VM+StifNeck' },
                 { value: 'Spineboard/Headblock', label: 'Spineboard' },
