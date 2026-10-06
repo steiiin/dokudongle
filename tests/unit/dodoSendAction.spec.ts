@@ -16,11 +16,13 @@ const mocks = vi.hoisted(() => ({
   getCachedResult: vi.fn(),
   connectDongle: vi.fn(),
   markProtocolSent: vi.fn(),
+  newProtocol: vi.fn(),
   sendProtocol: vi.fn(),
   scrollToTop: vi.fn(),
   createAlert: vi.fn(),
   store: {
     generatedProtocol: 'Generated protocol text',
+    isProtocolChanging: false,
     isDongleConnected: true,
     isDongleConnecting: false,
     connection: {
@@ -55,6 +57,7 @@ vi.mock('@/store/doku', () => ({
   useDokuStore: () => Object.assign(reactive(mocks.store), {
     connectDongle: mocks.connectDongle,
     markProtocolSent: mocks.markProtocolSent,
+    newProtocol: mocks.newProtocol,
     sendProtocol: mocks.sendProtocol,
   }),
 }))
@@ -133,6 +136,23 @@ describe('DodoSendAction protocol check', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  test('explains history in reset confirmation and reports failed resets', async () => {
+    mocks.newProtocol.mockRejectedValueOnce(new Error('storage unavailable'))
+    const wrapper = shallowMount(DodoSendAction, {
+      props: { showReset: true }, global: { renderStubDefaultSlot: true },
+    })
+    await wrapper.findAllComponents(IonButton).find(button => button.text() === 'Neu')!.trigger('click')
+    expect(mocks.createAlert).toHaveBeenCalledWith(expect.objectContaining({
+      message: expect.stringContaining('Protokolle wiederherstellen'),
+    }))
+    const confirm = mocks.createAlert.mock.calls[0][0].buttons.find((button: { text: string }) => button.text === 'Ja')
+    await confirm.handler()
+    expect(mocks.newProtocol).toHaveBeenCalledOnce()
+    expect(mocks.createAlert).toHaveBeenLastCalledWith(expect.objectContaining({
+      header: 'Zurücksetzen fehlgeschlagen', message: expect.stringContaining('Eingaben bleiben erhalten'),
+    }))
   })
 
   test('reuses a manual check across preview and send components, even offline', async () => {

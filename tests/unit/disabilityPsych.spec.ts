@@ -17,12 +17,11 @@ vi.mock('@/store/persistence', () => ({
   loadTemporaryProtocolState: vi.fn(),
   removeTemporaryProtocolState: vi.fn(),
   saveDokuState: vi.fn(),
-  saveTemporaryProtocolState: vi.fn(),
 }))
 
 beforeEach(() => {
   setActivePinia(createPinia())
-  vi.clearAllMocks()
+  vi.resetAllMocks()
 })
 
 describe('DisabilityPsych', () => {
@@ -155,7 +154,8 @@ describe('psychiatric persistence', () => {
       await store.hydrateFromStorage()
     } else {
       vi.mocked(loadTemporaryProtocolState).mockResolvedValueOnce(payload)
-      await expect(store.restoreTemporaryProtocol()).resolves.toBe(true)
+      await store.hydrateFromStorage()
+      await expect(store.restoreProtocolFromHistory(store.protocolHistory[0].id)).resolves.toBe(true)
     }
     expect(store.doku.xabcDe.psych).toBeInstanceOf(DisabilityPsych)
     expect(store.doku.xabcDe.psych).toEqual(nested)

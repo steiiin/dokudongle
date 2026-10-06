@@ -5,18 +5,19 @@ import { Capacitor } from '@capacitor/core'
 import { Device as CapacitorDevice } from '@capacitor/device'
 import { defineStore } from 'pinia'
 
-import { toRaw } from 'vue'
+import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
 import {
   DOKU_SCHEMA_VERSION,
   ProtocolAuditEntry,
+  type ProtocolHistoryEntry,
+  type PersistedDokuState,
   appendProtocolAuditEntry,
   loadDokuState,
   loadProtocolAuditEntries,
   loadTemporaryProtocolState,
   removeTemporaryProtocolState,
   saveDokuState,
-  saveTemporaryProtocolState,
 } from '@/store/persistence'
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
 import { AuditExport } from '@/plugins/audit-export'
@@ -37,14 +38,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function hydrateLikeTemplate<T>(template: T, input: unknown): T {
+  if (input === undefined) return template
+
   if (Array.isArray(template)) {
-    return Array.isArray(input) ? input as T : template
+    if (!Array.isArray(input)) throw new Error('Invalid protocol array')
+    return toPersistable(input) as T
   }
 
   if (isRecord(template)) {
-    if (!isRecord(input)) {
-      return template
-    }
+    if (!isRecord(input)) throw new Error('Invalid protocol object')
 
     for (const key of Object.keys(template)) {
       const typedKey = key as keyof T
@@ -57,10 +59,19 @@ function hydrateLikeTemplate<T>(template: T, input: unknown): T {
     return template
   }
 
-  return input === undefined ? template : input as T
+  if (template !== null && typeof input !== typeof template) throw new Error('Invalid protocol value')
+  return input as T
 }
 
 function hydrateProtocol(input: unknown): Protocol | null {
+  try {
+    return hydrateProtocolUnchecked(input)
+  } catch {
+    return null
+  }
+}
+
+function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   if (!isRecord(input)) {
     return null
   }
@@ -98,10 +109,10 @@ function hydrateProtocol(input: unknown): Protocol | null {
   }
 
   hydratedProtocol.sampler.medication.PlanMedication = hydratedProtocol.sampler.medication.PlanMedication
-    .map((item) => new SampleMedicationItem(item))
+    .map((item) => hydrateLikeTemplate(new SampleMedicationItem(), item))
 
   hydratedProtocol.sampler.contacts.contacts = hydratedProtocol.sampler.contacts.contacts
-    .map((contact) => new SampleContactsItem(contact))
+    .map((contact) => hydrateLikeTemplate(new SampleContactsItem(), contact))
 
   return hydratedProtocol
 }
@@ -124,6 +135,85 @@ function toPersistable<T>(value: T): T {
   }
 
   return rawValue
+}
+
+
+// Read through Vue proxies so the getter tracks nested changes. Only text values,
+// not the editor's transient state, determine whether a protocol contains data.
+function protocolValues(value: unknown): unknown {
+  if (value instanceof EnhanceableText) return value.value
+  if (Array.isArray(value)) return value.map(protocolValues)
+  if (isRecord(value)) {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, protocolValues(value[key])]))
+  }
+  return value
+}
+
+// Protocol classes import store-dependent text helpers; initialize after module loading.
+let emptyProtocolValues: string | undefined
+function containsProtocolData(protocol: unknown): boolean {
+  emptyProtocolValues ??= JSON.stringify(protocolValues(resetProtocol()))
+  return JSON.stringify(protocolValues(protocol)) !== emptyProtocolValues
+}
+
+function clearProtocolEditingState(value: unknown): void {
+  if (value instanceof EnhanceableText) {
+    value.clearHistory()
+    value.isEnhancing = false
+  } else if (Array.isArray(value)) {
+    value.forEach(clearProtocolEditingState)
+  } else if (isRecord(value)) {
+    Object.values(value).forEach(clearProtocolEditingState)
+  }
+}
+
+function hydrateHistory(input: unknown): ProtocolHistoryEntry[] {
+  if (!Array.isArray(input)) return []
+  const ids = new Set<string>()
+  return input.flatMap((entry): ProtocolHistoryEntry[] => {
+    if (!isRecord(entry) || typeof entry.id !== 'string' || !entry.id || ids.has(entry.id)
+      || typeof entry.archivedAt !== 'string' || Number.isNaN(Date.parse(entry.archivedAt))) return []
+    const doku = hydrateProtocol(entry.doku)
+    if (!doku || !containsProtocolData(doku)) return []
+    clearProtocolEditingState(doku)
+    ids.add(entry.id)
+    return [{ id: entry.id, archivedAt: entry.archivedAt, doku }]
+  }).sort((a, b) => Date.parse(b.archivedAt) - Date.parse(a.archivedAt)).slice(0, 3)
+}
+
+function archiveProtocol(protocol: UnwrapRef<Protocol>, history: ProtocolHistoryEntry[]): ProtocolHistoryEntry[] {
+  if (!containsProtocolData(protocol)) return [...history]
+  return [{
+    id: crypto.randomUUID(),
+    archivedAt: new Date().toISOString(),
+    doku: toPersistable(protocol),
+  }, ...history].slice(0, 3)
+}
+
+// Queue operations outside reactive state. Persist reads the current state when
+// its turn begins, so a queued autosave cannot overwrite a completed restore.
+const storageQueues = new WeakMap<object, Promise<unknown>>()
+function serializeStorage<T>(store: object, operation: () => Promise<T>): Promise<T> {
+  const pending = storageQueues.get(store) ?? Promise.resolve()
+  const result = pending.then(operation)
+  storageQueues.set(store, result.catch(() => undefined))
+  return result
+}
+
+function persistedProtocolState(state: {
+  doku: UnwrapRef<Protocol>
+  protocolHistory: ProtocolHistoryEntry[]
+  lastProtocolResetAt: string
+  lastProtocolSentAt: string | null
+}): PersistedDokuState {
+  return {
+    schemaVersion: DOKU_SCHEMA_VERSION,
+    updatedAt: new Date().toISOString(),
+    lastProtocolResetAt: state.lastProtocolResetAt,
+    lastProtocolSentAt: state.lastProtocolSentAt ?? undefined,
+    doku: toPersistable(state.doku),
+    protocolHistory: toPersistable(state.protocolHistory),
+  }
 }
 
 
@@ -226,6 +316,8 @@ export const useDokuStore = defineStore('doku', {
     } as DeviceConnection,
 
     doku: resetProtocolState(),
+    protocolHistory: [] as ProtocolHistoryEntry[],
+    isProtocolChanging: false,
     lastProtocolResetAt: new Date().toISOString(),
     lastProtocolSentAt: null as string | null,
 
@@ -486,11 +578,48 @@ export const useDokuStore = defineStore('doku', {
 
     // protocol
     async newProtocol() {
-      await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
-      this.doku = resetProtocolState()
-      this.lastProtocolResetAt = new Date().toISOString()
-      this.lastProtocolSentAt = null
-      await this.persistToStorage()
+      if (this.isProtocolChanging) return
+      this.isProtocolChanging = true
+      try {
+        await serializeStorage(this, async () => {
+          const next = {
+            doku: resetProtocol(),
+            protocolHistory: archiveProtocol(this.doku, this.protocolHistory),
+            lastProtocolResetAt: new Date().toISOString(),
+            lastProtocolSentAt: null,
+          }
+          await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
+          await saveDokuState(persistedProtocolState(next))
+          resetQuickies()
+          this.$patch(state => Object.assign(state, next))
+        })
+      } finally {
+        this.isProtocolChanging = false
+      }
+    },
+    async restoreProtocolFromHistory(id: string): Promise<boolean> {
+      if (this.isProtocolChanging) return false
+      this.isProtocolChanging = true
+      try {
+        return await serializeStorage(this, async () => {
+          const entry = this.protocolHistory.find(entry => entry.id === id)
+          const doku = entry && hydrateProtocol(toPersistable(entry.doku))
+          if (!doku) return false
+          clearProtocolEditingState(doku)
+          const next = {
+            doku,
+            protocolHistory: archiveProtocol(this.doku, this.protocolHistory),
+            lastProtocolResetAt: new Date().toISOString(),
+            lastProtocolSentAt: null,
+          }
+          await saveDokuState(persistedProtocolState(next))
+          resetQuickies()
+          this.$patch(state => Object.assign(state, next))
+          return true
+        })
+      } finally {
+        this.isProtocolChanging = false
+      }
     },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
       this.doku.flavors[key] = enabled
@@ -546,8 +675,13 @@ export const useDokuStore = defineStore('doku', {
       URL.revokeObjectURL(url)
     },
     async markProtocolSent(referenceTime: number = Date.now()) {
-      this.lastProtocolSentAt = new Date(referenceTime).toISOString()
-      await this.persistToStorage()
+      const protocol = this.doku
+      await serializeStorage(this, async () => {
+        if (this.doku !== protocol) return
+        const lastProtocolSentAt = new Date(referenceTime).toISOString()
+        await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolSentAt }))
+        this.lastProtocolSentAt = lastProtocolSentAt
+      })
     },
     wasCurrentProtocolSent(): boolean {
       if (!this.lastProtocolSentAt) return false
@@ -559,70 +693,44 @@ export const useDokuStore = defineStore('doku', {
         && lastSentAtMs >= lastResetAtMs
     },
     async autoResetProtocol() {
-      await saveTemporaryProtocolState({
-        schemaVersion: DOKU_SCHEMA_VERSION,
-        savedAt: new Date().toISOString(),
-        doku: toPersistable(this.doku),
-      })
-
-      try {
-        await this.newProtocol()
-      } catch (error) {
-        await removeTemporaryProtocolState()
-        throw error
-      }
-    },
-    async restoreTemporaryProtocol() {
-      const temporaryState = await loadTemporaryProtocolState()
-      if (!temporaryState || temporaryState.schemaVersion !== DOKU_SCHEMA_VERSION) {
-        await removeTemporaryProtocolState()
-        return false
-      }
-
-      const hydratedProtocol = hydrateProtocol(temporaryState.doku)
-      if (!hydratedProtocol) {
-        await removeTemporaryProtocolState()
-        return false
-      }
-
-      resetQuickies()
-      this.doku = hydratedProtocol
-      this.lastProtocolResetAt = new Date().toISOString()
-      this.lastProtocolSentAt = null
-      await this.persistToStorage()
-      await removeTemporaryProtocolState()
-      return true
-    },
-    async discardTemporaryProtocol() {
-      await removeTemporaryProtocolState()
+      await this.newProtocol()
     },
     async hydrateFromStorage() {
-      const persistedState = await loadDokuState()
-      if (!persistedState || persistedState.schemaVersion !== DOKU_SCHEMA_VERSION) {
-        this.doku = resetProtocolState()
-        this.lastProtocolResetAt = new Date().toISOString()
-        this.lastProtocolSentAt = null
-        await this.persistToStorage()
-        return
-      }
-
-      const hydratedProtocol = hydrateProtocol(persistedState.doku)
-      if (!hydratedProtocol) {
-        this.doku = resetProtocolState()
-        this.lastProtocolResetAt = new Date().toISOString()
-        this.lastProtocolSentAt = null
-        await this.persistToStorage()
-        return
-      }
-
-      resetQuickies()
-      this.doku = hydratedProtocol
-      this.lastProtocolResetAt = persistedState.lastProtocolResetAt ?? persistedState.updatedAt ?? new Date().toISOString()
-      this.lastProtocolSentAt = persistedState.lastProtocolSentAt ?? null
-
-      if (!this.wasCurrentProtocolSent()) {
-        this.lastProtocolSentAt = null
-      }
+      await serializeStorage(this, async () => {
+        const persistedState = await loadDokuState()
+        const compatible = persistedState?.schemaVersion === DOKU_SCHEMA_VERSION
+        const doku = compatible ? hydrateProtocol(persistedState.doku) : null
+        let protocolHistory = compatible ? hydrateHistory(persistedState.protocolHistory) : []
+        const temporary = await loadTemporaryProtocolState()
+        if (temporary?.schemaVersion === DOKU_SCHEMA_VERSION) {
+          const legacy = hydrateProtocol(temporary.doku)
+          // Deterministic identity makes migration safe if cleanup was interrupted.
+          const id = `legacy-temporary:${temporary.savedAt}`
+          if (legacy && containsProtocolData(legacy) && !protocolHistory.some(entry => entry.id === id)) {
+            protocolHistory = hydrateHistory([
+              ...protocolHistory,
+              { id, archivedAt: temporary.savedAt, doku: legacy },
+            ])
+          }
+        }
+        const next = {
+          doku: doku ?? resetProtocol(),
+          protocolHistory,
+          lastProtocolResetAt: doku
+            ? persistedState!.lastProtocolResetAt ?? persistedState!.updatedAt ?? new Date().toISOString()
+            : new Date().toISOString(),
+          lastProtocolSentAt: doku ? persistedState!.lastProtocolSentAt ?? null : null,
+        }
+        if (!next.lastProtocolSentAt || Number.isNaN(Date.parse(next.lastProtocolResetAt))
+          || !(Date.parse(next.lastProtocolSentAt) >= Date.parse(next.lastProtocolResetAt))) {
+          next.lastProtocolSentAt = null
+        }
+        clearProtocolEditingState(next.doku)
+        await saveDokuState(persistedProtocolState(next))
+        resetQuickies()
+        this.$patch(state => Object.assign(state, next))
+        if (temporary) await removeTemporaryProtocolState()
+      })
     },
     getAutoProtocolResetAction(referenceTime: number = Date.now()): AutoProtocolResetAction {
       const lastResetAtMs = Date.parse(this.lastProtocolResetAt)
@@ -637,13 +745,7 @@ export const useDokuStore = defineStore('doku', {
       return 'none'
     },
     async persistToStorage() {
-      await saveDokuState({
-        schemaVersion: DOKU_SCHEMA_VERSION,
-        updatedAt: new Date().toISOString(),
-        lastProtocolResetAt: this.lastProtocolResetAt,
-        lastProtocolSentAt: this.lastProtocolSentAt ?? undefined,
-        doku: toPersistable(this.doku),
-      })
+      await serializeStorage(this, () => saveDokuState(persistedProtocolState(this)))
     },
     async sendProtocol() {
       if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
@@ -782,6 +884,7 @@ export const useDokuStore = defineStore('doku', {
 
   },
   getters: {
+    hasProtocolData: (state): boolean => containsProtocolData(state.doku),
 
     // app status
     isDongleConnecting: (state) => state.connection.isConnecting,

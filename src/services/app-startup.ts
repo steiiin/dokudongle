@@ -4,10 +4,7 @@ import { toastController } from '@ionic/vue'
 import { reactive, readonly, type DeepReadonly } from 'vue'
 
 import { useDokuStore, type AutoProtocolResetAction } from '@/store/doku'
-import {
-  hasTemporaryProtocolState,
-  initStorage,
-} from '@/store/persistence'
+import { initStorage } from '@/store/persistence'
 
 export type StartupStatus = 'loading' | 'ready' | 'error'
 
@@ -21,11 +18,9 @@ type DokuStore = ReturnType<typeof useDokuStore>
 interface StartupStore {
   $subscribe: DokuStore['$subscribe']
   autoResetProtocol: DokuStore['autoResetProtocol']
-  discardTemporaryProtocol: DokuStore['discardTemporaryProtocol']
   getAutoProtocolResetAction: DokuStore['getAutoProtocolResetAction']
   newProtocol: DokuStore['newProtocol']
   persistToStorage: DokuStore['persistToStorage']
-  restoreTemporaryProtocol: DokuStore['restoreTemporaryProtocol']
   hydrateFromStorage: DokuStore['hydrateFromStorage']
   wasCurrentProtocolSent: DokuStore['wasCurrentProtocolSent']
 }
@@ -34,9 +29,7 @@ type AppStateChangeHandler = (isActive: boolean) => void
 
 export interface AppStartupDependencies {
   getStore: () => StartupStore
-  hasTemporaryProtocol: () => Promise<boolean>
   initializeStorage: () => Promise<void>
-  presentTemporaryProtocolRestore: () => Promise<'restore' | 'dismiss'>
   registerAppStateChange: (handler: AppStateChangeHandler) => Promise<void>
   scheduleAfterPaint: (callback: () => void) => void
   showError: (message: string) => Promise<void>
@@ -57,26 +50,6 @@ async function showErrorToast(message: string): Promise<void> {
   await toast.present()
 }
 
-export async function presentTemporaryProtocolRestore(): Promise<'restore' | 'dismiss'> {
-  const toast = await toastController.create({
-    message: 'Protokoll zurückgesetzt.',
-    cssClass: 'protocol-reset-toast',
-    duration: 5000,
-    position: 'bottom',
-    positionAnchor: 'main-tab-bar',
-    buttons: [
-      {
-        text: 'Wiederherstellen',
-        role: 'restore',
-      },
-    ],
-  })
-
-  await toast.present()
-  const { role } = await toast.onDidDismiss()
-  return role === 'restore' ? 'restore' : 'dismiss'
-}
-
 async function registerAppStateChange(handler: AppStateChangeHandler): Promise<void> {
   const listener: PluginListenerHandle = await CapacitorApp.addListener('appStateChange', ({ isActive }) => {
     handler(isActive)
@@ -92,9 +65,7 @@ function scheduleAfterPaint(callback: () => void): void {
 
 const defaultDependencies: AppStartupDependencies = {
   getStore: () => useDokuStore(),
-  hasTemporaryProtocol: hasTemporaryProtocolState,
   initializeStorage: initStorage,
-  presentTemporaryProtocolRestore,
   registerAppStateChange,
   scheduleAfterPaint,
   showError: showErrorToast,
@@ -116,7 +87,6 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
   let store: StartupStore | null = null
   let persistTimer: ReturnType<typeof setTimeout> | null = null
   let isResetFlowOpen = false
-  let pendingRestore = false
   let pendingResetAction: AutoProtocolResetAction = 'none'
   let pendingResetError: string | null = null
 
@@ -168,28 +138,12 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
     }, { detached: true })
   }
 
-  const offerTemporaryProtocolRestore = async (): Promise<void> => {
-    if (!store) return
-
-    const role = await dependencies.presentTemporaryProtocolRestore()
-    if (role === 'restore') {
-      const restored = await store.restoreTemporaryProtocol()
-      if (!restored) {
-        await reportNonFatalError('Das Protokoll konnte nicht wiederhergestellt werden.', new Error('Temporary protocol is invalid.'))
-      }
-      return
-    }
-
-    await store.discardTemporaryProtocol()
-  }
-
   const handleResetAction = async (action: AutoProtocolResetAction): Promise<void> => {
     if (!store || action === 'none' || isResetFlowOpen) return
 
     isResetFlowOpen = true
     try {
       await store.autoResetProtocol()
-      await offerTemporaryProtocolRestore()
     } catch (error) {
       await reportNonFatalError('Das Protokoll konnte nicht automatisch zurückgesetzt werden.', error)
     } finally {
@@ -204,19 +158,6 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
       const message = pendingResetError
       pendingResetError = null
       await reportNonFatalError(message, new Error('Protocol reset failed during startup.'))
-    }
-
-    if (pendingRestore) {
-      pendingRestore = false
-      isResetFlowOpen = true
-      try {
-        await offerTemporaryProtocolRestore()
-      } catch (error) {
-        await reportNonFatalError('Das zwischengespeicherte Protokoll konnte nicht verarbeitet werden.', error)
-      } finally {
-        isResetFlowOpen = false
-      }
-      return
     }
 
     const action = pendingResetAction
@@ -257,7 +198,6 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
         try {
           logStartupStage('resetting successfully sent protocol')
           await withStartupTimeout('Sent protocol reset', store.newProtocol())
-          await withStartupTimeout('Temporary protocol cleanup', store.discardTemporaryProtocol())
         } catch (error) {
           console.error('[startup] Sent protocol reset failed.', error)
           pendingResetError = 'Das gesendete Protokoll konnte beim Start nicht zurückgesetzt werden.'
@@ -266,15 +206,13 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
       }
 
       if (!sentProtocolResetFailed) {
-        pendingRestore = await withStartupTimeout('Temporary protocol lookup', dependencies.hasTemporaryProtocol())
-        pendingResetAction = pendingRestore ? 'none' : store.getAutoProtocolResetAction()
+        pendingResetAction = store.getAutoProtocolResetAction()
       }
 
       if (pendingResetAction === 'reset') {
         try {
           logStartupStage('automatically resetting expired protocol')
           await withStartupTimeout('Automatic protocol reset', store.autoResetProtocol())
-          pendingRestore = true
           pendingResetAction = 'none'
         } catch (error) {
           console.error('[startup] Automatic protocol reset failed.', error)
