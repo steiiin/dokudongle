@@ -7,6 +7,7 @@ import { useDokuStore } from '@/store/doku'
 import { loadDokuState, loadTemporaryProtocolState, saveDokuState } from '@/store/persistence'
 import { DisabilityPsych } from '@/types/protocol/abcde'
 import AbcdeDisabilityCard from '@/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue'
+import DodoInputSelectLR from '@/components/DodoInputSelectLR.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,
@@ -105,6 +106,29 @@ describe('DisabilityPsych', () => {
     await nextTick()
     expect(disability.couldBeBaseline).toBe(false)
     expect(disability.psych.baseline).toBe(false)
+    wrapper.unmount()
+  })
+})
+
+describe('Disability card paired motor assessments', () => {
+  test('binds each side to the corresponding arm or leg field', async () => {
+    const neuro = useDokuStore().doku.xabcDe.neuro
+    const wrapper = shallowMount(AbcdeDisabilityCard, {
+      global: { renderStubDefaultSlot: true },
+    })
+    const pairs = wrapper.findAllComponents(DodoInputSelectLR)
+    expect(pairs.map(pair => pair.props('label'))).toEqual(['Armhalteversuch', 'Beinhalteversuch'])
+
+    pairs[0].vm.$emit('update:left', 'Absinken')
+    pairs[0].vm.$emit('update:right', 'leichtes Absinken')
+    pairs[1].vm.$emit('update:left', 'nur Restbewegungen')
+    pairs[1].vm.$emit('update:right', 'keine aktive Bewegung')
+    await nextTick()
+
+    expect([neuro.msArmLeft, neuro.msArmRight, neuro.msLegLeft, neuro.msLegRight])
+      .toEqual(['Absinken', 'leichtes Absinken', 'nur Restbewegungen', 'keine aktive Bewegung'])
+    expect(pairs.map(pair => [pair.props('left'), pair.props('right')]))
+      .toEqual([['Absinken', 'leichtes Absinken'], ['nur Restbewegungen', 'keine aktive Bewegung']])
     wrapper.unmount()
   })
 })

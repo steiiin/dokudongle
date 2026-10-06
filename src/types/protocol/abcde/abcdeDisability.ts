@@ -193,6 +193,91 @@ export class DisabilityGcs {
 
 // ############################################################################
 
+export class DisabilityNeuro {
+
+  public followInstructions: 'befolgt' | 'teilweise befolgt' | 'nicht befolgt'
+
+  public msFace: '' | 'leichte' | 'ausgeprägte' | 'komplette'
+
+  public msArmLeft: 'ohne Absinken' | 'leichtes Absinken' | 'Absinken' | 'nur Restbewegungen' | 'keine aktive Bewegung'
+  public msArmRight: 'ohne Absinken' | 'leichtes Absinken' | 'Absinken' | 'nur Restbewegungen' | 'keine aktive Bewegung'
+  public msLegLeft: 'ohne Absinken' | 'leichtes Absinken' | 'Absinken' | 'nur Restbewegungen' | 'keine aktive Bewegung'
+  public msLegRight: 'ohne Absinken' | 'leichtes Absinken' | 'Absinken' | 'nur Restbewegungen' | 'keine aktive Bewegung'
+
+  public msMeningism: '' | 'kein' | 'leichter' | 'ausgeprägter'
+  public msTremor: boolean
+
+  public sensitivity: OptionalValue<string>
+  public paraesthesia: OptionalValue<string>
+
+  public dysarthria: 'normal' | 'verwaschen' | 'unverständlich' | 'stumm' | ''
+  public aphasia: 'keine' | 'leichte' | 'schwere' | 'globale' | ''
+
+  constructor()
+  {
+    this.followInstructions = 'befolgt'
+    this.msFace = ''
+    this.msArmLeft = 'ohne Absinken'
+    this.msArmRight = 'ohne Absinken'
+    this.msLegLeft = 'ohne Absinken'
+    this.msLegRight = 'ohne Absinken'
+    this.msMeningism = 'kein'
+    this.msTremor = false
+    this.sensitivity = OptionalValue.inactive('')
+    this.paraesthesia = OptionalValue.inactive('')
+    this.dysarthria = 'normal'
+    this.aphasia = 'keine'
+  }
+
+  get hasAbnormalities(): boolean {
+    return this.followInstructions !== 'befolgt'
+      || this.msFace == 'leichte' ||this.msFace == 'ausgeprägte' || this.msFace == 'komplette'
+      || this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'
+      || this.msLegLeft != 'ohne Absinken' || this.msLegRight != 'ohne Absinken'
+      || this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'
+      || this.msTremor
+      || this.sensitivity.isActive || this.paraesthesia.isActive
+      || this.dysarthria == 'stumm' || this.dysarthria == 'unverständlich' || this.dysarthria == 'verwaschen'
+      || this.aphasia == 'globale' || this.aphasia == 'leichte' || this.aphasia == 'schwere'
+  }
+
+  get needTreatment(): boolean {
+    return false
+  }
+
+  get state(): string {
+    return this.hasAbnormalities ? this.text : 'normal'
+  }
+
+  get text(): string {
+    const articulation: Record<typeof this.dysarthria, string> = {
+      normal: '',
+      verwaschen: 'verwaschene Artikulation',
+      unverständlich: 'unverständliche Artikulation',
+      stumm: 'stumm',
+      '': '',
+    }
+
+    return concatDoku([
+      textIf(`Anweisungen ${this.followInstructions}`, this.followInstructions != 'befolgt'),
+      textIf(`${this.msFace} Fazialisparese`, this.msFace != ''),
+      textIf(`Arm links: ${this.msArmLeft}`, this.msArmLeft != 'ohne Absinken'),
+      textIf(`Arm rechts: ${this.msArmRight}`, this.msArmRight != 'ohne Absinken'),
+      textIf(`Bein links: ${this.msLegLeft}`, this.msLegLeft != 'ohne Absinken'),
+      textIf(`Bein rechts: ${this.msLegRight}`, this.msLegRight != 'ohne Absinken'),
+      textIf(`${this.msMeningism} Meningismus`, this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'),
+      textIf('Tremor/Myoklonien', this.msTremor),
+      textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), this.sensitivity.isActive),
+      textIf(prefixParaesthesis(this.paraesthesia.value), this.paraesthesia.isActive),
+      articulation[this.dysarthria],
+      textIf(`${this.aphasia} Aphasie`, this.aphasia != '' && this.aphasia != 'keine'),
+    ], false)
+  }
+
+}
+
+// ############################################################################
+
 export class DisabilityPsych {
 
   public rass: '' | 'unruhig' | 'agitiert' | 'sehr agitiert' | 'streitsüchtig'
@@ -271,6 +356,7 @@ export class AbcdeDisability {
 
   public dizziness: 'kein' | 'ungerichteter' | 'gerichteter'
 
+  public neuro: DisabilityNeuro
   public psych: DisabilityPsych
 
   public bloodGlucose: '' | 'normal' | 'niedrig' | 'hoch'
@@ -291,6 +377,7 @@ export class AbcdeDisability {
     this.paresthesia = OptionalValue.inactive('')
     this.headache = false
     this.dizziness = 'kein'
+    this.neuro = new DisabilityNeuro()
     this.psych = new DisabilityPsych()
     this.bloodGlucose = ''
     this.intoxication = OptionalValue.inactive('')
@@ -303,6 +390,7 @@ export class AbcdeDisability {
     return this.avpu != 'wach'
       || !this.zops.isOriented
       || this.gcs.score < 15
+      || this.neuro.needTreatment
       || this.psych.needTreatment
       || this.bloodGlucose == 'hoch'
       || this.bloodGlucose == 'niedrig'
@@ -345,25 +433,6 @@ export class AbcdeDisability {
     else { return 'Dreh-/Schwankschwindel' }
   }
 
-  ///////////////////////////////////////////////
-
-  get paresisText(): string {
-
-    const isNonVerbal = getCtx().isNonVerbal
-    if (!this.paresis.active && !this.paresthesia.active) { return onNormal('keine Paresen' + (isNonVerbal ? '' : '/Parästhesien')) }
-    return concatDoku([
-      !this.paresis.active
-        ? onNormal('keine Paresen')
-        : prefixParesis(this.paresis.value),
-      textIf(
-        !this.paresthesia.active
-          ? onNormal('keine Parästhesien')
-          : prefixParaesthesis(this.paresthesia.value),
-        !isNonVerbal
-      ),
-    ])
-  }
-
   // ##########################################################################
 
   public generateText(): string
@@ -388,7 +457,7 @@ export class AbcdeDisability {
         textIf('Dysarthrie', this.aphasia),
         textIf(headache, !isNonVerbal),
         textIf(this.dizzinessText, !isNonVerbal),
-        this.paresisText,
+        this.neuro.text,
         this.psych.text,
         textIf(
           onNormal('baseline: nichts akutes'),

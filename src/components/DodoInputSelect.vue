@@ -1,7 +1,13 @@
 <template>
 
   <IonItem :lines="isCustomMode ? 'none' : lines">
-    <IonSelect :label="label" interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
+    <IonSelect interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
+
+      <div slot="label" class="multiline-label-wrapper">
+        <div>{{ label }}</div>
+        <div class="description-label-wrapper" v-if="description">{{ description }}</div>
+      </div>
+
       <IonSelectOption v-if="emptyLabel" value="">
         {{ emptyLabel }}
       </IonSelectOption>
@@ -53,6 +59,7 @@ const props = defineProps<{
   modelValue: SelectValue
   label: string
   labelColor?: string
+  description?: string
   options: readonly OptionInput[]
   emptyLabel?: string
   allowCustom?: boolean
@@ -183,5 +190,20 @@ watch(
   ion-select.dd-input-select::part(label) {
     color: var(--dd-label-color, inherit);
   }
+
+</style>
+<style scoped>
+
+.multiline-label-wrapper {
+  padding: .5rem 0;
+}
+
+.description-label-wrapper {
+  color: var(--ion-color-medium);
+  font-size: 0.8em;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 
 </style>

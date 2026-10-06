@@ -22,6 +22,7 @@ declare module 'vue' {
     DodoInputSaamed: typeof import('./src/components/DodoInputSaamed.vue')['default']
     DodoInputSampleLimb: typeof import('./src/components/DodoInputSampleLimb.vue')['default']
     DodoInputSelect: typeof import('./src/components/DodoInputSelect.vue')['default']
+    DodoInputSelectLR: typeof import('./src/components/DodoInputSelectLR.vue')['default']
     DodoInputSelectOptional: typeof import('./src/components/DodoInputSelectOptional.vue')['default']
     DodoInputTemperature: typeof import('./src/components/DodoInputTemperature.vue')['default']
     DodoInputText: typeof import('./src/components/DodoInputText.vue')['default']

@@ -137,25 +137,7 @@
 
         </DodoItemModal>
 
-        <DodoInputTextOptional :lines="(ctx.isNonVerbal || store.doku.xabcDe.paresis.active) ? 'full' : 'inset'"
-          toggle-label="Paresen?" v-model:toggle="store.doku.xabcDe.paresis.active"
-          text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresis.value"
-          :ime-dictionary="{ /* activate IME */ }">
-        </DodoInputTextOptional>
-
-        <DodoInputTextOptional v-if="!ctx.isNonVerbal" :lines="(store.doku.xabcDe.paresthesia.active) ? 'full' : 'inset'"
-          toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.paresthesia.active"
-          text-label="Beschreibung:" v-model:text="store.doku.xabcDe.paresthesia.value"
-          :ime-dictionary="{ /* activate IME */ }">
-        </DodoInputTextOptional>
-
-        <IonItem v-if="!ctx.isNonVerbal" lines="full">
-          <IonToggle v-model="store.doku.xabcDe.aphasia" label-placement="end">
-            Dysarthrie/Aphasie?
-          </IonToggle>
-        </IonItem>
-
-        <IonItem v-if="!ctx.isNonVerbal" lines="full">
+        <IonItem v-if="!ctx.isNonVerbal" lines="inset">
           <IonToggle v-model="store.doku.xabcDe.headache" label-placement="end">
             Kopfschmerzen?
           </IonToggle>
@@ -170,8 +152,114 @@
           ]">
         </DodoInputSelect>
 
-        <DodoItemModal
-          label="Psych-Befund"
+        <DodoItemModal label="Neuro-Befund" modal-label="Neurologischer Befund"
+          :state="store.doku.xabcDe.neuro.state" lines="inset">
+
+          <IonItemDivider>
+            <IonLabel>Bewusstsein</IonLabel>
+          </IonItemDivider>
+          <DodoInputSelect v-model="store.doku.xabcDe.neuro.followInstructions"
+            label="Anweisungen befolgen" description="Zwinkern + nicht-paretische Hand öffnen/schließen"
+            lines="none"
+            :options="[
+              { value: 'befolgt', label: 'Beide' },
+              { value: 'teilweise befolgt', label: 'Eine' },
+              { value: 'nicht befolgt', label: 'Keine' },
+            ]">
+          </DodoInputSelect>
+
+          <IonItemDivider>
+            <IonLabel>Motorik</IonLabel>
+          </IonItemDivider>
+          <DodoInputSelect v-model="store.doku.xabcDe.neuro.msFace"
+            label="Fazialisparese" lines="full"
+            :options="[
+              { value: '', label: 'Keine' },
+              { value: 'leichte', label: 'Leicht' },
+              { value: 'ausgeprägte', label: 'Ausgeprägt' },
+              { value: 'komplette', label: 'Komplett/Beidseitig' },
+            ]">
+          </DodoInputSelect>
+
+          <DodoInputSelectLR v-model:left="store.doku.xabcDe.neuro.msArmLeft"
+            v-model:right="store.doku.xabcDe.neuro.msArmRight"
+            label="Armhalteversuch" lines="full"
+            :options="[
+              { value: 'ohne Absinken', label: 'Ohne Absinken' },
+              { value: 'leichtes Absinken', label: 'Leichtes Absinken' },
+              { value: 'Absinken', label: 'Voll Absinken' },
+              { value: 'nur Restbewegungen', label: 'Nur Restbewegung' },
+              { value: 'keine aktive Bewegung', label: 'Keine Bewegung' },
+            ]">
+          </DodoInputSelectLR>
+
+          <DodoInputSelectLR v-model:left="store.doku.xabcDe.neuro.msLegLeft"
+            v-model:right="store.doku.xabcDe.neuro.msLegRight"
+            label="Beinhalteversuch" lines="full"
+            :options="[
+              { value: 'ohne Absinken', label: 'Ohne Absinken' },
+              { value: 'leichtes Absinken', label: 'Leichtes Absinken' },
+              { value: 'Absinken', label: 'Voll Absinken' },
+              { value: 'nur Restbewegungen', label: 'Nur Restbewegung' },
+              { value: 'keine aktive Bewegung', label: 'Keine Bewegung' },
+            ]">
+          </DodoInputSelectLR>
+
+          <DodoInputSelect v-model="store.doku.xabcDe.neuro.msMeningism"
+            label="Meningismus" lines="full"
+            :options="[
+              { value: '', label: 'Nicht Anwendbar' },
+              { value: 'kein', label: 'Nein' },
+              { value: 'leichter', label: 'Leicht' },
+              { value: 'ausgeprägter', label: 'Ausgeprägt' },
+            ]">
+          </DodoInputSelect>
+
+          <IonItem lines="none">
+            <IonToggle v-model="store.doku.xabcDe.neuro.msTremor" label-placement="end">
+              Tremor/Myoklonien?
+            </IonToggle>
+          </IonItem>
+
+          <IonItemDivider>
+            <IonLabel>Sensorik</IonLabel>
+          </IonItemDivider>
+          <DodoInputTextOptional lines="inset"
+            toggle-label="Sensibilität gestört?" v-model:toggle="store.doku.xabcDe.neuro.sensitivity.active"
+            text-label="Wie?" text-placeholder="z.B. Taubheit li. Arm" v-model:text="store.doku.xabcDe.neuro.sensitivity.value">
+          </DodoInputTextOptional>
+          <DodoInputTextOptional lines="none"
+            toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.neuro.paraesthesia.active"
+            text-label="Wie?" text-placeholder="z.B. Kribbeln li. Arm" v-model:text="store.doku.xabcDe.neuro.paraesthesia.value">
+          </DodoInputTextOptional>
+
+          <IonItemDivider>
+            <IonLabel>Sprache</IonLabel>
+          </IonItemDivider>
+          <DodoInputSelect v-model="store.doku.xabcDe.neuro.dysarthria"
+            label="Artikulation" lines="inset"
+            :options="[
+              { value: '', label: 'Nicht Anwendbar' },
+              { value: 'normal', label: 'Normal' },
+              { value: 'verwaschen', label: 'Verwaschen' },
+              { value: 'unverständlich', label: 'Unverständlich' },
+              { value: 'stumm', label: 'Stumm' },
+            ]">
+          </DodoInputSelect>
+          <DodoInputSelect v-model="store.doku.xabcDe.neuro.aphasia"
+            label="Aphasie" :description=" !aphasiaNote ? 'Sprachbildung + Verständnis' : aphasiaNote" lines="none"
+            :options="[
+              { value: '', label: 'Nicht Anwendbar' },
+              { value: 'keine', label: 'Keine' },
+              { value: 'leichte', label: 'Leichte' },
+              { value: 'schwere', label: 'Schwere' },
+              { value: 'globale', label: 'Global' },
+            ]">
+          </DodoInputSelect>
+
+        </DodoItemModal>
+
+        <DodoItemModal label="Psych-Befund"
           :state="store.doku.xabcDe.psych.state">
 
           <IonItemDivider>
@@ -240,12 +328,6 @@
 
         </DodoItemModal>
 
-        <IonItem lines="full" v-if="store.doku.xabcDe.couldBeBaseline">
-          <IonToggle v-model="store.doku.xabcDe.psych.baseline" label-placement="end">
-            Entspricht Baseline?
-          </IonToggle>
-        </IonItem>
-
         <DodoInputSelect v-model="store.doku.xabcDe.bloodGlucose"
           label="Blutzucker" lines="full"
           :options="[
@@ -256,10 +338,16 @@
           ]">
         </DodoInputSelect>
 
-        <DodoInputTextOptional lines="none"
+        <DodoInputTextOptional :lines="store.doku.xabcDe.couldBeBaseline ? 'full' : 'none'"
           toggle-label="Intoxikation möglich?" v-model:toggle="store.doku.xabcDe.intoxication.active"
           text-label="Beschreibung" text-placeholder="z.B. C2-Geruch" v-model:text="store.doku.xabcDe.intoxication.value">
         </DodoInputTextOptional>
+
+        <IonItem lines="none" v-if="store.doku.xabcDe.couldBeBaseline">
+          <IonToggle v-model="store.doku.xabcDe.psych.baseline" label-placement="end">
+            Entspricht Baseline?
+          </IonToggle>
+        </IonItem>
 
       </IonList>
 
@@ -321,6 +409,20 @@ const setZopsYes = () => {
   store.doku.xabcDe.zops.P = 'ja'
   store.doku.xabcDe.zops.S = 'ja'
 }
+
+// ############################################################################
+
+const aphasiaNote = computed(() => {
+  if (store.doku.xabcDe.neuro.aphasia == 'leichte') {
+    return 'Wortfindung, Ausdruck oder Verständnis eingeschränkt; Inhalte noch ausreichend vermittelbar.'
+  } else if (store.doku.xabcDe.neuro.aphasia == 'schwere') {
+    return 'Nur bruchstückhafte Verständigung; viel Nachfragen und Erschließen erforderlich.'
+  } else if (store.doku.xabcDe.neuro.aphasia == 'globale') {
+    return 'Keine verwertbare Sprachäußerung und kein verwertbares Sprachverständnis.'
+  } else {
+    return null
+  }
+})
 
 // ############################################################################
 
