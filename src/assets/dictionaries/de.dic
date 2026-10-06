@@ -1,4 +1,4 @@
-57488
+57487
 	This is the dictionary file of the de_DE Hunspell dictionary
 	derived from the igerman98 dictionary
 
@@ -16951,7 +16951,6 @@ Zimbabwe
 Zimbel/Nm
 Zimmer/NSMmij
 Zimmerer/NSm
-Zimmerflucht/Pm
 Zimmerlautstärke/m
 Zimmermann/Sm
 Zimt/Smij
@@ -19671,7 +19670,6 @@ angeschuldigt/A
 angeschwärzt/A
 angeschweißt/A
 angeschwemmt/A
-angeschwindelt/A
 angeschwollen/A
 angesehen/AC
 angeseilt/A
@@ -24280,7 +24278,7 @@ beute/Nozm
 beute/hke
 beutel/NSozm
 beutel/hke
-beuteln/DIXYW
+beuteln/DIXY
 beuten/DIXY
 bevölkern/DIOXYW
 bevölkern/SJozm
@@ -24921,7 +24919,7 @@ brauchbarkeit/ozm
 brauchen/DIVXYW
 brauchwasser/Sozm
 braue/Nozm
-brauen/DIXY
+brauen/DXY
 brauer/SNFozm
 brauerei/Pozm
 brauerei/hke
@@ -25089,7 +25087,7 @@ büffeln/DIXYW
 bügel/NSMozm
 bügel/hke
 bügelfrei/A
-bügeln/BDIXYW
+bügeln/BDIXY
 bühne/Nozm
 bühnen/hke
 büken/XI
@@ -25120,7 +25118,7 @@ bürokrat/Pozm
 bürokratie/Nozm
 bürokratisch/AU
 bürste/NMozm
-bürsten/DIXYke
+bürsten/DXYke
 büßen/DIVXY
 büsche/NSMozm
 büschel/NSMozm
@@ -25791,7 +25789,7 @@ dehydrieren/SJozm
 deich/EPTSozm
 deich/hke
 deichsel/Nozm
-deichseln/BDIXYW
+deichseln/BDIXY
 dein/A
 deinerseits
 deinesgleichen
@@ -26582,7 +26580,7 @@ druck/ESTozm
 druck/hke
 druckabhängig/A
 druckempfindlich/A
-drucken/BDIVXYW
+drucken/BDIVXY
 drucken/Sozm
 drucker/NSFozm
 drucker/hke
@@ -27079,7 +27077,7 @@ echtzeit/hke
 echtzeit/ozm
 eck/hke
 ecke/NMozm
-ecken/IXYW
+ecken/XYW
 eckig/A
 ecuador/Sozm
 ecuadorianer/NSFozm
@@ -29765,7 +29763,7 @@ fächeln/DIXYW
 fächer/NSozm
 fächer/hke
 fächerförmig/A
-fächern/DIXYW
+fächern/DIXY
 fädchen/Sozm
 fädeln/DIXYW
 fäden/ozm
@@ -30050,7 +30048,7 @@ feigen/hke
 feigheit/Pozm
 feigling/EPSozm
 feile/Nozm
-feilen/DIXY
+feilen/DXY
 feilschen/DIXY
 fein/ACUke
 feind
@@ -30303,7 +30301,7 @@ filmen/BDIVXY
 filter/NSozm
 filter/hke
 filterlos/A
-filtern/BDIXYW
+filtern/BDIXY
 filtern/SJozm
 filtrat/EPSTozm
 filtration/Pozm
@@ -31342,7 +31340,7 @@ gab/VZ
 gabe/Nozm
 gabel/NJozm
 gabel/hke
-gabeln/DIXYW
+gabeln/DIXY
 gablig/A
 gabun/Sozm
 gackern/DIXYW
@@ -33724,7 +33722,7 @@ glied/STozm
 glieder/JNozm
 gliederfüßler/ozm
 gliederkette/ozm
-gliedern/DIXYW
+gliedern/DIXY
 gliederns/ozm
 gliederpuppe/ozm
 gliederungs/hke
@@ -37418,7 +37416,7 @@ kannte/VZ
 kanonen/hke
 kansas/ozm
 kante/Nozm
-kanten/DIXYke
+kanten/DXYke
 kantig/A
 kantine/Nozm
 kantinen/hke
@@ -37458,7 +37456,7 @@ kappe/Nozm
 kappen/DIXYW
 kapriolen/ozm
 kapsel/ozm
-kapseln/BDIVXYW
+kapseln/BDIVXY
 kapseln/SJozm
 kapselriss/EPTozm
 kapstadt/Sozm
@@ -38038,7 +38036,7 @@ klinik/hke
 klinikum/Sozm
 klinisch/A
 klinke/Nozm
-klinken/DIXY
+klinken/DXY
 klinker/Sozm
 klinker/hke
 klipp
@@ -38141,7 +38139,7 @@ knie/NSozm
 knie/hke
 kniebundhose/Nozm
 kniehohe/A
-knien/DIXY
+knien/DXY
 knietief/A
 knieweich/A
 kniff/EPSozm
@@ -38162,7 +38160,7 @@ knöchern/A
 knödel/SNozm
 knöllchen/Sozm
 knöpfe/NMozm
-knöpfen/DIXYW
+knöpfen/DXYW
 knobeln/DIXYW
 knoblauch/STozm
 knoblauchzehe/Nozm
@@ -39059,7 +39057,7 @@ kufe/Nozm
 kugel/Nozm
 kugel/hke
 kugelförmig/A
-kugeln/DIXYW
+kugeln/DIXY
 kugelsicher/A
 kugelstoßer/FNSozm
 kuglig/A
@@ -39125,7 +39123,7 @@ kurativ/A
 kuratorium/Sozm
 kurbel/Nozm
 kurbel/hke
-kurbeln/DIXYW
+kurbeln/DIXY
 kurde/NFozm
 kurdisch/A
 kurdistan/Sozm
@@ -39731,7 +39729,7 @@ libido/ozm
 libyen/Sozm
 libyer/FNSozm
 libysch/A
-licht/AC
+licht/ACh
 licht/RSMTozm
 licht/hke
 lichtblau/A
@@ -39877,7 +39875,7 @@ löchern/DIXYW
 löchrig/A
 löffel/NSMozm
 löffel/hke
-löffeln/DIXYW
+löffeln/DIXY
 löffler/ozm
 löhne/Nozm
 löhnen/DIXY
@@ -40306,7 +40304,7 @@ mangel/Sozm
 mangel/hke
 mangelhaft/A
 mangelhaftigkeit/Pozm
-mangeln/DIXYW
+mangeln/DIXY
 mangels
 manie/Nozm
 manier/Pozm
@@ -40514,7 +40512,7 @@ mattschwarz/A
 maturität/ozm
 mauer/Nozm
 mauer/hke
-mauern/DIVXYW
+mauern/DIVXY
 maul/STozm
 maul/hke
 maulen/DIXY
@@ -40685,7 +40683,7 @@ memo/ozm
 memorieren/DIOXY
 memphis/ozm
 menge/Nozm
-mengen/IVXY
+mengen/VXY
 mengen/SJozm
 mengen/hke
 mengenmäßig/A
@@ -41515,7 +41513,7 @@ münster/Sozm
 münsteraner/NSFozm
 münz/hke
 münze/Nozm
-münzen/DIXY
+münzen/DXY
 münzer/ozm
 mürbe/A
 mürrisch/A
@@ -41594,7 +41592,7 @@ mustang/Sozm
 muster/NSJozm
 muster/hke
 mustergültig/A
-mustern/DIXYW
+mustern/DIXY
 musterungsarzt/Tozm
 mut/STEozm
 mutant/PFozm
@@ -42027,7 +42025,7 @@ nadelöhr/Sozm
 nagasaki/Sozm
 nagel/Sozm
 nagel/hke
-nageln/DIVXYW
+nageln/DIVXY
 nagelneu/A
 nagen/DIXY
 nager/NSFozm
@@ -43262,7 +43260,7 @@ pauschal/Ake
 pauschale/Nozm
 pauschalisieren/BDIOXYW
 pause/Nozm
-pausen/DIXYke
+pausen/DXYke
 pausenlos/A
 pausieren/DIXY
 pavian/EPSozm
@@ -43457,7 +43455,7 @@ pflanzer/NSFozm
 pflanzgut/STozm
 pflanzlich/A
 pflaster/SNozm
-pflastern/DIXYW
+pflastern/DIXY
 pflasterstein/EPSozm
 pflaume/Nozm
 pflaumen/hke
@@ -43495,7 +43493,7 @@ pfostenschuss/Tpozm
 pfote/Nozm
 pfriemeln
 pfropf/PSTEozm
-pfropfen/DIXYW
+pfropfen/DIXY
 pfütze/Nozm
 pfuhl/ozm
 pfund/EPSTozm
@@ -43822,7 +43820,7 @@ polnisch/A
 polospieler/ozm
 polster/JNSozm
 polster/hke
-polstern/DIXYW
+polstern/DIXY
 polterabend/SPEozm
 poltern/DIXYW
 polyamor/A
@@ -44080,7 +44078,7 @@ probat/A
 probe/Nozm
 probe/hke
 probehalber
-proben/DIXYke
+proben/DXYke
 probeweise/A
 probieren/DIXYW
 probierens/ozm
@@ -44291,7 +44289,7 @@ pudelnass/A
 pudelwohl
 puder/SNozm
 puder/hke
-pudern/IXYW
+pudern/IXY
 puff/Sozm
 puffer/NSozm
 puffer/hke
@@ -44873,7 +44871,7 @@ regel/hke
 regelbasiert/A
 regelhaft/A
 regelmäßig/ACU
-regeln/BDIXYW
+regeln/BDIXY
 regelrecht/A
 regelungs/hke
 regelwidrig/A
@@ -45337,7 +45335,7 @@ röcheln/DIXYW
 röchen/XI
 röcke/NMozm
 röhre/NMozm
-röhren/DIXYke
+röhren/DXYke
 röhrenförmig/A
 römer/NSFozm
 römisch/A
@@ -45709,7 +45707,7 @@ salat/SEPTozm
 salat/hke
 salbe/ozm
 salbei/Sozm
-salben/DIXY
+salben/DXY
 salben/SJozm
 salm/Pozm
 salmiakgeist/Sozm
@@ -45890,7 +45888,7 @@ schändlich/AC
 schänke/Nozm
 schären/ozm
 schärfe/ozm
-schärfen/DIVXY
+schärfen/DVXY
 schärfen/SJozm
 schärfer/AU
 schärfste/AU
@@ -45944,7 +45942,7 @@ schafskopf/Tozm
 schaft/SEPTozm
 schaftstiefel/NSozm
 schakal/EPSozm
-schal/AC
+schal/ACh
 schal/JSozm
 schale/Nozm
 schalensitz/EPTozm
@@ -46035,7 +46033,7 @@ schauerlich/AC
 schauern/DIXY
 schaufel/hke
 schaufel/ozm
-schaufeln/DIXYW
+schaufeln/DIXY
 schaukel/hke
 schaukel/ozm
 schaukeln/DIXYW
@@ -46091,7 +46089,7 @@ schenker/NSFozm
 scheppern/DIXYW
 scherbe/Nozm
 schere/Nozm
-scheren/DIXYW
+scheren/DXYW
 scherenschnitt/SEPTozm
 scherer/NSFozm
 schererei/Pozm
@@ -46391,7 +46389,7 @@ schlüpfrig/A
 schlürfen/DIXY
 schlüssel/NSMozm
 schlüssel/hke
-schlüsseln/IXYW
+schlüsseln/IXY
 schlüssig/ACU
 schlüssigkeit/ozm
 schlucht/Pozm
@@ -46495,7 +46493,7 @@ schmorbraten/ozm
 schmoren/DIXY
 schmücken/DIXY
 schmücken/SJozm
-schmuck/AC
+schmuck/ACh
 schmuck/Sozm
 schmuck/hke
 schmucklos/A
@@ -46826,7 +46824,7 @@ schulstress/EPTozm
 schulter/Nozm
 schulter/hke
 schulterfrei/A
-schultern/BDIXYW
+schultern/BDIXY
 schulungs/hke
 schummelei/Pozm
 schummeln/DIXYW
@@ -46862,7 +46860,7 @@ schutzwürdig/A
 schwäche/hke
 schwäche/ozm
 schwächeln/DIXYW
-schwächen/DIXYW
+schwächen/DXYW
 schwächen/SJozm
 schwächer/A
 schwächlich/A
@@ -46964,7 +46962,7 @@ schweinsleder/ozm
 schweinswal/EPSozm
 schweiß/TEozm
 schweiß/hke
-schweißen/BDIXYW
+schweißen/BDIXY
 schweißen/SJozm
 schweißer/NSFozm
 schweißerei/ozm
@@ -47053,7 +47051,6 @@ schwindel/hke
 schwindelei/Pozm
 schwindelerregend/A
 schwindelfrei/A
-schwindeln/DIXYW
 schwinden/DIVX
 schwindler/FNSozm
 schwindlig/A
@@ -47190,12 +47187,12 @@ seidenweich/A
 seidig/A
 seiend/A
 seife/Nozm
-seifen/IXYWke
+seifen/XYWke
 seifenlauge/Nozm
 seifig/A
 seil/RSTEPozm
 seil/hke
-seilen/IXYW
+seilen/IXY
 seilhüpfen/ozm
 seilschaft/Pozm
 seim/EPSozm
@@ -48052,7 +48049,7 @@ spiegel/SMozm
 spiegel/hke
 spiegelbildlich/A
 spiegelglatt/A
-spiegeln/DIXYW
+spiegeln/DIXY
 spiegeln/SJozm
 spiegelverkehrt/A
 spiel/STMEPozm
@@ -48256,7 +48253,7 @@ stärke/ozm
 stärkegrad/ozm
 stärkehaltig/A
 stärkemehl/Sozm
-stärken/DIVXY
+stärken/DVXY
 stärken/SJozm
 stärker/A
 stärkste/A
@@ -48535,7 +48532,7 @@ stemm/hke
 stemmen/BDIXY
 stempel/SNozm
 stempel/hke
-stempeln/DIXYW
+stempeln/DIXY
 steppdecke/Nozm
 steppen/DIXY
 steppnaht/ozm
@@ -48615,7 +48612,7 @@ stiefbruder/ozm
 stiefel/SNMozm
 stiefel/hke
 stiefelette/Nozm
-stiefeln/DIXYW
+stiefeln/DIXY
 stiefgeschwister/Nozm
 stiefkind/RSTozm
 stiefmütter/Mozm
@@ -52328,7 +52325,7 @@ verdächtig/ACU
 verdächtigen/DIOXY
 verdächtigen/SJozm
 verdächtigungsperson/ozm
-verdacht/A
+verdacht/Ah
 verdacht/Sozm
 verdachts/hke
 verdachtsunabhängig/A
@@ -54999,7 +54996,7 @@ welk/AC
 welken/DIVXY
 well/nhke
 welle/Nozm
-wellen/DIXYke
+wellen/DXYke
 wellenartig/A
 wellenförmig/AC
 wellig/A
@@ -55399,7 +55396,7 @@ wir
 wirbel/NSozm
 wirbel/hke
 wirbellos/A
-wirbeln/DIXYW
+wirbeln/DIXY
 wirbelstürme/Nozm
 wirbt/XW
 wird
@@ -56060,7 +56057,7 @@ zeta
 zetern/DIXYW
 zettel/NSMozm
 zettel/hke
-zetteln/IVXYW
+zetteln/IVXY
 zeug/EFJPSTozm
 zeugen/DIXYW
 zeugen/Sozm
@@ -56138,11 +56135,8 @@ zimbel/Nozm
 zimmer/NSMozm
 zimmer/hke
 zimmerer/NSozm
-zimmerflucht/Pozm
-zimmerig/A
 zimmerlautstärke/ozm
 zimmermann/Sozm
-zimmern/DIXYW
 zimperlich/AC
 zimt/Sozm
 zimt/hke
@@ -57501,3 +57495,8 @@ zypern/Sozm
 zypresse/Nozm
 zyste/Nozm
 zzgl.
+bebeuteln/DIXYW
+bebeutelt/A
+verdruck
+vermauer
+verschärfe

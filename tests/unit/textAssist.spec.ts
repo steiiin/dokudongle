@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test, vi } from 'vitest'
+import { AutocorrectService } from '@/services/text-assist/AutocorrectService'
 import { ConservativeCorrectionPolicy } from '@/services/text-assist/CorrectionPolicy'
 import { SnippetService } from '@/services/text-assist/SnippetService'
 import { ShortcutReplacementService } from '@/services/text-assist/ShortcutReplacementService'
@@ -46,6 +47,73 @@ const change = (
 
 const applyMutation = (text: string, mutation: TextMutation): string =>
   text.slice(0, mutation.start) + mutation.replacement + text.slice(mutation.end)
+
+describe('autocorrect suggestion lookup', () => {
+  const setup = (suggestions: Record<string, string[]> = {}, correct = false) => {
+    const spell = {
+      initialize: vi.fn(async () => undefined),
+      correct: vi.fn(async () => correct),
+      suggest: vi.fn(async (word: string) => suggestions[word] ?? []),
+      addWord: vi.fn(async () => undefined),
+      rebuild: vi.fn(async () => undefined),
+      dispose: vi.fn(async () => undefined),
+    }
+    return { spell, service: new AutocorrectService(new MemoryRepository(), undefined, spell) }
+  }
+
+  test('merges suggestions in lookup order and deduplicates before limiting', async () => {
+    const { service } = setup({
+      patinet: ['paletti', 'paletti'],
+      Patinet: ['paletti', 'Patient', 'PATIENT', 'Patin et'],
+    })
+    const candidates = await service.getSpellingCandidates('patinet', 3)
+    expect(candidates.map(candidate => candidate.replacement)).toEqual(['paletti', 'Patient', 'PATIENT'])
+    expect(candidates.every(candidate => candidate.original === 'patinet')).toBe(true)
+  })
+
+  test('duplicate suggestions and local words do not make a correction ambiguous', async () => {
+    const { service } = setup({
+      krankehaus: ['Krankenhaus', 'Krankenhaus'],
+      Krankehaus: ['Krankenhaus'],
+    })
+    const result = await service.correctAfterDelimiter(
+      change('duplicate', 'krankehaus', 'krankehaus '), ['Krankenhaus'],
+    )
+    expect(result?.mutation.replacement).toBe('Krankenhaus')
+  })
+
+  test('rejects equally close candidates from the combined lookups', async () => {
+    const { service } = setup({ abcdef: ['abcdeg'], Abcdef: ['Abcdeh'] })
+    expect(await service.correctAfterDelimiter(change('ambiguous', 'abcdef', 'abcdef '))).toBeNull()
+  })
+
+  test('keeps differently cased candidates distinct for ambiguity checks', async () => {
+    const { service } = setup({ beispiel: ['Beispiel'], Beispiel: ['BEISPIEL'] })
+    expect(await service.correctAfterDelimiter(change('case-ambiguous', 'beispiel', 'beispiel '))).toBeNull()
+  })
+
+  test.each(['morgen', 'Patient'])('does not query suggestions for correct word %s', async word => {
+    const { service, spell } = setup({}, true)
+    expect(await service.getSpellingCandidates(word)).toEqual([])
+    expect(await service.correctAfterDelimiter(change('valid', word, `${word} `))).toBeNull()
+    expect(spell.suggest).not.toHaveBeenCalled()
+  })
+
+  test.each(['Patinet', 'PATINET'])('queries an uppercase initial only once per operation: %s', async word => {
+    const { service, spell } = setup()
+    await service.getSpellingCandidates(word)
+    expect(spell.suggest.mock.calls).toEqual([[word]])
+    spell.suggest.mockClear()
+    await service.correctAfterDelimiter(change('uppercase', word, `${word} `))
+    expect(spell.suggest.mock.calls).toEqual([[word]])
+  })
+
+  test('capitalizes an umlaut while preserving the rest of the input', async () => {
+    const { service, spell } = setup()
+    await service.getSpellingCandidates('äRztin')
+    expect(spell.suggest.mock.calls).toEqual([['äRztin'], ['ÄRztin']])
+  })
+})
 
 describe('conservative correction policy', () => {
   const policy = new ConservativeCorrectionPolicy()
@@ -296,6 +364,31 @@ describe('text assist integration', () => {
     }
   })
 
+  test.each(['patinet', 'Patinet'])('corrects %s with Hunspell and restores it on Backspace', async typed => {
+    const localService = new TextAssistService(new MemoryRepository())
+    const sessionId = `typo-case-${typed}`
+    const update = await localService.processInput(change(sessionId, typed, `${typed} `))
+    expect(update.mutation).toEqual({ start: 0, end: 7, replacement: 'Patient', cursor: 8 })
+    const corrected = applyMutation(`${typed} `, update.mutation!)
+    expect(corrected).toBe('Patient ')
+    const undo = localService.handleBackspace(sessionId, snapshot(corrected))
+    expect(undo).toMatchObject({ replacement: typed, cursor: 7 })
+    expect(applyMutation(corrected, undo!)).toBe(typed)
+  })
+
+  test('offers Patient for a lowercase typo using Hunspell', async () => {
+    const candidates = await service.autocorrect.getSpellingCandidates('patinet')
+    expect(candidates).toEqual(expect.arrayContaining([
+      expect.objectContaining({ original: 'patinet', replacement: 'Patient' }),
+    ]))
+  })
+
+  test('preserves punctuation, suffix and caret when correcting a lowercase typo', async () => {
+    const update = await service.processInput(change('typo-case-middle', 'patinet Rest', 'patinet, Rest', 8))
+    expect(update.mutation).toEqual({ start: 0, end: 7, replacement: 'Patient', cursor: 8 })
+    expect(applyMutation('patinet, Rest', update.mutation!)).toBe('Patient, Rest')
+  })
+
   test('applies configured shortcuts before spelling autocorrection', async () => {
     const update = await service.processInput(change('shortcut-precedence', 'lt', 'lt '))
     expect(update.mutation).toEqual({ start: 0, end: 2, replacement: 'laut', cursor: 5 })
@@ -331,7 +424,6 @@ describe('text assist integration', () => {
       ['krankenhaus', 'Krankenhaus'],
       ['rettungsdienst', 'Rettungsdienst'],
       ['patient', 'Patient'],
-      ['pATIENT', 'Patient'],
     ]) {
       const update = await service.processInput(change(`case-${typed}`, typed, `${typed} `))
       expect(update.mutation).toMatchObject({ replacement: expected, cursor: expected.length + 1 })
@@ -354,6 +446,13 @@ describe('text assist integration', () => {
 
     const uppercase = await service.processInput(change('valid-uppercase', 'KRANKENHAUS', 'KRANKENHAUS '))
     expect(uppercase.mutation).toBeUndefined()
+  })
+
+  test('leaves mixed case unchanged when Hunspell offers distinct case-only variants', async () => {
+    const candidates = await service.autocorrect.getSpellingCandidates('pATIENT', 10)
+    expect(candidates.map(candidate => candidate.replacement)).toEqual(expect.arrayContaining(['Patient', 'PATIENT']))
+    const update = await service.processInput(change('ambiguous-mixed-case', 'pATIENT', 'pATIENT '))
+    expect(update.mutation).toBeUndefined()
   })
 
   test('offers capitalized compound spelling while the word is being typed', async () => {

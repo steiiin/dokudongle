@@ -58,12 +58,19 @@ export class AutocorrectService {
   async getSpellingCandidates(word: string, limit = 5): Promise<CorrectionCandidate[]> {
     await this.initialize()
     if (!word || await this.spell.correct(word)) return []
-    const suggestions = await this.spell.suggest(word)
+    const suggestions = await this.getSuggestions(word)
     return suggestions.slice(0, limit).map(replacement => ({
       original: word,
       replacement: preserveInitialCapitalization(word, replacement),
       confidence: 1 - Math.min(1, Math.max(0, Math.abs(word.length - replacement.length)) / Math.max(1, word.length)),
     }))
+  }
+
+  private async getSuggestions(word: string): Promise<string[]> {
+    const capitalized = word.replace(/^\p{Ll}/u, initial => initial.toLocaleUpperCase('de-DE'))
+    const variants = capitalized === word ? [word] : [word, capitalized]
+    const suggestions = await Promise.all(variants.map(variant => this.spell.suggest(variant)))
+    return [...new Set(suggestions.flat())]
   }
 
   async addUserWord(word: string): Promise<void> {
@@ -98,7 +105,7 @@ export class AutocorrectService {
     if (!range
       || additionalWords.includes(normalizeDictionaryWord(range.word))
       || await this.spell.correct(range.word)) return null
-    const spellSuggestions = await this.spell.suggest(range.word)
+    const spellSuggestions = await this.getSuggestions(range.word)
     const suggestions = [
       ...spellSuggestions,
       ...additionalWords.filter(word => !spellSuggestions.includes(word)),
