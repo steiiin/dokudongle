@@ -228,12 +228,14 @@ function persistedProtocolState(state: {
   protocolHistory: ProtocolHistoryEntry[]
   activeHistoryEntryId: string | null
   lastProtocolResetAt: string
+  lastProtocolOpenedAt: string
   lastProtocolSentAt: string | null
 }): PersistedDokuState {
   return {
     schemaVersion: DOKU_SCHEMA_VERSION,
     updatedAt: new Date().toISOString(),
     lastProtocolResetAt: state.lastProtocolResetAt,
+    lastProtocolOpenedAt: state.lastProtocolOpenedAt,
     lastProtocolSentAt: state.lastProtocolSentAt ?? undefined,
     doku: toPersistable(state.doku),
     protocolHistory: toPersistable(state.protocolHistory),
@@ -345,6 +347,7 @@ export const useDokuStore = defineStore('doku', {
     activeHistoryEntryId: null as string | null,
     isProtocolChanging: false,
     lastProtocolResetAt: new Date().toISOString(),
+    lastProtocolOpenedAt: new Date().toISOString(),
     lastProtocolSentAt: null as string | null,
 
   }),
@@ -613,6 +616,7 @@ export const useDokuStore = defineStore('doku', {
             protocolHistory: archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId),
             activeHistoryEntryId: null,
             lastProtocolResetAt: new Date().toISOString(),
+            lastProtocolOpenedAt: new Date().toISOString(),
             lastProtocolSentAt: null,
           }
           await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
@@ -640,6 +644,7 @@ export const useDokuStore = defineStore('doku', {
             protocolHistory,
             activeHistoryEntryId: id,
             lastProtocolResetAt: new Date().toISOString(),
+            lastProtocolOpenedAt: new Date().toISOString(),
             lastProtocolSentAt: null,
           }
           await saveDokuState(persistedProtocolState(next))
@@ -704,10 +709,19 @@ export const useDokuStore = defineStore('doku', {
       link.remove()
       URL.revokeObjectURL(url)
     },
-    async markProtocolSent(referenceTime: number = Date.now()) {
+    async markProtocolOpened(referenceTime: number = Date.now()) {
       const protocol = this.doku
       await serializeStorage(this, async () => {
         if (this.doku !== protocol) return
+        const lastProtocolOpenedAt = new Date(referenceTime).toISOString()
+        await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolOpenedAt }))
+        this.lastProtocolOpenedAt = lastProtocolOpenedAt
+      })
+    },
+    async markProtocolSent(referenceTime: number = Date.now(), protocol?: UnwrapRef<Protocol>) {
+      const sentProtocol = protocol ?? this.doku
+      await serializeStorage(this, async () => {
+        if (this.doku !== sentProtocol) return
         const lastProtocolSentAt = new Date(referenceTime).toISOString()
         const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId)
         await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolSentAt, protocolHistory }))
@@ -755,6 +769,10 @@ export const useDokuStore = defineStore('doku', {
             ? persistedState!.lastProtocolResetAt ?? persistedState!.updatedAt ?? new Date().toISOString()
             : new Date().toISOString(),
           lastProtocolSentAt: doku ? persistedState!.lastProtocolSentAt ?? null : null,
+          lastProtocolOpenedAt: (doku ? [persistedState!.lastProtocolOpenedAt,
+            persistedState!.lastProtocolResetAt, persistedState!.updatedAt] : [])
+            .find(value => typeof value === 'string' && Number.isFinite(Date.parse(value)))
+            ?? new Date().toISOString(),
         }
         if (!next.lastProtocolSentAt || Number.isNaN(Date.parse(next.lastProtocolResetAt))
           || !(Date.parse(next.lastProtocolSentAt) >= Date.parse(next.lastProtocolResetAt))) {
@@ -769,12 +787,13 @@ export const useDokuStore = defineStore('doku', {
       })
     },
     getAutoProtocolResetAction(referenceTime: number = Date.now()): AutoProtocolResetAction {
-      const lastResetAtMs = Date.parse(this.lastProtocolResetAt)
-      if (Number.isNaN(lastResetAtMs)) {
+      if (this.wasCurrentProtocolSent()) return 'reset'
+      const lastOpenedAtMs = Date.parse(this.lastProtocolOpenedAt)
+      if (Number.isNaN(lastOpenedAtMs)) {
         return 'reset'
       }
 
-      const protocolAgeMs = referenceTime - lastResetAtMs
+      const protocolAgeMs = referenceTime - lastOpenedAtMs
       if (protocolAgeMs >= AUTO_RESET_THRESHOLD_MS) {
         return 'reset'
       }
@@ -791,6 +810,7 @@ export const useDokuStore = defineStore('doku', {
       if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
       this.connection.isTransmitting = true
 
+      const protocol = this.doku
       const protocolText = this.generatedProtocol
 
       console.log('Protokoll gesendet:')
@@ -879,6 +899,9 @@ export const useDokuStore = defineStore('doku', {
           // send EOD
           await BleClient.write(this.connection.device!.id, ServiceUUID, SendTextUUID, new DataView(new Uint8Array([0x00,0x00]).buffer))
 
+          // Persist completion before releasing the transmission guard: a queued
+          // background reset must see the send marker for this exact protocol.
+          await this.markProtocolSent(Date.now(), protocol)
           return true
 
         }

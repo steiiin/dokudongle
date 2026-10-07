@@ -10,9 +10,10 @@ const createStore = (action: 'none' | 'reset' = 'none') => ({
   autoResetProtocol: vi.fn().mockResolvedValue(undefined),
   getAutoProtocolResetAction: vi.fn(() => action),
   hydrateFromStorage: vi.fn().mockResolvedValue(undefined),
-  newProtocol: vi.fn().mockResolvedValue(undefined),
+  markProtocolOpened: vi.fn().mockResolvedValue(undefined),
+  isProtocolChanging: false,
+  connection: { isTransmitting: false },
   persistToStorage: vi.fn().mockResolvedValue(undefined),
-  wasCurrentProtocolSent: vi.fn().mockReturnValue(false),
 })
 
 const createDependencies = (
@@ -97,22 +98,22 @@ describe('application startup', () => {
   })
 
   test('clears a successfully sent protocol on cold start without offering restore', async () => {
-    const store = createStore()
-    store.wasCurrentProtocolSent.mockReturnValue(true)
+    const store = createStore('reset')
     const dependencies = createDependencies(store)
     const startup = createAppStartup(dependencies)
 
     await startup.start()
 
     expect(store.hydrateFromStorage).toHaveBeenCalledOnce()
-    expect(store.newProtocol).toHaveBeenCalledOnce()
-    expect(store.autoResetProtocol).not.toHaveBeenCalled()
+    expect(store.autoResetProtocol).toHaveBeenCalledOnce()
+    expect(dependencies.showError).not.toHaveBeenCalled()
     expect(startup.state.status).toBe('ready')
   })
 
   test('does not rehydrate on resume and still evaluates automatic reset', async () => {
     const store = createStore()
     store.getAutoProtocolResetAction
+      .mockReturnValueOnce('none')
       .mockReturnValueOnce('none')
       .mockReturnValueOnce('reset')
     let appStateHandler: ((isActive: boolean) => void) | undefined
@@ -125,6 +126,7 @@ describe('application startup', () => {
 
     await startup.start()
     await vi.waitFor(() => expect(appStateHandler).toBeTypeOf('function'))
+    appStateHandler!(false)
     appStateHandler!(true)
     await vi.waitFor(() => expect(store.autoResetProtocol).toHaveBeenCalledOnce())
 

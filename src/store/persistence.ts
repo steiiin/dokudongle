@@ -15,6 +15,7 @@ export interface PersistedDokuState {
   schemaVersion?: number
   updatedAt?: string
   lastProtocolResetAt?: string
+  lastProtocolOpenedAt?: string
   lastProtocolSentAt?: string
   doku?: any
   protocolHistory?: ProtocolHistoryEntry[]

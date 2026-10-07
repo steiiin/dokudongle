@@ -15,7 +15,6 @@ const mocks = vi.hoisted(() => ({
   checkProtocol: vi.fn(),
   getCachedResult: vi.fn(),
   connectDongle: vi.fn(),
-  markProtocolSent: vi.fn(),
   newProtocol: vi.fn(),
   sendProtocol: vi.fn(),
   scrollToTop: vi.fn(),
@@ -56,7 +55,6 @@ vi.mock('@/services/protocol-check', async importOriginal => ({
 vi.mock('@/store/doku', () => ({
   useDokuStore: () => Object.assign(reactive(mocks.store), {
     connectDongle: mocks.connectDongle,
-    markProtocolSent: mocks.markProtocolSent,
     newProtocol: mocks.newProtocol,
     sendProtocol: mocks.sendProtocol,
   }),
@@ -124,7 +122,6 @@ describe('DodoSendAction protocol check', () => {
     mocks.getNetworkStatus.mockResolvedValue({ connected: true, connectionType: 'wifi' })
     mocks.checkProtocol.mockResolvedValue(cleanResult)
     mocks.getCachedResult.mockResolvedValue(null)
-    mocks.markProtocolSent.mockResolvedValue(undefined)
     mocks.sendProtocol.mockResolvedValue(true)
     mocks.scrollToTop.mockResolvedValue(undefined)
     mocks.connectDongle.mockResolvedValue(undefined)
@@ -246,7 +243,6 @@ describe('DodoSendAction protocol check', () => {
     expect(mocks.checkProtocol).toHaveBeenCalledOnce()
     expect(mocks.checkProtocol).toHaveBeenCalledWith('Generated protocol text')
     expect(mocks.sendProtocol).toHaveBeenCalledOnce()
-    expect(mocks.markProtocolSent).toHaveBeenCalledOnce()
     expect(mocks.scrollToTop).toHaveBeenCalledOnce()
   })
 
@@ -312,7 +308,6 @@ describe('DodoSendAction protocol check', () => {
     await flushPromises()
 
     expect(mocks.sendProtocol).toHaveBeenCalledOnce()
-    expect(mocks.markProtocolSent).not.toHaveBeenCalled()
   })
 
   test('shows findings and sends only after the explicit bypass', async () => {

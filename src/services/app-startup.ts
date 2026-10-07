@@ -3,7 +3,7 @@ import type { PluginListenerHandle } from '@capacitor/core'
 import { toastController } from '@ionic/vue'
 import { reactive, readonly, type DeepReadonly } from 'vue'
 
-import { useDokuStore, type AutoProtocolResetAction } from '@/store/doku'
+import { useDokuStore } from '@/store/doku'
 import { initStorage } from '@/store/persistence'
 
 export type StartupStatus = 'loading' | 'ready' | 'error'
@@ -19,10 +19,11 @@ interface StartupStore {
   $subscribe: DokuStore['$subscribe']
   autoResetProtocol: DokuStore['autoResetProtocol']
   getAutoProtocolResetAction: DokuStore['getAutoProtocolResetAction']
-  newProtocol: DokuStore['newProtocol']
+  markProtocolOpened: DokuStore['markProtocolOpened']
+  isProtocolChanging: boolean
+  connection: Pick<DokuStore['connection'], 'isTransmitting'>
   persistToStorage: DokuStore['persistToStorage']
   hydrateFromStorage: DokuStore['hydrateFromStorage']
-  wasCurrentProtocolSent: DokuStore['wasCurrentProtocolSent']
 }
 
 type AppStateChangeHandler = (isActive: boolean) => void
@@ -57,6 +58,7 @@ async function registerAppStateChange(handler: AppStateChangeHandler): Promise<v
 
   // The listener intentionally lives for the lifetime of the application.
   void listener
+  handler((await CapacitorApp.getState()).isActive)
 }
 
 function scheduleAfterPaint(callback: () => void): void {
@@ -86,9 +88,10 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
   let startPromise: Promise<void> | null = null
   let store: StartupStore | null = null
   let persistTimer: ReturnType<typeof setTimeout> | null = null
-  let isResetFlowOpen = false
-  let pendingResetAction: AutoProtocolResetAction = 'none'
-  let pendingResetError: string | null = null
+  let appIsActive = true
+  let processingLifecycle = false
+  const lifecycleEvents: { isActive: boolean; openedAt: number }[] = []
+  let pendingError: { message: string; error: unknown } | null = null
 
   const withStartupTimeout = async <T>(stage: string, operation: Promise<T>): Promise<T> => {
     let timer: ReturnType<typeof setTimeout> | null = null
@@ -127,6 +130,50 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
     }
   }
 
+  const reportPendingError = async (): Promise<void> => {
+    if (!appIsActive || mutableState.status !== 'ready' || !pendingError) return
+    const { message, error } = pendingError
+    pendingError = null
+    await reportNonFatalError(message, error)
+  }
+
+  const isProtocolBusy = (): boolean => Boolean(store?.isProtocolChanging || store?.connection.isTransmitting)
+
+  const processLifecycleEvent = async (event: { isActive: boolean; openedAt: number }): Promise<void> => {
+    if (!store) return
+    let errorMessage = 'Das Protokoll konnte nicht automatisch zurückgesetzt werden.'
+    try {
+      if (store.getAutoProtocolResetAction() === 'reset') {
+        await store.autoResetProtocol()
+      }
+      errorMessage = 'Der Protokollstatus konnte nicht gespeichert werden.'
+      if (event.isActive) {
+        // Check the previous opening time first. A failed reset must not restart
+        // the clock, otherwise the next lifecycle event could miss the retry.
+        await store.markProtocolOpened(event.openedAt)
+      } else {
+        await store.persistToStorage()
+      }
+    } catch (error) {
+      pendingError = { message: errorMessage, error }
+      console.error(`[startup] ${errorMessage}`, error)
+    }
+  }
+
+  const drainLifecycleEvents = async (): Promise<void> => {
+    if (processingLifecycle || mutableState.status !== 'ready' || isProtocolBusy()) return
+    processingLifecycle = true
+    try {
+      while (lifecycleEvents.length && !isProtocolBusy()) {
+        await processLifecycleEvent(lifecycleEvents.shift()!)
+      }
+      await reportPendingError()
+    } finally {
+      processingLifecycle = false
+      if (lifecycleEvents.length && !isProtocolBusy()) void drainLifecycleEvents()
+    }
+  }
+
   const installPersistenceSubscription = (): void => {
     if (!store) return
     store.$subscribe(() => {
@@ -135,44 +182,25 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
         persistTimer = null
         void flushPersistence()
       }, PERSISTENCE_DEBOUNCE_MS)
+      // Busy transitions also come through this subscription. Retain lifecycle
+      // events until a send/restore/reset has finished instead of dropping them.
+      if (lifecycleEvents.length) void drainLifecycleEvents()
     }, { detached: true })
   }
 
-  const handleResetAction = async (action: AutoProtocolResetAction): Promise<void> => {
-    if (!store || action === 'none' || isResetFlowOpen) return
-
-    isResetFlowOpen = true
-    try {
-      await store.autoResetProtocol()
-    } catch (error) {
-      await reportNonFatalError('Das Protokoll konnte nicht automatisch zurückgesetzt werden.', error)
-    } finally {
-      isResetFlowOpen = false
-    }
-  }
-
-  const runPostReadyFlow = async (): Promise<void> => {
-    if (!store) return
-
-    if (pendingResetError) {
-      const message = pendingResetError
-      pendingResetError = null
-      await reportNonFatalError(message, new Error('Protocol reset failed during startup.'))
-    }
-
-    const action = pendingResetAction
-    pendingResetAction = 'none'
-    await handleResetAction(action)
-  }
-
   const handleAppStateChange = (isActive: boolean): void => {
+    if (isActive === appIsActive) return
+    appIsActive = isActive
+    lifecycleEvents.push({ isActive, openedAt: Date.now() })
+    if (mutableState.status !== 'ready') return
     if (!isActive) {
-      void flushPersistence()
-      return
+      if (persistTimer) clearTimeout(persistTimer)
+      persistTimer = null
+      // A send may continue while hidden; save its current draft immediately,
+      // then reconsider resetting once the send has recorded its outcome.
+      if (isProtocolBusy() || processingLifecycle) void flushPersistence()
     }
-
-    if (!store || mutableState.status !== 'ready') return
-    void handleResetAction(store.getAutoProtocolResetAction())
+    void drainLifecycleEvents()
   }
 
   const registerLifecycleListener = (): void => {
@@ -186,6 +214,7 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
     mutableState.errorMessage = null
 
     try {
+      registerLifecycleListener()
       logStartupStage('initializing storage')
       await withStartupTimeout('Storage initialization', dependencies.initializeStorage())
 
@@ -193,41 +222,22 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
       logStartupStage('hydrating protocol state')
       await withStartupTimeout('Protocol hydration', store.hydrateFromStorage())
 
-      let sentProtocolResetFailed = false
-      if (store.wasCurrentProtocolSent()) {
-        try {
-          logStartupStage('resetting successfully sent protocol')
-          await withStartupTimeout('Sent protocol reset', store.newProtocol())
-        } catch (error) {
-          console.error('[startup] Sent protocol reset failed.', error)
-          pendingResetError = 'Das gesendete Protokoll konnte beim Start nicht zurückgesetzt werden.'
-          sentProtocolResetFailed = true
-        }
-      }
-
-      if (!sentProtocolResetFailed) {
-        pendingResetAction = store.getAutoProtocolResetAction()
-      }
-
-      if (pendingResetAction === 'reset') {
-        try {
-          logStartupStage('automatically resetting expired protocol')
-          await withStartupTimeout('Automatic protocol reset', store.autoResetProtocol())
-          pendingResetAction = 'none'
-        } catch (error) {
-          console.error('[startup] Automatic protocol reset failed.', error)
-          pendingResetError = 'Das Protokoll konnte nicht automatisch zurückgesetzt werden.'
-          pendingResetAction = 'none'
-        }
+      // Events received during hydration are represented by the latest app
+      // state. Further events are queued while this first evaluation runs.
+      lifecycleEvents.length = 0
+      try {
+        await withStartupTimeout('Protocol lifecycle initialization',
+          processLifecycleEvent({ isActive: appIsActive, openedAt: Date.now() }))
+      } catch (error) {
+        pendingError = { message: 'Das Protokoll konnte nicht automatisch zurückgesetzt werden.', error }
       }
 
       installPersistenceSubscription()
-      registerLifecycleListener()
 
       mutableState.status = 'ready'
       logStartupStage('application ready')
       dependencies.scheduleAfterPaint(() => {
-        void runPostReadyFlow()
+        void drainLifecycleEvents()
       })
     } catch (error) {
       console.error('[startup] Application startup failed.', error)
