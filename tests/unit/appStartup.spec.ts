@@ -1,22 +1,19 @@
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import { toastController } from '@ionic/vue'
 
 import {
   createAppStartup,
-  presentTemporaryProtocolRestore,
   type AppStartupDependencies,
 } from '@/services/app-startup'
 
 const createStore = (action: 'none' | 'reset' = 'none') => ({
   $subscribe: vi.fn(() => vi.fn()),
   autoResetProtocol: vi.fn().mockResolvedValue(undefined),
-  discardTemporaryProtocol: vi.fn().mockResolvedValue(undefined),
   getAutoProtocolResetAction: vi.fn(() => action),
   hydrateFromStorage: vi.fn().mockResolvedValue(undefined),
-  newProtocol: vi.fn().mockResolvedValue(undefined),
+  markProtocolOpened: vi.fn().mockResolvedValue(undefined),
+  isProtocolChanging: false,
+  connection: { isTransmitting: false },
   persistToStorage: vi.fn().mockResolvedValue(undefined),
-  restoreTemporaryProtocol: vi.fn().mockResolvedValue(true),
-  wasCurrentProtocolSent: vi.fn().mockReturnValue(false),
 })
 
 const createDependencies = (
@@ -24,9 +21,7 @@ const createDependencies = (
   overrides: Partial<AppStartupDependencies> = {},
 ): AppStartupDependencies => ({
   getStore: () => store,
-  hasTemporaryProtocol: vi.fn().mockResolvedValue(false),
   initializeStorage: vi.fn().mockResolvedValue(undefined),
-  presentTemporaryProtocolRestore: vi.fn().mockResolvedValue('dismiss'),
   registerAppStateChange: vi.fn().mockResolvedValue(undefined),
   scheduleAfterPaint: callback => callback(),
   showError: vi.fn().mockResolvedValue(undefined),
@@ -78,19 +73,12 @@ describe('application startup', () => {
     expect(store.hydrateFromStorage).not.toHaveBeenCalled()
   })
 
-  test('does not keep startup waiting for the automatic-reset restore toast', async () => {
+  test('finishes startup after automatically resetting an expired protocol', async () => {
     const store = createStore('reset')
-    const presentRestore = vi.fn(() => new Promise<'restore' | 'dismiss'>(() => undefined))
-    const dependencies = createDependencies(store, {
-      presentTemporaryProtocolRestore: presentRestore,
-    })
-    const startup = createAppStartup(dependencies)
-
+    const startup = createAppStartup(createDependencies(store))
     await startup.start()
-
     expect(startup.state.status).toBe('ready')
     expect(store.autoResetProtocol).toHaveBeenCalledOnce()
-    expect(presentRestore).toHaveBeenCalledOnce()
   })
 
   test('keeps the application ready when reset or lifecycle follow-up work fails', async () => {
@@ -109,53 +97,23 @@ describe('application startup', () => {
     expect(startup.state.status).toBe('ready')
   })
 
-  test('offers a snapshot left by an interrupted previous startup', async () => {
-    const store = createStore()
-    const dependencies = createDependencies(store, {
-      hasTemporaryProtocol: vi.fn().mockResolvedValue(true),
-      presentTemporaryProtocolRestore: vi.fn().mockResolvedValue('restore'),
-    })
-    const startup = createAppStartup(dependencies)
-
-    await startup.start()
-    await vi.waitFor(() => expect(store.restoreTemporaryProtocol).toHaveBeenCalledOnce())
-
-    expect(store.autoResetProtocol).not.toHaveBeenCalled()
-    expect(store.discardTemporaryProtocol).not.toHaveBeenCalled()
-  })
-
   test('clears a successfully sent protocol on cold start without offering restore', async () => {
-    const store = createStore()
-    store.wasCurrentProtocolSent.mockReturnValue(true)
+    const store = createStore('reset')
     const dependencies = createDependencies(store)
     const startup = createAppStartup(dependencies)
 
     await startup.start()
 
     expect(store.hydrateFromStorage).toHaveBeenCalledOnce()
-    expect(store.newProtocol).toHaveBeenCalledOnce()
-    expect(store.discardTemporaryProtocol).toHaveBeenCalledOnce()
-    expect(store.autoResetProtocol).not.toHaveBeenCalled()
-    expect(dependencies.presentTemporaryProtocolRestore).not.toHaveBeenCalled()
+    expect(store.autoResetProtocol).toHaveBeenCalledOnce()
+    expect(dependencies.showError).not.toHaveBeenCalled()
     expect(startup.state.status).toBe('ready')
-  })
-
-  test('deletes an interrupted-reset snapshot when the restore toast is dismissed', async () => {
-    const store = createStore()
-    const dependencies = createDependencies(store, {
-      hasTemporaryProtocol: vi.fn().mockResolvedValue(true),
-      presentTemporaryProtocolRestore: vi.fn().mockResolvedValue('dismiss'),
-    })
-
-    await createAppStartup(dependencies).start()
-    await vi.waitFor(() => expect(store.discardTemporaryProtocol).toHaveBeenCalledOnce())
-
-    expect(store.restoreTemporaryProtocol).not.toHaveBeenCalled()
   })
 
   test('does not rehydrate on resume and still evaluates automatic reset', async () => {
     const store = createStore()
     store.getAutoProtocolResetAction
+      .mockReturnValueOnce('none')
       .mockReturnValueOnce('none')
       .mockReturnValueOnce('reset')
     let appStateHandler: ((isActive: boolean) => void) | undefined
@@ -168,29 +126,11 @@ describe('application startup', () => {
 
     await startup.start()
     await vi.waitFor(() => expect(appStateHandler).toBeTypeOf('function'))
+    appStateHandler!(false)
     appStateHandler!(true)
     await vi.waitFor(() => expect(store.autoResetProtocol).toHaveBeenCalledOnce())
 
     expect(store.hydrateFromStorage).toHaveBeenCalledOnce()
   })
 
-  test('configures the restore toast with dark styling above the tab bar', async () => {
-    const present = vi.fn().mockResolvedValue(undefined)
-    const onDidDismiss = vi.fn().mockResolvedValue({ role: 'restore' })
-    const createToast = vi.spyOn(toastController, 'create').mockResolvedValue({
-      present,
-      onDidDismiss,
-    } as unknown as HTMLIonToastElement)
-
-    await expect(presentTemporaryProtocolRestore()).resolves.toBe('restore')
-
-    expect(createToast).toHaveBeenCalledWith(expect.objectContaining({
-      message: 'Protokoll zurückgesetzt.',
-      cssClass: 'protocol-reset-toast',
-      duration: 5000,
-      position: 'bottom',
-      positionAnchor: 'main-tab-bar',
-    }))
-    expect(present).toHaveBeenCalledOnce()
-  })
 })

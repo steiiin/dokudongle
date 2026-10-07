@@ -4,6 +4,7 @@ import { cog } from 'ionicons/icons'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
+import ProtocolHistorySettingsCard from '@/views/settingsCards/ProtocolHistorySettingsCard.vue'
 import SpellcheckerSettingsCard from '@/views/settingsCards/SpellcheckerSettingsCard.vue'
 import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 import DodoSendAction from '@/components/DodoSendAction.vue'
@@ -30,6 +31,7 @@ describe('Settings tab', () => {
     expect(wrapper.getComponent(IonContent).findComponent(DongleSettingsCard).exists()).toBe(true)
     expect(wrapper.getComponent(IonContent).findAllComponents(DongleSettingsCard)).toHaveLength(1)
     expect(wrapper.getComponent(IonContent).findAllComponents(SpellcheckerSettingsCard)).toHaveLength(1)
+    expect(wrapper.getComponent(IonContent).findAllComponents(ProtocolHistorySettingsCard)).toHaveLength(1)
     expect(wrapper.find('dongle-firmware-card-stub').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('Dongle suchen')
     expect(wrapper.getComponent(IonContent).classes()).not.toContain('dongle-connecting')

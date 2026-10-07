@@ -2,7 +2,7 @@
   <IonButtons slot="primary">
     <IonButton v-if="showReset"
       fill="solid" color="primary"
-      @click="reset">Neu
+      :disabled="store.isProtocolChanging" @click="reset">Neu
     </IonButton>
     <IonButton v-if="!store.isDongleConnected"
       :fill="store.isDongleConnecting ? 'clear' : 'solid'" color="dark" :disabled="store.isDongleConnecting || store.connection.isSavingSettings"
@@ -87,7 +87,7 @@ const reset = async () => {
 
   const alert = await alertController.create({
     header: 'Neues Protokoll',
-    message: 'Du verlierst alle Eingaben, die du bisher getätigt hast. \nBist du sicher?',
+    message: 'Ein neues Protokoll beginnen? Deine bisherigen Eingaben findest du in den Einstellungen unter „Protokolle wiederherstellen“. Dort werden die letzten drei Protokolle gespeichert.',
     buttons: [
       {
         text: 'Abbrechen',
@@ -96,7 +96,16 @@ const reset = async () => {
       {
         text: 'Ja',
         handler: async () => {
-          await store.newProtocol()
+          try {
+            await store.newProtocol()
+          } catch {
+            const error = await alertController.create({
+              header: 'Zurücksetzen fehlgeschlagen',
+              message: 'Das Protokoll konnte nicht gespeichert und zurückgesetzt werden. Deine Eingaben bleiben erhalten.',
+              buttons: ['OK'],
+            })
+            await error.present()
+          }
         }
       }
     ]
@@ -144,10 +153,7 @@ const transmitProtocol = async () => {
 
   try {
     await tryScrollingToTop()
-    const sent = await store.sendProtocol()
-    if (sent) {
-      await store.markProtocolSent()
-    }
+    await store.sendProtocol()
   }
   finally {
     resetCheckState()

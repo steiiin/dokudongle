@@ -14,11 +14,13 @@
     >
       <DongleSettingsCard />
       <SpellcheckerSettingsCard />
+      <ProtocolHistorySettingsCard />
     </IonContent>
   </IonPage>
 </template>
 
 <script setup lang="ts">
+import ProtocolHistorySettingsCard from '@/views/settingsCards/ProtocolHistorySettingsCard.vue'
 import SpellcheckerSettingsCard from '@/views/settingsCards/SpellcheckerSettingsCard.vue'
 import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'

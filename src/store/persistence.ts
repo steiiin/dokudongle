@@ -1,4 +1,6 @@
 import { Storage } from '@ionic/storage'
+import type { UnwrapRef } from 'vue'
+import type { Protocol } from '@/types/protocol'
 
 // ############################################################################
 
@@ -13,8 +15,17 @@ export interface PersistedDokuState {
   schemaVersion?: number
   updatedAt?: string
   lastProtocolResetAt?: string
+  lastProtocolOpenedAt?: string
   lastProtocolSentAt?: string
   doku?: any
+  protocolHistory?: ProtocolHistoryEntry[]
+  activeHistoryEntryId?: string | null
+}
+
+export interface ProtocolHistoryEntry {
+  id: string
+  archivedAt: string
+  doku: UnwrapRef<Protocol>
 }
 
 export interface ProtocolAuditEntry {
@@ -85,25 +96,6 @@ export async function loadTemporaryProtocolState(): Promise<TemporaryProtocolSta
     return null
   }
   return raw as TemporaryProtocolState
-}
-
-export async function hasTemporaryProtocolState(): Promise<boolean> {
-  const temporaryState = await loadTemporaryProtocolState()
-  if (!temporaryState) {
-    return false
-  }
-
-  if (temporaryState.schemaVersion !== DOKU_SCHEMA_VERSION) {
-    await removeTemporaryProtocolState()
-    return false
-  }
-
-  return true
-}
-
-export async function saveTemporaryProtocolState(payload: TemporaryProtocolState): Promise<void> {
-  const storage = await getStorage()
-  await storage.set(DOKU_TEMPORARY_PROTOCOL_STORAGE_KEY, payload)
 }
 
 export async function removeTemporaryProtocolState(): Promise<void> {
