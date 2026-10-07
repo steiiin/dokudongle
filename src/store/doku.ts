@@ -174,20 +174,43 @@ function hydrateHistory(input: unknown): ProtocolHistoryEntry[] {
     if (!isRecord(entry) || typeof entry.id !== 'string' || !entry.id || ids.has(entry.id)
       || typeof entry.archivedAt !== 'string' || Number.isNaN(Date.parse(entry.archivedAt))) return []
     const doku = hydrateProtocol(entry.doku)
-    if (!doku || !containsProtocolData(doku)) return []
+    if (!doku) return []
     clearProtocolEditingState(doku)
     ids.add(entry.id)
     return [{ id: entry.id, archivedAt: entry.archivedAt, doku }]
   }).sort((a, b) => Date.parse(b.archivedAt) - Date.parse(a.archivedAt)).slice(0, 3)
 }
 
-function archiveProtocol(protocol: UnwrapRef<Protocol>, history: ProtocolHistoryEntry[]): ProtocolHistoryEntry[] {
-  if (!containsProtocolData(protocol)) return [...history]
-  return [{
+function updateHistoryEntry(
+  protocol: UnwrapRef<Protocol>, history: ProtocolHistoryEntry[], activeHistoryEntryId: string | null,
+): ProtocolHistoryEntry[] {
+  const entry = history.find(entry => entry.id === activeHistoryEntryId)
+  if (!entry) return history
+  const doku = toPersistable(protocol)
+  // Keep the same reference when nothing changed so committing an autosave
+  // cannot keep triggering the persistence subscription indefinitely.
+  if (JSON.stringify(toPersistable(entry.doku)) === JSON.stringify(doku)) return history
+  return history.map(item => item.id === entry.id ? { ...item, doku } : item)
+}
+
+function archiveProtocol(
+  protocol: UnwrapRef<Protocol>, history: ProtocolHistoryEntry[], activeHistoryEntryId: string | null,
+  preserveId?: string,
+): ProtocolHistoryEntry[] {
+  if (history.some(entry => entry.id === activeHistoryEntryId)) {
+    return updateHistoryEntry(protocol, history, activeHistoryEntryId)
+  }
+  if (!containsProtocolData(protocol)) return history
+  const next = [{
     id: crypto.randomUUID(),
     archivedAt: new Date().toISOString(),
     doku: toPersistable(protocol),
-  }, ...history].slice(0, 3)
+  }, ...history]
+  // Opening the oldest entry must not evict the entry we are about to edit.
+  while (next.length > 3) {
+    next.splice(next.findLastIndex(entry => entry.id !== preserveId), 1)
+  }
+  return next
 }
 
 // Queue operations outside reactive state. Persist reads the current state when
@@ -203,6 +226,7 @@ function serializeStorage<T>(store: object, operation: () => Promise<T>): Promis
 function persistedProtocolState(state: {
   doku: UnwrapRef<Protocol>
   protocolHistory: ProtocolHistoryEntry[]
+  activeHistoryEntryId: string | null
   lastProtocolResetAt: string
   lastProtocolSentAt: string | null
 }): PersistedDokuState {
@@ -213,6 +237,7 @@ function persistedProtocolState(state: {
     lastProtocolSentAt: state.lastProtocolSentAt ?? undefined,
     doku: toPersistable(state.doku),
     protocolHistory: toPersistable(state.protocolHistory),
+    activeHistoryEntryId: state.activeHistoryEntryId,
   }
 }
 
@@ -317,6 +342,7 @@ export const useDokuStore = defineStore('doku', {
 
     doku: resetProtocolState(),
     protocolHistory: [] as ProtocolHistoryEntry[],
+    activeHistoryEntryId: null as string | null,
     isProtocolChanging: false,
     lastProtocolResetAt: new Date().toISOString(),
     lastProtocolSentAt: null as string | null,
@@ -584,7 +610,8 @@ export const useDokuStore = defineStore('doku', {
         await serializeStorage(this, async () => {
           const next = {
             doku: resetProtocol(),
-            protocolHistory: archiveProtocol(this.doku, this.protocolHistory),
+            protocolHistory: archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId),
+            activeHistoryEntryId: null,
             lastProtocolResetAt: new Date().toISOString(),
             lastProtocolSentAt: null,
           }
@@ -602,13 +629,16 @@ export const useDokuStore = defineStore('doku', {
       this.isProtocolChanging = true
       try {
         return await serializeStorage(this, async () => {
-          const entry = this.protocolHistory.find(entry => entry.id === id)
+          if (!this.protocolHistory.some(entry => entry.id === id)) return false
+          const protocolHistory = archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId, id)
+          const entry = protocolHistory.find(entry => entry.id === id)
           const doku = entry && hydrateProtocol(toPersistable(entry.doku))
           if (!doku) return false
           clearProtocolEditingState(doku)
           const next = {
             doku,
-            protocolHistory: archiveProtocol(this.doku, this.protocolHistory),
+            protocolHistory,
+            activeHistoryEntryId: id,
             lastProtocolResetAt: new Date().toISOString(),
             lastProtocolSentAt: null,
           }
@@ -679,7 +709,9 @@ export const useDokuStore = defineStore('doku', {
       await serializeStorage(this, async () => {
         if (this.doku !== protocol) return
         const lastProtocolSentAt = new Date(referenceTime).toISOString()
-        await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolSentAt }))
+        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId)
+        await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolSentAt, protocolHistory }))
+        if (protocolHistory !== this.protocolHistory) this.protocolHistory = protocolHistory
         this.lastProtocolSentAt = lastProtocolSentAt
       })
     },
@@ -716,6 +748,9 @@ export const useDokuStore = defineStore('doku', {
         const next = {
           doku: doku ?? resetProtocol(),
           protocolHistory,
+          activeHistoryEntryId: doku && typeof persistedState?.activeHistoryEntryId === 'string'
+            && protocolHistory.some(entry => entry.id === persistedState.activeHistoryEntryId)
+            ? persistedState.activeHistoryEntryId : null,
           lastProtocolResetAt: doku
             ? persistedState!.lastProtocolResetAt ?? persistedState!.updatedAt ?? new Date().toISOString()
             : new Date().toISOString(),
@@ -726,6 +761,7 @@ export const useDokuStore = defineStore('doku', {
           next.lastProtocolSentAt = null
         }
         clearProtocolEditingState(next.doku)
+        next.protocolHistory = updateHistoryEntry(next.doku, next.protocolHistory, next.activeHistoryEntryId)
         await saveDokuState(persistedProtocolState(next))
         resetQuickies()
         this.$patch(state => Object.assign(state, next))
@@ -745,7 +781,11 @@ export const useDokuStore = defineStore('doku', {
       return 'none'
     },
     async persistToStorage() {
-      await serializeStorage(this, () => saveDokuState(persistedProtocolState(this)))
+      await serializeStorage(this, async () => {
+        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId)
+        await saveDokuState(persistedProtocolState({ ...this.$state, protocolHistory }))
+        if (protocolHistory !== this.protocolHistory) this.protocolHistory = protocolHistory
+      })
     },
     async sendProtocol() {
       if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false

@@ -18,6 +18,7 @@ export interface PersistedDokuState {
   lastProtocolSentAt?: string
   doku?: any
   protocolHistory?: ProtocolHistoryEntry[]
+  activeHistoryEntryId?: string | null
 }
 
 export interface ProtocolHistoryEntry {

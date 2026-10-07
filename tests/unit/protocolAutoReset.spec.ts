@@ -1,8 +1,9 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { useDokuStore } from '@/store/doku'
+import { createAppStartup } from '@/services/app-startup'
 import {
   appendProtocolAuditEntry, loadDokuState, loadTemporaryProtocolState,
   removeTemporaryProtocolState, saveDokuState, type PersistedDokuState,
@@ -12,6 +13,7 @@ import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sampl
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,
+  initStorage: vi.fn(),
   appendProtocolAuditEntry: vi.fn(),
   loadDokuState: vi.fn(),
   loadProtocolAuditEntries: vi.fn().mockResolvedValue([]),
@@ -174,7 +176,7 @@ describe('restoration', () => {
     expect(store.protocolHistory[0].doku.sampler.medication.PlanMedication[0].Name).toBe('Medication')
   })
 
-  test('resolves the oldest snapshot before archiving current work evicts it', async () => {
+  test('retains the oldest selected snapshot when archiving current work fills history', async () => {
     const store = useDokuStore()
     const oldest = await archive('one')
     await archive('two')
@@ -182,7 +184,11 @@ describe('restoration', () => {
     store.doku.situation.setText('current')
     await expect(store.restoreProtocolFromHistory(oldest)).resolves.toBe(true)
     expect(store.doku.situation.value).toBe('one')
-    expect(store.protocolHistory.map(entry => entry.doku.situation._text)).toEqual(['current', 'three', 'two'])
+    expect(store.protocolHistory.map(entry => entry.doku.situation._text)).toEqual(['current', 'three', 'one'])
+    expect(store.activeHistoryEntryId).toBe(oldest)
+    store.doku.situation.setText('one edited')
+    await store.persistToStorage()
+    expect(store.protocolHistory.map(entry => entry.doku.situation._text)).toEqual(['current', 'three', 'one edited'])
   })
 
   test('retains the selected snapshot when current work does not fill history', async () => {
@@ -219,7 +225,189 @@ describe('restoration', () => {
   })
 })
 
+describe('editing reopened protocols', () => {
+  test.each(['persistToStorage', 'markProtocolSent'] as const)('%s updates the same entry without changing its date or position', async action => {
+    const store = useDokuStore()
+    const id = await archive('original')
+    await archive('newer')
+    const metadata = store.protocolHistory.map(({ id, archivedAt }) => ({ id, archivedAt }))
+    await store.restoreProtocolFromHistory(id)
+    store.doku.situation.setText('edited')
+    store.doku.sampler.medication.PlanMedication.push(new SampleMedicationItem({ Name: 'Medication' }))
+    vi.setSystemTime(Date.now() + MINUTE_MS)
+    await store[action]()
+    expect(store.protocolHistory.map(({ id, archivedAt }) => ({ id, archivedAt }))).toEqual(metadata)
+    expect(store.protocolHistory[1].doku.situation._text).toBe('edited')
+    const saved = vi.mocked(saveDokuState).mock.lastCall![0]
+    expect(saved.activeHistoryEntryId).toBe(id)
+    expect(saved.protocolHistory![1].doku.situation._text).toBe('edited')
+    store.doku.situation.setText('not saved yet')
+    store.doku.sampler.medication.PlanMedication[0].Name = 'Changed'
+    expect(store.protocolHistory[1].doku.situation._text).toBe('edited')
+    expect(store.protocolHistory[1].doku.sampler.medication.PlanMedication[0].Name).toBe('Medication')
+    expect(saved.doku.situation._text).toBe('edited')
+  })
+
+  test.each(['newProtocol', 'autoResetProtocol'] as const)('%s saves pending edits in place and clears the link', async action => {
+    const store = useDokuStore()
+    const id = await archive('original')
+    await store.restoreProtocolFromHistory(id)
+    store.doku.situation.setText('edited')
+    await store[action]()
+    expect(store.protocolHistory).toHaveLength(1)
+    expect(store.protocolHistory[0]).toMatchObject({ id, doku: { situation: { _text: 'edited' } } })
+    expect(store.activeHistoryEntryId).toBeNull()
+    expect(vi.mocked(saveDokuState).mock.lastCall![0].activeHistoryEntryId).toBeNull()
+    expect(store.hasProtocolData).toBe(false)
+    await archive('new protocol')
+    expect(store.protocolHistory).toHaveLength(2)
+    expect(store.protocolHistory[0].id).not.toBe(id)
+  })
+
+  test('switching and repeatedly reopening preserves edits made before autosave', async () => {
+    const store = useDokuStore()
+    const first = await archive('first')
+    const second = await archive('second')
+    await store.restoreProtocolFromHistory(first)
+    store.doku.situation.setText('first edited')
+    await store.restoreProtocolFromHistory(first)
+    expect(store.doku.situation.value).toBe('first edited')
+    store.doku.situation.setText('first edited again')
+    await store.restoreProtocolFromHistory(second)
+    expect(store.doku.situation.value).toBe('second')
+    store.doku.situation.setText('second edited')
+    await store.restoreProtocolFromHistory(first)
+    expect(store.doku.situation.value).toBe('first edited again')
+    expect(store.protocolHistory.map(entry => entry.doku.situation._text)).toEqual(['second edited', 'first edited again'])
+    expect(store.activeHistoryEntryId).toBe(first)
+  })
+
+  test.each(['persistToStorage', 'markProtocolSent', 'newProtocol', 'restoreProtocolFromHistory'] as const)(
+    '%s leaves history and active edits intact after a failed write', async action => {
+      const store = useDokuStore()
+      const id = await archive('original')
+      const other = await archive('other')
+      await store.restoreProtocolFromHistory(id)
+      store.doku.situation.setText('unsaved edit')
+      const before = JSON.stringify(store.$state)
+      vi.mocked(saveDokuState).mockRejectedValueOnce(new Error('storage unavailable'))
+      const run = () => action === 'restoreProtocolFromHistory' ? store[action](other) : store[action]()
+      await expect(run()).rejects.toThrow('storage unavailable')
+      expect(JSON.stringify(store.$state)).toBe(before)
+      await run()
+      expect(store.protocolHistory.find(entry => entry.id === id)!.doku.situation._text).toBe('unsaved edit')
+    },
+  )
+
+  test('commits history only after saving and queues later edits without overwriting them', async () => {
+    const store = useDokuStore()
+    const id = await archive('original')
+    await store.restoreProtocolFromHistory(id)
+    store.doku.situation.setText('first edit')
+    const write = deferred()
+    vi.mocked(saveDokuState).mockClear().mockReturnValueOnce(write.promise)
+    const firstSave = store.persistToStorage()
+    await vi.waitFor(() => expect(saveDokuState).toHaveBeenCalledOnce())
+    expect(store.protocolHistory[0].doku.situation._text).toBe('original')
+    store.doku.situation.setText('second edit')
+    const secondSave = store.persistToStorage()
+    write.resolve()
+    await Promise.all([firstSave, secondSave])
+    expect(store.doku.situation.value).toBe('second edit')
+    expect(store.protocolHistory).toHaveLength(1)
+    expect(store.protocolHistory[0].doku.situation._text).toBe('second edit')
+    expect(vi.mocked(saveDokuState).mock.calls[0][0].protocolHistory![0].doku.situation._text).toBe('first edit')
+    expect(vi.mocked(saveDokuState).mock.lastCall![0].protocolHistory![0].doku.situation._text).toBe('second edit')
+  })
+
+  test('an autosave queued behind switching entries persists the new active link', async () => {
+    const store = useDokuStore()
+    const first = await archive('first')
+    const second = await archive('second')
+    await store.restoreProtocolFromHistory(first)
+    store.doku.situation.setText('first edited')
+    const write = deferred()
+    vi.mocked(saveDokuState).mockReturnValueOnce(write.promise)
+    const restore = store.restoreProtocolFromHistory(second)
+    const autosave = store.persistToStorage()
+    write.resolve()
+    await Promise.all([restore, autosave])
+    const saved = vi.mocked(saveDokuState).mock.lastCall![0]
+    expect(saved.activeHistoryEntryId).toBe(second)
+    expect(saved.doku.situation._text).toBe('second')
+    expect(saved.protocolHistory!.map(entry => entry.doku.situation._text)).toEqual(['second', 'first edited'])
+  })
+
+  test('the application autosave subscription updates history and settles without looping', async () => {
+    const store = useDokuStore()
+    const id = await archive('original')
+    await store.restoreProtocolFromHistory(id)
+    vi.mocked(loadDokuState).mockResolvedValueOnce(vi.mocked(saveDokuState).mock.lastCall![0])
+    const startup = createAppStartup({
+      getStore: () => store,
+      initializeStorage: vi.fn().mockResolvedValue(undefined),
+      registerAppStateChange: vi.fn().mockResolvedValue(undefined),
+      scheduleAfterPaint: callback => callback(),
+      showError: vi.fn().mockResolvedValue(undefined),
+      startupTimeoutMs: 1000,
+    })
+    await startup.start()
+    expect(startup.state.status).toBe('ready')
+    vi.mocked(saveDokuState).mockClear()
+    store.doku.situation.setText('autosaved edit')
+    await nextTick()
+    await vi.advanceTimersByTimeAsync(3000)
+    expect(store.protocolHistory[0].doku.situation._text).toBe('autosaved edit')
+    await vi.advanceTimersByTimeAsync(3000)
+    const calls = vi.mocked(saveDokuState).mock.calls.length
+    expect(calls).toBeGreaterThan(0)
+    await vi.advanceTimersByTimeAsync(12000)
+    expect(saveDokuState).toHaveBeenCalledTimes(calls)
+    store.$dispose()
+  })
+})
+
 describe('persistence and migration', () => {
+  test.each([false, true])('preserves the active link and subsequent updates across restart (cleared: %s)', async cleared => {
+    const store = useDokuStore()
+    const id = await archive('original')
+    const archivedAt = store.protocolHistory[0].archivedAt
+    await store.restoreProtocolFromHistory(id)
+    if (cleared) store.doku = resetProtocol()
+    else store.doku.situation.setText('edited')
+    await store.persistToStorage()
+    const saved = JSON.parse(JSON.stringify(vi.mocked(saveDokuState).mock.lastCall![0]))
+    setActivePinia(createPinia())
+    vi.mocked(loadDokuState).mockResolvedValueOnce(saved)
+    const restarted = useDokuStore()
+    await restarted.hydrateFromStorage()
+    expect(restarted.activeHistoryEntryId).toBe(id)
+    expect(restarted.protocolHistory).toHaveLength(1)
+    expect(restarted.protocolHistory[0]).toMatchObject({ id, archivedAt })
+    expect(restarted.doku.situation.value).toBe(cleared ? '' : 'edited')
+    await restarted.newProtocol()
+    expect(restarted.protocolHistory).toHaveLength(1)
+    // Cleared entries also survive reload once they are no longer active.
+    vi.mocked(loadDokuState).mockResolvedValueOnce(vi.mocked(saveDokuState).mock.lastCall![0])
+    await restarted.hydrateFromStorage()
+    await restarted.restoreProtocolFromHistory(id)
+    expect(restarted.doku.situation.value).toBe(cleared ? '' : 'edited')
+    restarted.doku.situation.setText('after restart')
+    await restarted.newProtocol()
+    expect(restarted.protocolHistory).toHaveLength(1)
+    expect(restarted.protocolHistory[0]).toMatchObject({ id, archivedAt, doku: { situation: { _text: 'after restart' } } })
+  })
+
+  test.each([undefined, null, '', 'missing', 42])('ignores an absent or invalid persisted history link: %s', async activeHistoryEntryId => {
+    await archive('saved')
+    const saved = vi.mocked(saveDokuState).mock.lastCall![0]
+    vi.mocked(loadDokuState).mockResolvedValueOnce({ ...saved, activeHistoryEntryId } as PersistedDokuState)
+    const store = useDokuStore()
+    await store.hydrateFromStorage()
+    expect(store.activeHistoryEntryId).toBeNull()
+    expect(store.protocolHistory).toHaveLength(1)
+  })
+
   test('survives restart and restores saved class methods', async () => {
     const id = await archive('Persistent situation')
     const saved = JSON.parse(JSON.stringify(vi.mocked(saveDokuState).mock.lastCall![0]))
@@ -241,6 +429,7 @@ describe('persistence and migration', () => {
     const store = useDokuStore()
     await store.hydrateFromStorage()
     expect(store.protocolHistory).toEqual([])
+    expect(store.activeHistoryEntryId).toBeNull()
     expect(store.doku.situation.value).toBe('Existing')
     expect(store.wasCurrentProtocolSent()).toBe(Boolean(sentAt))
   })
@@ -250,12 +439,14 @@ describe('persistence and migration', () => {
     const saved = vi.mocked(saveDokuState).mock.lastCall![0]
     saved.doku = null
     const valid = saved.protocolHistory![0]
+    saved.activeHistoryEntryId = valid.id
     saved.protocolHistory = [null, { ...valid, id: 'broken', doku: { situation: { _text: 42 } } },
       { ...valid, id: 'bad-date', archivedAt: 'invalid' }, valid, valid] as unknown as PersistedDokuState['protocolHistory']
     vi.mocked(loadDokuState).mockResolvedValueOnce(saved)
     const store = useDokuStore()
     await store.hydrateFromStorage()
     expect(store.hasProtocolData).toBe(false)
+    expect(store.activeHistoryEntryId).toBeNull()
     expect(store.protocolHistory).toHaveLength(1)
     expect(store.protocolHistory[0].doku.situation.value).toBe('valid')
   })
