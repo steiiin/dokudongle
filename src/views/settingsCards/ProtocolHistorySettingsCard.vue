@@ -1,10 +1,11 @@
 <template>
   <IonCard data-testid="protocol-history-settings">
-    <IonCardHeader><IonCardTitle>Protokolle wiederherstellen</IonCardTitle></IonCardHeader>
+    <IonCardHeader><IonCardTitle>Archiv</IonCardTitle></IonCardHeader>
     <IonCardContent class="with-list">
       <IonList v-if="store.protocolHistory.length">
-        <IonItem v-for="entry in store.protocolHistory" :key="entry.id" button detail
-          :disabled="busy || store.isProtocolChanging" @click="restore(entry.id)">
+        <IonItem v-for="(entry,index) in store.protocolHistory" :key="entry.id" button detail
+          :disabled="busy || store.isProtocolChanging" @click="restore(entry.id)"
+          :lines="(index+1)<store.protocolHistory.length ? 'full' : 'none'">
           <IonLabel>
             <h2>{{ formatDate(entry.archivedAt) }}</h2>
             <p class="situation-preview">{{ entry.doku.situation._text.trim() || 'Ohne Situationsbeschreibung' }}</p>
@@ -18,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDokuStore } from '@/store/doku'
 

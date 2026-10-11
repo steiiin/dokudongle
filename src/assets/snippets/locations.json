@@ -5,7 +5,7 @@
     "trigger": "@",
     "label": "Uniklinik Dresden",
     "replacement": "Uniklinik Dresden",
-    "keywords": [ "uniklinik", "ukd", "uni", "dresden" ],
+    "keywords": [ "ukd" ],
     "category": "hospital"
   },
   {
@@ -13,7 +13,7 @@
     "trigger": "@",
     "label": "KH DD-Friedrichstadt",
     "replacement": "KH DD-Friedrichstadt",
-    "keywords": [ "krankenhaus", "fstadt", "friedrichstadt" ],
+    "keywords": [ "fstadt" ],
     "category": "hospital"
   },
   {
@@ -21,7 +21,6 @@
     "trigger": "@",
     "label": "KH DD-Neustadt",
     "replacement": "KH DD-Neustadt",
-    "keywords": [ "krankenhaus", "neustadt" ],
     "category": "hospital"
   },
   {
@@ -29,7 +28,6 @@
     "trigger": "@",
     "label": "KH DD-StJosephStift",
     "replacement": "KH DD-StJosephStift",
-    "keywords": [ "krankenhaus", "stift", "joseph" ],
     "category": "hospital"
   },
   {
@@ -37,7 +35,7 @@
     "trigger": "@",
     "label": "KH DD-StMarien",
     "replacement": "KH DD-StMarien",
-    "keywords": [ "krankenhaus", "stmarien", "sankt", "marien", "psych" ],
+    "keywords": [ "sankt" ],
     "category": "hospital"
   },
   {
@@ -45,7 +43,7 @@
     "trigger": "@",
     "label": "KH DD-Diako",
     "replacement": "KH DD-Diako",
-    "keywords": [ "krankenhaus", "diakonissen" ],
+    "keywords": [ "diakonissen" ],
     "category": "hospital"
   },
 
@@ -54,7 +52,6 @@
     "trigger": "@",
     "label": "KH Radebeul",
     "replacement": "KH Radebeul",
-    "keywords": [ "krankenhaus", "radebeul" ],
     "category": "hospital"
   },
   {
@@ -62,7 +59,7 @@
     "trigger": "@",
     "label": "KH Meißen",
     "replacement": "KH Meißen",
-    "keywords": [ "krankenhaus", "meissen", "meißen" ],
+    "keywords": [ "meissen" ],
     "category": "hospital"
   },
   {
@@ -70,7 +67,6 @@
     "trigger": "@",
     "label": "KH Riesa",
     "replacement": "KH Riesa",
-    "keywords": [ "krankenhaus", "riesa" ],
     "category": "hospital"
   },
   {
@@ -78,7 +74,7 @@
     "trigger": "@",
     "label": "FKH Coswig",
     "replacement": "FKH Coswig",
-    "keywords": [ "krankenhaus", "coswig", "lungenklinik" ],
+    "keywords": [ "lungenklinik" ],
     "category": "hospital"
   },
   {
@@ -86,7 +82,6 @@
     "trigger": "@",
     "label": "Reha Radeburg",
     "replacement": "Reha Radeburg",
-    "keywords": [ "reha", "radeburg" ],
     "category": "hospital"
   },
 
@@ -95,7 +90,6 @@
     "trigger": "@",
     "label": "KH Freital",
     "replacement": "KH Freital",
-    "keywords": [ "krankenhaus", "freital" ],
     "category": "hospital"
   },
   {
@@ -103,7 +97,6 @@
     "trigger": "@",
     "label": "KH Arnsdorf",
     "replacement": "KH Arnsdorf",
-    "keywords": [ "krankenhaus", "arnsdorf", "psych" ],
     "category": "hospital"
   }
 

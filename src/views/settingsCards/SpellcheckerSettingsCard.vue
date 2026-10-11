@@ -2,14 +2,14 @@
   <IonCard data-testid="spellchecker-settings">
     <IonCardHeader><IonCardTitle>Rechtschreibprüfung</IonCardTitle></IonCardHeader>
     <IonCardContent class="with-list">
-      <IonList>
+      <IonList lines="full">
         <IonItem button detail @click="openDictionary">
           <IonIcon slot="start" :icon="bookOutline" /><IonLabel>Eigenes Wörterbuch</IonLabel>
         </IonItem>
         <IonItem button detail @click="activeModal = 'shortcuts'">
           <IonIcon slot="start" :icon="swapHorizontalOutline" /><IonLabel>Shortcut-Ersetzungen</IonLabel>
         </IonItem>
-        <IonItem button detail @click="activeModal = 'locations'">
+        <IonItem button detail @click="activeModal = 'locations'" lines="none">
           <IonIcon slot="start" :icon="locationOutline" /><IonLabel>Orts-Snippets</IonLabel>
         </IonItem>
       </IonList>

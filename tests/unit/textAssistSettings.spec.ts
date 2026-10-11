@@ -109,6 +109,30 @@ describe('text assistance settings', () => {
     expect(locations.at(-1)!.id).not.toBe(locations.at(-2)!.id)
   })
 
+  test('edits snippets in place and renames shortcuts atomically across reloads', async () => {
+    const { service } = setup()
+    const before = await service.getLocationSnippets()
+    await service.updateLocationSnippet(before[0].id, { ...location, trigger: '@', label: 'Neuer Ort', replacement: 'Neuer Ort' })
+    await service.updateShortcutReplacement('lt', 'neu', 'Neuer Text')
+    const restored = reload().service
+    const after = await restored.getLocationSnippets()
+    expect(after).toHaveLength(before.length)
+    expect(after[0]).toMatchObject({ id: before[0].id, label: 'Neuer Ort', replacement: 'Neuer Ort' })
+    expect(after.slice(1)).toEqual(before.slice(1))
+    expect(await restored.getShortcutReplacements()).not.toHaveProperty('lt')
+    expect(await restored.getShortcutReplacements()).toHaveProperty('neu', 'Neuer Text')
+    expect(service.snippets.getSuggestions('@heim', 5)[0]).toMatchObject({ snippetId: before[0].id, replacement: 'Neuer Ort' })
+    await expect(service.updateShortcutReplacement('missing', 'test', 'text')).rejects.toThrow('nicht mehr vorhanden')
+    await expect(service.updateShortcutReplacement('neu', ' ', 'text')).rejects.toThrow('einzelnen Wort')
+    await expect(service.updateShortcutReplacement('neu', 'neu', ' ')).rejects.toThrow('Ersetzung')
+    await service.addShortcutReplacement('taken', 'Belegt')
+    await expect(service.updateShortcutReplacement('neu', 'taken', 'text')).rejects.toThrow('bereits vorhanden')
+    await expect(service.updateLocationSnippet('missing', location)).rejects.toThrow('nicht mehr vorhanden')
+    await expect(service.updateLocationSnippet(before[0].id, { ...location, label: '' })).rejects.toThrow('Bezeichnung')
+    expect((await service.getLocationSnippets())[0].label).toBe('Neuer Ort')
+    expect(await service.getShortcutReplacements()).toHaveProperty('neu', 'Neuer Text')
+  })
+
   test('failed add, remove and reset roll back and allow retries', async () => {
     const { service } = setup()
     await service.addShortcutReplacement('custom', 'text')
@@ -118,9 +142,11 @@ describe('text assistance settings', () => {
     const actions = [
       () => service.addShortcutReplacement('neu', 'text'),
       () => service.removeShortcutReplacement('lt'),
+      () => service.updateShortcutReplacement('lt', 'renamed', 'Text'),
       () => service.resetShortcutReplacements(),
       () => service.addLocationSnippet(location),
       () => service.removeLocationSnippet(locations[0].id),
+      () => service.updateLocationSnippet(locations[0].id, location),
       () => service.resetLocationSnippets(),
     ]
     for (const action of actions) {

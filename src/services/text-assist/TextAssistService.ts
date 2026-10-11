@@ -221,10 +221,12 @@ export class TextAssistService {
 
   getShortcutReplacements(): Promise<Record<string, string>> { return this.settings.getShortcuts() }
   addShortcutReplacement(shortcut: string, replacement: string): Promise<void> { return this.settings.addShortcut(shortcut, replacement) }
+  updateShortcutReplacement(original: string, shortcut: string, replacement: string): Promise<void> { return this.settings.updateShortcut(original, shortcut, replacement) }
   removeShortcutReplacement(shortcut: string): Promise<void> { return this.settings.removeShortcut(shortcut) }
   resetShortcutReplacements(): Promise<void> { return this.settings.resetShortcuts() }
   getLocationSnippets(): Promise<TextSnippet[]> { return this.settings.getLocations() }
   addLocationSnippet(snippet: NewLocationSnippet): Promise<void> { return this.settings.addLocation(snippet) }
+  updateLocationSnippet(id: string, snippet: NewLocationSnippet): Promise<void> { return this.settings.updateLocation(id, snippet) }
   removeLocationSnippet(id: string): Promise<void> { return this.settings.removeLocation(id) }
   resetLocationSnippets(): Promise<void> { return this.settings.resetLocations() }
 
