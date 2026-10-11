@@ -165,7 +165,7 @@ import { provideTextSuggestionScope } from '@/services/text-suggestions'
 import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
 import { isCompletionDelimiter, isDictionaryEntry, wordAroundCursor } from '@/services/text-assist/text'
-import { sameInputSnapshot, snapshotBeforeInput, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
+import { sameInputSnapshot, snapshotBeforeInput, snippetStartMutation, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
 
 // ############################################################################
 
@@ -245,6 +245,9 @@ const selectedDictionaryText = computed(() => {
 
 const isQuickieModalOpen = ref(false)
 const activeQuickie = ref<Quickie | null>(null)
+const canStartSnippet = computed(() => isEditing.value && isTextAssistReady.value && isTextAssistAvailable.value
+  && !isComposing.value && !isApplyingAssistMutation.value && !props.modelValue.isEnhancing
+  && !isDictionaryOpen.value && !isQuickieModalOpen.value)
 
 // ############################################################################
 
@@ -314,6 +317,7 @@ const handleModalDidPresent = async () => {
 }
 
 const closeModal = () => {
+  assistRevision += 1
   stopObservingTextarea()
   saveDraft()
   textAssistService.invalidateSession(assistSessionId, snapshotTextarea())
@@ -587,7 +591,10 @@ const handleFocus = async () => {
   lastInputSnapshot = snapshotTextarea()
   setSuggestionSuppression(true)
   isEditing.value = true
-  suggestionScope.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) })
+  suggestionScope.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) }, {
+    enabled: canStartSnippet,
+    start: () => { void startSnippet() },
+  })
   const revision = assistRevision
 
   const updated = cloneModelValue()
@@ -599,6 +606,7 @@ const handleFocus = async () => {
 }
 
 const handleBlur = () => {
+  assistRevision += 1
   pendingBeforeInput.value = null
   lastInputSnapshot = null
   clearTypingSnapshotTimeout()
@@ -672,6 +680,17 @@ const applyTextSuggestion = async (suggestion: TextSuggestion) => {
   assistRevision += 1
   if (mutation) await applyAssistMutation(mutation)
   await refreshTextSuggestions()
+}
+
+const startSnippet = async () => {
+  const textarea = inputTextarea.value
+  if (!canStartSnippet.value || !textarea || document.activeElement !== textarea || textarea.disabled || textarea.readOnly) return
+  const snapshot = snapshotTextarea()
+  const revision = ++assistRevision
+  pendingBeforeInput.value = null
+  textAssistService.invalidateSession(assistSessionId, snapshot)
+  await applyAssistMutation(snippetStartMutation(snapshot))
+  if (revision === assistRevision) await refreshTextSuggestions()
 }
 
 const commitOpenEditIfNeeded = () => {
@@ -914,6 +933,7 @@ const acceptQuickieDialog = async (insertedText: string) => {
 //#endregion
 
 onBeforeUnmount(() => {
+  assistRevision += 1
   document.removeEventListener('selectionchange', handleDocumentSelectionChange)
   stopObservingTextarea()
   clearTypingSnapshotTimeout()

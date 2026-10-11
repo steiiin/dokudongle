@@ -119,6 +119,81 @@ afterEach(() => {
 })
 
 describe('DodoInputText single-line IME', () => {
+  test.each([
+    ['', 0, 0, '@', 1],
+    ['Ziel', 4, 4, 'Ziel @', 6],
+    ['Ziel Alt Ende', 5, 8, 'Ziel @ Ende', 6],
+  ])('starts a snippet in %j and retains focus and caret', async (text, start, end, expected, cursor) => {
+    let finishOldRequest!: (value: []) => void
+    vi.spyOn(textAssistService, 'getSuggestions').mockImplementationOnce(() =>
+      new Promise(resolve => { finishOldRequest = resolve }))
+    const wrapper = mountAssistedInput()
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.value = text
+    input.setSelectionRange(start, end)
+    input.focus()
+    await flushPromises()
+    const button = wrapper.get('[aria-label="Textbaustein einfügen"]')
+    await vi.waitFor(() => expect((button.element as HTMLButtonElement).disabled).toBe(false))
+    await button.trigger('pointerdown')
+    await button.trigger('click')
+    await flushPromises()
+    expect(input.value).toBe(expected)
+    expect(input.selectionStart).toBe(cursor)
+    expect(input.selectionEnd).toBe(cursor)
+    expect(document.activeElement).toBe(input)
+    expect(wrapper.getComponent(DodoInputText).emitted('update:modelValue')?.at(-1)).toEqual([expected])
+    const panel = wrapper.getComponent(DodoTextSuggestionPanel)
+    await vi.waitFor(() => expect(panel.props('suggestions').length).toBeGreaterThan(0))
+    finishOldRequest([])
+    await flushPromises()
+    expect(panel.props('suggestions').length).toBeGreaterThan(0)
+    expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(false)
+    const snippet = panel.props('suggestions')[0]
+    await panel.get('button').trigger('click')
+    await flushPromises()
+    expect(input.value).toBe(expected.slice(0, cursor - 1) + snippet.replacement + expected.slice(cursor))
+    input.blur()
+    await flushPromises()
+    expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('disables snippet insertion during composition', async () => {
+    const wrapper = mountAssistedInput()
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))
+    await flushPromises()
+    const button = wrapper.get<HTMLButtonElement>('[aria-label="Textbaustein einfügen"]')
+    expect(button.element.disabled).toBe(true)
+    await button.trigger('click')
+    expect(input.value).toBe('')
+    wrapper.unmount()
+  })
+
+  test('keeps the snippet button disabled until assistance is ready', async () => {
+    let ready!: () => void
+    vi.spyOn(textAssistService, 'initialize').mockImplementationOnce(() => new Promise(resolve => { ready = resolve }))
+    vi.spyOn(textAssistService, 'getSuggestions').mockResolvedValue([])
+    const wrapper = mountAssistedInput()
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    await flushPromises()
+    const button = wrapper.get<HTMLButtonElement>('[aria-label="Textbaustein einfügen"]')
+    expect(button.element.disabled).toBe(true)
+    ready()
+    await flushPromises()
+    expect(button.element.disabled).toBe(false)
+    input.blur()
+    await flushPromises()
+    expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   test('leaves native input behavior unchanged when no dictionary prop is present', async () => {
     const process = vi.spyOn(textAssistService, 'processAutomaticInput')
     const wrapper = mountInput()

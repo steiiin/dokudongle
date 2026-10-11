@@ -56,6 +56,106 @@ describe('DodoInputTextArea native textarea', () => {
 
   afterEach(() => { vi.unstubAllGlobals() })
 
+  test.each([
+    ['', 0, 0, '@', 1],
+    ['Ziel', 4, 4, 'Ziel @', 6],
+    ['Ziel Alt Ende', 5, 8, 'Ziel @ Ende', 6],
+  ])('starts an undoable snippet in %j without losing focus', async (text, start, end, expected, cursor) => {
+    let finishOldRequest!: (value: []) => void
+    const getSuggestions = vi.spyOn(textAssistService, 'getSuggestions').mockImplementationOnce(() =>
+      new Promise(resolve => { finishOldRequest = resolve }))
+    const wrapper = mountTextarea(new EnhanceableText(text), document.body)
+    try {
+      wrapper.vm.openModal()
+      await flushPromises()
+      const textarea = wrapper.get<HTMLTextAreaElement>('textarea').element
+      textarea.setSelectionRange(start, end)
+      textarea.focus()
+      await flushPromises()
+      await wrapper.setProps({ modelValue: lastModelUpdate(wrapper) })
+      const button = wrapper.get('[aria-label="Textbaustein einfügen"]')
+      await vi.waitFor(() => expect((button.element as HTMLButtonElement).disabled).toBe(false))
+      await button.trigger('pointerdown')
+      await button.trigger('click')
+      await flushPromises()
+      expect(textarea.value).toBe(expected)
+      expect(textarea.selectionStart).toBe(cursor)
+      expect(textarea.selectionEnd).toBe(cursor)
+      expect(document.activeElement).toBe(textarea)
+      const panel = wrapper.getComponent(DodoTextSuggestionPanel)
+      await vi.waitFor(() => expect(panel.props('suggestions').length).toBeGreaterThan(0))
+      finishOldRequest([])
+      await flushPromises()
+      expect(panel.props('suggestions').length).toBeGreaterThan(0)
+      expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(false)
+      const snippet = panel.props('suggestions')[0]
+      await panel.get('button').trigger('click')
+      await flushPromises()
+      const expanded = expected.slice(0, cursor - 1) + snippet.replacement + expected.slice(cursor)
+      expect(textarea.value).toBe(expanded)
+      textarea.blur()
+      await flushPromises()
+      expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+      const updated = lastModelUpdate(wrapper)
+      expect(updated.value).toBe(expanded)
+      updated.undo()
+      expect(updated.value).toBe(text)
+    } finally {
+      wrapper.unmount()
+      getSuggestions.mockRestore()
+    }
+  })
+
+  test('disables the snippet button during composition and enhancement', async () => {
+    const wrapper = mountTextarea(new EnhanceableText(''), document.body)
+    try {
+      wrapper.vm.openModal()
+      await flushPromises()
+      const textarea = wrapper.get<HTMLTextAreaElement>('textarea').element
+      textarea.focus()
+      textarea.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))
+      await flushPromises()
+      const button = wrapper.get<HTMLButtonElement>('[aria-label="Textbaustein einfügen"]')
+      expect(button.element.disabled).toBe(true)
+      await button.trigger('click')
+      expect(textarea.value).toBe('')
+      textarea.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '' }))
+      await vi.waitFor(() => expect(button.element.disabled).toBe(false))
+      const enhancing = new EnhanceableText('')
+      enhancing.isEnhancing = true
+      await wrapper.setProps({ modelValue: enhancing })
+      expect(button.element.disabled).toBe(true)
+      await button.trigger('click')
+      expect(textarea.value).toBe('')
+    } finally { wrapper.unmount() }
+  })
+
+  test('keeps the snippet button disabled until assistance is ready', async () => {
+    let ready!: () => void
+    const initialize = vi.spyOn(textAssistService, 'initialize').mockImplementationOnce(() => new Promise(resolve => { ready = resolve }))
+    const suggestions = vi.spyOn(textAssistService, 'getSuggestions').mockResolvedValue([])
+    const wrapper = mountTextarea(new EnhanceableText(''), document.body)
+    try {
+      wrapper.vm.openModal()
+      await nextTick()
+      const textarea = wrapper.get<HTMLTextAreaElement>('textarea').element
+      textarea.focus()
+      await nextTick()
+      const button = wrapper.get<HTMLButtonElement>('[aria-label="Textbaustein einfügen"]')
+      expect(button.element.disabled).toBe(true)
+      ready()
+      await flushPromises()
+      expect(button.element.disabled).toBe(false)
+      textarea.blur()
+      await nextTick()
+      expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+    } finally {
+      wrapper.unmount()
+      initialize.mockRestore()
+      suggestions.mockRestore()
+    }
+  })
+
   test('renders optional help through the shared hint', () => {
     const wrapper = shallowMount(DodoInputTextArea, {
       props: { modelValue: new EnhanceableText(''), title: 'Situation', assistContextId: 'test.hint' },

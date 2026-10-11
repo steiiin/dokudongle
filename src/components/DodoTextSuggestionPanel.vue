@@ -1,5 +1,15 @@
 <template>
-  <div v-if="suggestions.length" class="dd-suggestion-panel" role="listbox" aria-label="Textvorschläge">
+  <div v-if="suggestions.length || hasSnippetStart" class="dd-suggestion-panel"
+    :role="suggestions.length ? 'listbox' : undefined" aria-label="Textvorschläge">
+    <button
+      v-if="!suggestions.length && hasSnippetStart"
+      type="button"
+      class="dd-suggestion"
+      aria-label="Textbaustein einfügen"
+      :disabled="!canStartSnippet"
+      @pointerdown.prevent
+      @click="emit('start-snippet')"
+    >@</button>
     <button
       v-for="suggestion in suggestions"
       :key="suggestion.id"
@@ -17,10 +27,15 @@
 <script setup lang="ts">
 import type { TextSuggestion } from '@/services/text-assist'
 
-defineProps<{ suggestions: TextSuggestion[] }>()
+defineProps<{
+  suggestions: TextSuggestion[]
+  hasSnippetStart?: boolean
+  canStartSnippet?: boolean
+}>()
 
 const emit = defineEmits<{
   (event: 'select', suggestion: TextSuggestion): void
+  (event: 'start-snippet'): void
 }>()
 
 const selectSuggestion = (suggestion: TextSuggestion) => emit('select', suggestion)
@@ -63,5 +78,9 @@ const selectSuggestion = (suggestion: TextSuggestion) => emit('select', suggesti
 .dd-suggestion:focus-visible {
   outline: 2px solid var(--ion-color-primary);
   outline-offset: 1px;
+}
+
+.dd-suggestion:disabled {
+  opacity: 0.5;
 }
 </style>

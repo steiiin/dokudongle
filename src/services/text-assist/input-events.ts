@@ -1,5 +1,17 @@
 import type { TextInputSnapshot, TextMutation } from './types'
 
+export const snippetStartMutation = (snapshot: TextInputSnapshot): TextMutation => {
+  // Match SnippetService's boundary rule, including Unicode letters and marks.
+  const previous = Array.from(snapshot.text.slice(0, snapshot.selectionStart)).at(-1) ?? ''
+  const replacement = /[\p{L}\p{M}\p{N}_]/u.test(previous) ? ' @' : '@'
+  return {
+    start: snapshot.selectionStart,
+    end: snapshot.selectionEnd,
+    replacement,
+    cursor: snapshot.selectionStart + replacement.length,
+  }
+}
+
 export const sameInputSnapshot = (before: TextInputSnapshot | null, after: TextInputSnapshot): boolean =>
   before !== null
   && before.text === after.text

@@ -23,7 +23,7 @@ import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
 import { useTextSuggestionScope } from '@/services/text-suggestions'
 
 import { textAssistService } from '@/services/text-assist'
-import { sameInputSnapshot, snapshotBeforeInput, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
+import { sameInputSnapshot, snapshotBeforeInput, snippetStartMutation, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
 import type { ImeDictionary } from '@/services/text-assist'
 import type { TextInputSnapshot } from '@/services/text-assist'
 import type { TextMutation } from '@/services/text-assist'
@@ -68,6 +68,8 @@ let textAssistInitialization: Promise<void> | null = null
 
 const imeEnabled = computed(() => props.imeDictionary !== undefined)
 const imeOperational = computed(() => imeEnabled.value && isTextAssistAvailable.value)
+const canStartSnippet = computed(() => imeOperational.value && isTextAssistReady.value
+  && !isComposing.value && !isApplyingAssistMutation.value)
 const imeDictionarySignature = computed(() => props.imeDictionary === undefined
   ? null
   : JSON.stringify(props.imeDictionary))
@@ -201,7 +203,8 @@ const processAssistInput = async (before: TextInputSnapshot, event: InputEvent, 
 const refreshTextSuggestions = async () => {
   const revision = ++assistRevision
   await initializeTextAssist()
-  if (!imeOperational.value || isComposing.value || revision !== assistRevision) {
+  if (revision !== assistRevision) return
+  if (!imeOperational.value || isComposing.value) {
     updateTextSuggestions([])
     return
   }
@@ -225,6 +228,17 @@ const applyTextSuggestion = async (suggestion: TextSuggestion) => {
   assistRevision += 1
   if (mutation) await applyAssistMutation(mutation, snapshot.text)
   await refreshTextSuggestions()
+}
+
+const startSnippet = async () => {
+  const input = nativeInput.value
+  if (!canStartSnippet.value || !input || document.activeElement !== input || input.disabled || input.readOnly) return
+  const snapshot = snapshotInput()
+  const revision = ++assistRevision
+  pendingBeforeInput.value = null
+  textAssistService.invalidateSession(assistSessionId, snapshot)
+  await applyAssistMutation(snippetStartMutation(snapshot), snapshot.text)
+  if (revision === assistRevision) await refreshTextSuggestions()
 }
 
 const handleBeforeInput = (event: InputEvent) => {
@@ -269,7 +283,10 @@ const handleFocus = () => {
   if (!imeOperational.value) return
   lastInputSnapshot = snapshotInput()
   setSuggestionSuppression(true)
-  suggestionScope?.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) })
+  suggestionScope?.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) }, {
+    enabled: canStartSnippet,
+    start: () => { void startSnippet() },
+  })
   void refreshTextSuggestions()
 }
 

@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { defineComponent, nextTick, ref } from 'vue'
+import { computed, defineComponent, nextTick, ref } from 'vue'
 import { describe, expect, test, vi } from 'vitest'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
@@ -42,6 +42,29 @@ const HostHarness = defineComponent({
 })
 
 describe('text suggestion panel interactions', () => {
+  test('renders an accessible fallback only without suggestions and preserves pointer focus', async () => {
+    const wrapper = mount(DodoTextSuggestionPanel, {
+      props: { suggestions: [], hasSnippetStart: true, canStartSnippet: true },
+    })
+    const button = wrapper.get('button')
+    expect(button.text()).toBe('@')
+    expect(button.attributes('aria-label')).toBe('Textbaustein einfügen')
+    expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+    const pointer = new Event('pointerdown', { bubbles: true, cancelable: true })
+    button.element.dispatchEvent(pointer)
+    expect(pointer.defaultPrevented).toBe(true)
+    expect(wrapper.emitted('start-snippet')).toBeUndefined()
+    await button.trigger('click')
+    expect(wrapper.emitted('start-snippet')).toEqual([[]])
+    await wrapper.setProps({ canStartSnippet: false })
+    expect((button.element as HTMLButtonElement).disabled).toBe(true)
+    await wrapper.setProps({ suggestions: [suggestion('candidate')] })
+    expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(false)
+    expect(wrapper.find('[role="listbox"]').exists()).toBe(true)
+    await wrapper.setProps({ suggestions: [], hasSnippetStart: false })
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
   test('preserves input focus on pointerdown and selects once on click', async () => {
     const item = suggestion('candidate')
     const wrapper = mount(DodoTextSuggestionPanel, {
@@ -58,6 +81,38 @@ describe('text suggestion panel interactions', () => {
 })
 
 describe('scoped text suggestion hosts', () => {
+  test('routes snippet starts to the active modal owner and tracks availability', async () => {
+    const wrapper = mount(HostHarness)
+    const outer = (wrapper.vm as any).scope
+    const nested = (wrapper.vm as any).nested.scope
+    const enabled = ref(true)
+    const startOuter = vi.fn()
+    const startNested = vi.fn()
+    const owner = Symbol('nested')
+    outer.activate(Symbol('outer'), vi.fn(), { enabled: computed(() => true), start: startOuter })
+    nested.activate(owner, vi.fn(), { enabled: computed(() => enabled.value), start: startNested })
+    await nextTick()
+    await wrapper.get('.nested button').trigger('click')
+    expect(startNested).toHaveBeenCalledOnce()
+    expect(startOuter).not.toHaveBeenCalled()
+    enabled.value = false
+    await nextTick()
+    expect(wrapper.get('.nested button').attributes('disabled')).toBeDefined()
+    nested.startSnippet()
+    expect(startNested).toHaveBeenCalledOnce()
+    nested.clear(Symbol('stale'))
+    expect(nested.hasSnippetStart.value).toBe(true)
+    nested.clear(owner)
+    await nextTick()
+    expect(wrapper.find('.nested button').exists()).toBe(false)
+    nested.startSnippet()
+    expect(startNested).toHaveBeenCalledOnce()
+    outer.reset()
+    await nextTick()
+    expect(wrapper.find('.outer button').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   test('keeps nested modal suggestions separate and ignores stale owners', async () => {
     const wrapper = mount(HostHarness)
     const outerScope = (wrapper.vm as any).scope
