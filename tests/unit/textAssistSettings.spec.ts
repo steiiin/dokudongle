@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { TextAssistService } from '@/services/text-assist/TextAssistService'
 import { TextAssistStateRepository, emptyTextAssistState } from '@/services/text-assist/persistence'
 import { loadStoredValue, saveStoredValue } from '@/store/persistence'
-import defaultShortcuts from '@/assets/text-assist/shortcut-replacements.json'
-import defaultLocations from '@/assets/snippets/locations.json'
+import defaultShortcuts from '@/assets/text-assist/default-shortcuts.json'
+import defaultLocations from '@/assets/text-assist/default-snippets.json'
 import type { TextInputChange } from '@/services/text-assist/types'
 
 vi.mock('@/store/persistence', () => ({ loadStoredValue: vi.fn(), saveStoredValue: vi.fn() }))

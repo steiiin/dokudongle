@@ -1,4 +1,4 @@
-import locations from '@/assets/snippets/locations.json'
+import locations from '@/assets/text-assist/default-snippets.json'
 import type { SnippetSuggestion, TextSnippet } from './types'
 import { normalizeKey } from './text'
 

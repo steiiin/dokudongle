@@ -1,5 +1,5 @@
-import defaultShortcuts from '@/assets/text-assist/shortcut-replacements.json'
-import defaultLocations from '@/assets/snippets/locations.json'
+import defaultShortcuts from '@/assets/text-assist/default-shortcuts.json'
+import defaultLocations from '@/assets/text-assist/default-snippets.json'
 import { loadStoredValue, saveStoredValue } from '@/store/persistence'
 import type { LearningScopeState, TextAssistPersistedState } from './types'
 

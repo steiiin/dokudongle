@@ -344,6 +344,19 @@ describe('text assist integration', () => {
     await service.initialize()
   })
 
+  test.each([
+    ['KoP', 'KoPlaWu'],
+    ['Demenz', 'Demenz-WG'],
+    ['Demenz', 'DemenzWG'],
+  ])('offers medical completion for %s without Hunspell flags', async (prefix, word) => {
+    const suggestions = await service.getSuggestions('medical-completion', 'situation', snapshot(prefix))
+    expect(suggestions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'medical', label: word, replacement: word }),
+    ]))
+    expect(service.autocorrect.isMedicalWord(word)).toBe(true)
+    expect(service.autocorrect.getMedicalWords().every(entry => !entry.includes('/'))).toBe(true)
+  })
+
   test('corrects supported German and medical typos only after a delimiter', async () => {
     const german = await service.processInput(change('german', 'Krankehaus', 'Krankehaus '))
     expect(german.mutation).toMatchObject({ replacement: 'Krankenhaus', cursor: 12 })

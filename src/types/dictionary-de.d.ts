@@ -3,3 +3,8 @@ declare module 'virtual:dictionary-de' {
   export default dictionary
 }
 
+declare module 'virtual:medical-de' {
+  const words: string[]
+  export default words
+}
+

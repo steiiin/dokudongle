@@ -77,9 +77,7 @@ describe('user dictionary words and phrases', () => {
     await autocorrect.addUserWord('Not-Arzt')
     await autocorrect.rebuildUserWords()
     for (const words of [spell.initialize.mock.calls[0][0], spell.rebuild.mock.calls[0][0]]) {
-      expect(words).toContain('DokuDongle')
-      expect(words).not.toContain('Patient ist beschwerdefrei')
-      expect(words).not.toContain('Kontrolle!')
+      expect(words).toEqual(['DokuDongle'])
     }
     expect(spell.addWord.mock.calls).toEqual([['Not-Arzt']])
   })

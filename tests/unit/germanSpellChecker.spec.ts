@@ -1,4 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
+import dictionary from 'virtual:dictionary-de'
+import medicalWords from 'virtual:medical-de'
+import baseDictionary from '@/assets/dictionaries/de.dic?raw'
 import { InProcessGermanSpellChecker } from '@/services/text-assist/InProcessGermanSpellChecker'
 import { SpellCheckerWorkerRuntime } from '@/services/text-assist/SpellCheckerWorkerRuntime'
 import { WorkerGermanSpellChecker } from '@/services/text-assist/WorkerGermanSpellChecker'
@@ -7,6 +10,20 @@ import type {
   SpellCheckerWorkerRequest,
   SpellCheckerWorkerResponse,
 } from '@/services/text-assist/spell-checker-worker-protocol'
+
+const medicalVocabulary = ['DemenzWG', 'Demenz-WG', 'Epistaxis', 'HA', 'Patient', 'PD', 'RD', 'KH', 'KoPlaWu']
+
+test('bundles both dictionaries with an accurate count and preserves base entries and flags', () => {
+  const [header, ...lines] = dictionary.dic.trimEnd().split('\n')
+  const baseEntries = baseDictionary.split(/\r?\n/).slice(1).filter(line => line && !/^\s/.test(line))
+  expect(Number(header)).toBe(lines.length)
+  expect(lines).toHaveLength(baseEntries.length + 9)
+  expect(lines.slice(0, baseEntries.length)).toEqual(baseEntries)
+  expect(lines).toContain('KoPlaWu/S')
+  expect(lines).toContain('Demenz-WG/S')
+  expect(lines).toContain('DemenzWG')
+  expect(medicalWords).toEqual(medicalVocabulary)
+})
 
 describe('Hunspell German engine', () => {
   const spellChecker = new InProcessGermanSpellChecker()
@@ -23,6 +40,14 @@ describe('Hunspell German engine', () => {
     await expect(spellChecker.correct('Krankenhaus')).resolves.toBe(true)
     await expect(spellChecker.correct('Krankenhäuser')).resolves.toBe(true)
     await expect(spellChecker.correct('Rettungsdienst')).resolves.toBe(true)
+    await expect(spellChecker.correct('Patienten')).resolves.toBe(true)
+  })
+
+  test('recognizes bundled medical words and suffixes before and after rebuilding user words', async () => {
+    const words = [...medicalVocabulary, 'KoPlaWus', 'Demenz-WGs', 'Patienten']
+    for (const word of words) await expect(spellChecker.correct(word), word).resolves.toBe(true)
+    await spellChecker.rebuild([])
+    for (const word of words) await expect(spellChecker.correct(word), word).resolves.toBe(true)
   })
 
   test('rejects lowercase nouns and suggests their dictionary casing', async () => {

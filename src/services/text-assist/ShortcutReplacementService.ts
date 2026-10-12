@@ -1,4 +1,4 @@
-import shortcutReplacements from '@/assets/text-assist/shortcut-replacements.json'
+import shortcutReplacements from '@/assets/text-assist/default-shortcuts.json'
 import type { TextInputChange, TextInputSnapshot, TextMutation } from './types'
 import { isCompletionDelimiter, wordImmediatelyBefore } from './text'
 

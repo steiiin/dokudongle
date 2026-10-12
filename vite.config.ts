@@ -8,14 +8,30 @@ import { configDefaults, defineConfig, type Plugin } from 'vitest/config'
 
 const VIRTUAL_DICTIONARY_DE = 'virtual:dictionary-de'
 const RESOLVED_VIRTUAL_DICTIONARY_DE = `\0${VIRTUAL_DICTIONARY_DE}`
+const VIRTUAL_MEDICAL_DE = 'virtual:medical-de'
+const RESOLVED_VIRTUAL_MEDICAL_DE = `\0${VIRTUAL_MEDICAL_DE}`
+
+const dictionaryEntries = (source: string): string[] => source.split(/\r?\n/)
+  .slice(1)
+  .filter(line => line.length > 0 && !/^\s/.test(line))
 
 const dictionaryDeBrowserPlugin = (): Plugin => ({
   name: 'dictionary-de-browser',
   resolveId(id: string) {
-    return id === VIRTUAL_DICTIONARY_DE ? RESOLVED_VIRTUAL_DICTIONARY_DE : null
+    if (id === VIRTUAL_DICTIONARY_DE) return RESOLVED_VIRTUAL_DICTIONARY_DE
+    if (id === VIRTUAL_MEDICAL_DE) return RESOLVED_VIRTUAL_MEDICAL_DE
+    return null
   },
   async load(id: string) {
-    if (id !== RESOLVED_VIRTUAL_DICTIONARY_DE) return null
+    if (id !== RESOLVED_VIRTUAL_DICTIONARY_DE && id !== RESOLVED_VIRTUAL_MEDICAL_DE) return null
+
+    const medicalPath = fileURLToPath(new URL('./src/assets/dictionaries/medical.de.dic', import.meta.url))
+    this.addWatchFile(medicalPath)
+    const medicalEntries = dictionaryEntries(await readFile(medicalPath, 'utf8'))
+    if (id === RESOLVED_VIRTUAL_MEDICAL_DE) {
+      const words = [...new Set(medicalEntries.map(entry => entry.split('/')[0]))]
+      return `export default ${JSON.stringify(words)}`
+    }
 
     const entryUrl = import.meta.resolve('dictionary-de')
     const packageDirectory = new URL('.', entryUrl)
@@ -25,11 +41,10 @@ const dictionaryDeBrowserPlugin = (): Plugin => ({
       readFile(fileURLToPath(new URL('index.aff', packageDirectory)), 'utf8'),
       readFile(dictionaryPath, 'utf8'),
     ])
-    // Keep the editable file in Hunspell format, but update its entry count in
-    // memory so adding/removing words never requires maintaining the header.
-    const [, ...lines] = source.split(/\r?\n/)
-    const count = lines.filter(line => line.length > 0 && !/^\s/.test(line)).length
-    const dic = [String(count), ...lines].join('\n')
+    // Merge entries with their flags intact and recalculate the header so edits
+    // to either source dictionary do not require maintaining its entry count.
+    const entries = [...dictionaryEntries(source), ...medicalEntries]
+    const dic = [String(entries.length), ...entries, ''].join('\n')
 
     return `export default ${JSON.stringify({ aff, dic })}`
   },

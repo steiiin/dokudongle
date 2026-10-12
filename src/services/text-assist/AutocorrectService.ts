@@ -1,4 +1,4 @@
-import medicalWords from '@/assets/dictionaries/medical-de.json'
+import medicalWords from 'virtual:medical-de'
 import type { CorrectionPolicy } from './CorrectionPolicy'
 import { ConservativeCorrectionPolicy } from './CorrectionPolicy'
 import type { GermanSpellChecker } from './GermanSpellChecker'
@@ -32,10 +32,7 @@ export class AutocorrectService {
   initialize(): Promise<void> {
     if (!this.initialization) {
       this.initialization = this.repository.initialize().then(state => {
-        const additionalWords = [
-          ...medicalWords,
-          ...state.userDictionary.map(entry => entry.word).filter(isDictionaryWord),
-        ]
+        const additionalWords = state.userDictionary.map(entry => entry.word).filter(isDictionaryWord)
         return this.spell.initialize(additionalWords)
       })
     }
@@ -81,10 +78,7 @@ export class AutocorrectService {
   async rebuildUserWords(): Promise<void> {
     await this.initialize()
     const state = this.repository.getState()
-    await this.spell.rebuild([
-      ...medicalWords,
-      ...state.userDictionary.map(entry => entry.word).filter(isDictionaryWord),
-    ])
+    await this.spell.rebuild(state.userDictionary.map(entry => entry.word).filter(isDictionaryWord))
   }
 
   async correctAfterDelimiter(
