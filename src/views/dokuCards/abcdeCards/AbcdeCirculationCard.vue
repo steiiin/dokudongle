@@ -270,6 +270,7 @@
 <script setup lang="ts">
 
 import { computed, watch } from 'vue'
+import { isRestoringReanimation } from '@/store/reanimation'
 
 import { AssessedValue } from '@/types/protocol/input'
 import { insetIf } from '@/utils/filter'
@@ -281,20 +282,22 @@ const ctx = computed(() => store.context)
 // ############################################################################
 
 watch(() => store.doku.xabCde.pulse.centralStrength, (v) => {
+  if (isRestoringReanimation(store.doku)) return
   if (v == 'schlecht' && store.doku.xabCde.pulse.peripheralStrength == 'gut') {
     store.doku.xabCde.pulse.peripheralStrength = 'schlecht'
   }
   if (v == 'nicht' && store.doku.xabCde.pulse.peripheralStrength != 'nicht') {
     store.doku.xabCde.pulse.peripheralStrength = 'nicht'
   }
-})
+}, { flush: 'sync' })
 
 watch(() => store.doku.xabCde.pulse.peripheralStrength, (v) => {
+  if (isRestoringReanimation(store.doku)) return
   if (v == 'gut') { store.doku.xabCde.pulse.centralStrength = 'gut' }
   if (v == 'schlecht' && store.doku.xabCde.pulse.centralStrength == 'nicht') {
     store.doku.xabCde.pulse.centralStrength = 'schlecht'
   }
-})
+}, { flush: 'sync' })
 
 watch(() => store.doku.xabCde.chest.pain, (v) => {
   if (v == 'keine') {

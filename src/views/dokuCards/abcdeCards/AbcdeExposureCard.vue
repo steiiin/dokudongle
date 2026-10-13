@@ -174,6 +174,7 @@
 <script setup lang="ts">
 
 import { computed, watch } from 'vue'
+import { isRestoringReanimation } from '@/store/reanimation'
 
 import { fullIf } from '@/utils/filter'
 
@@ -190,10 +191,11 @@ watch(() => store.doku.xabcdE.abdominal.value.guarding, (v) => {
 })
 
 watch(() => ctx.value.isNonVerbal, (v) => {
+  if (isRestoringReanimation(store.doku)) return
   if (v && store.doku.xabcdE.abdominal.value.pain != 'keine') {
     store.doku.xabcdE.abdominal.value.pain = 'keine'
   }
-})
+}, { flush: 'sync' })
 
 </script>
 <style scoped>

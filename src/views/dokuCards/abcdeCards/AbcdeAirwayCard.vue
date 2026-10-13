@@ -90,6 +90,7 @@
 <script setup lang="ts">
 
 import { watch } from 'vue'
+import { isRestoringReanimation } from '@/store/reanimation'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -97,6 +98,7 @@ const store = useDokuStore()
 // ############################################################################
 
 watch(() => store.doku.xAbcde.isBreathing, (v) => {
+  if (isRestoringReanimation(store.doku)) return
 
   store.doku.xAbcde.hasStridor = false
   store.doku.xAbcde.mucosa.e = v ? 'rosig' : 'bläulich'
@@ -119,7 +121,7 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
   store.doku.xaBcde.hasEmphysema = false
   store.doku.xaBcde.hasTrachealDeviation = false
 
-})
+}, { flush: 'sync' })
 
 watch(() => store.doku.xAbcde.hasAngioEdema, (v) => {
   if (v && store.doku.xAbcde.obstruction != 'Schwellung')

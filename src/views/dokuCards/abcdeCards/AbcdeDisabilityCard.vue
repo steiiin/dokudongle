@@ -365,6 +365,7 @@
 import { computed, watch } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
+import { isRestoringReanimation } from '@/store/reanimation'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -427,12 +428,14 @@ const aphasiaNote = computed(() => {
 // ############################################################################
 
 watch(() => ctx.value.isNonVerbal, () => {
+  if (isRestoringReanimation(store.doku)) return
   store.doku.xabcDe.headache = false
-})
+}, { flush: 'sync' })
 
 watch(() => store.doku.xabcDe.couldBeBaseline, () => {
+  if (isRestoringReanimation(store.doku)) return
   store.doku.xabcDe.psych.baseline = false
-})
+}, { flush: 'sync' })
 
 </script>
 <style scoped>

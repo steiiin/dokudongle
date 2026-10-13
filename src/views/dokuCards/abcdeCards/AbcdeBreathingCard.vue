@@ -164,6 +164,7 @@
 <script setup lang="ts">
 
 import { computed, watch } from 'vue'
+import { isRestoringReanimation } from '@/store/reanimation'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -174,9 +175,10 @@ const ctx = computed(() => store.context)
 const hasPattern = computed(() => store.doku.xaBcde.mechanics.pattern != '')
 
 watch(() => store.doku.xaBcde.mechanics.pattern, () => {
+  if (isRestoringReanimation(store.doku)) return
   store.doku.xaBcde.mechanics.frequency = ''
   store.doku.xaBcde.mechanics.depth = ''
-})
+}, { flush: 'sync' })
 
 const hasAusculated = computed(() => store.doku.xaBcde.auscultation.assessed)
 

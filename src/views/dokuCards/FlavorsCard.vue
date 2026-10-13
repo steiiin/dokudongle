@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -83,32 +83,6 @@ const visibleFlavors = computed(() => {
     trauma: !isNoEmergencyCallSelected && !isVerlegungSelected,
     reanimation: !isNoEmergencyCallSelected && !isVerlegungSelected,
     nonVerbal: !isNoEmergencyCallSelected && !isReanimationSelected,
-  }
-})
-
-watch(() => store.doku.flavors.reanimation, (v) => {
-  if (v) {
-    store.doku.flavors.non_verbal = true
-    store.doku.xAbcde.isBreathing = false
-    store.doku.xabCde.skin.color = 'zyanotisch'
-    store.doku.xabCde.skin.peripheralTemp = 'kühl'
-    store.doku.xabCde.skin.centralTemp = 'kühl'
-    store.doku.xabCde.pulse.peripheralStrength = 'nicht'
-    store.doku.xabCde.pulse.centralStrength = 'nicht'
-    store.doku.xabCde.pulse.rhythmic = false
-    store.doku.xabcDe.avpu = 'bewusstlos'
-    store.doku.xabcDe.gcs.a = 1
-    store.doku.xabcDe.gcs.v = 1
-    store.doku.xabcDe.gcs.m = 1
-  } else {
-    store.doku.flavors.non_verbal = false
-  }
-})
-
-watch(() => store.doku.flavors.non_verbal, (v) => {
-  if (v && store.doku.xabcDe.gcs.v == 5)
-  {
-    store.doku.xabcDe.gcs.v = 5
   }
 })
 

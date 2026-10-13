@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 
 import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
+import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
 import { composeTextAreaText } from '@/types/text-area-block'
 import {
@@ -639,6 +640,7 @@ export const useDokuStore = defineStore('doku', {
           await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
           await saveDokuState(persistedProtocolState(next))
           resetQuickies()
+          discardReanimationSnapshot(this.doku)
           this.$patch(state => Object.assign(state, next))
         })
       } finally {
@@ -666,6 +668,7 @@ export const useDokuStore = defineStore('doku', {
           }
           await saveDokuState(persistedProtocolState(next))
           resetQuickies()
+          discardReanimationSnapshot(this.doku)
           this.$patch(state => Object.assign(state, next))
           return true
         })
@@ -678,7 +681,11 @@ export const useDokuStore = defineStore('doku', {
       if (source && this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id].active[id] = active
     },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
-      this.doku.flavors[key] = enabled
+      if (key === 'reanimation') {
+        setReanimation(this.doku, enabled)
+      } else {
+        this.doku.flavors[key] = enabled
+      }
 
       if (enabled && (key === 'no_emergency_call' || key === 'verlegung' || key === 'einweisung')) {
         this.doku.flavors.no_emergency_call = key === 'no_emergency_call'
@@ -698,6 +705,7 @@ export const useDokuStore = defineStore('doku', {
         return
       }
 
+      discardReanimationSnapshot(this.doku)
       this.doku.flavors.trauma = false
       this.doku.flavors.non_verbal = false
       this.doku.flavors.reanimation = false
@@ -807,6 +815,7 @@ export const useDokuStore = defineStore('doku', {
         next.protocolHistory = updateHistoryEntry(next.doku, next.protocolHistory, next.activeHistoryEntryId)
         await saveDokuState(persistedProtocolState(next))
         resetQuickies()
+        discardReanimationSnapshot(this.doku)
         this.$patch(state => Object.assign(state, next))
         if (temporary) await removeTemporaryProtocolState()
       })
