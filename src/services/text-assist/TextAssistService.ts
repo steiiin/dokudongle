@@ -48,6 +48,7 @@ export class TextAssistService {
   readonly learning: TextLearningService
   readonly suggestions: SuggestionService
   private initialization?: Promise<void>
+  private readonly suggestionsAwaitingDelimiter = new Set<string>()
 
   constructor(repository: TextAssistStateRepositoryLike = new TextAssistStateRepository()) {
     this.repository = repository
@@ -80,6 +81,9 @@ export class TextAssistService {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return { suggestions: [] }
 
+    if (this.suggestionsAwaitingDelimiter.has(change.sessionId) && this.insertsCompletionDelimiter(change)) {
+      this.suggestionsAwaitingDelimiter.delete(change.sessionId)
+    }
     this.acceptPendingAutomaticChange(change.sessionId, change.before)
     const resolvedDictionary = this.resolveImeDictionary(dictionary)
     const snippetCompletion = this.completeSnippetAfterDelimiter(change)
@@ -160,7 +164,8 @@ export class TextAssistService {
 
   async getSuggestions(sessionId: string, contextId: string, snapshot: TextInputSnapshot): Promise<TextSuggestion[]> {
     await this.initialize()
-    if (snapshot.isComposing || snapshot.selectionStart !== snapshot.selectionEnd) return []
+    if (snapshot.isComposing || snapshot.selectionStart !== snapshot.selectionEnd
+      || this.suggestionsAwaitingDelimiter.has(sessionId)) return []
     const cursor = snapshot.selectionStart
     const words = wordsBefore(snapshot.text, cursor, 2)
     const current = wordImmediatelyBefore(snapshot.text, cursor)?.word ?? ''
@@ -172,7 +177,8 @@ export class TextAssistService {
       sessionId,
       contextId,
     }
-    return this.suggestions.getSuggestions(context)
+    const suggestions = await this.suggestions.getSuggestions(context)
+    return this.suggestionsAwaitingDelimiter.has(sessionId) ? [] : suggestions
   }
 
   applySuggestion(
@@ -204,6 +210,7 @@ export class TextAssistService {
     }
 
     this.recordSuggestionUsage(contextId, snapshot, currentSuggestion)
+    if (currentSuggestion.type === 'snippet') this.suggestionsAwaitingDelimiter.add(sessionId)
     return {
       start: currentSuggestion.start,
       end: currentSuggestion.end,
@@ -212,7 +219,8 @@ export class TextAssistService {
     }
   }
 
-  invalidateSession(sessionId: string, snapshot?: TextInputSnapshot): void {
+  invalidateSession(sessionId: string, snapshot?: TextInputSnapshot, preserveSuggestionSuppression = false): void {
+    if (!preserveSuggestionSuppression) this.suggestionsAwaitingDelimiter.delete(sessionId)
     this.imeAutocorrect.invalidate(sessionId)
     this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
@@ -293,6 +301,22 @@ export class TextAssistService {
     const word = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
     if (!word) return
     this.learning.recordCompletedWord(word.word, change.contextId, wordsBefore(change.after.text, word.start, 4))
+  }
+
+  private insertsCompletionDelimiter(change: TextInputChange): boolean {
+    if (!change.inputType.startsWith('insert')) return false
+    // Diff the actual edit: IMEs can omit event.data or replace existing text.
+    const before = change.before.text
+    const after = change.after.text
+    let start = 0
+    while (start < before.length && start < after.length && before[start] === after[start]) start += 1
+    let beforeEnd = before.length
+    let afterEnd = after.length
+    while (beforeEnd > start && afterEnd > start && before[beforeEnd - 1] === after[afterEnd - 1]) {
+      beforeEnd -= 1
+      afterEnd -= 1
+    }
+    return Array.from(after.slice(start, afterEnd)).some(isCompletionDelimiter)
   }
 
   private completeSnippetAfterDelimiter(change: TextInputChange): { active: boolean; mutation?: TextMutation } {

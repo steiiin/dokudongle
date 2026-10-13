@@ -582,6 +582,93 @@ describe('text assist integration', () => {
   })
 })
 
+describe('suggestions after location selection', () => {
+  const setup = () => {
+    const service = new TextAssistService(new MemoryRepository())
+    const candidates = [{
+      id: 'next:test', label: 'weiter', replacement: 'weiter', type: 'word' as const,
+      start: 0, end: 0, score: 1, source: 'learned' as const,
+    }]
+    vi.spyOn(service.suggestions, 'getSuggestions').mockResolvedValue(candidates)
+    const query = 'Ziel @uni'
+    const location = service.snippets.getSuggestions(query, query.length)[0]
+    const mutation = service.applySuggestion('location', 'situation', snapshot(query), location)!
+    const text = applyMutation(query, mutation)
+    return { service, candidates, text, location }
+  }
+
+  test('hides repeated refreshes only in the session that selected a location', async () => {
+    const { service, candidates, text } = setup()
+    expect(await service.getSuggestions('location', 'situation', snapshot(text))).toEqual([])
+    expect(await service.getSuggestions('location', 'situation', snapshot(text))).toEqual([])
+    expect(await service.getSuggestions('other', 'situation', snapshot(text))).toEqual(candidates)
+  })
+
+  test.each(['x', '-', "'", '’'])('keeps suggestions hidden when appending %s', async inserted => {
+    const { service, text } = setup()
+    expect((await service.processInput(change('location', text, text + inserted))).suggestions).toEqual([])
+  })
+
+  test('keeps suggestions hidden through backward deletion', async () => {
+    const { service, text } = setup()
+    const update = await service.processInput({
+      ...change('location', text, text.slice(0, -1)), inputType: 'deleteContentBackward', data: null,
+    })
+    expect(update.suggestions).toEqual([])
+    expect(await service.getSuggestions('location', 'situation', snapshot(text.slice(0, -1)))).toEqual([])
+  })
+
+  test.each([' ', '.', ',', '\n', '𐄀', ' und weiter'])('resumes suggestions after inserting %j', async inserted => {
+    const { service, candidates, text } = setup()
+    const after = text + inserted
+    expect((await service.processInput({
+      ...change('location', text, after), data: null,
+    })).suggestions).toEqual(candidates)
+    expect(await service.getSuggestions('location', 'situation', snapshot(after))).toEqual(candidates)
+  })
+
+  test('ignores existing suffix delimiters when inserting letters in the middle', async () => {
+    const { service, text } = setup()
+    const update = await service.processInput({
+      ...change('location', text + ', Ende', text + 'x, Ende', text.length + 1),
+      before: snapshot(text + ', Ende', text.length),
+    })
+    expect(update.suggestions).toEqual([])
+  })
+
+  test('resets suppression on ordinary session invalidation', async () => {
+    const { service, candidates, text } = setup()
+    service.invalidateSession('location', snapshot(text, 0))
+    expect(await service.getSuggestions('location', 'situation', snapshot(text))).toEqual(candidates)
+  })
+
+  test('preserves suppression through composition until a delimiter is committed', async () => {
+    const { service, candidates, text } = setup()
+    service.invalidateSession('location', snapshot(text), true)
+    expect((await service.processInput(change('location', text, text + ' ', text.length + 1, true))).suggestions).toEqual([])
+    expect(await service.getSuggestions('location', 'situation', snapshot(text))).toEqual([])
+    expect((await service.processInput({
+      ...change('location', text, text + 'ä'), inputType: 'insertCompositionText',
+    })).suggestions).toEqual([])
+    expect((await service.processInput({
+      ...change('location', text + 'ä', text + 'ä '), inputType: 'insertCompositionText',
+    })).suggestions).toEqual(candidates)
+  })
+
+  test('does not suppress suggestions for a rejected stale location selection', async () => {
+    const { service, candidates, location } = setup()
+    expect(service.applySuggestion('other', 'situation', snapshot('Unrelated'), location)).toBeNull()
+    expect(await service.getSuggestions('other', 'situation', snapshot('Unrelated'))).toEqual(candidates)
+  })
+
+  test.each([' ', ','])('allows suggestions when %j automatically completes a location', async delimiter => {
+    const { service, candidates } = setup()
+    const update = await service.processInput(change('automatic', '@uni', '@uni' + delimiter))
+    expect(update.mutation?.replacement).toBe('Uniklinik Dresden')
+    expect(update.suggestions).toEqual(candidates)
+  })
+})
+
 describe('snippets and usage learning', () => {
   test('filters @ locations and replaces the complete trigger expression', () => {
     const snippets = new SnippetService()

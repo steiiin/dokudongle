@@ -27,7 +27,7 @@ const resolveColor = (color: string) => /^(#|rgb|hsl|var\()/.test(color)
 .dd-textarea-blocks { display: grid; gap: 0.5rem; }
 .dd-textarea-block {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: .5rem;
   width: 100%;
   padding: .5rem .5rem .5rem .75rem;

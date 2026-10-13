@@ -637,7 +637,7 @@ const handleCompositionStart = () => {
   isComposing.value = true
   pendingBeforeInput.value = null
   assistRevision += 1
-  textAssistService.invalidateSession(assistSessionId, compositionBefore.value)
+  textAssistService.invalidateSession(assistSessionId, compositionBefore.value, true)
   textSuggestions.value = []
 }
 
