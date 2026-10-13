@@ -44,17 +44,17 @@
         <IonProgressBar v-if="modelValue.isEnhancing" type="indeterminate" />
       </IonHeader>
       <IonContent class="dd-modal-content ion-padding" :scroll-y="false">
-        <div v-if="$slots.default" v-show="isHelpExpanded" class="dd-modal-help">
-          <DodoHint :id="helpId" class="dd-modal-hint">
+        <DodoHint v-if="$slots.default" v-show="isHelpExpanded" class="dd-modal-help">
+          <div :id="helpId" class="dd-modal-hint">
             <slot />
-          </DodoHint>
+          </div>
           <button v-if="isHelpExpanded" type="button" class="dd-modal-help-toggle dd-modal-help-collapse"
             aria-label="Hinweise einklappen" title="Hinweise einklappen"
             :aria-expanded="true" :aria-controls="helpId"
             @pointerdown.prevent @click="toggleHelp">
             <IonIcon :src="caretUpCircleOutline" aria-hidden="true" />
           </button>
-        </div>
+        </DodoHint>
         <div class="dd-modal-data" :class="{ 'has-blocks': blocks?.length }">
           <DodoTextAreaBlocks v-if="blocks?.length" class="dd-modal-blocks" :blocks="blocks"
             @activation-change="(id, active) => emit('activation-change', id, active)" />
@@ -998,9 +998,12 @@ defineExpose({
 
 .dd-modal-help {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
   flex: 0 1 auto;
   min-height: 0;
   margin-bottom: 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
   overflow: hidden;
 }
 
@@ -1008,18 +1011,21 @@ defineExpose({
   display: grid;
   place-items: center;
   flex: none;
-  margin-left: var(--padding-end);
+  margin: 0;
+  padding: 0;
+  border: 0;
   background: transparent;
   color: var(--ion-color-medium);
+  cursor: pointer;
 }
 
 .dd-modal-help-collapse ion-icon {
-  width: 24px;
-  height: 24px;
+  font-size: 1.5rem;
 }
 
 .dd-modal-hint {
   flex: 1;
+  align-self: stretch;
   min-width: 0;
   min-height: 0;
   margin-bottom: 0;
