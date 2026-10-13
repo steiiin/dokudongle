@@ -8,7 +8,8 @@
       <DodoInputTextArea v-model="store.doku.situation"
         assist-context-id="situation"
         title="Situation" placeholder="Beschreibe ..." mandatory
-        :quickieKeys="quickieKeys">
+        :blocks="blocks"
+        @activation-change="store.setTextAreaBlockActive">
         Beschreibe das <b>Notfallgeschehen</b> und die <b>Auffindesituation</b> vor Ort. <br>
         <template v-if="ctx.isTrauma">
           <br>
@@ -24,7 +25,6 @@
 <script setup lang="ts">
 
 import { computed } from 'vue'
-import { QU_SIT_Einweisung, QU_SIT_Verlegung } from '@/data/quickies'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -32,11 +32,6 @@ const ctx = computed(() => store.context)
 
 // ############################################################################
 
-const quickieKeys = computed(() => {
-  const list: Array<string> = []
-  if (ctx.value.isVerlegung) { list.push(QU_SIT_Verlegung) }
-  if (ctx.value.isEinweisung) { list.push(QU_SIT_Einweisung) }
-  return list
-})
+const blocks = computed(() => store.textAreaBlocks.filter(block => block.target === 'situation'))
 
 </script>

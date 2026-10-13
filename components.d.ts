@@ -44,6 +44,7 @@ declare module 'vue' {
     DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']
     DodoSwitchButton: typeof import('./src/components/DodoSwitchButton.vue')['default']
+    DodoTextAreaBlocks: typeof import('./src/components/DodoTextAreaBlocks.vue')['default']
     DodoTextAssistEntriesModal: typeof import('./src/components/DodoTextAssistEntriesModal.vue')['default']
     DodoTextAssistEntryList: typeof import('./src/components/DodoTextAssistEntryList.vue')['default']
     DodoTextSuggestionHost: typeof import('./src/components/DodoTextSuggestionHost.vue')['default']

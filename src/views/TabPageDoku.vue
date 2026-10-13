@@ -28,6 +28,9 @@
           <SettingCard v-show="ctx.requireSceneDetails"></SettingCard>
 
           <!-- SITUATION -->
+          <BlockVerlegungCard v-if="store.doku.flavors.verlegung" />
+          <BlockEinweisungCard v-if="store.doku.flavors.einweisung" />
+
           <SituationCard></SituationCard>
 
           <!-- ABCDE -->
@@ -59,6 +62,8 @@ import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import IdentifikationCard from './dokuCards/IdentifikationCard.vue'
 import SettingCard from './dokuCards/SettingCard.vue'
 import SituationCard from './dokuCards/SituationCard.vue'
+import BlockVerlegungCard from './dokuCards/blocksourceCards/BlockVerlegungCard.vue'
+import BlockEinweisungCard from './dokuCards/blocksourceCards/BlockEinweisungCard.vue'
 import AbcdeContainerCard from './dokuCards/AbcdeContainerCard.vue'
 import SampleContainerCard from './dokuCards/SampleContainerCard.vue'
 import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'

@@ -6,7 +6,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
 import DodoToggleButton from '@/components/DodoToggleButton.vue'
 import DodoToggleChip from '@/components/DodoToggleChip.vue'
-import { QU_SIT_Einweisung, QU_SIT_Verlegung } from '@/data/quickies'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState } from '@/store/persistence'
 import { ProtocolCourse } from '@/types/protocol'
@@ -151,7 +150,7 @@ describe('Verlegung and Einweisung flavors', () => {
     expect(flavorLabels(wrapper)).toEqual(['Einweisung', 'Trauma', 'Reanimation'])
   })
 
-  test('uses the former Verlegung context, quickie, and optional treatment', () => {
+  test('uses the Verlegung context, generated blocks, and optional treatment', () => {
     const store = useDokuStore()
     store.setFlavor('verlegung', true)
 
@@ -168,7 +167,8 @@ describe('Verlegung and Einweisung flavors', () => {
     const situation = shallowMount(SituationCard, {
       global: { renderStubDefaultSlot: true },
     })
-    expect(situation.findComponent(DodoInputTextArea).props('quickieKeys')).toEqual([QU_SIT_Verlegung])
+    expect(situation.findComponent(DodoInputTextArea).props('quickieKeys')).toBeUndefined()
+    expect(situation.findComponent(DodoInputTextArea).props('blocks')).toEqual([])
 
     const treatment = shallowMount(TreatmentTasksCard, {
       global: { renderStubDefaultSlot: true },
@@ -198,7 +198,8 @@ describe('Verlegung and Einweisung flavors', () => {
     const situation = shallowMount(SituationCard, {
       global: { renderStubDefaultSlot: true },
     })
-    expect(situation.findComponent(DodoInputTextArea).props('quickieKeys')).toEqual([QU_SIT_Einweisung])
+    expect(situation.findComponent(DodoInputTextArea).props('quickieKeys')).toBeUndefined()
+    expect(situation.findComponent(DodoInputTextArea).props('blocks')).toEqual([])
 
     const treatment = shallowMount(TreatmentTasksCard, {
       global: { renderStubDefaultSlot: true },

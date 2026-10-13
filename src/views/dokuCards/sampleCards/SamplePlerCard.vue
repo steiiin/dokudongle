@@ -7,6 +7,8 @@
 
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
         assist-context-id="sampler.pler"
+        :blocks="store.textAreaBlocks.filter(block => block.target === 'sampler.pler.PLER')"
+        @activation-change="store.setTextAreaBlockActive"
         title="PLER" placeholder="Beschreibe ..."
         :quickieKeys="quickieKeys">
         <p><b>(P)</b> Beschreibung von:</p>

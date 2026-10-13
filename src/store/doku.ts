@@ -7,6 +7,8 @@ import { defineStore } from 'pinia'
 
 import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
+import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
+import { composeTextAreaText } from '@/types/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
   ProtocolAuditEntry,
@@ -106,6 +108,12 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     hydratedProtocol.course = ProtocolCourse.TRANSPORT
     hydratedProtocol.flavors.verlegung = legacyCourse === 1
     hydratedProtocol.flavors.einweisung = legacyCourse === 2
+  }
+
+  for (const source of TEXT_AREA_BLOCK_SOURCES) {
+    if (!hydratedProtocol.flavors[source.id]) {
+      hydratedProtocol.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
+    }
   }
 
   hydratedProtocol.sampler.medication.PlanMedication = hydratedProtocol.sampler.medication.PlanMedication
@@ -266,12 +274,21 @@ function collectFreeformBlocks(value: unknown, prefix = '', result: Record<strin
   return result
 }
 
-function createProtocolAuditEntry(protocol: unknown, protocolText: string): ProtocolAuditEntry {
+function composedFreeformText(protocol: UnwrapRef<Protocol>): Record<string, string> {
+  const freeform = collectFreeformBlocks(protocol)
+  const blocks = resolveTextAreaBlocks(protocol)
+  for (const target of new Set(blocks.map(block => block.target))) {
+    freeform[target] = composeTextAreaText(freeform[target] ?? '', blocks.filter(block => block.target === target))
+  }
+  return freeform
+}
+
+function createProtocolAuditEntry(protocol: UnwrapRef<Protocol>, protocolText: string): ProtocolAuditEntry {
   return {
     schemaVersion: DOKU_SCHEMA_VERSION,
     resetAt: new Date().toISOString(),
     protocolText,
-    ...collectFreeformBlocks(protocol),
+    ...composedFreeformText(protocol),
   }
 }
 
@@ -656,17 +673,25 @@ export const useDokuStore = defineStore('doku', {
         this.isProtocolChanging = false
       }
     },
+    setTextAreaBlockActive(id: string, active: boolean) {
+      const source = TEXT_AREA_BLOCK_SOURCES.find(source => source.outputs.some(output => output.id === id))
+      if (source && this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id].active[id] = active
+    },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
       this.doku.flavors[key] = enabled
 
-      if (!enabled) {
-        return
-      }
-
-      if (key === 'no_emergency_call' || key === 'verlegung' || key === 'einweisung') {
+      if (enabled && (key === 'no_emergency_call' || key === 'verlegung' || key === 'einweisung')) {
         this.doku.flavors.no_emergency_call = key === 'no_emergency_call'
         this.doku.flavors.verlegung = key === 'verlegung'
         this.doku.flavors.einweisung = key === 'einweisung'
+      }
+
+      for (const source of TEXT_AREA_BLOCK_SOURCES) {
+        if (!this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
+      }
+
+      if (!enabled) {
+        return
       }
 
       if (key !== 'no_emergency_call') {
@@ -974,7 +999,7 @@ export const useDokuStore = defineStore('doku', {
       const isPediatric: boolean = state.doku.ident.age?.totalYears <= 4
 
       const nothingToTreat: boolean = (
-        !state.doku.Xabcde.hasCriticalBleeding
+        !this.freeformText['Xabcde.description'].trim()
         && !state.doku.xAbcde.needTreatment
         && !state.doku.xaBcde.needTreatment
         && !state.doku.xabCde.needTreatment
@@ -1066,6 +1091,12 @@ export const useDokuStore = defineStore('doku', {
     },
 
     // protocol
+    textAreaBlocks(state) {
+      return resolveTextAreaBlocks(state.doku)
+    },
+    freeformText(state): Record<string, string> {
+      return composedFreeformText(state.doku)
+    },
     generatedProtocol(state): string {
       let text = ''
 
@@ -1081,7 +1112,7 @@ export const useDokuStore = defineStore('doku', {
       // Situation
       text += breakDoku([
         textIf(state.doku.setting.generateText(), this.context.requireSceneDetails),
-        placeholder(state.doku.situation.value, 'Situation'),
+        placeholder(this.freeformText.situation, 'Situation'),
       ], true)
 
 
@@ -1090,7 +1121,7 @@ export const useDokuStore = defineStore('doku', {
 
         // ABCDE
         text += breakDoku([
-          state.doku.Xabcde.generateText(),
+          state.doku.Xabcde.generateText(this.freeformText['Xabcde.description']),
           state.doku.xAbcde.generateText(),
           state.doku.xaBcde.generateText(),
           state.doku.xabCde.generateText(),
@@ -1116,12 +1147,12 @@ export const useDokuStore = defineStore('doku', {
       {
 
         // SAMPLE
-        text += textIf(breakDoku(state.doku.sampler.symptoms.additionalSymptoms.value, true), this.context.requireSampleSymptoms)
+        text += textIf(breakDoku(this.freeformText['sampler.symptoms.additionalSymptoms'], true), this.context.requireSampleSymptoms)
         text += breakDoku([
           state.doku.sampler.allergies.generateText(),
           state.doku.sampler.medication.generateText(),
         ], true)
-        text += breakDoku(state.doku.sampler.pler.generateText(), true)
+        text += breakDoku(this.freeformText['sampler.pler.PLER'], true)
         text += breakDoku(state.doku.sampler.contacts.generateText(), true)
 
       }
@@ -1130,8 +1161,8 @@ export const useDokuStore = defineStore('doku', {
       text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
       text += breakDoku(
         this.context.requireTasks
-        ? placeholder(state.doku.treatment.value, 'Maßnahmen')
-        : state.doku.treatment.value.trim(), true)
+        ? placeholder(this.freeformText.treatment, 'Maßnahmen')
+        : this.freeformText.treatment.trim(), true)
       text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
       text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
 

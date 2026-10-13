@@ -9,6 +9,7 @@ import { AssessedValue, OptionalValue } from "@/types/protocol/input"
 import { PregnancySpan } from "@/types/protocol/pregnancy"
 
 import { Component, markRaw } from "vue"
+import { TEXT_AREA_BLOCK_SOURCES } from "@/data/text-area-blocks"
 
 // ############################################################################
 
@@ -356,39 +357,10 @@ export class QuickieSchwangerschaft extends Quickie
 // ############################################################################
 
 const buildQuickies = (): Record<string, Quickie> => ({
-  [QU_SIT_Verlegung]: new QuickieTemplate(QU_SIT_Verlegung,
-    'Verlegung', 'Verlegung von <START> nach <ZIEL>.\n',
-    [
-      {
-        key: 'START', color: 'warning',
-        customPlaceholder: 'z.B. FKH Coswig',
-      },
-      {
-        key: 'ZIEL', color: 'success',
-        customPlaceholder: 'z.B. FKH Coswig',
-      },
-
-    ]
-  ),
-
-  [QU_SIT_Einweisung]: new QuickieTemplate(QU_SIT_Einweisung,
-    'Einweisung', 'Einweisung <ARZT> nach <ZIEL> wg. <KRANKHEIT>.\n',
-    [
-      {
-        key: 'ARZT', color: 'success',
-        customPlaceholder: 'z.B. HA Wegner',
-      },
-      {
-        key: 'ZIEL', color: 'warning',
-        customPlaceholder: 'z.B. FKH Coswig',
-      },
-      {
-        key: 'KRANKHEIT', color: 'primary',
-        customPlaceholder: 'z.B. Thrombose',
-      },
-
-    ],
-  ),
+  ...Object.fromEntries(TEXT_AREA_BLOCK_SOURCES.map(source => [source.id,
+    new QuickieTemplate(source.id, source.id === QU_SIT_Verlegung ? 'Verlegung' : 'Einweisung',
+      source.outputs[0].template, source.fields),
+  ])),
 
   [QU_SYM_AbdominalPain]: new QuickieAbdominalPain(QU_SYM_AbdominalPain, 'Bauchschmerz'),
   [QU_SYM_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_SYM_ExcretionsUrinary, 'Wasserlassen'),

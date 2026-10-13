@@ -24,11 +24,11 @@ export class AbcdeBleeding {
     return !this.description.isEmpty
   }
 
-  public generateText(): string
+  public generateText(description = this.description.value): string
   {
-    if (getCtx().isTrauma && this.hasCriticalBleeding)
+    if (getCtx().isTrauma && description.trim().length > 0)
     {
-      return breakDoku(prefix('x:', this.description.value))
+      return breakDoku(prefix('x:', description))
     }
     return ''
   }

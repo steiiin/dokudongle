@@ -4,6 +4,8 @@
 
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
       assist-context-id="sampler.symptoms"
+      :blocks="store.textAreaBlocks.filter(block => block.target === 'sampler.symptoms.additionalSymptoms')"
+      @activation-change="store.setTextAreaBlockActive"
       title="Symptome" placeholder="Beschreibe ..."
       :quickieKeys="quickieKeys">
       Zusätzliche Symptome beschreiben, die weder in Situation, noch ABCDE erfasst wurden, oder<br>

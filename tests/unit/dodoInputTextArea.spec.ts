@@ -7,6 +7,8 @@ import { textAssistService } from '@/services/text-assist'
 import DodoUserDictionaryModal from '@/components/DodoUserDictionaryModal.vue'
 import DodoHint from '@/components/DodoHint.vue'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
+import DodoTextAreaBlocks from '@/components/DodoTextAreaBlocks.vue'
+import { TextAreaBlock } from '@/types/text-area-block'
 import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import DodoQuickieTemplate from '@/components/quickie-components/DodoQuickieTemplate.vue'
 import { QU_SIT_Verlegung } from '@/data/quickies'
@@ -55,6 +57,59 @@ describe('DodoInputTextArea native textarea', () => {
   })
 
   afterEach(() => { vi.unstubAllGlobals() })
+
+  test('previews final text and keeps generated block controls in the editor', async () => {
+    const block = new TextAreaBlock('test.situation', 'test', 'situation', 'Generated', []).render({ values: {}, active: {} })!
+    const wrapper = mountTextarea(new EnhanceableText('Manual'))
+    await wrapper.setProps({ blocks: [block], mandatory: true })
+    expect(wrapper.get('.dd-input-preview').text()).toBe('Generated\nManual')
+    expect(wrapper.get('.dd-input-preview').findComponent(DodoTextAreaBlocks).exists()).toBe(false)
+    wrapper.vm.openModal()
+    await flushPromises()
+    expect(wrapper.get<HTMLTextAreaElement>('textarea').element.value).toBe('Manual')
+    const renderer = wrapper.get('.dd-modal-data').getComponent(DodoTextAreaBlocks)
+    renderer.vm.$emit('activation-change', block.id, false)
+    expect(wrapper.emitted('activation-change')).toEqual([[block.id, false]])
+    expect(wrapper.props('modelValue').value).toBe('Manual')
+    await wrapper.setProps({ blocks: [{ ...block, text: 'Updated' }] })
+    expect(wrapper.get<HTMLTextAreaElement>('textarea').element.value).toBe('Manual')
+    expect(renderer.props('blocks')[0].text).toBe('Updated')
+    expect(wrapper.get('.preview').text()).toBe('Updated\nManual')
+    await wrapper.setProps({ blocks: [{ ...block, active: false }] })
+    expect(wrapper.get('.preview').text()).toBe('Manual')
+    await wrapper.setProps({ modelValue: new EnhanceableText('Edited manual text') })
+    expect(wrapper.get('.preview').text()).toBe('Edited manual text')
+    wrapper.unmount()
+  })
+
+  test('previews active blocks in order with line breaks and literal text', async () => {
+    const block = new TextAreaBlock('test.first', 'test', 'situation', 'First\nsecond line', []).render({ values: {}, active: {} })!
+    const wrapper = mountTextarea(new EnhanceableText('Manual\nlast line'))
+    await wrapper.setProps({ blocks: [
+      block,
+      { ...block, id: 'test.inactive', text: 'Excluded', active: false },
+      { ...block, id: 'test.last', text: '<b>Last block</b>' },
+    ] })
+    expect(wrapper.get('.dd-input-preview').text()).toBe('First\nsecond line\n<b>Last block</b>\nManual\nlast line')
+    expect(wrapper.get('.preview').find('b').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('counts only active blocks toward the mandatory input state', async () => {
+    const block = new TextAreaBlock('test', 'test', 'situation', 'Generated', []).render({ values: {}, active: {} })!
+    const wrapper = mountTextarea()
+    expect(wrapper.find('.dd-input-preview').exists()).toBe(false)
+    await wrapper.setProps({ blocks: [block], mandatory: true })
+    expect(wrapper.getComponent(IonButton).text()).toContain('bearbeiten')
+    expect(wrapper.get('.preview').text()).toBe('Generated')
+    await wrapper.setProps({ blocks: [{ ...block, active: false }] })
+    expect(wrapper.getComponent(IonButton).text()).toContain('fehlt')
+    expect(wrapper.find('.dd-input-preview').exists()).toBe(false)
+    expect(wrapper.findComponent(DodoTextAreaBlocks).exists()).toBe(true)
+    await wrapper.setProps({ blocks: [], modelValue: new EnhanceableText(' \n ') })
+    expect(wrapper.find('.dd-input-preview').exists()).toBe(false)
+    wrapper.unmount()
+  })
 
   test.each([
     ['', 0, 0, '@', 1],

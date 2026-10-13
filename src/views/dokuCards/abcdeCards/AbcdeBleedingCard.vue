@@ -8,6 +8,8 @@
 
         <DodoInputTextArea v-model="store.doku.Xabcde.description"
           assist-context-id="abcde.bleeding"
+          :blocks="store.textAreaBlocks.filter(block => block.target === 'Xabcde.description')"
+          @activation-change="store.setTextAreaBlockActive"
           ref="bleedingInput" inherit-style
           title="Kritische Blutung" placeholder="z.B. Schnittverletzung Arm: Tourniquet">
           Beschreibe ganz kurz die <b>kritischen Blutungen</b>

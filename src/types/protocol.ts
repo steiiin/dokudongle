@@ -8,7 +8,12 @@ import { TreatmentRedflags } from "./protocol/treatment/treatmentRedflags"
 export { PregnancySpan } from "./protocol/pregnancy"
 export type { PregnancyTrimester } from "./protocol/pregnancy"
 
+import { createTextAreaBlockState } from "@/data/text-area-blocks"
+import type { TextAreaBlockSourceState } from "@/types/text-area-block"
+
 export interface Protocol {
+
+  textAreaBlocks: Record<string, TextAreaBlockSourceState>,
 
   course: ProtocolCourse,
   flavors: ProtocolFlavors,
@@ -34,6 +39,8 @@ export interface Protocol {
 
 export function resetProtocol(): Protocol {
   const result: Protocol = {
+
+    textAreaBlocks: createTextAreaBlockState(),
 
     course: ProtocolCourse.TRANSPORT,
     flavors: {

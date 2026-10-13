@@ -7,6 +7,8 @@
 
       <DodoInputTextArea v-model="store.doku.treatment"
         assist-context-id="treatment.tasks"
+        :blocks="store.textAreaBlocks.filter(block => block.target === 'treatment')"
+        @activation-change="store.setTextAreaBlockActive"
         title="Maßnahmen" placeholder="Beschreibe ..." :mandatory="ctx.requireTasks">
         <p><b>Arbeitsdiagnose</b></p>
         <p><b>Maßnahmen</b></p>

@@ -1,7 +1,7 @@
 <template>
   <div class="dd-input-textarea">
-    <div v-if="!modelValue.isEmpty" class="preview">
-      {{ modelValue.value }}
+    <div v-if="!isCombinedEmpty" class="dd-input-preview">
+      <div class="preview">{{ previewText }}</div>
     </div>
 
     <IonButton
@@ -55,7 +55,9 @@
             <IonIcon :src="caretUpCircleOutline" aria-hidden="true" />
           </button>
         </div>
-        <div class="dd-modal-data">
+        <div class="dd-modal-data" :class="{ 'has-blocks': blocks?.length }">
+          <DodoTextAreaBlocks v-if="blocks?.length" class="dd-modal-blocks" :blocks="blocks"
+            @activation-change="(id, active) => emit('activation-change', id, active)" />
           <div class="dd-modal-textarea-wrap">
             <div
               ref="textareaMirror"
@@ -152,6 +154,8 @@
 
 <script setup lang="ts">
 import DodoHint from '@/components/DodoHint.vue'
+import DodoTextAreaBlocks from '@/components/DodoTextAreaBlocks.vue'
+import { composeTextAreaText, type RenderedTextAreaBlock } from '@/types/text-area-block'
 
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useSlots, watch } from 'vue'
 import { chevronBackOutline, add, alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
@@ -176,11 +180,13 @@ const props = defineProps<{
   mandatory?: boolean
   inheritStyle?: boolean
   quickieKeys?: string[]
+  blocks?: readonly RenderedTextAreaBlock[]
   assistContextId: string
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: EnhanceableText): void
+  (e: 'activation-change', id: string, active: boolean): void
 }>()
 
 // ############################################################################
@@ -251,8 +257,10 @@ const canStartSnippet = computed(() => isEditing.value && isTextAssistReady.valu
 
 // ############################################################################
 
-const isMissingField = computed(() => props.mandatory && props.modelValue.isEmpty)
-const triggerActionLabel = computed(() => props.modelValue.isEmpty ? (props.mandatory ? 'fehlt' : 'hinzufügen') : 'bearbeiten')
+const previewText = computed(() => composeTextAreaText(props.modelValue.value, props.blocks ?? []))
+const isCombinedEmpty = computed(() => !previewText.value)
+const isMissingField = computed(() => props.mandatory && isCombinedEmpty.value)
+const triggerActionLabel = computed(() => isCombinedEmpty.value ? (props.mandatory ? 'fehlt' : 'hinzufügen') : 'bearbeiten')
 const triggerColor = computed(() => {
   if (isMissingField.value) return 'danger'
   return props.inheritStyle ? 'dark' : 'light'
@@ -1172,4 +1180,13 @@ dodo-tag {
   letter-spacing: -1px;
 }
 dodo-tag::before { content: '#'; }
+.dd-modal-blocks {
+  flex: 0 1 auto;
+  max-height: 45%;
+  min-height: 0;
+  overflow-y: auto;
+}
+.dd-modal-data.has-blocks {
+  padding: .5rem 0;
+}
 </style>
