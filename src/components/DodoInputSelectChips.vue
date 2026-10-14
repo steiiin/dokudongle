@@ -38,12 +38,6 @@
         </button>
       </div>
     </div>
-    <IonList class="dd-input-select-chips__actions">
-      <IonItem button :detail="false" lines="none" class="dd-input-select-chips__save"
-        @click="isPopoverOpen = false">
-        <IonLabel>Speichern</IonLabel>
-      </IonItem>
-    </IonList>
   </IonPopover>
 </template>
 
