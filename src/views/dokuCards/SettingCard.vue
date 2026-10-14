@@ -33,7 +33,6 @@
           </IonToggle>
         </IonItem>
 
-
         <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
           empty-label="Normal / k.A."
           :options="[
@@ -44,19 +43,17 @@
           ]">
         </DodoInputSelect>
 
-
-        <DodoInputSelect label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
-          empty-label="Keiner / k.A."
+        <DodoInputSelectChips label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
           :options="[
-            { value: 'nursing', label: 'Pflege' },
-            'Angehörige',
-            'Ehepartner',
-            'Lebenspartner',
-            'Kinder',
+            [ { value: 'nursing', label: 'Pflege' }, 'Ersthelfer' ],
+            [ 'Sohn', 'Tochter', 'Kinder' ],
+            [ 'Mutter', 'Vater', 'Eltern' ],
+            [ 'Ehepartner', 'Lebenspartner' ],
+            [ 'Nachbar', 'Kollege', 'Betreuuer' ]
           ]"
           allow-custom custom-label="Wer?" custom-placeholder="z.B. Tochter & Nachbarin"
-          :ime-dictionary="{ /* activate IME */ }">
-        </DodoInputSelect>
+          :ime-dictionary="{ /* activate IME */ }" empty-label="Keiner">
+        </DodoInputSelectChips>
 
       </IonList>
     </IonCardContent>

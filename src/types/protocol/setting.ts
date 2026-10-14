@@ -5,7 +5,7 @@ export class Setting {
 
   public mobility: string
   public location: string
-  public helpers: string
+  public helpers: string[]
   public isForcedEntry: boolean
   public isAlone: boolean
 
@@ -15,7 +15,7 @@ export class Setting {
   {
     this.mobility = ''
     this.location = ''
-    this.helpers = ''
+    this.helpers = []
     this.isForcedEntry = false
     this.isAlone = false
   }
@@ -25,7 +25,7 @@ export class Setting {
   get isEmpty(): boolean {
     return this.mobility == ''
       && this.location == ''
-      && this.helpers == ''
+      && this.helpers.length == 0
       && !this.isForcedEntry
       && !this.isAlone
   }
@@ -34,9 +34,9 @@ export class Setting {
 
   public generateText(): string
   {
-    const helpers = this.helpers === 'nursing'
+    const helpers = this.helpers.map(e => e === 'nursing'
       ? (this.location === 'Pflegeheim' ? 'Pflegepersonal' : 'Pflegedienst')
-      : this.helpers
+      : e).join('+')
 
     return capitalizeBegin(
       concatDoku([
