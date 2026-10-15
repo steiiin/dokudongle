@@ -1,7 +1,7 @@
 <template>
 
   <IonItem :lines="isCustomMode ? 'none' : lines">
-    <IonSelect interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
+    <IonSelect ref="select" interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
 
       <div slot="label" class="multiline-label-wrapper">
         <div>{{ label }}</div>
@@ -43,6 +43,7 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
+import { IonSelect } from '@ionic/vue'
 import type { ImeDictionary } from '@/services/text-assist'
 
 // ############################################################################
@@ -75,6 +76,14 @@ const emit = defineEmits<{
 }>()
 
 // ############################################################################
+
+const select = ref<InstanceType<typeof IonSelect> | null>(null)
+const open = () => {
+  const element = select.value?.$el as HTMLIonSelectElement | undefined
+  // Ionic needs an event anchor for popovers; without one it opens an alert.
+  return element?.open({ target: element } as unknown as UIEvent)
+}
+defineExpose({ open })
 
 const CUSTOM_VALUE = '__custom'
 

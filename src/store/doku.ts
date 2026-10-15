@@ -103,6 +103,17 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     }
     normalizedInput = { ...input, xabcDe: { ...disability, psych } }
   }
+  if (isRecord(normalizedInput.xAbcde)) {
+    const airway = normalizedInput.xAbcde
+    const stridor = airway.stridor === undefined ? airway.hasStridor : airway.stridor
+    normalizedInput = {
+      ...normalizedInput,
+      xAbcde: {
+        ...airway,
+        stridor: typeof stridor === 'boolean' ? { assessed: stridor, value: stridor } : stridor,
+      },
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
 
   if (legacyCourse === 1 || legacyCourse === 2) {

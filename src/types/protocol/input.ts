@@ -160,6 +160,9 @@ export class AssessedValue<T> {
 
     return true
   }
+  matches(expected: T): boolean {
+    return this.isAssessed && this.value === expected
+  }
 
   static assessed<T>(value: T): AssessedValue<T> {
     return new AssessedValue(true, value)

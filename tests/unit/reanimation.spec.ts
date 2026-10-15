@@ -33,7 +33,8 @@ function mountClinicalCards() {
 
 function seedFindings(store: ReturnType<typeof useDokuStore>) {
   const p = store.doku
-  p.xAbcde.hasStridor = true
+  p.xAbcde.stridor.assessed = true
+  p.xAbcde.stridor.value = true
   p.xAbcde.mucosa.e = 'blass'
   p.xaBcde.breathlessness = 'schwere'
   p.xaBcde.mechanics = { pattern: 'Kußmaul-Atmung', frequency: 'Tachypnoe', depth: 'Vertieft' }
@@ -62,6 +63,17 @@ describe('Reanimation restoration', () => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
     vi.mocked(loadDokuState).mockReset()
+  })
+
+  test.each([false, true])('restores a negative Stridor value with assessed=%s', async assessed => {
+    const store = useDokuStore()
+    store.doku.xAbcde.stridor.assessed = assessed
+    mountClinicalCards()
+    store.setFlavor('reanimation', true)
+    expect(store.doku.xAbcde.stridor).toMatchObject({ assessed: false, value: false })
+    store.setFlavor('reanimation', false)
+    await nextTick()
+    expect(store.doku.xAbcde.stridor).toMatchObject({ assessed, value: false })
   })
 
   test('the chip applies the preset and restores non-default values through the store', async () => {
@@ -135,7 +147,7 @@ describe('Reanimation restoration', () => {
     expect(store.doku.xabcdE.abdominal.value.pain).toBe('leichte')
     expect(store.doku.xaBcde.treatment).toBe('New treatment')
     expect(store.doku.situation.value).toBe('New situation')
-    expect(store.doku.xAbcde.hasStridor).toBe(true)
+    expect(store.doku.xAbcde.stridor).toMatchObject({ assessed: true, value: true })
   })
 
   test('restores an edited field returned to its preset value', () => {
@@ -251,7 +263,7 @@ describe('Reanimation restoration', () => {
     store.doku.xabCde.pulse.centralStrength = 'nicht'
     store.setFlavor('non_verbal', true)
     await nextTick()
-    expect(store.doku.xAbcde.hasStridor).toBe(false)
+    expect(store.doku.xAbcde.stridor).toMatchObject({ assessed: false, value: false })
     expect(store.doku.xaBcde.mechanics.pattern).toBe('')
     expect(store.doku.xaBcde.hasHypoxia).toBe(true)
     expect(store.doku.xabCde.pulse.peripheralStrength).toBe('nicht')

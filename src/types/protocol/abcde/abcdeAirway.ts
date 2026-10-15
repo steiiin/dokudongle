@@ -1,5 +1,6 @@
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { onNormal, textIf } from "@/utils/filter"
+import { AssessedValue } from "../input"
 
 // ############################################################################
 
@@ -17,8 +18,8 @@ export class AbcdeAirway {
   public mucosa: AirwayMucosa
   public obstruction: string
 
-  public hasStridor: boolean
   public hasTongueBite: boolean
+  public stridor: AssessedValue<boolean>
 
   public treatment: string
 
@@ -29,7 +30,7 @@ export class AbcdeAirway {
     this.isBreathing = true
     this.mucosa = { m: 'feucht', e: 'rosig' }
     this.obstruction = ''
-    this.hasStridor = false
+    this.stridor = AssessedValue.unassessed(false)
     this.hasTongueBite = false
     this.treatment = ''
   }
@@ -38,7 +39,7 @@ export class AbcdeAirway {
 
   get needTreatment(): boolean {
     return !this.isBreathing
-      || this.hasStridor
+      || this.stridor.matches(true)
       || !this.noObstruction
   }
 
@@ -67,7 +68,10 @@ export class AbcdeAirway {
       textIf('keine Atmung! ', !this.isBreathing) + capitalizeBegin(concatDoku([
       this.obstructionText,
       onNormal('SH ' + this.mucosaText),
-      textIf('Stridor', this.hasStridor),
+      textIf(
+        this.stridor.value ? 'Stridor' : 'kein Stridor',
+        this.stridor.isAssessed
+      ),
       this.hasTongueBite
         ? 'Zungenbiss'
         : onNormal('kein Zungenbiss')

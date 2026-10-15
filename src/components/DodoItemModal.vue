@@ -1,5 +1,5 @@
 <template>
-  <IonItem :lines="lines" button :detail="detail" @click="isModalOpen = true">
+  <IonItem ref="trigger" :lines="lines" button :detail="detail" @click="open">
     <template v-if="useStackedLayout">
       <IonLabel>
         <h2>{{ label }}</h2>
@@ -34,6 +34,7 @@
 import { chevronBackOutline } from 'ionicons/icons'
 
 import { computed, ref } from 'vue'
+import { IonItem } from '@ionic/vue'
 
 // ############################################################################
 
@@ -52,9 +53,17 @@ const props = withDefaults(defineProps<{
 // ############################################################################
 
 const isModalOpen = ref(false)
+const trigger = ref<InstanceType<typeof IonItem> | null>(null)
 
 const stateText = computed(() => props.state ?? '')
 const useStackedLayout = computed(() => stateText.value.length > 22)
+
+const open = () => {
+  trigger.value?.$el.shadowRoot?.querySelector('button')?.focus()
+  isModalOpen.value = true
+}
+
+defineExpose({ open })
 
 const closeModal = () => {
   isModalOpen.value = false

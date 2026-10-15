@@ -1,84 +1,84 @@
 <template>
-  <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>A - Airway</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent>
-      <IonList lines="none">
+  <DodoExaminationCard title="A - Airway">
 
-        <IonItem lines="full">
-          <IonToggle v-model="store.doku.xAbcde.isBreathing" label-placement="end">
-            Atmung vorhanden?
-          </IonToggle>
+    <IonItem lines="full">
+      <IonToggle v-model="store.doku.xAbcde.isBreathing" label-placement="end">
+        Atmung vorhanden?
+      </IonToggle>
+    </IonItem>
+
+    <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction"
+      lines="inset" empty-label="Keine"
+      :options="[
+        'Fremdkörper',
+        'Schwellung',
+        'Erbrochenes',
+        'Blut',
+      ]"
+      allow-custom custom-label="Durch?" custom-placeholder="z.B. Blut"
+      :ime-dictionary="{ /* activate IME */ }">
+    </DodoInputSelect>
+
+    <DodoExaminationItem id="stridor" label="Stridor"
+      v-model:assessed="store.doku.xAbcde.stridor.assessed"
+      :available="store.doku.xAbcde.isBreathing" show-line="inset"
+      @select="store.doku.xAbcde.stridor.value = true"
+      @remove="store.doku.xAbcde.stridor.value = false">
+      <IonItem>
+        <IonToggle v-model="store.doku.xAbcde.stridor.value" label-placement="end">
+          Stridor?
+        </IonToggle>
+      </IonItem>
+    </DodoExaminationItem>
+
+    <DodoItemModal label="Schleimhaut" modal-label="Mundschleimhaut"
+      :state="store.doku.xAbcde.mucosaText" lines="full">
+
+      <IonItemDivider>
+        <IonLabel>Feuchtigkeit</IonLabel>
+      </IonItemDivider>
+      <IonRadioGroup v-model="store.doku.xAbcde.mucosa.m">
+        <IonItem lines="inset">
+          <IonRadio value="feucht">Feucht</IonRadio>
         </IonItem>
-
-        <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction"
-          lines="inset" empty-label="Keine"
-          :options="[
-            'Fremdkörper',
-            'Schwellung',
-            'Erbrochenes',
-            'Blut',
-          ]"
-          allow-custom custom-label="Durch?" custom-placeholder="z.B. Blut"
-          :ime-dictionary="{ /* activate IME */ }">
-        </DodoInputSelect>
-
-        <IonItem v-show="store.doku.xAbcde.isBreathing" lines="full">
-          <IonToggle v-model="store.doku.xAbcde.hasStridor" label-placement="end">
-            Stridor?
-          </IonToggle>
+        <IonItem>
+          <IonRadio value="trocken">Trocken</IonRadio>
         </IonItem>
-
-        <DodoItemModal label="Schleimhaut" modal-label="Mundschleimhaut"
-          :state="store.doku.xAbcde.mucosaText" lines="full">
-
-          <IonItemDivider>
-            <IonLabel>Feuchtigkeit</IonLabel>
-          </IonItemDivider>
-          <IonRadioGroup v-model="store.doku.xAbcde.mucosa.m">
-            <IonItem lines="inset">
-              <IonRadio value="feucht">Feucht</IonRadio>
-            </IonItem>
-            <IonItem>
-              <IonRadio value="trocken">Trocken</IonRadio>
-            </IonItem>
-          </IonRadioGroup>
-          <IonItemDivider>
-            <IonLabel>Erythema / Farbe</IonLabel>
-          </IonItemDivider>
-          <IonRadioGroup v-model="store.doku.xAbcde.mucosa.e">
-            <IonItem lines="inset">
-              <IonRadio value="rosig">Rosig</IonRadio>
-            </IonItem>
-            <IonItem lines="inset">
-              <IonRadio value="blass">Blass</IonRadio>
-            </IonItem>
-            <IonItem lines="inset">
-              <IonRadio value="gerötet">Gerötet</IonRadio>
-            </IonItem>
-            <IonItem>
-              <IonRadio value="bläulich">Bläulich / Zyanotisch</IonRadio>
-            </IonItem>
-          </IonRadioGroup>
-
-        </DodoItemModal>
-
-        <IonItem lines="none">
-          <IonToggle v-model="store.doku.xAbcde.hasTongueBite" label-placement="end">
-            Zungenbiss?
-          </IonToggle>
+      </IonRadioGroup>
+      <IonItemDivider>
+        <IonLabel>Erythema / Farbe</IonLabel>
+      </IonItemDivider>
+      <IonRadioGroup v-model="store.doku.xAbcde.mucosa.e">
+        <IonItem lines="inset">
+          <IonRadio value="rosig">Rosig</IonRadio>
         </IonItem>
+        <IonItem lines="inset">
+          <IonRadio value="blass">Blass</IonRadio>
+        </IonItem>
+        <IonItem lines="inset">
+          <IonRadio value="gerötet">Gerötet</IonRadio>
+        </IonItem>
+        <IonItem>
+          <IonRadio value="bläulich">Bläulich / Zyanotisch</IonRadio>
+        </IonItem>
+      </IonRadioGroup>
 
-      </IonList>
+    </DodoItemModal>
 
+    <IonItem lines="none">
+      <IonToggle v-model="store.doku.xAbcde.hasTongueBite" label-placement="end">
+        Zungenbiss?
+      </IonToggle>
+    </IonItem>
+
+    <template #footer>
       <DodoInputTreatment v-if="store.doku.xAbcde.needTreatment"
         v-model="store.doku.xAbcde.treatment"
         placeholder="Absaugen, Guedel-Tubus">
       </DodoInputTreatment>
 
-    </IonCardContent>
-  </IonCard>
+    </template>
+  </DodoExaminationCard>
 </template>
 
 <script setup lang="ts">
@@ -94,7 +94,8 @@ const store = useDokuStore()
 watch(() => store.doku.xAbcde.isBreathing, (v) => {
   if (isRestoringReanimation(store.doku)) return
 
-  store.doku.xAbcde.hasStridor = false
+  store.doku.xAbcde.stridor.assessed = false
+  store.doku.xAbcde.stridor.value = false
   store.doku.xAbcde.mucosa.e = v ? 'rosig' : 'bläulich'
 
   store.doku.xaBcde.breathlessness = 'keine'
