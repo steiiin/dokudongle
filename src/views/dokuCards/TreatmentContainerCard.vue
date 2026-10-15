@@ -1,16 +1,11 @@
 <template>
-  <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>Aufgaben</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent class="card-in-card">
+  <DodoContainerCard title="Aufgaben" card-in-card>
 
-      <TreatmentTasksCard />
-      <TreatmentMedicationsCard v-show="ctx.requireSaamed" />
-      <TreatmentRedflagsCard v-show="ctx.requireRedflags" />
+    <TreatmentTasksCard />
+    <TreatmentMedicationsCard v-show="ctx.requireSaamed" />
+    <TreatmentRedflagsCard v-show="ctx.requireRedflags" />
 
-    </IonCardContent>
-  </IonCard>
+  </DodoContainerCard>
 </template>
 
 <script setup lang="ts">

@@ -24,12 +24,6 @@
           :ime-dictionary="{ /* activate IME */ }">
         </DodoInputSelect>
 
-        <IonItem :lines="store.doku.xAbcde.isBreathing ? 'inset' : 'full'">
-          <IonToggle v-model="store.doku.xAbcde.hasAngioEdema" label-placement="end">
-            Angioödem?
-          </IonToggle>
-        </IonItem>
-
         <IonItem v-show="store.doku.xAbcde.isBreathing" lines="full">
           <IonToggle v-model="store.doku.xAbcde.hasStridor" label-placement="end">
             Stridor?
@@ -122,17 +116,6 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
   store.doku.xaBcde.hasTrachealDeviation = false
 
 }, { flush: 'sync' })
-
-watch(() => store.doku.xAbcde.hasAngioEdema, (v) => {
-  if (v && store.doku.xAbcde.obstruction != 'Schwellung')
-  {
-    store.doku.xAbcde.obstruction = 'Schwellung'
-  }
-  else if (!v && store.doku.xAbcde.obstruction == 'Schwellung')
-  {
-    store.doku.xAbcde.obstruction = ''
-  }
-})
 
 </script>
 <style scoped>

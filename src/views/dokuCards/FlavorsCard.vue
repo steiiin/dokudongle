@@ -1,57 +1,52 @@
 <template>
-  <ion-card>
-    <ion-card-content>
-      <ion-list style="padding: 0;">
+  <DodoContainerCard>
+    <ion-list>
 
-        <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.noEmergencyCall || visibleFlavors.verlegung || visibleFlavors.einweisung">
+      <ion-item lines="none" class="flavor-row"
+        v-if="visibleFlavors.noEmergencyCall || visibleFlavors.verlegung || visibleFlavors.einweisung">
 
-          <DodoToggleChip v-if="visibleFlavors.noEmergencyCall"
-            :model-value="store.doku.flavors.no_emergency_call" color="primary"
-            @update:modelValue="setFlavor('no_emergency_call', $event)">
-            Fehlfahrt
-          </DodoToggleChip>
+        <DodoToggleChip v-if="visibleFlavors.noEmergencyCall" :model-value="store.doku.flavors.no_emergency_call"
+          color="primary" @update:modelValue="setFlavor('no_emergency_call', $event)">
+          Fehlfahrt
+        </DodoToggleChip>
 
-          <DodoToggleChip v-if="visibleFlavors.verlegung"
-            :model-value="store.doku.flavors.verlegung" color="primary"
-            @update:modelValue="setFlavor('verlegung', $event)">
-            Verlegung
-          </DodoToggleChip>
+        <DodoToggleChip v-if="visibleFlavors.verlegung" :model-value="store.doku.flavors.verlegung" color="primary"
+          @update:modelValue="setFlavor('verlegung', $event)">
+          Verlegung
+        </DodoToggleChip>
 
-          <DodoToggleChip v-if="visibleFlavors.einweisung"
-            :model-value="store.doku.flavors.einweisung" color="primary"
-            @update:modelValue="setFlavor('einweisung', $event)">
-            Einweisung
-          </DodoToggleChip>
+        <DodoToggleChip v-if="visibleFlavors.einweisung" :model-value="store.doku.flavors.einweisung" color="primary"
+          @update:modelValue="setFlavor('einweisung', $event)">
+          Einweisung
+        </DodoToggleChip>
 
-        </ion-item>
+      </ion-item>
 
-        <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.trauma || visibleFlavors.reanimation">
+      <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.trauma || visibleFlavors.reanimation">
 
-          <DodoToggleChip v-if="visibleFlavors.trauma"
-            :model-value="store.doku.flavors.trauma" color="warning"
-            @update:modelValue="setFlavor('trauma', $event)">
-            Trauma
-          </DodoToggleChip>
+        <DodoToggleChip v-if="visibleFlavors.trauma" :model-value="store.doku.flavors.trauma" color="warning"
+          @update:modelValue="setFlavor('trauma', $event)">
+          Trauma
+        </DodoToggleChip>
 
-          <DodoToggleChip v-if="visibleFlavors.reanimation"
-            :model-value="store.doku.flavors.reanimation" color="warning"
-            @update:modelValue="setFlavor('reanimation', $event)">
-            Reanimation
-          </DodoToggleChip>
+        <DodoToggleChip v-if="visibleFlavors.reanimation" :model-value="store.doku.flavors.reanimation" color="warning"
+          @update:modelValue="setFlavor('reanimation', $event)">
+          Reanimation
+        </DodoToggleChip>
 
-        </ion-item>
-        <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.nonVerbal">
+      </ion-item>
 
-          <DodoToggleChip
-            :model-value="store.doku.flavors.non_verbal" color="success"
-            @update:modelValue="setFlavor('non_verbal', $event)">
-            Non-Verbal
-          </DodoToggleChip>
+      <ion-item lines="none" class="flavor-row" v-if="visibleFlavors.nonVerbal">
 
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
+        <DodoToggleChip :model-value="store.doku.flavors.non_verbal" color="success"
+          @update:modelValue="setFlavor('non_verbal', $event)">
+          Non-Verbal
+        </DodoToggleChip>
+
+      </ion-item>
+
+    </ion-list>
+  </DodoContainerCard>
 </template>
 
 <script setup lang="ts">
@@ -89,14 +84,14 @@ const visibleFlavors = computed(() => {
 </script>
 
 <style scoped>
+ion-list { padding: 0 }
 
-  .flavor-row {
-    --min-height: unset;
-    --inner-padding-end: 0;
-    --padding-start: 0;
-    --padding-end: 0;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
+.flavor-row {
+  --min-height: unset;
+  --inner-padding-end: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 </style>

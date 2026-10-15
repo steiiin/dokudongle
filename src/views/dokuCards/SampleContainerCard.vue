@@ -1,29 +1,23 @@
 <template>
-  <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>SAMPLE(R)</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent class="card-in-card">
+  <DodoContainerCard title="SAMPLE(R)" card-in-card>
 
-          <IonCard class="sample-symptoms" v-show="ctx.requireSampleSymptoms">
-            <IonCardHeader>
-              <IonCardTitle>Symptome</IonCardTitle>
-            </IonCardHeader>
-            <IonCardContent class="card-in-card">
+    <IonCard class="sample-symptoms" v-show="ctx.requireSampleSymptoms">
+      <IonCardHeader>
+        <IonCardTitle>Symptome</IonCardTitle>
+      </IonCardHeader>
+      <IonCardContent class="card-in-card">
 
-              <SampleSymptomsTrauma v-show="ctx.isTrauma" />
-              <SampleSymptomsCard />
+        <SampleSymptomsTrauma v-show="ctx.isTrauma" />
+        <SampleSymptomsCard />
 
-            </IonCardContent>
-          </IonCard>
-          <SampleAllergiesCard />
-          <SampleMedicationsCard />
-          <SamplePlerCard />
-          <SampleContactsCard />
+      </IonCardContent>
+    </IonCard>
+    <SampleAllergiesCard />
+    <SampleMedicationsCard />
+    <SamplePlerCard />
+    <SampleContactsCard />
 
-
-    </IonCardContent>
-  </IonCard>
+  </DodoContainerCard>
 </template>
 
 <script setup lang="ts">

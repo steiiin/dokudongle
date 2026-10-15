@@ -1,19 +1,14 @@
 <template>
-  <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>{{ ctx.isTrauma ? 'x' : '' }}ABCDE</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent class="card-in-card">
+  <DodoContainerCard :title="`${ctx.isTrauma ? 'x' : ''}ABCDE`" card-in-card>
 
-      <AbcdeBleedingCard v-show="ctx.isTrauma" />
-      <AbcdeAirwayCard />
-      <AbcdeBreathingCard />
-      <AbcdeCirculationCard />
-      <AbcdeDisabilityCard />
-      <AbcdeExposureCard />
+    <AbcdeBleedingCard v-show="ctx.isTrauma" />
+    <AbcdeAirwayCard />
+    <AbcdeBreathingCard />
+    <AbcdeCirculationCard />
+    <AbcdeDisabilityCard />
+    <AbcdeExposureCard />
 
-    </IonCardContent>
-  </IonCard>
+  </DodoContainerCard>
 </template>
 
 <script setup lang="ts">

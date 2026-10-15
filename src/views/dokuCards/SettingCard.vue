@@ -1,63 +1,58 @@
 <template>
-  <IonCard v-show="ctx.requireSceneDetails">
-    <IonCardHeader>
-      <IonCardTitle>Umgebung</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent class="with-list">
-      <IonList lines="inset">
+  <DodoContainerCard title="Umgebung" card-in-card v-show="ctx.requireSceneDetails">
+    <IonList>
 
-        <DodoInputSelect label="Einsatzort" v-model="store.doku.setting.location" lines="inset"
-          empty-label="Keine Angabe"
-          :options="[
-            'Häuslichkeit',
-            'Betreutes Wohnen',
-            'Pflegeheim',
-            { value: 'In Werkhalle', label: 'Werkhalle' },
-            'Bahnhof',
-            { value: 'Auf Straße', label: 'Straße' },
-            { value: 'Auf Fußweg', label: 'Fußweg' },
-          ]"
-          allow-custom custom-label="Wo?" custom-placeholder="z.B. Fußweg"
-          :ime-dictionary="{ /* activate IME */ }">
-        </DodoInputSelect>
+      <DodoInputSelect label="Einsatzort" v-model="store.doku.setting.location" lines="inset"
+        empty-label="Keine Angabe"
+        :options="[
+          'Häuslichkeit',
+          'Betreutes Wohnen',
+          'Pflegeheim',
+          { value: 'In Werkhalle', label: 'Werkhalle' },
+          'Bahnhof',
+          { value: 'Auf Straße', label: 'Straße' },
+          { value: 'Auf Fußweg', label: 'Fußweg' },
+        ]"
+        allow-custom custom-label="Wo?" custom-placeholder="z.B. Fußweg"
+        :ime-dictionary="{ /* activate IME */ }">
+      </DodoInputSelect>
 
-        <IonItem>
-          <IonToggle v-model="store.doku.setting.isAlone" label-placement="end">
-            Lebt allein?
-          </IonToggle>
-        </IonItem>
+      <IonItem>
+        <IonToggle v-model="store.doku.setting.isAlone" label-placement="end">
+          Lebt allein?
+        </IonToggle>
+      </IonItem>
 
-        <IonItem lines="full">
-          <IonToggle v-model="store.doku.setting.isForcedEntry" label-placement="end">
-            Türöffnung?
-          </IonToggle>
-        </IonItem>
+      <IonItem lines="full">
+        <IonToggle v-model="store.doku.setting.isForcedEntry" label-placement="end">
+          Türöffnung?
+        </IonToggle>
+      </IonItem>
 
-        <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
-          empty-label="Normal / k.A."
-          :options="[
-            { value: 'am Stock mobil', label: 'Am Stock' },
-            { value: 'rollatormobil', label: 'Rollator' },
-            { value: 'rollstuhlmobil', label: 'Rollstuhl' },
-            { value: 'bettlägerig', label: 'Bettlägerig' },
-          ]">
-        </DodoInputSelect>
+      <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
+        empty-label="Normal / k.A."
+        :options="[
+          { value: 'am Stock mobil', label: 'Am Stock' },
+          { value: 'rollatormobil', label: 'Rollator' },
+          { value: 'rollstuhlmobil', label: 'Rollstuhl' },
+          { value: 'bettlägerig', label: 'Bettlägerig' },
+        ]">
+      </DodoInputSelect>
 
-        <DodoInputSelectChips label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
-          :options="[
-            [ { value: 'nursing', label: 'Pflege' }, 'Ersthelfer' ],
-            [ 'Sohn', 'Tochter', 'Kinder' ],
-            [ 'Mutter', 'Vater', 'Eltern' ],
-            [ 'Ehepartner', 'Lebenspartner' ],
-            [ 'Nachbar', 'Kollege', 'Betreuuer' ]
-          ]"
-          allow-custom custom-label="Wer?" custom-placeholder="z.B. Tochter & Nachbarin"
-          :ime-dictionary="{ /* activate IME */ }" empty-label="Keiner">
-        </DodoInputSelectChips>
+      <DodoInputSelectChips label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
+        :options="[
+          [ { value: 'nursing', label: 'Pflege' }, 'Ersthelfer' ],
+          [ 'Sohn', 'Tochter', 'Kinder' ],
+          [ 'Mutter', 'Vater', 'Eltern' ],
+          [ 'Ehepartner', 'Lebenspartner' ],
+          [ 'Nachbar', 'Kollege', 'Betreuuer' ]
+        ]"
+        allow-custom custom-label="Wer?" custom-placeholder="z.B. Tochter & Nachbarin"
+        :ime-dictionary="{ /* activate IME */ }" empty-label="Keiner">
+      </DodoInputSelectChips>
 
-      </IonList>
-    </IonCardContent>
-  </IonCard>
+    </IonList>
+  </DodoContainerCard>
 </template>
 
 <script setup lang="ts">

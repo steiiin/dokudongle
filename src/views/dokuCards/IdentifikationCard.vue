@@ -1,11 +1,7 @@
 <template>
-  <IonCard>
-    <IonCardContent class="">
-
-      <DodoInputAge v-model="store.doku.ident.age" />
-
-    </IonCardContent>
-  </IonCard>
+  <DodoContainerCard>
+    <DodoInputAge v-model="store.doku.ident.age" />
+  </DodoContainerCard>
 </template>
 
 <script setup lang="ts">
