@@ -36,7 +36,7 @@ export interface CirculationChest {
 
 export interface CirculationEdema {
   grade: 'keine Ödeme' | 'Knöchelödeme' | 'Unterschenkelödeme' | 'ausgeprägte abhängige Ödeme'
-  variation: 'neu aufgetreten' | 'zunehmend' | 'unverändert' | 'rückläufig' | ''
+  variation: 'neu' | 'zunehmend' | 'bekannt' | ''
 }
 
 // ############################################################################
@@ -87,7 +87,7 @@ export class AbcdeCirculation {
     this.capillaryRefill = '2s'
     this.edema = AssessedValue.unassessed({
       grade: 'keine Ödeme',
-      variation: '',
+      variation: 'bekannt',
     })
     this.ecg = AssessedValue.unassessed('SR')
     this.treatment = ''
@@ -176,8 +176,7 @@ export class AbcdeCirculation {
   get edemaText(): string {
     if (!this.edema.isAssessed) { return '' }
     const { grade, variation } = this.edema.value
-    if (grade == 'keine Ödeme') { return textIf(grade, getCtx().isHigh || getCtx().hasHeartIssue) }
-    if (variation == '') { return grade }
+    if (grade == 'keine Ödeme' || variation == '') { return grade }
     return `${grade} (${variation})`
   }
 

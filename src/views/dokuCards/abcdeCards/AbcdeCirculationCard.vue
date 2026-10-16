@@ -230,10 +230,9 @@
       <DodoInputSelect v-model="store.doku.xabCde.edema.value.variation" v-if="store.doku.xabCde.edema.value.grade != 'keine Ödeme'"
         label="Verlauf" lines="none" empty-label="unklar"
         :options="[
-          'neu aufgetreten',
+          'neu',
           'zunehmend',
-          'unverändert',
-          'rückläufig',
+          'bekannt',
         ]">
       </DodoInputSelect>
     </DodoExaminationItem>
@@ -303,7 +302,7 @@ const ecgModal = ref<InstanceType<typeof DodoItemModal>>()
 const edemaSelect = ref<InstanceType<typeof DodoInputSelect>>()
 
 function resetEdema() {
-  store.doku.xabCde.edema.value = { grade: 'keine Ödeme', variation: '' }
+  store.doku.xabCde.edema.value = { grade: 'keine Ödeme', variation: 'bekannt' }
 }
 
 watch(() => store.doku.xabCde.edema.value.grade, (v) => {
