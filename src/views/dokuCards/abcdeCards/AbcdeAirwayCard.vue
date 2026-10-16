@@ -103,18 +103,25 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
   store.doku.xaBcde.mechanics.depth = ''
   store.doku.xaBcde.mechanics.pattern = ''
 
-  store.doku.xaBcde.useAccessoryMuscles = false
-  store.doku.xaBcde.hasRetractions = false
+  store.doku.xaBcde.accessoryMuscles.assessed = false
+  store.doku.xaBcde.accessoryMuscles.value = false
+  store.doku.xaBcde.retractions.assessed = false
+  store.doku.xaBcde.retractions.value = false
   store.doku.xaBcde.hasHypoxia = !v
 
+  store.doku.xaBcde.auscultation.assessed = false
   store.doku.xaBcde.auscultation.value.wheezing = ''
   store.doku.xaBcde.auscultation.value.crackles = ''
   store.doku.xaBcde.auscultation.value.dimished = ''
 
-  store.doku.xaBcde.isParadoxical = false
-  store.doku.xaBcde.hasJugularVenousDistension = false
-  store.doku.xaBcde.hasEmphysema = false
-  store.doku.xaBcde.hasTrachealDeviation = false
+  store.doku.xaBcde.paradoxical.assessed = false
+  store.doku.xaBcde.paradoxical.value = false
+  store.doku.xaBcde.jugularVenousDistension.assessed = false
+  store.doku.xaBcde.jugularVenousDistension.value = false
+  store.doku.xaBcde.emphysema.assessed = false
+  store.doku.xaBcde.emphysema.value = false
+  store.doku.xaBcde.trachealDeviation.assessed = false
+  store.doku.xaBcde.trachealDeviation.value = false
 
 }, { flush: 'sync' })
 

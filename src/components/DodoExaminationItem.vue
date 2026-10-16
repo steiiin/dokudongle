@@ -14,7 +14,7 @@
 import { h, inject, onBeforeUnmount, ref, useSlots } from 'vue'
 import { IonLabel } from '@ionic/vue'
 import { closeOutline } from 'ionicons/icons'
-import { examinationCardKey } from './examination'
+import { examinationCardKey, type ExaminationPreset } from './examination'
 
 const props = withDefaults(defineProps<{
   id: string
@@ -22,10 +22,12 @@ const props = withDefaults(defineProps<{
   available?: boolean
   label?: string
   showLine?: boolean | 'full' | 'inset'
-}>(), { available: true, label: '', showLine: false })
+  pickerSeparatorAfter?: boolean
+  assessedPresets?: boolean
+}>(), { available: true, label: '', showLine: false, pickerSeparatorAfter: false, assessedPresets: false })
 const emit = defineEmits<{
   'update:assessed': [value: boolean]
-  select: []
+  select: [preset?: ExaminationPreset]
   activate: []
   remove: []
 }>()
@@ -36,15 +38,21 @@ if (!card) throw new Error('DodoExaminationItem requires DodoExaminationCard')
 
 const unregister = card.register({
   id: props.id,
+  get label() { return props.label || props.id },
   get assessed() { return props.assessed },
   get available() { return props.available },
+  get assessedPresets() { return props.assessedPresets },
+  get pickerSeparatorAfter() { return props.pickerSeparatorAfter },
   picker: () => slots.picker?.() ?? h(IonLabel, {}, () => props.label),
-  select() {
+  select(preset) {
     emit('update:assessed', true)
-    emit('select')
+    if (preset === undefined) emit('select')
+    else emit('select', preset)
+  },
+  focus() {
+    row.value?.focus()
   },
   activate() {
-    row.value?.focus()
     emit('activate')
   },
 })
@@ -72,6 +80,9 @@ function remove() {
   --inner-padding-bottom: 0;
   --background: transparent;
   pointer-events: none;
+}
+.examination-item:last-child > .examination-separator {
+  display: none;
 }
 .examination-control {
   flex: 1;

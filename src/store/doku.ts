@@ -114,6 +114,22 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       },
     }
   }
+  if (isRecord(normalizedInput.xaBcde)) {
+    const breathing = { ...normalizedInput.xaBcde }
+    const legacyBreathingFields = {
+      accessoryMuscles: 'useAccessoryMuscles',
+      retractions: 'hasRetractions',
+      paradoxical: 'isParadoxical',
+      jugularVenousDistension: 'hasJugularVenousDistension',
+      emphysema: 'hasEmphysema',
+      trachealDeviation: 'hasTrachealDeviation',
+    } as const
+    for (const [key, legacyKey] of Object.entries(legacyBreathingFields)) {
+      const finding = breathing[key] === undefined ? breathing[legacyKey] : breathing[key]
+      breathing[key] = typeof finding === 'boolean' ? { assessed: finding, value: finding } : finding
+    }
+    normalizedInput = { ...normalizedInput, xaBcde: breathing }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
 
   if (legacyCourse === 1 || legacyCourse === 2) {
@@ -1037,7 +1053,7 @@ export const useDokuStore = defineStore('doku', {
         !state.doku.xAbcde.isBreathing
         || state.doku.xaBcde.breathlessness == 'schwere'
         || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
-        || state.doku.xaBcde.hasTrachealDeviation
+        || state.doku.xaBcde.trachealDeviation.matches(true)
         || state.doku.xabCde.pulse.peripheralStrength == 'nicht'
         || state.doku.xabCde.pulse.centralStrength != 'gut'
         || (isTrauma && gcs <= 12 && !isBaseline)

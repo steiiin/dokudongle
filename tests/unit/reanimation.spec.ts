@@ -38,13 +38,20 @@ function seedFindings(store: ReturnType<typeof useDokuStore>) {
   p.xAbcde.mucosa.e = 'blass'
   p.xaBcde.breathlessness = 'schwere'
   p.xaBcde.mechanics = { pattern: 'Kußmaul-Atmung', frequency: 'Tachypnoe', depth: 'Vertieft' }
-  p.xaBcde.useAccessoryMuscles = true
-  p.xaBcde.hasRetractions = true
+  p.xaBcde.accessoryMuscles.assessed = true
+  p.xaBcde.accessoryMuscles.value = true
+  p.xaBcde.retractions.assessed = true
+  p.xaBcde.retractions.value = true
+  p.xaBcde.auscultation.assessed = true
   p.xaBcde.auscultation.value = { wheezing: 're.', crackles: 'li.', dimished: 'bds.' }
-  p.xaBcde.isParadoxical = true
-  p.xaBcde.hasJugularVenousDistension = true
-  p.xaBcde.hasEmphysema = true
-  p.xaBcde.hasTrachealDeviation = true
+  p.xaBcde.paradoxical.assessed = true
+  p.xaBcde.paradoxical.value = true
+  p.xaBcde.jugularVenousDistension.assessed = true
+  p.xaBcde.jugularVenousDistension.value = true
+  p.xaBcde.emphysema.assessed = true
+  p.xaBcde.emphysema.value = true
+  p.xaBcde.trachealDeviation.assessed = true
+  p.xaBcde.trachealDeviation.value = true
   p.xabCde.skin.color = 'blass'
   p.xabCde.skin.peripheralTemp = 'warm'
   p.xabCde.skin.centralTemp = 'warm'
@@ -74,6 +81,19 @@ describe('Reanimation restoration', () => {
     store.setFlavor('reanimation', false)
     await nextTick()
     expect(store.doku.xAbcde.stridor).toMatchObject({ assessed, value: false })
+  })
+
+  test.each([false, true])('restores negative breathing examinations with assessed=%s', async assessed => {
+    const store = useDokuStore()
+    const keys = ['accessoryMuscles', 'retractions', 'paradoxical', 'jugularVenousDistension', 'emphysema', 'trachealDeviation', 'auscultation'] as const
+    for (const key of keys) store.doku.xaBcde[key].assessed = assessed
+    mountClinicalCards()
+    const before = plain(store.doku.xaBcde)
+    store.setFlavor('reanimation', true)
+    for (const key of keys) expect(store.doku.xaBcde[key].assessed).toBe(false)
+    store.setFlavor('reanimation', false)
+    await nextTick()
+    expect(plain(store.doku.xaBcde)).toEqual(before)
   })
 
   test('the chip applies the preset and restores non-default values through the store', async () => {

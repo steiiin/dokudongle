@@ -2,6 +2,7 @@
 import { useDokuStore } from "@/store/doku"
 import { ProtocolVerbosity } from "@/types/protocol"
 import { prefix } from "./text"
+import { AssessedValue } from "@/types/protocol/input"
 
 function getCtx() { return useDokuStore().context }
 
@@ -27,6 +28,13 @@ export function conditionalPrefix(draft: string, condPrefix: string, condKeyword
  */
 export function textIf(text: string, expr: boolean): string {
   return expr ? text : ''
+}
+
+/**
+ * return true/false text if assessed, otherwise empty
+ */
+export function assessedText(value: AssessedValue<boolean>, trueText: string, falseText: string): string {
+  return value.isAssessed ? (value.value ? trueText : falseText) : ''
 }
 
 /**
