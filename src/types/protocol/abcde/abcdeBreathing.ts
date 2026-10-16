@@ -159,7 +159,7 @@ export class AbcdeBreathing {
     if (this.auscultation.value.wheezing == ''
         && this.auscultation.value.crackles == ''
         && this.auscultation.value.dimished == '') {
-      return PSV('unauffällig', onNormal('Ausk. unauffällig')) }
+      return PSV('unauffällig', 'Ausk. unauffällig') }
 
     const _wheezing = textIf(`Giemen ${this.auscultation.value.wheezing}`, !!this.auscultation.value.wheezing)
     const _crackles = textIf(`RGs ${this.auscultation.value.crackles}`, !!this.auscultation.value.crackles)
