@@ -10,18 +10,19 @@ import DodoItemModal from '../../../src/components/DodoItemModal.vue'
 import DodoInputSelect from '../../../src/components/DodoInputSelect.vue'
 import AbcdeBreathingCard from '../../../src/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue'
 import AbcdeAirwayCard from '../../../src/views/dokuCards/abcdeCards/AbcdeAirwayCard.vue'
+import AbcdeCirculationCard from '../../../src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue'
 
 createApp(defineComponent({
   setup() {
     const assessedPresets = new URLSearchParams(location.search).has('presets')
+    const circulation = new URLSearchParams(location.search).has('circulation')
     const modalAssessed = ref(false)
     const selectAssessed = ref(false)
     const value = ref<string | number>('Alpha')
     const modal = ref<InstanceType<typeof DodoItemModal>>()
     const select = ref<InstanceType<typeof DodoInputSelect>>()
     return () => h(IonApp, {}, () => h(IonContent, {}, () => [
-      h(AbcdeAirwayCard),
-      h(AbcdeBreathingCard),
+      ...(circulation ? [h(AbcdeCirculationCard)] : [h(AbcdeAirwayCard), h(AbcdeBreathingCard)]),
       h(DodoExaminationCard, { title: 'Controls' }, () => [
         h(DodoExaminationItem, {
           assessedPresets, id: 'modal', label: 'Modal examination', assessed: modalAssessed.value,

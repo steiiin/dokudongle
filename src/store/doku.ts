@@ -130,6 +130,19 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     }
     normalizedInput = { ...normalizedInput, xaBcde: breathing }
   }
+  if (isRecord(normalizedInput.xabCde)) {
+    const circulation = normalizedInput.xabCde
+    const edema = circulation.edema
+    if (isRecord(edema) && edema.assessed === undefined && edema.value === undefined && typeof edema.grade === 'string') {
+      normalizedInput = {
+        ...normalizedInput,
+        xabCde: {
+          ...circulation,
+          edema: { assessed: edema.grade !== 'keine Ödeme', value: edema },
+        },
+      }
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
 
   if (legacyCourse === 1 || legacyCourse === 2) {

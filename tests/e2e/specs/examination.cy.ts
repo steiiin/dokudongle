@@ -60,6 +60,93 @@ for (const width of [320, 1024]) {
       cy.contains('ion-card', 'B - Breathing').as('breathing')
     })
 
+    it('adds ECG defaults, edits through the positive action, and resets on removal', () => {
+      cy.visit('/tests/e2e/fixtures/examination.html?circulation')
+      cy.contains('ion-card', 'C - Circulation').as('circulation')
+      cy.get('@circulation').find('.examination-item').should('not.exist')
+      openPickerForKeyboard('@circulation')
+      cy.get('ion-popover.examination-picker:visible').find('[data-examination="ecg"] .positive-examination').should('have.length', 1)
+      cy.get('ion-popover.examination-picker:visible').find('[data-examination="ecg"]')
+        .shadow().find('button').focus()
+      pressKey('Enter')
+      cy.get('ion-popover.examination-picker:visible').should('not.exist')
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('@circulation').find('[data-examination="ecg"]').should('contain.text', 'SR').should(expectFocusWithin)
+      cy.get('@circulation').find('[data-examination="ecg"] .remove-examination').click()
+      cy.get('@circulation').find('.add-examination').should(expectFocusWithin)
+      openPickerForKeyboard('@circulation')
+      cy.get('ion-popover.examination-picker:visible').find('[data-examination="ecg"]')
+        .shadow().find('button').focus()
+      pressKey('Tab')
+      cy.get('ion-popover.examination-picker:visible').find('[data-examination="ecg"] .positive-examination').should(expectFocusWithin)
+      pressKey('Enter')
+      cy.get('ion-popover.examination-picker:visible').should('not.exist')
+      cy.get('ion-modal:visible').should('have.length', 1).should(expectFocusWithin)
+      cy.get('ion-modal:visible').find('ion-toggle').should('not.exist')
+      cy.get('ion-modal:visible').find('ion-select').should('have.prop', 'value', 'SR').click()
+      cy.get('ion-popover:visible').contains('ion-item', 'Vorhofflimmern').click()
+      cy.get('ion-modal:visible').find('ion-header ion-button').click()
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('@circulation').find('[data-examination="ecg"]').should('contain.text', 'VHF')
+      cy.get('@circulation').find('[data-examination="ecg"] .remove-examination').click()
+      cy.get('@circulation').find('.add-examination').click()
+      cy.get('ion-popover.examination-picker:visible').find('[data-examination="ecg"]').click()
+      cy.get('@circulation').find('[data-examination="ecg"]').should('contain.text', 'SR')
+      cy.get('ion-modal:visible').should('not.exist')
+    })
+
+    it('adds edema defaults, edits through the positive action, and resets on re-addition', () => {
+      cy.visit('/tests/e2e/fixtures/examination.html?circulation')
+      cy.contains('ion-card', 'C - Circulation').as('circulation')
+      const addEdema = (positive = false) => {
+        openPickerForKeyboard('@circulation')
+        cy.get('ion-popover.examination-picker:visible').find('[data-examination="edema"]')
+          .shadow().find('button').focus()
+        if (positive) {
+          pressKey('Tab')
+          cy.get('ion-popover.examination-picker:visible').find('[data-examination="edema"] .positive-examination')
+            .should(expectFocusWithin)
+        }
+        pressKey('Enter')
+        cy.get('ion-popover.examination-picker:visible').should('not.exist')
+        if (positive) cy.get('ion-popover:visible').should('have.length', 1).should(expectFocusWithin)
+        else {
+          cy.get('ion-popover:visible').should('not.exist')
+          cy.get('@circulation').find('[data-examination="edema"]').should(expectFocusWithin)
+        }
+      }
+      const chooseOption = (label: string) => {
+        let dismissed: Promise<void>
+        cy.get('ion-popover:visible').should('have.length', 1).then(popover => {
+          dismissed = new Cypress.Promise<void>(resolve => {
+            popover[0].addEventListener('ionPopoverDidDismiss', () => resolve(), { once: true })
+          })
+        })
+        cy.get('ion-popover:visible').contains('ion-item', label).click()
+        cy.then(() => dismissed)
+        cy.get('ion-popover:visible').should('not.exist')
+      }
+      addEdema()
+      cy.get('@circulation').find('[data-examination="edema"] ion-select').should('have.prop', 'value', 'keine Ödeme')
+      cy.get('@circulation').find('[data-examination="edema"] .remove-examination').click()
+      cy.get('@circulation').find('.add-examination').should(expectFocusWithin)
+      addEdema(true)
+      cy.get('@circulation').find('[data-examination="edema"] ion-select').should('have.prop', 'value', 'keine Ödeme')
+      chooseOption('Knöchelödeme')
+      cy.get('@circulation').find('[data-examination="edema"]').contains('ion-select', 'Verlauf').click()
+      chooseOption('zunehmend')
+      cy.get('@circulation').find('[data-examination="edema"]').contains('ion-select', 'Ödeme').click()
+      chooseOption('keine Ödeme')
+      cy.get('@circulation').find('[data-examination="edema"] ion-select').should('have.length', 1)
+      cy.get('@circulation').find('[data-examination="edema"] .remove-examination').click()
+      cy.get('@circulation').find('.add-examination').should(expectFocusWithin)
+      addEdema()
+      cy.get('@circulation').find('[data-examination="edema"] ion-select').should('have.prop', 'value', 'keine Ödeme')
+      cy.get('@circulation').find('[data-examination="edema"]').each(row => {
+        expect(row[0].scrollWidth).to.be.at.most(row[0].clientWidth)
+      })
+    })
+
     it('adds Stridor, keeps a negative result visible, removes and re-adds it', () => {
       cy.get('@airway').find('.examination-item').should('not.exist')
       cy.get('@airway').find('.add-examination').click()

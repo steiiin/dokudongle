@@ -50,7 +50,7 @@ export class AbcdeCirculation {
   public chest: CirculationChest
 
   public capillaryRefill: '1s' | '2s' | '3s' | '>3s'
-  public edema: CirculationEdema
+  public edema: AssessedValue<CirculationEdema>
 
   public ecg: AssessedValue<'SR' | 'VHF' | string>
 
@@ -85,10 +85,10 @@ export class AbcdeCirculation {
       radiation: AssessedValue.unassessed(''),
     }
     this.capillaryRefill = '2s'
-    this.edema = {
+    this.edema = AssessedValue.unassessed({
       grade: 'keine Ödeme',
       variation: '',
-    }
+    })
     this.ecg = AssessedValue.unassessed('SR')
     this.treatment = ''
   }
@@ -174,9 +174,11 @@ export class AbcdeCirculation {
   ///////////////////////////////////////////////
 
   get edemaText(): string {
-    if (this.edema.grade == 'keine Ödeme') { return textIf(this.edema.grade, getCtx().isHigh || getCtx().hasHeartIssue) }
-    if (this.edema.variation == '') { return this.edema.grade }
-    return `${this.edema.grade} (${this.edema.variation})`
+    if (!this.edema.isAssessed) { return '' }
+    const { grade, variation } = this.edema.value
+    if (grade == 'keine Ödeme') { return textIf(grade, getCtx().isHigh || getCtx().hasHeartIssue) }
+    if (variation == '') { return grade }
+    return `${grade} (${variation})`
   }
 
   ///////////////////////////////////////////////

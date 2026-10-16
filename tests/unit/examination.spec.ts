@@ -10,6 +10,7 @@ import DodoItemModal from '@/components/DodoItemModal.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import AbcdeBreathingCard from '@/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue'
 import AbcdeAirwayCard from '@/views/dokuCards/abcdeCards/AbcdeAirwayCard.vue'
+import AbcdeCirculationCard from '@/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue'
 import { useDokuStore } from '@/store/doku'
 
 const global = {
@@ -387,5 +388,114 @@ describe('Breathing examinations', () => {
     store.doku.xAbcde.isBreathing = true
     await nextTick()
     expect(f.picker.findAllComponents(IonItem)).toHaveLength(7)
+  })
+})
+
+function circulationFixture() {
+  const wrapper = mount(AbcdeCirculationCard, { global })
+  const picker = wrapper.getComponent(IonPopover)
+  const item = (id: string) => wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === id)!
+  const select = async (id: string, positive = false) => {
+    await wrapper.get('.add-examination').trigger('click')
+    const row = picker.get(`[data-examination="${id}"]`)
+    await (positive ? row.get('.positive-examination') : row).trigger('click')
+  }
+  const dismiss = async () => {
+    picker.vm.$emit('didDismiss')
+    await flushPromises()
+  }
+  return { wrapper, picker, item, select, dismiss }
+}
+
+describe('Circulation examinations', () => {
+  test.each([false, true])('adds ECG with positive action %s and resets on removal', async positive => {
+    const store = useDokuStore()
+    const f = circulationFixture()
+    await nextTick()
+    expect(f.wrapper.findAll('.examination-item')).toHaveLength(0)
+    expect(f.picker.findAllComponents(IonItem).map(row => row.attributes('data-examination'))).toEqual(['ecg', 'edema'])
+    expect(f.picker.findAll('.positive-examination')).toHaveLength(2)
+    await f.select('ecg', positive)
+    const modal = f.item('ecg').getComponent(DodoItemModal)
+    expect(modal.getComponent(IonModal).props('isOpen')).toBe(false)
+    expect(store.doku.xabCde.ecg).toMatchObject({ assessed: true, value: 'SR' })
+    await f.dismiss()
+    expect(modal.getComponent(IonModal).props('isOpen')).toBe(positive)
+    expect(modal.findComponent(IonToggle).exists()).toBe(false)
+    const select = modal.getComponent(DodoInputSelect)
+    expect(select.props('allowCustom')).toBe(true)
+    for (const rhythm of ['VHF', 'TAA 130-160/min']) {
+      select.vm.$emit('update:modelValue', rhythm)
+      await nextTick()
+      expect(store.doku.xabCde.ecgText).toBe(rhythm)
+      modal.getComponent(IonModal).vm.$emit('willDismiss')
+      await nextTick()
+      await modal.getComponent(IonItem).trigger('click')
+      expect(select.props('modelValue')).toBe(rhythm)
+    }
+    await f.item('ecg').get('.remove-examination').trigger('click')
+    expect(store.doku.xabCde.ecg).toMatchObject({ assessed: false, value: 'SR' })
+    await f.select('ecg')
+    await f.dismiss()
+    expect(store.doku.xabCde.ecg).toMatchObject({ assessed: true, value: 'SR' })
+    expect(f.item('ecg').getComponent(IonModal).props('isOpen')).toBe(false)
+  })
+
+  test.each([false, true])('adds edema with positive action %s, clears variation, and resets on removal', async positive => {
+    const store = useDokuStore()
+    store.doku.xabCde.edema.value = { grade: 'Unterschenkelödeme', variation: 'zunehmend' }
+    const f = circulationFixture()
+    await f.select('edema', positive)
+    const grade = f.item('edema').getComponent(DodoInputSelect)
+    const open = vi.fn()
+    grade.getComponent(IonSelect).element.open = open
+    expect(open).not.toHaveBeenCalled()
+    await f.dismiss()
+    expect(open).toHaveBeenCalledTimes(positive ? 1 : 0)
+    expect(store.doku.xabCde.edema).toMatchObject({ assessed: true, value: { grade: 'keine Ödeme', variation: '' } })
+    grade.vm.$emit('update:modelValue', 'Knöchelödeme')
+    await nextTick()
+    f.item('edema').findAllComponents(DodoInputSelect)[1].vm.$emit('update:modelValue', 'zunehmend')
+    await nextTick()
+    expect(store.doku.xabCde.edemaText).toBe('Knöchelödeme (zunehmend)')
+    grade.vm.$emit('update:modelValue', 'keine Ödeme')
+    await nextTick()
+    expect(store.doku.xabCde.edema.value.variation).toBe('')
+    expect(f.item('edema').findAllComponents(DodoInputSelect)).toHaveLength(1)
+    store.doku.xabCde.edema.value = { grade: 'Unterschenkelödeme', variation: 'rückläufig' }
+    await nextTick()
+    await f.item('edema').get('.remove-examination').trigger('click')
+    expect(store.doku.xabCde.edema).toMatchObject({ assessed: false, value: { grade: 'keine Ödeme', variation: '' } })
+    await f.select('edema')
+    const reopen = vi.fn()
+    f.item('edema').getComponent(IonSelect).element.open = reopen
+    await f.dismiss()
+    expect(reopen).not.toHaveBeenCalled()
+    expect(store.doku.xabCde.edema).toMatchObject({ assessed: true, value: { grade: 'keine Ödeme', variation: '' } })
+  })
+
+  test('preserves restored findings and hides edema without a pulse', async () => {
+    const store = useDokuStore()
+    store.doku.xabCde.ecg.assessed = true
+    store.doku.xabCde.ecg.value = 'VHF'
+    store.doku.xabCde.edema.assessed = true
+    store.doku.xabCde.edema.value = { grade: 'Knöchelödeme', variation: 'neu aufgetreten' }
+    const f = circulationFixture()
+    await nextTick()
+    expect(f.item('ecg').getComponent(IonModal).props('isOpen')).toBe(false)
+    store.doku.xabCde.pulse.centralStrength = 'nicht'
+    await nextTick()
+    expect(f.item('edema').find('.examination-item').exists()).toBe(false)
+    expect(f.item('ecg').find('.examination-item').exists()).toBe(true)
+    expect(store.doku.xabCde.edema).toMatchObject({ assessed: true, value: { grade: 'Knöchelödeme', variation: 'neu aufgetreten' } })
+    store.doku.xabCde.edema.assessed = false
+    await nextTick()
+    expect(f.picker.find('[data-examination="edema"]').exists()).toBe(false)
+    store.doku.xabCde.pulse.peripheralStrength = 'gut'
+    await nextTick()
+    expect(f.picker.find('[data-examination="edema"]').exists()).toBe(true)
+    store.doku.xabCde.edema.assessed = true
+    await nextTick()
+    expect(f.item('edema').getComponent(DodoInputSelect).props('modelValue')).toBe('Knöchelödeme')
   })
 })
