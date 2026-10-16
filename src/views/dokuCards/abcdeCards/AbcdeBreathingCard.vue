@@ -58,12 +58,6 @@
 
     </DodoItemModal>
 
-    <IonItem lines="full">
-      <IonToggle v-model="store.doku.xaBcde.hasHypoxia" label-placement="end">
-        Hypoxie (&lt;90%)?
-      </IonToggle>
-    </IonItem>
-
     <DodoExaminationItem id="auscultation" label="Auskultation" assessed-presets
       v-model:assessed="store.doku.xaBcde.auscultation.assessed"
       :available="store.doku.xAbcde.isBreathing" show-line="full" picker-separator-after
@@ -171,6 +165,12 @@
         </IonToggle>
       </IonItem>
     </DodoExaminationItem>
+
+    <IonItem lines="none">
+      <IonToggle v-model="store.doku.xaBcde.hasHypoxia" label-placement="end">
+        Hypoxie (&lt;90%)?
+      </IonToggle>
+    </IonItem>
 
     <template #footer>
       <DodoInputTreatment v-if="store.doku.xaBcde.needTreatment"
