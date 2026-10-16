@@ -1,5 +1,5 @@
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { onHigh, onNormal, textDef, textIf } from "@/utils/filter"
+import { assessedText, onNormal, textDef, textIf } from "@/utils/filter"
 import { AssessedValue, ProtocolStateValue, PSV } from "../input"
 
 import { useDokuStore } from "@/store/doku"
@@ -25,17 +25,16 @@ export class AbcdeBreathing {
 
   public breathlessness: 'keine' | 'leichte' | '' | 'schwere'
   public hasHypoxia: boolean
-
   public mechanics: BreathingMech
-  public useAccessoryMuscles: boolean
-  public hasRetractions: boolean
 
   public auscultation: AssessedValue<BreathingAuscultation>
 
-  public isParadoxical: boolean
-  public hasJugularVenousDistension: boolean
-  public hasEmphysema: boolean
-  public hasTrachealDeviation: boolean
+  public accessoryMuscles: AssessedValue<boolean>
+  public retractions: AssessedValue<boolean>
+  public paradoxical: AssessedValue<boolean>
+  public jugularVenousDistension: AssessedValue<boolean>
+  public emphysema: AssessedValue<boolean>
+  public trachealDeviation: AssessedValue<boolean>
 
   public treatment: string
 
@@ -47,15 +46,14 @@ export class AbcdeBreathing {
     this.hasHypoxia = false
 
     this.mechanics = { frequency: '', depth: '', pattern: '' }
-    this.useAccessoryMuscles = false
-    this.hasRetractions = false
-
     this.auscultation = AssessedValue.unassessed({ wheezing: '', crackles: '', dimished: '' })
 
-    this.isParadoxical = false
-    this.hasJugularVenousDistension = false
-    this.hasEmphysema = false
-    this.hasTrachealDeviation = false
+    this.accessoryMuscles = AssessedValue.unassessed(false)
+    this.retractions = AssessedValue.unassessed(false)
+    this.paradoxical = AssessedValue.unassessed(false)
+    this.jugularVenousDistension = AssessedValue.unassessed(false)
+    this.emphysema = AssessedValue.unassessed(false)
+    this.trachealDeviation = AssessedValue.unassessed(false)
 
     this.treatment = ''
   }
@@ -68,18 +66,18 @@ export class AbcdeBreathing {
       || this.mechanics.frequency != ''
       || this.mechanics.depth != ''
       || this.mechanics.pattern != ''
-      || this.useAccessoryMuscles
-      || this.hasRetractions
+      || this.accessoryMuscles.matches(true)
+      || this.retractions.matches(true)
       || (this.auscultation.assessed &&
           (
             this.auscultation.value.wheezing != ''
             || this.auscultation.value.crackles != ''
             || this.auscultation.value.dimished != ''
           ))
-      || this.isParadoxical
-      || this.hasJugularVenousDistension
-      || this.hasEmphysema
-      || this.hasTrachealDeviation
+      || this.paradoxical.matches(true)
+      || this.jugularVenousDistension.matches(true)
+      || this.emphysema.matches(true)
+      || this.trachealDeviation.matches(true)
   }
 
   // #####################################################################
@@ -97,12 +95,12 @@ export class AbcdeBreathing {
       && this.mechanics.frequency == ''
       && this.mechanics.depth == ''
       && this.mechanics.pattern == ''
-      && !this.useAccessoryMuscles
-      && !this.hasRetractions
-      && !this.isParadoxical
-      && !this.hasJugularVenousDistension
-      && !this.hasEmphysema
-      && !this.hasTrachealDeviation
+      && !this.accessoryMuscles.matches(true)
+      && !this.retractions.matches(true)
+      && !this.paradoxical.matches(true)
+      && !this.jugularVenousDistension.matches(true)
+      && !this.emphysema.matches(true)
+      && !this.trachealDeviation.matches(true)
     )
   }
 
@@ -181,44 +179,17 @@ export class AbcdeBreathing {
 
   ///////////////////////////////////////////////
 
-  get thoraxState(): string {
-
-    if (!this.useAccessoryMuscles
-        && !this.hasRetractions
-        && !this.isParadoxical
-        && !this.hasJugularVenousDistension
-        && !this.hasEmphysema
-        && !this.hasTrachealDeviation
-    ) { return 'unauffällig' }
-
-    return concatDoku([
-      textIf('Einsatz AHM', this.useAccessoryMuscles),
-      textIf('Einziehungen', this.hasRetractions),
-      textIf('paradoxe Atmung', this.isParadoxical),
-      textIf('Halsvenenstauung', this.hasJugularVenousDistension),
-      textIf('subkutanes Emphysem', this.hasEmphysema),
-      textIf('Trachea verschoben', this.hasTrachealDeviation),
-    ], false)
-
-  }
-
   get thoraxText(): string {
-
     return concatDoku([
       [
-        textIf('Einsatz AHM', this.useAccessoryMuscles),
-        this.hasRetractions
-          ? 'Einziehungen'
-          : textIf('keine Einziehungen', (getCtx().isHigh && this.hasDyspnoe) || getCtx().isPediatric),
-        textIf('paradoxe Atmung', this.isParadoxical)
+        assessedText(this.accessoryMuscles, 'Einsatz AHM', 'kein Einsatz AHM'),
+        assessedText(this.retractions, 'Einziehungen', 'keine Einziehungen'),
+        assessedText(this.paradoxical, 'paradoxe Atmung', 'keine paradoxe Atmung'),
       ],
-      this.hasJugularVenousDistension
-        ? 'Halsvenenstauung'
-        : onHigh('keine Halsvenenstauung'),
-      textIf('subkutanes Emphysem', this.hasEmphysema),
-      textIf('Trachea verschoben', this.hasTrachealDeviation),
+      assessedText(this.jugularVenousDistension, 'Halsvenenstauung', 'keine Halsvenenstauung'),
+      assessedText(this.emphysema, 'subkutanes Emphysem', 'kein subkutanes Emphysem'),
+      assessedText(this.trachealDeviation, 'Trachea verschoben', 'keine Trachealverschiebung'),
     ])
-
   }
 
   // #####################################################################
