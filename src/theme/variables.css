@@ -28,6 +28,9 @@ ion-card.decent-card {
   padding: 0;
   --card-bg: #333;
 }
+ion-card.decent-card {
+  margin: 0 0 1rem 0;
+}
 
 ion-card-content.card-in-card ion-card-header,
 ion-card.decent-card ion-card-header {
