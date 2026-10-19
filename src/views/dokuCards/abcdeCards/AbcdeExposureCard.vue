@@ -1,174 +1,169 @@
 <template>
-  <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>E - Exposure</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent>
-      <IonList>
+  <DodoExaminationCard title="E - Exposure">
 
-        <IonItem lines="full">
-          <DodoInputTemperature
-            v-model="store.doku.xabcdE.bodyTemperature">
-          </DodoInputTemperature>
-        </IonItem>
+    <IonItem lines="full">
+      <DodoInputTemperature
+        v-model="store.doku.xabcdE.bodyTemperature">
+      </DodoInputTemperature>
+    </IonItem>
 
-        <DodoItemModal label="Ausscheidung"
-          :state="store.doku.xabcdE.excretionsState" lines="inset">
+    <DodoExaminationItem id="excretions" label="Ausscheidung" assessed-presets show-line="inset"
+      v-model:assessed="store.doku.xabcdE.excretions.assessed"
+      @select="resetExcretions" @activate="excretionsModal?.open()" @remove="resetExcretions">
+      <DodoItemModal ref="excretionsModal" label="Ausscheidung"
+        :state="store.doku.xabcdE.excretionsState" lines="none">
 
-          <DodoInputToggle :lines="fullIf(store.doku.xabcdE.excretions.assessed)" v-model="store.doku.xabcdE.excretions.assessed">
-            Ausscheidungen erfassen?
-          </DodoInputToggle>
+        <IonItemDivider>
+          <IonLabel>Katheter</IonLabel>
+        </IonItemDivider>
+        <DodoInputSelect v-model="store.doku.xabcdE.excretions.value.catheterType"
+          label="Typ" lines="none"
+          :options="[
+            { value: '', label: 'Kein Katheter' },
+            { value: 'ISK', label: 'Einmalkatheter' },
+            { value: 'transurethraler DK', label: 'Transurethral' },
+            { value: 'suprapubischer DK', label: 'Suprapubisch' },
+            { value: 'Nierenkatheter', label: 'Nierenkatheter' },
+          ]">
+        </DodoInputSelect>
 
-          <template v-if="store.doku.xabcdE.excretions.assessed">
-
-            <IonItemDivider>
-              <IonLabel>Katheter</IonLabel>
-            </IonItemDivider>
-            <DodoInputSelect v-model="store.doku.xabcdE.excretions.value.catheterType"
-              label="Typ" lines="none"
-              :options="[
-                { value: '', label: 'Kein Katheter' },
-                { value: 'ISK', label: 'Einmalkatheter' },
-                { value: 'transurethraler DK', label: 'Transurethral' },
-                { value: 'suprapubischer DK', label: 'Suprapubisch' },
-                { value: 'Nierenkatheter', label: 'Nierenkatheter' },
-              ]">
-            </DodoInputSelect>
-
-            <IonItemDivider>
-              <IonLabel>Auffälligkeiten?</IonLabel>
-            </IonItemDivider>
-            <DodoInputToggle lines="inset" v-model="store.doku.xabcdE.excretions.value.urinaryAbnormalities">
-              Wasserlassen auffällig?
-            </DodoInputToggle>
-            <DodoInputToggle lines="none" v-model="store.doku.xabcdE.excretions.value.bowelAbnormalities">
-              Stuhlgang auffällig?
-            </DodoInputToggle>
-
-          </template>
-
-        </DodoItemModal>
-
-        <DodoInputToggle lines="full" v-model="store.doku.xabcdE.urinaryIncontinence">
-          Eingenässt?
+        <IonItemDivider>
+          <IonLabel>Auffälligkeiten?</IonLabel>
+        </IonItemDivider>
+        <DodoInputToggle lines="inset" v-model="store.doku.xabcdE.excretions.value.urinaryAbnormalities">
+          Wasserlassen auffällig?
+        </DodoInputToggle>
+        <DodoInputToggle lines="none" v-model="store.doku.xabcdE.excretions.value.bowelAbnormalities">
+          Stuhlgang auffällig?
         </DodoInputToggle>
 
-        <DodoInputToggle v-if="!ctx.isNonVerbal" v-model="store.doku.xabcdE.nausea">
-          Übelkeit?
-        </DodoInputToggle>
+      </DodoItemModal>
+    </DodoExaminationItem>
 
-        <DodoItemModal label="Erbrechen" modal-label="Erbrechen"
-          :state="store.doku.xabcdE.emesis.state" lines="full">
+    <DodoInputToggle lines="full" v-model="store.doku.xabcdE.urinaryIncontinence">
+      Eingenässt?
+    </DodoInputToggle>
 
-          <DodoInputSelect v-model="store.doku.xabcdE.emesis.incidences"
-            label="Erbrechen" :lines="store.doku.xabcdE.emesis.incidences == '' ? 'none' : 'full'"
+    <DodoExaminationItem id="abdominal" label="Bauchbefund" assessed-presets
+      v-model:assessed="store.doku.xabcdE.abdominal.assessed" show-line="full"
+      @select="resetAbdominal" @activate="abdominalModal?.open()" @remove="resetAbdominal">
+      <DodoItemModal ref="abdominalModal" label="Bauchbefund" modal-label="Bauchbefund"
+        :state="store.doku.xabcdE.abdominalState" lines="none">
+
+        <DodoInputSelect
+          v-model="store.doku.xabcdE.abdominal.value.guarding"
+          label="Abwehrspannung" lines="full"
+          :options="[
+            { value: '', label: 'Keine' },
+            { value: 'leichte', label: 'Leicht' },
+            { value: 'starke', label: 'Stark' },
+          ]">
+        </DodoInputSelect>
+
+        <template v-if="!ctx.isNonVerbal">
+
+          <DodoInputSelect
+            v-model="store.doku.xabcdE.abdominal.value.pain"
+            label="Bauchschmerzen" lines="inset"
             :options="[
-              { value: '', label: 'Nein' },
-              { value: 'einmalig erbrochen', label: 'Einmalig' },
-              { value: 'mehrfach erbrochen', label: 'Mehrfach' },
-              { value: 'anhaltendes Erbrechen', label: 'Anhaltend' },
+              { value: 'keine', label: 'Keine' },
+              { value: 'leichte', label: 'Leicht' },
+              { value: '', label: 'Mittel' },
+              { value: 'starke', label: 'Stark' },
             ]">
           </DodoInputSelect>
 
-          <template v-if="store.doku.xabcdE.emesis.incidences != ''">
+        </template>
 
-            <IonItemDivider>
-              <IonLabel>Auffälligkeiten?</IonLabel>
-            </IonItemDivider>
+        <DodoInputSelect
+          v-model="store.doku.xabcdE.abdominal.value.peristalsis"
+          label="Peristaltik" lines="none"
+          :options="[
+            { value: '', label: 'Unauffällig' },
+            { value: 'spärlich', label: 'Vermindert' },
+            { value: 'fehlend', label: 'Fehlend' },
+            { value: 'hochgestellt', label: 'Hochgestellt' },
+          ]">
+        </DodoInputSelect>
 
-            <IonRadioGroup v-model="store.doku.xabcdE.emesis.abnormalities">
-              <IonItem>
-                <IonRadio value="">unauffällig</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="schaumig">Schaumig</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="gallig">Gallig</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="kaffeesatzartig">Kaffeesatzartig</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="blutig">Blutig</IonRadio>
-              </IonItem>
-            </IonRadioGroup>
+      </DodoItemModal>
+    </DodoExaminationItem>
 
-          </template>
+    <DodoInputToggle v-if="!ctx.isNonVerbal" v-model="store.doku.xabcdE.nausea" lines="inset">
+      Übelkeit?
+    </DodoInputToggle>
 
-        </DodoItemModal>
+    <DodoItemModal label="Erbrechen" modal-label="Erbrechen"
+      :state="store.doku.xabcdE.emesis.state" lines="none">
 
-        <DodoItemModal
-          label="Bauchbefund" modal-label="Bauchbefund"
-          :state="store.doku.xabcdE.abdominalState" lines="none">
+      <DodoInputSelect v-model="store.doku.xabcdE.emesis.incidences"
+        label="Erbrechen" :lines="store.doku.xabcdE.emesis.incidences == '' ? 'none' : 'full'"
+        :options="[
+          { value: '', label: 'Nein' },
+          { value: 'einmalig erbrochen', label: 'Einmalig' },
+          { value: 'mehrfach erbrochen', label: 'Mehrfach' },
+          { value: 'anhaltendes Erbrechen', label: 'Anhaltend' },
+        ]">
+      </DodoInputSelect>
 
-          <DodoInputToggle :lines="store.doku.xabcdE.abdominal.assessed ? 'full' : 'none'" v-model="store.doku.xabcdE.abdominal.assessed">
-            Bauch untersucht?
-          </DodoInputToggle>
+      <template v-if="store.doku.xabcdE.emesis.incidences != ''">
 
-          <template v-if="store.doku.xabcdE.abdominal.assessed">
+        <IonItemDivider>
+          <IonLabel>Auffälligkeiten?</IonLabel>
+        </IonItemDivider>
 
-            <DodoInputSelect
-              v-model="store.doku.xabcdE.abdominal.value.guarding"
-              label="Abwehrspannung" lines="full"
-              :options="[
-                { value: '', label: 'Keine' },
-                { value: 'leichte', label: 'Leicht' },
-                { value: 'starke', label: 'Stark' },
-              ]">
-            </DodoInputSelect>
+        <IonRadioGroup v-model="store.doku.xabcdE.emesis.abnormalities">
+          <IonItem>
+            <IonRadio value="">unauffällig</IonRadio>
+          </IonItem>
+          <IonItem>
+            <IonRadio value="schaumig">Schaumig</IonRadio>
+          </IonItem>
+          <IonItem>
+            <IonRadio value="gallig">Gallig</IonRadio>
+          </IonItem>
+          <IonItem>
+            <IonRadio value="kaffeesatzartig">Kaffeesatzartig</IonRadio>
+          </IonItem>
+          <IonItem>
+            <IonRadio value="blutig">Blutig</IonRadio>
+          </IonItem>
+        </IonRadioGroup>
 
-            <template v-if="!ctx.isNonVerbal">
+      </template>
 
-              <DodoInputSelect
-                v-model="store.doku.xabcdE.abdominal.value.pain"
-                label="Bauchschmerzen" lines="inset"
-                :options="[
-                  { value: 'keine', label: 'Keine' },
-                  { value: 'leichte', label: 'Leicht' },
-                  { value: '', label: 'Mittel' },
-                  { value: 'starke', label: 'Stark' },
-                ]">
-              </DodoInputSelect>
+    </DodoItemModal>
 
-            </template>
-
-            <DodoInputSelect
-              v-model="store.doku.xabcdE.abdominal.value.peristalsis"
-              label="Peristaltik" lines="none"
-              :options="[
-                { value: '', label: 'Unauffällig' },
-                { value: 'spärlich', label: 'Vermindert' },
-                { value: 'fehlend', label: 'Fehlend' },
-                { value: 'hochgestellt', label: 'Hochgestellt' },
-              ]">
-            </DodoInputSelect>
-
-          </template>
-
-        </DodoItemModal>
-
-      </IonList>
-
+    <template #footer>
       <DodoInputTreatment v-if="store.doku.xabcdE.needTreatment"
         v-model="store.doku.xabcdE.treatment"
         placeholder="Rettungsdecke">
       </DodoInputTreatment>
-
-    </IonCardContent>
-  </IonCard>
+    </template>
+  </DodoExaminationCard>
 </template>
 
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
-import { fullIf } from '@/utils/filter'
+import DodoItemModal from '@/components/DodoItemModal.vue'
+import { ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+const abdominalModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
+const excretionsModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
+
+function resetAbdominal() {
+  store.doku.xabcdE.abdominal.value = new ExposureAbdominal()
+}
+
+function resetExcretions() {
+  store.doku.xabcdE.excretions.value = new ExposureExcretions()
+}
 
 // ############################################################################
 

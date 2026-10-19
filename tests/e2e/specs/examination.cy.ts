@@ -147,6 +147,115 @@ for (const width of [320, 1024]) {
       })
     })
 
+    it('adds, edits and resets Exposure examinations through both picker actions', () => {
+      cy.visit('/tests/e2e/fixtures/examination.html?exposure')
+      cy.contains('ion-card', 'E - Exposure').as('exposure')
+      cy.get('@exposure').find('.examination-item').should('not.exist')
+      const add = (id: string, edit = false) => {
+        cy.get('@exposure').find('.add-examination').click()
+        const option = cy.get('ion-popover.examination-picker:visible').find(`[data-examination="${id}"]`)
+        if (edit) option.find('.positive-examination').click()
+        else option.click()
+        cy.get('ion-popover.examination-picker:visible').should('not.exist')
+        if (edit) cy.get('ion-modal:visible').should('have.length', 1).should(expectFocusWithin)
+        else cy.get('ion-modal:visible').should('not.exist')
+      }
+      const close = () => {
+        cy.get('ion-modal:visible').find('ion-header ion-button').click()
+        cy.get('ion-modal:visible').should('not.exist')
+      }
+      for (const [id, summary] of [
+        ['excretions', 'Wasserlassen/Stuhlgang o.B.'], ['abdominal', 'Abdomen weich/schmerzfrei'],
+      ]) {
+        add(id)
+        cy.get('@exposure').find(`[data-examination="${id}"]`).should('contain.text', summary).should(expectFocusWithin)
+        cy.get('@exposure').find(`[data-examination="${id}"] .examination-control ion-item`).click()
+        cy.get('ion-modal:visible').should('have.length', 1)
+          .and('not.contain.text', 'Ausscheidungen erfassen?').and('not.contain.text', 'Bauch untersucht?')
+        close()
+        cy.get('@exposure').find(`[data-examination="${id}"] .remove-examination`).click()
+        cy.get('@exposure').find(`[data-examination="${id}"]`).should('not.exist')
+        cy.get('@exposure').find('.add-examination').should(expectFocusWithin)
+        add(id, true)
+        if (id === 'excretions') {
+          cy.get('ion-modal:visible').contains('ion-select', 'Typ').click()
+          cy.get('ion-popover:visible').contains('ion-item', 'Transurethral').click()
+          cy.get('ion-popover:visible').should('not.exist')
+          cy.get('ion-modal:visible').contains('ion-toggle', 'Wasserlassen auffällig?').click()
+          cy.get('ion-modal:visible').contains('ion-toggle', 'Stuhlgang auffällig?').click()
+        } else {
+          cy.get('ion-modal:visible').contains('ion-select', 'Abwehrspannung').click()
+          cy.get('ion-popover:visible').contains('ion-item', 'Stark').click()
+          cy.get('ion-popover:visible').should('not.exist')
+          cy.get('ion-modal:visible').contains('ion-select', 'Bauchschmerzen').should('have.prop', 'value', '')
+          cy.get('ion-modal:visible').contains('ion-select', 'Peristaltik').click()
+          cy.get('ion-popover:visible').contains('ion-item', 'Fehlend').click()
+          cy.get('ion-popover:visible').should('not.exist')
+        }
+        close()
+        cy.get('@exposure').find(`[data-examination="${id}"]`).should('contain.text',
+          id === 'excretions' ? 'transurethraler DK, Wasserlassen/Stuhlgang path.' : 'starke Abwehrspannung')
+        if (id === 'excretions') cy.get('@exposure').find('.add-treatment').should('be.visible')
+        cy.get('@exposure').find(`[data-examination="${id}"] .remove-examination`).click()
+        cy.get('@exposure').find('.add-treatment').should('not.exist')
+        add(id)
+        cy.get('@exposure').find(`[data-examination="${id}"]`).should('contain.text', summary)
+      }
+      cy.get('@exposure').find('.add-examination').should('have.prop', 'disabled', true)
+      cy.get('@exposure').find('[data-examination="excretions"] .examination-separator')
+        .should('have.prop', 'lines', 'inset').and('not.have.css', 'display', 'none')
+      cy.get('@exposure').find('.examination-item').each(row => {
+        expect(row[0].scrollWidth).to.be.at.most(row[0].clientWidth)
+      })
+      cy.get('@exposure').find('[data-examination="abdominal"] .remove-examination').click()
+      cy.get('@exposure').find('.add-examination').click()
+      cy.get('ion-popover.examination-picker:visible').find('ion-item').should('have.length', 1)
+        .and('have.attr', 'data-examination', 'abdominal')
+    })
+
+    it('keeps permanent Exposure controls and the treatment footer usable', () => {
+      cy.visit('/tests/e2e/fixtures/examination.html?exposure')
+      cy.contains('ion-card', 'E - Exposure').as('exposure')
+      cy.get('@exposure').find('.dd-input-temp input').clear().type('38').blur()
+      cy.get('@exposure').find('.add-treatment').should('be.visible')
+      cy.get('@exposure').find('.dd-input-temp input').clear().type('36.5').blur()
+      cy.get('@exposure').find('.add-treatment').should('not.exist')
+      for (const label of ['Eingenässt?', 'Übelkeit?']) {
+        cy.get('@exposure').contains('ion-toggle', label).click().should('have.prop', 'checked', true)
+        cy.get('@exposure').find('.add-treatment').should('be.visible')
+        cy.get('@exposure').contains('ion-toggle', label).click().should('have.prop', 'checked', false)
+        cy.get('@exposure').find('.add-treatment').should('not.exist')
+      }
+      cy.get('@exposure').contains('ion-item', 'Erbrechen').click()
+      cy.get('ion-modal:visible').should(expectFocusWithin)
+      cy.get('ion-modal:visible').contains('ion-select', 'Erbrechen').shadow().find('button').focus()
+      pressKey('Enter')
+      cy.get('ion-popover:visible').contains('ion-item', 'Einmalig').click()
+      cy.get('ion-popover:visible').should('not.exist')
+      cy.get('ion-modal:visible').find('ion-header ion-button').click()
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('@exposure').should('contain.text', 'einmalig erbrochen')
+      cy.get('@exposure').find('.add-treatment').click()
+      cy.get('@exposure').find('.dd-input-text input').should('have.attr', 'placeholder', 'z.B. Rettungsdecke')
+        .type('Rettungsdecke').blur()
+      cy.get('@exposure').find('.dd-input-text').should('have.prop', 'value', 'Rettungsdecke')
+      cy.get('@exposure').find('.examination-item').should('not.exist')
+    })
+
+    it('keeps abdominal examination available for nonverbal patients without a pain input', () => {
+      cy.visit('/tests/e2e/fixtures/examination.html?exposure&nonverbal')
+      cy.contains('ion-card', 'E - Exposure').as('exposure')
+      cy.get('@exposure').should('not.contain.text', 'Übelkeit?')
+      cy.get('@exposure').find('.add-examination').click()
+      cy.get('ion-popover.examination-picker:visible').find('[data-examination="abdominal"] .positive-examination').click()
+      cy.get('ion-modal:visible').should('contain.text', 'Abwehrspannung').and('contain.text', 'Peristaltik')
+        .and('not.contain.text', 'Bauchschmerzen')
+      cy.get('ion-modal:visible').find('ion-header ion-button').click()
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('@exposure').find('[data-examination="abdominal"]').should('contain.text', 'Abdomen weich')
+        .and('not.contain.text', 'schmerzfrei')
+    })
+
     it('adds Stridor, keeps a negative result visible, removes and re-adds it', () => {
       cy.get('@airway').find('.examination-item').should('not.exist')
       cy.get('@airway').find('.add-examination').click()
