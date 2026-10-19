@@ -57,7 +57,7 @@ function seedFindings(store: ReturnType<typeof useDokuStore>) {
   p.xabCde.skin.centralTemp = 'warm'
   p.xabCde.pulse.peripheralStrength = 'schlecht'
   p.xabcDe.headache = true
-  p.xabcDe.psych.baseline = true
+  p.xabcDe.baseline = true
   p.xabcdE.abdominal.value.pain = 'starke'
   p.xaBcde.treatment = 'Existing treatment'
   p.situation.setText('Existing situation')
@@ -81,6 +81,17 @@ describe('Reanimation restoration', () => {
     store.setFlavor('reanimation', false)
     await nextTick()
     expect(store.doku.xAbcde.stridor).toMatchObject({ assessed, value: false })
+  })
+
+  test.each([false, true])('restores headache=%s', async headache => {
+    const store = useDokuStore()
+    store.doku.xabcDe.headache = headache
+    mountClinicalCards()
+    store.setFlavor('reanimation', true)
+    expect(store.doku.xabcDe.headache).toBe(false)
+    store.setFlavor('reanimation', false)
+    await nextTick()
+    expect(store.doku.xabcDe.headache).toBe(headache)
   })
 
   test.each([false, true])('restores negative breathing examinations with assessed=%s', async assessed => {
@@ -129,7 +140,7 @@ describe('Reanimation restoration', () => {
     store.setFlavor('reanimation', true)
     expect(store.doku.xaBcde.mechanics.pattern).toBe('')
     expect(store.doku.xAbcde.mucosa.e).toBe('bläulich')
-    expect(store.doku.xabcDe.psych.baseline).toBe(false)
+    expect(store.doku.xabcDe.baseline).toBe(false)
     if (!nonVerbal) {
       expect(store.doku.xabcDe.headache).toBe(false)
       expect(store.doku.xabcdE.abdominal.value.pain).toBe('keine')

@@ -30,9 +30,9 @@ describe('DodoInputSelectLR', () => {
     const summary = () => wrapper.get('[aria-live="polite"]').text()
     expect(summary()).toBe('Li: Ohne Absinken • Re: Absinken')
     const buttons = wrapper.findAllComponents(IonButton)
-    expect(buttons.map(button => button.text())).toEqual(['Links', 'Rechts'])
+    expect(buttons.map(button => button.text())).toEqual(['Li', 'Re'])
     expect(buttons.map(button => button.attributes('aria-label')))
-      .toEqual(['Armhalteversuch: Links', 'Armhalteversuch: Rechts'])
+      .toEqual(['Armhalteversuch: Li', 'Armhalteversuch: Re'])
 
     await wrapper.setProps({ left: 'drop', right: 'steady', description: 'Arme ausstrecken' })
     expect(summary()).toBe('Li: Absinken • Re: Ohne Absinken')

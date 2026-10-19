@@ -9,19 +9,15 @@
       <IonCardContent>
         <IonList>
 
-          <IonItem :lines="fullIf(store.doku.sampler.symptoms.trauma.head.isInjured)">
-            <IonToggle v-model="store.doku.sampler.symptoms.trauma.head.isInjured" label-placement="end">
-              Kopftrauma plausibel?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle :lines="fullIf(store.doku.sampler.symptoms.trauma.head.isInjured)" v-model="store.doku.sampler.symptoms.trauma.head.isInjured">
+            Kopftrauma plausibel?
+          </DodoInputToggle>
 
           <template v-if="store.doku.sampler.symptoms.trauma.head.isInjured">
 
-            <IonItem lines="inset">
-              <IonToggle v-model="store.doku.sampler.symptoms.trauma.head.wasInitiallyUnconscious" label-placement="end">
-                Initial Bewusstlos?
-              </IonToggle>
-            </IonItem>
+            <DodoInputToggle lines="inset" v-model="store.doku.sampler.symptoms.trauma.head.wasInitiallyUnconscious">
+              Initial Bewusstlos?
+            </DodoInputToggle>
 
             <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.head.Amnesia"
               label="Amnesie" :lines="isSHTStateVisible ? (store.context.hasHeadache ? 'inset' : 'full') : 'none'"
@@ -75,43 +71,33 @@
       <IonCardContent>
         <IonList lines="inset">
 
-          <IonItem :lines="stepline(store.doku.sampler.symptoms.trauma.spine.hasObviousSevereInjury)">
-            <IonToggle v-model="store.doku.sampler.symptoms.trauma.spine.hasObviousSevereInjury" label-placement="end">
-              Offensichtlich Schwerverletzt?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle :lines="stepline(store.doku.sampler.symptoms.trauma.spine.hasObviousSevereInjury)" v-model="store.doku.sampler.symptoms.trauma.spine.hasObviousSevereInjury">
+            Offensichtlich Schwerverletzt?
+          </DodoInputToggle>
 
           <template v-if="!store.doku.sampler.symptoms.trauma.spine.hasObviousSevereInjury">
 
-            <IonItem :lines="stepline(store.doku.sampler.symptoms.trauma.spine.needPainTreatment)">
-              <IonToggle v-model="store.doku.sampler.symptoms.trauma.spine.needPainTreatment" label-placement="end">
-                Wirbelsäulenschmerz <b>(NRS &ge; 5)</b>?
-              </IonToggle>
-            </IonItem>
+            <DodoInputToggle :lines="stepline(store.doku.sampler.symptoms.trauma.spine.needPainTreatment)" v-model="store.doku.sampler.symptoms.trauma.spine.needPainTreatment">
+              Wirbelsäulenschmerz <b>(NRS &ge; 5)</b>?
+            </DodoInputToggle>
 
             <template v-if="!store.doku.sampler.symptoms.trauma.spine.needPainTreatment">
 
-              <IonItem :lines="stepline(store.doku.sampler.symptoms.trauma.spine.hasFallFromOver3m)">
-                <IonToggle v-model="store.doku.sampler.symptoms.trauma.spine.hasFallFromOver3m" label-placement="end">
-                  Sturz <b>&gt; 3m</b>?
-                </IonToggle>
-              </IonItem>
+              <DodoInputToggle :lines="stepline(store.doku.sampler.symptoms.trauma.spine.hasFallFromOver3m)" v-model="store.doku.sampler.symptoms.trauma.spine.hasFallFromOver3m">
+                Sturz <b>&gt; 3m</b>?
+              </DodoInputToggle>
 
               <template v-if="!store.doku.sampler.symptoms.trauma.spine.hasFallFromOver3m">
 
-                <IonItem :lines="stepline(store.doku.sampler.symptoms.trauma.spine.hasSupraclavicularInjury)">
-                  <IonToggle v-model="store.doku.sampler.symptoms.trauma.spine.hasSupraclavicularInjury" label-placement="end">
-                    Supraklavikuläre Verletzung?
-                  </IonToggle>
-                </IonItem>
+                <DodoInputToggle :lines="stepline(store.doku.sampler.symptoms.trauma.spine.hasSupraclavicularInjury)" v-model="store.doku.sampler.symptoms.trauma.spine.hasSupraclavicularInjury">
+                  Supraklavikuläre Verletzung?
+                </DodoInputToggle>
 
                 <template v-if="!store.doku.sampler.symptoms.trauma.spine.hasSupraclavicularInjury">
 
-                  <IonItem lines="full">
-                    <IonToggle v-model="store.doku.sampler.symptoms.trauma.spine.hasSevereThoracoabdominalInjury" label-placement="end">
-                      Schwere thorakoabdominelle Verletzung?
-                    </IonToggle>
-                  </IonItem>
+                  <DodoInputToggle lines="full" v-model="store.doku.sampler.symptoms.trauma.spine.hasSevereThoracoabdominalInjury">
+                    Schwere thorakoabdominelle Verletzung?
+                  </DodoInputToggle>
 
                 </template>
 
@@ -167,11 +153,9 @@
       <IonCardContent>
         <IonList>
 
-          <IonItem lines="none">
-            <IonToggle v-model="store.doku.sampler.symptoms.trauma.thorax.hasUnstableChestWall" label-placement="end">
-              Instabilität?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle lines="none" v-model="store.doku.sampler.symptoms.trauma.thorax.hasUnstableChestWall">
+            Instabilität?
+          </DodoInputToggle>
 
         </IonList>
       </IonCardContent>
@@ -184,25 +168,19 @@
       <IonCardContent>
         <IonList>
 
-          <IonItem :lines="fullIf(store.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability)">
-            <IonToggle v-model="store.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability" label-placement="end">
-              Patient schockig?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle :lines="fullIf(store.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability)" v-model="store.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability">
+            Patient schockig?
+          </DodoInputToggle>
 
           <template v-if="store.doku.sampler.symptoms.trauma.pelvis.hasHemodynamicInstability">
 
-            <IonItem>
-              <IonToggle v-model="store.doku.sampler.symptoms.trauma.pelvis.hasHighEnergyMechanism" label-placement="end">
-                Kinematik plausibel?
-              </IonToggle>
-            </IonItem>
+            <DodoInputToggle v-model="store.doku.sampler.symptoms.trauma.pelvis.hasHighEnergyMechanism">
+              Kinematik plausibel?
+            </DodoInputToggle>
 
-            <IonItem>
-              <IonToggle v-model="store.doku.sampler.symptoms.trauma.pelvis.hasObviousInjuries" label-placement="end">
-                Sichtbare Verletzung?
-              </IonToggle>
-            </IonItem>
+            <DodoInputToggle v-model="store.doku.sampler.symptoms.trauma.pelvis.hasObviousInjuries">
+              Sichtbare Verletzung?
+            </DodoInputToggle>
 
             <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.pelvis.PelvisPainOccurence"
               label="Schmerzen Becken" lines="none"

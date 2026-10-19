@@ -28,8 +28,8 @@ describe('Paired motor assessment selectors', () => {
       cy.contains('.dd-input-select-lr', 'Beinhalteversuch').as('legs')
       cy.get('@arms').should('contain.text', 'Li: Ohne Absinken • Re: Ohne Absinken')
 
-      cy.get('@arms').contains('ion-button', 'Links').as('left')
-      cy.get('@left').shadow().find('button').should('have.attr', 'aria-label', 'Armhalteversuch: Links')
+      cy.get('@arms').contains('ion-button', 'Li').as('left')
+      cy.get('@left').shadow().find('button').should('have.attr', 'aria-label', 'Armhalteversuch: Li')
       cy.get('@left').click()
       cy.get('ion-popover:visible').as('popover')
       cy.get('@popover').find('ion-item[aria-current="true"]').should('have.text', 'Ohne Absinken')
@@ -48,7 +48,7 @@ describe('Paired motor assessment selectors', () => {
       cy.get('@arms').should('contain.text', 'Li: Voll Absinken • Re: Ohne Absinken')
       cy.get('@legs').should('contain.text', 'Li: Ohne Absinken • Re: Ohne Absinken')
 
-      cy.get('@arms').contains('ion-button', 'Rechts').as('right')
+      cy.get('@arms').contains('ion-button', 'Re').as('right')
       // Native focus/events preserve shadow-DOM retargeting through Ionic's focus trap.
       cy.get('@right').should('be.visible').shadow().find('button').then(button => { button[0].focus(); expectNativeFocus(button) })
       cy.get('@right').shadow().find('button').should(expectNativeFocus)
@@ -70,11 +70,11 @@ describe('Paired motor assessment selectors', () => {
       cy.get('@arms').should('contain.text', 'Li: Voll Absinken • Re: Leichtes Absinken')
       cy.get('@right').shadow().find('button').should(expectNativeFocus)
 
-      cy.get('@legs').contains('ion-button', 'Links').click()
+      cy.get('@legs').contains('ion-button', 'Li').click()
       cy.get('ion-popover:visible').contains('ion-item', 'Nur Restbewegung').click()
       cy.get('ion-popover:visible').should('not.exist')
       cy.get('ion-popover ion-content').should('not.exist')
-      cy.get('@legs').contains('ion-button', 'Rechts').click()
+      cy.get('@legs').contains('ion-button', 'Re').click()
       cy.get('ion-popover:visible').contains('ion-item', 'Keine Bewegung').click()
       cy.get('ion-popover:visible').should('not.exist')
       cy.get('ion-popover ion-content').should('not.exist')

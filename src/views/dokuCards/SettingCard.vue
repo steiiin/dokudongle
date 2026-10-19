@@ -17,17 +17,13 @@
         :ime-dictionary="{ /* activate IME */ }">
       </DodoInputSelect>
 
-      <IonItem>
-        <IonToggle v-model="store.doku.setting.isAlone" label-placement="end">
-          Lebt allein?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle v-model="store.doku.setting.isAlone">
+        Lebt allein?
+      </DodoInputToggle>
 
-      <IonItem lines="full">
-        <IonToggle v-model="store.doku.setting.isForcedEntry" label-placement="end">
-          Türöffnung?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="full" v-model="store.doku.setting.isForcedEntry">
+        Türöffnung?
+      </DodoInputToggle>
 
       <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
         empty-label="Normal / k.A."

@@ -57,11 +57,9 @@
           <IonItemDivider>
             <IonLabel>Einnahme</IonLabel>
           </IonItemDivider>
-          <IonItem lines="full">
-            <IonToggle v-model="currentItem.isRegularly"
-              label-placement="end">Regelmäßige Einnahme?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle lines="full" v-model="currentItem.isRegularly">
+            Regelmäßige Einnahme?
+          </DodoInputToggle>
           <IonItem lines="none" v-if="currentItem.isRegularly">
             <IonSelect interface="popover" :multiple="true" v-model="currentItem.Times"
               label="Einnahmezeiten:" placeholder="Wann?">

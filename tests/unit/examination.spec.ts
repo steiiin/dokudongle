@@ -10,6 +10,9 @@ import DodoItemModal from '@/components/DodoItemModal.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import AbcdeBreathingCard from '@/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue'
 import AbcdeAirwayCard from '@/views/dokuCards/abcdeCards/AbcdeAirwayCard.vue'
+import AbcdeDisabilityCard from '@/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue'
+import DodoInputText from '@/components/DodoInputText.vue'
+import { DisabilityNeuro, DisabilityPsych } from '@/types/protocol/abcde'
 import AbcdeCirculationCard from '@/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue'
 import { useDokuStore } from '@/store/doku'
 
@@ -462,7 +465,7 @@ describe('Circulation examinations', () => {
     await nextTick()
     expect(store.doku.xabCde.edema.value.variation).toBe('')
     expect(f.item('edema').findAllComponents(DodoInputSelect)).toHaveLength(1)
-    store.doku.xabCde.edema.value = { grade: 'Unterschenkelödeme', variation: 'rückläufig' }
+    store.doku.xabCde.edema.value = { grade: 'Unterschenkelödeme', variation: 'bekannt' }
     await nextTick()
     await f.item('edema').get('.remove-examination').trigger('click')
     expect(store.doku.xabCde.edema).toMatchObject({ assessed: false, value: { grade: 'keine Ödeme', variation: '' } })
@@ -479,7 +482,7 @@ describe('Circulation examinations', () => {
     store.doku.xabCde.ecg.assessed = true
     store.doku.xabCde.ecg.value = 'VHF'
     store.doku.xabCde.edema.assessed = true
-    store.doku.xabCde.edema.value = { grade: 'Knöchelödeme', variation: 'neu aufgetreten' }
+    store.doku.xabCde.edema.value = { grade: 'Knöchelödeme', variation: 'neu' }
     const f = circulationFixture()
     await nextTick()
     expect(f.item('ecg').getComponent(IonModal).props('isOpen')).toBe(false)
@@ -487,7 +490,7 @@ describe('Circulation examinations', () => {
     await nextTick()
     expect(f.item('edema').find('.examination-item').exists()).toBe(false)
     expect(f.item('ecg').find('.examination-item').exists()).toBe(true)
-    expect(store.doku.xabCde.edema).toMatchObject({ assessed: true, value: { grade: 'Knöchelödeme', variation: 'neu aufgetreten' } })
+    expect(store.doku.xabCde.edema).toMatchObject({ assessed: true, value: { grade: 'Knöchelödeme', variation: 'neu' } })
     store.doku.xabCde.edema.assessed = false
     await nextTick()
     expect(f.picker.find('[data-examination="edema"]').exists()).toBe(false)
@@ -497,5 +500,184 @@ describe('Circulation examinations', () => {
     store.doku.xabCde.edema.assessed = true
     await nextTick()
     expect(f.item('edema').getComponent(DodoInputSelect).props('modelValue')).toBe('Knöchelödeme')
+  })
+})
+
+function disabilityFixture() {
+  const wrapper = mount(AbcdeDisabilityCard, { global })
+  const picker = wrapper.getComponent(IonPopover)
+  const item = (id: string) => wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === id)!
+  const select = async (id: string, positive = false) => {
+    await wrapper.get('.add-examination').trigger('click')
+    const row = picker.get(`[data-examination="${id}"]`)
+    await (positive ? row.get('.positive-examination') : row).trigger('click')
+  }
+  const dismiss = async () => {
+    picker.vm.$emit('didDismiss')
+    await flushPromises()
+  }
+  return { wrapper, picker, item, select, dismiss }
+}
+
+describe('Disability examinations', () => {
+  test('offers four optional findings in order and retains the fixed assessments', async () => {
+    const f = disabilityFixture()
+    await nextTick()
+    expect(f.wrapper.findAll('.examination-item')).toHaveLength(0)
+    expect(f.picker.findAllComponents(IonItem).map(row => row.attributes('data-examination')))
+      .toEqual(['neuro', 'psych', 'bloodGlucose', 'intoxication'])
+    expect(f.picker.findAll('.positive-examination')).toHaveLength(2)
+    expect(f.wrapper.findAllComponents(DodoInputSelect).some(c => c.props('label') === 'Wachheit')).toBe(true)
+    expect(f.wrapper.findAllComponents(DodoItemModal).some(c => c.props('label') === 'GCS')).toBe(true)
+  })
+
+  test('edits dementia within psych and resets it on removal', async () => {
+    const d = useDokuStore().doku.xabcDe
+    const f = disabilityFixture()
+    await f.select('psych', true)
+    await f.dismiss()
+    const toggle = f.item('psych').findAllComponents(IonToggle)
+      .find(toggle => toggle.text().includes('Demenz bekannt?'))!
+    toggle.vm.$emit('update:modelValue', true)
+    await nextTick()
+    expect(d.psych.value.dementia).toBe(true)
+    expect(d.generateText()).toContain('bek. Demenz')
+    toggle.vm.$emit('update:modelValue', false)
+    await nextTick()
+    expect(d.generateText()).not.toContain('bek. Demenz')
+    toggle.vm.$emit('update:modelValue', true)
+    await nextTick()
+    await f.item('psych').get('.remove-examination').trigger('click')
+    expect(d.psych.assessed).toBe(false)
+    expect(d.psych.value.dementia).toBe(false)
+  })
+
+  test.each(['bloodGlucose'] as const)('supports normal and edit presets for %s', async id => {
+    const d = useDokuStore().doku.xabcDe
+    const f = disabilityFixture()
+    const normal = 'normal'
+    const abnormal = 'hoch'
+    for (const positive of [false, true]) {
+      await f.select(id, positive)
+      const select = f.item(id).getComponent(DodoInputSelect)
+      const open = vi.fn()
+      select.getComponent(IonSelect).element.open = open
+      expect(open).not.toHaveBeenCalled()
+      expect(d[id]).toMatchObject({ assessed: true, value: normal })
+      await f.dismiss()
+      expect(open).toHaveBeenCalledTimes(positive ? 1 : 0)
+      select.vm.$emit('update:modelValue', abnormal)
+      await nextTick()
+      expect(d[id].value).toBe(abnormal)
+      await f.item(id).get('.remove-examination').trigger('click')
+      expect(d[id]).toMatchObject({ assessed: false, value: normal })
+    }
+  })
+
+  test.each(['neuro', 'psych'] as const)('supports %s presets and resets nested findings on removal', async id => {
+    const d = useDokuStore().doku.xabcDe
+    const f = disabilityFixture()
+    for (const positive of [false, true]) {
+      await f.select(id, positive)
+      const modal = f.item(id).getComponent(DodoItemModal)
+      expect(modal.getComponent(IonModal).props('isOpen')).toBe(false)
+      await f.dismiss()
+      expect(modal.getComponent(IonModal).props('isOpen')).toBe(positive)
+      if (id === 'neuro') {
+        d.neuro.value.msFace = 'leichte'
+        d.neuro.value.sensitivity.active = true
+        d.neuro.value.sensitivity.value = 'Taubheit'
+      } else {
+        d.psych.value.disorder = 'Delir'
+        d.psych.value.hallucinations = true
+      }
+      await nextTick()
+      expect(modal.props('state')).not.toBe('normal')
+      await f.item(id).get('.remove-examination').trigger('click')
+      expect(d[id].assessed).toBe(false)
+      expect(d[id].value).toEqual(id === 'neuro' ? new DisabilityNeuro() : new DisabilityPsych())
+    }
+  })
+
+  test('adds an intoxication text editor, focuses after dismissal and clears on removal', async () => {
+    const d = useDokuStore().doku.xabcDe
+    const f = disabilityFixture()
+    await f.select('intoxication')
+    const input = f.item('intoxication').getComponent(DodoInputText)
+    const focus = vi.fn()
+    Object.assign(input.vm, { setFocus: focus })
+    expect(f.item('intoxication').findComponent(IonToggle).exists()).toBe(false)
+    expect(d.intoxication).toMatchObject({ assessed: true, value: '' })
+    expect(d.needTreatment).toBe(true)
+    expect(focus).not.toHaveBeenCalled()
+    await f.dismiss()
+    expect(focus).toHaveBeenCalledOnce()
+    input.vm.$emit('update:modelValue', 'C2-Geruch')
+    await nextTick()
+    expect(d.generateText()).toContain('Intox: C2-Geruch')
+    await f.item('intoxication').get('.remove-examination').trigger('click')
+    expect(d.intoxication).toMatchObject({ assessed: false, value: '' })
+  })
+
+  test('keeps headache and dizziness editable without adding an examination', async () => {
+    const d = useDokuStore().doku.xabcDe
+    const f = disabilityFixture()
+    await nextTick()
+    const headache = f.wrapper.findAllComponents(IonToggle).find(toggle => toggle.text().includes('Kopfschmerzen?'))!
+    const dizziness = f.wrapper.findAllComponents(DodoInputSelect).find(select => select.props('label') === 'Schwindel')!
+    expect(headache.props('modelValue')).toBe(false)
+    expect(dizziness.props('modelValue')).toBe('kein')
+    expect(f.item('headache')).toBeUndefined()
+    expect(f.item('dizziness')).toBeUndefined()
+    headache.vm.$emit('update:modelValue', true)
+    dizziness.vm.$emit('update:modelValue', 'gerichteter')
+    await nextTick()
+    expect(d.headache).toBe(true)
+    expect(d.dizziness).toBe('gerichteter')
+    headache.vm.$emit('update:modelValue', false)
+    dizziness.vm.$emit('update:modelValue', 'kein')
+    await nextTick()
+    expect(d.headache).toBe(false)
+    expect(d.dizziness).toBe('kein')
+  })
+
+  test('hides and clears headache for nonverbal patients while retaining dizziness', async () => {
+    const store = useDokuStore()
+    const d = store.doku.xabcDe
+    const f = disabilityFixture()
+    const headacheControls = () => f.wrapper.findAllComponents(IonToggle).filter(toggle => toggle.text().includes('Kopfschmerzen?'))
+    d.headache = true
+    d.dizziness = 'gerichteter'
+    store.doku.flavors.non_verbal = true
+    await nextTick()
+    expect(d.headache).toBe(false)
+    expect(headacheControls()).toHaveLength(0)
+    expect(f.picker.find('[data-examination="headache"]').exists()).toBe(false)
+    expect(f.wrapper.findAllComponents(DodoInputSelect).some(select => select.props('label') === 'Schwindel')).toBe(true)
+    expect(d.dizziness).toBe('gerichteter')
+    store.doku.flavors.non_verbal = false
+    await nextTick()
+    expect(headacheControls()).toHaveLength(1)
+    expect(f.picker.find('[data-examination="headache"]').exists()).toBe(false)
+  })
+
+  test('keeps one independent baseline control and preserves restored findings without opening modals', async () => {
+    const d = useDokuStore().doku.xabcDe
+    d.psych.value.dementia = true
+    d.psych.assessed = true
+    d.psych.value.disorder = 'Delir'
+    d.baseline = true
+    const f = disabilityFixture()
+    await nextTick()
+    const baselineControls = () => f.wrapper.findAllComponents(IonToggle).filter(toggle => toggle.text().includes('Entspricht Baseline?'))
+    expect(baselineControls()).toHaveLength(1)
+    expect(f.item('psych').getComponent(IonModal).props('isOpen')).toBe(false)
+    expect(d.psych.value.disorder).toBe('Delir')
+    await f.item('psych').get('.remove-examination').trigger('click')
+    expect(d.baseline).toBe(false)
+    expect(baselineControls()).toHaveLength(0)
+    d.avpu = 'benommen'
+    await nextTick()
+    expect(baselineControls()).toHaveLength(1)
   })
 })

@@ -19,11 +19,9 @@
 
     <ion-content>
       <ion-list lines="none">
-        <ion-item lines="none">
-          <ion-toggle v-model="model.isInjured" label-placement="end">
-            Verletzt?
-          </ion-toggle>
-        </ion-item>
+        <DodoInputToggle lines="none" v-model="model.isInjured">
+          Verletzt?
+        </DodoInputToggle>
 
         <template v-if="model.isInjured">
 

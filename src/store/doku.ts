@@ -28,6 +28,7 @@ import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/uti
 import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
+import { DisabilityNeuro, DisabilityPsych } from '@/types/protocol/abcde'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
@@ -80,28 +81,62 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
 
   const legacyCourse = input.course
-  // Normalize legacy psychiatric fields before hydrating the class instances.
+  // Normalize legacy disability findings before restoring their class instances.
   let normalizedInput = input
   if (isRecord(input.xabcDe)) {
-    const disability = input.xabcDe
-    const psych = isRecord(disability.psych) ? { ...disability.psych } : {}
+    const disability = { ...input.xabcDe }
+    const previousPsych = disability.psych
+    const wrappedPsych = isRecord(previousPsych) && 'assessed' in previousPsych
+    const psychInput = wrappedPsych ? previousPsych.value : previousPsych
+    const psych = isRecord(psychInput) ? { ...psychInput } : {}
     const legacyPsychFields = {
       rass: 'psychRass',
       disorder: 'psychDisorder',
       hallucinations: 'psychHallucinations',
       delusions: 'psychDelusions',
-      dementia: 'psychDementia',
       perseveration: 'psychPerseveration',
       behavioralChange: 'psychBehavioralChange',
-      baseline: 'psychBaseline',
     } as const
 
     for (const [key, legacyKey] of Object.entries(legacyPsychFields)) {
-      if (psych[key] === undefined) {
-        psych[key] = disability[legacyKey]
-      }
+      if (psych[key] === undefined) psych[key] = disability[legacyKey]
     }
-    normalizedInput = { ...input, xabcDe: { ...disability, psych } }
+    // Restore dementia under psych, including records with a separate assessment.
+    const separateDementia = disability.dementia
+    const migratedDementia = psych.dementia === undefined && separateDementia !== undefined
+    if (psych.dementia === undefined) {
+      psych.dementia = separateDementia === undefined
+        ? disability.psychDementia
+        : isRecord(separateDementia)
+          ? separateDementia.assessed === true && separateDementia.value === true
+          : separateDementia
+    }
+    disability.baseline = disability.baseline === undefined
+      ? (psych.baseline === undefined ? disability.psychBaseline : psych.baseline)
+      : disability.baseline
+    delete psych.baseline
+    disability.psych = wrappedPsych
+      ? { ...previousPsych, assessed: previousPsych.assessed || (migratedDementia && psych.dementia === true), value: psych }
+      : { assessed: hydrateLikeTemplate(new DisabilityPsych(), psych).hasAbnormalities, value: psych }
+
+    const neuro = disability.neuro
+    if (isRecord(neuro) && !('assessed' in neuro)) {
+      disability.neuro = { assessed: hydrateLikeTemplate(new DisabilityNeuro(), neuro).hasAbnormalities, value: neuro }
+    }
+    if (isRecord(disability.headache)) {
+      disability.headache = disability.headache.assessed === true ? disability.headache.value : false
+    }
+    if (isRecord(disability.dizziness)) {
+      disability.dizziness = disability.dizziness.assessed === true ? disability.dizziness.value : 'kein'
+    }
+    if (typeof disability.bloodGlucose === 'string') {
+      disability.bloodGlucose = { assessed: disability.bloodGlucose !== '', value: disability.bloodGlucose }
+    }
+    const intoxication = disability.intoxication
+    if (isRecord(intoxication) && !('assessed' in intoxication) && typeof intoxication.active === 'boolean') {
+      disability.intoxication = { assessed: intoxication.active, value: intoxication.value }
+    }
+    normalizedInput = { ...input, xabcDe: disability }
   }
   if (isRecord(normalizedInput.xAbcde)) {
     const airway = normalizedInput.xAbcde
@@ -1058,7 +1093,7 @@ export const useDokuStore = defineStore('doku', {
       )
 
       const gcs: number = state.doku.xabcDe.gcsScore
-      const isBaseline: boolean = state.doku.xabcDe.psych.baseline
+      const isBaseline: boolean = state.doku.xabcDe.baseline
 
       const isTrauma: boolean = requireABCDE && state.doku.flavors.trauma
 
@@ -1090,7 +1125,7 @@ export const useDokuStore = defineStore('doku', {
 
       const isLowVigilant: boolean =
         (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&
-        (!state.doku.xabcDe.psych.baseline && !state.doku.xabcDe.psych.dementia)
+        (!state.doku.xabcDe.baseline && !(state.doku.xabcDe.psych.isAssessed && state.doku.xabcDe.psych.value.dementia))
 
       const isChildbearingAge: boolean =
         (state.doku.ident.age?.totalYears >= 10) &&

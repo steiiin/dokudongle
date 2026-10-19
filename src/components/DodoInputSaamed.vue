@@ -88,11 +88,9 @@
           <IonItemDivider>
             <IonLabel>Kontraindikationen</IonLabel>
           </IonItemDivider>
-          <IonItem lines="full">
-            <IonToggle v-model="currentTask.contraOk" label-placement="end">
-              Kontraindikationen ausgeschlossen?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle lines="full" v-model="currentTask.contraOk">
+            Kontraindikationen ausgeschlossen?
+          </DodoInputToggle>
           <IonItem v-if="currentTask.contraOk === false" lines="none">
             <DodoInputText v-model="currentTask.contraText"
               label="Kontraindikationen" placeholder="z.B. Schwangerschaft">

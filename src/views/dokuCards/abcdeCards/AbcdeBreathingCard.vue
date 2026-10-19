@@ -98,11 +98,9 @@
       show-line="inset"
       @select="store.doku.xaBcde.accessoryMuscles.value = true"
       @remove="store.doku.xaBcde.accessoryMuscles.value = false">
-      <IonItem lines="none">
-        <IonToggle v-model="store.doku.xaBcde.accessoryMuscles.value" label-placement="end">
-          Hilfsmuskulatur?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.accessoryMuscles.value">
+        Hilfsmuskulatur?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="retractions" label="Einziehungen"
@@ -111,11 +109,9 @@
       show-line="inset"
       @select="store.doku.xaBcde.retractions.value = true"
       @remove="store.doku.xaBcde.retractions.value = false">
-      <IonItem lines="none">
-        <IonToggle v-model="store.doku.xaBcde.retractions.value" label-placement="end">
-          Einziehungen?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.retractions.value">
+        Einziehungen?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="paradoxical" label="Paradoxe Atmung"
@@ -124,11 +120,9 @@
       show-line="inset"
       @select="store.doku.xaBcde.paradoxical.value = true"
       @remove="store.doku.xaBcde.paradoxical.value = false">
-      <IonItem lines="none">
-        <IonToggle v-model="store.doku.xaBcde.paradoxical.value" label-placement="end">
-          Paradoxe Atmung?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.paradoxical.value">
+        Paradoxe Atmung?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="jugularVenousDistension" label="Halsvenenstauung"
@@ -136,11 +130,9 @@
       show-line="inset"
       @select="store.doku.xaBcde.jugularVenousDistension.value = true"
       @remove="store.doku.xaBcde.jugularVenousDistension.value = false">
-      <IonItem lines="none">
-        <IonToggle v-model="store.doku.xaBcde.jugularVenousDistension.value" label-placement="end">
-          Halsvenenstauung?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.jugularVenousDistension.value">
+        Halsvenenstauung?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="emphysema" label="Subkutanes Emphysem"
@@ -148,29 +140,23 @@
       show-line="inset"
       @select="store.doku.xaBcde.emphysema.value = true"
       @remove="store.doku.xaBcde.emphysema.value = false">
-      <IonItem lines="none">
-        <IonToggle v-model="store.doku.xaBcde.emphysema.value" label-placement="end">
-          Subkutanes Emphysem?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.emphysema.value">
+        Subkutanes Emphysem?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="trachealDeviation" label="Trachealverschiebung"
       v-model:assessed="store.doku.xaBcde.trachealDeviation.assessed"
       @select="store.doku.xaBcde.trachealDeviation.value = true"
       @remove="store.doku.xaBcde.trachealDeviation.value = false">
-      <IonItem lines="none">
-        <IonToggle v-model="store.doku.xaBcde.trachealDeviation.value" label-placement="end">
-          Trachealverschiebung?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.trachealDeviation.value">
+        Trachealverschiebung?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
-    <IonItem lines="none">
-      <IonToggle v-model="store.doku.xaBcde.hasHypoxia" label-placement="end">
-        Hypoxie (&lt;90%)?
-      </IonToggle>
-    </IonItem>
+    <DodoInputToggle lines="none" v-model="store.doku.xaBcde.hasHypoxia">
+      Hypoxie (&lt;90%)?
+    </DodoInputToggle>
 
     <template #footer>
       <DodoInputTreatment v-if="store.doku.xaBcde.needTreatment"

@@ -59,11 +59,9 @@
             { value: 'Teerstuhl', label: 'Teerstuhl' },
           ]">
         </DodoInputSelect>
-        <IonItem lines="inset">
-          <IonToggle v-model="localBowelPain" label-placement="end">
-            Schmerzhafter Stuhlgang?
-          </IonToggle>
-        </IonItem>
+        <DodoInputToggle lines="inset" v-model="localBowelPain">
+          Schmerzhafter Stuhlgang?
+        </DodoInputToggle>
         <DodoInputSelect
           v-model="localBowelSounds"
           label="Darmgeräusche" lines="none"

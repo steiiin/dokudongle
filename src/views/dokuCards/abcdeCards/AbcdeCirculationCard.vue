@@ -25,31 +25,21 @@
       <IonItemDivider>
         <IonLabel>Beschaffenheit</IonLabel>
       </IonItemDivider>
-      <IonItem lines="inset">
-        <IonToggle v-model="store.doku.xabCde.skin.clammy" label-placement="end">
-          Schweißig?
-        </IonToggle>
-      </IonItem>
-      <IonItem lines="full">
-        <IonToggle v-model="store.doku.xabCde.skin.poorSkinTurgor" label-placement="end">
-          Stehende Hautfalten?
-        </IonToggle>
-      </IonItem>
-      <IonItem lines="inset">
-        <IonToggle v-model="store.doku.xabCde.skin.hasUrtikaria" label-placement="end">
-          Quaddeln?
-        </IonToggle>
-      </IonItem>
-      <IonItem lines="inset">
-        <IonToggle v-model="store.doku.xabCde.skin.hasExanthem" label-placement="end">
-          Exanthem (flächiger Ausschlag)?
-        </IonToggle>
-      </IonItem>
-      <IonItem>
-        <IonToggle v-model="store.doku.xabCde.skin.hasFlush" label-placement="end">
-          Flush?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.clammy">
+        Schweißig?
+      </DodoInputToggle>
+      <DodoInputToggle lines="full" v-model="store.doku.xabCde.skin.poorSkinTurgor">
+        Stehende Hautfalten?
+      </DodoInputToggle>
+      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.hasUrtikaria">
+        Quaddeln?
+      </DodoInputToggle>
+      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.hasExanthem">
+        Exanthem (flächiger Ausschlag)?
+      </DodoInputToggle>
+      <DodoInputToggle v-model="store.doku.xabCde.skin.hasFlush">
+        Flush?
+      </DodoInputToggle>
 
       <IonItemDivider>
         <IonLabel>Temperatur (Extremitäten)</IonLabel>
@@ -123,11 +113,9 @@
         <IonItemDivider>
           <IonLabel>Frequenz</IonLabel>
         </IonItemDivider>
-        <IonItem lines="full">
-          <IonToggle v-model="store.doku.xabCde.pulse.rhythmic" label-placement="end">
-            Regelmäßig?
-          </IonToggle>
-        </IonItem>
+        <DodoInputToggle lines="full" v-model="store.doku.xabCde.pulse.rhythmic">
+          Regelmäßig?
+        </DodoInputToggle>
 
         <IonRadioGroup v-model="store.doku.xabCde.pulse.rate">
           <IonItem>
@@ -157,11 +145,9 @@
     <DodoItemModal label="Brustschmerz" v-if="!ctx.isNonVerbal"
       :state="store.doku.xabCde.chestpainState" lines="full">
 
-      <IonItem lines="full">
-        <IonToggle v-model="store.doku.xabCde.chest.tightness" label-placement="end">
-          Brustenge?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle lines="full" v-model="store.doku.xabCde.chest.tightness">
+        Brustenge?
+      </DodoInputToggle>
 
       <DodoInputSelect v-model="store.doku.xabCde.chest.pain" v-if="ctx.hasPulse"
         label="Brustschmerzen" :lines="insetIf(store.doku.xabCde.chest.pain != 'keine')"
@@ -175,17 +161,13 @@
 
       <template v-if="store.doku.xabCde.chest.pain !== 'keine'">
 
-        <IonItem lines="inset">
-          <IonToggle v-model="store.doku.xabCde.chest.tenderness" label-placement="end">
-            Druckdolent?
-          </IonToggle>
-        </IonItem>
+        <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.tenderness">
+          Druckdolent?
+        </DodoInputToggle>
 
-        <IonItem lines="inset">
-          <IonToggle v-model="store.doku.xabCde.chest.aggravation" label-placement="end">
-            Bewegungsabhängig?
-          </IonToggle>
-        </IonItem>
+        <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.aggravation">
+          Bewegungsabhängig?
+        </DodoInputToggle>
 
         <DodoInputTextOptional lines="none"
           toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed"

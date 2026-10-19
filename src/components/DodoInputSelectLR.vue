@@ -11,7 +11,7 @@
 
       <div class="dd-input-select-lr__buttons">
         <IonButton v-for="side in sides" :key="side.value" size="small" fill="clear"
-          :aria-label="`${label}: ${side.label}`" color="dark"
+          :aria-label="`${label}: ${side.label}`" :color="buttonColor(props[side.value])"
           aria-haspopup="dialog"
           @click="openPopover(side.value, $event)">
           {{ side.label }}
@@ -40,7 +40,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { checkmark, caretDown } from 'ionicons/icons'
-import type { OptionInput, SelectOption, SelectValue } from './DodoInputSelect.vue'
+import type { SelectOption, SelectValue } from './DodoInputSelect.vue'
+
+export type SelectLRColor = 'green' | 'yellow' | 'orange' | 'red'
+export type SelectLROption = SelectOption & { color?: SelectLRColor }
+export type SelectLROptionInput = SelectValue | SelectLROption
 
 const props = defineProps<{
   left: SelectValue
@@ -48,7 +52,7 @@ const props = defineProps<{
   label: string
   labelColor?: string
   description?: string
-  options: readonly OptionInput[]
+  options: readonly SelectLROptionInput[]
   emptyLabel?: string
   lines?: 'full' | 'inset' | 'none'
 }>()
@@ -69,7 +73,7 @@ const isPopoverOpen = ref(false)
 const popoverEvent = ref<Event>()
 const selectedValue = computed(() => activeSide.value === null ? undefined : props[activeSide.value])
 
-const normalizedOptions = computed<SelectOption[]>(() => {
+const normalizedOptions = computed<SelectLROption[]>(() => {
   const options = props.options.map(opt => typeof opt === 'object'
     ? opt
     : { value: opt, label: String(opt) })
@@ -81,6 +85,18 @@ const normalizedOptions = computed<SelectOption[]>(() => {
 
 const displayLabel = (value: SelectValue): string =>
   normalizedOptions.value.find(opt => opt.value === value)?.label ?? (value === '' ? '—' : String(value))
+
+const optionColors = {
+  green: 'success',
+  yellow: 'warning',
+  orange: 'orange',
+  red: 'danger',
+} as const satisfies Record<SelectLRColor, string>
+
+const buttonColor = (value: SelectValue): string => {
+  const color = normalizedOptions.value.find(opt => opt.value === value)?.color
+  return color ? optionColors[color] : 'dark'
+}
 
 const resolvedLabelColor = computed(() => {
   const color = props.labelColor?.trim()
@@ -144,6 +160,10 @@ const onDismiss = () => {
 
 .dd-input-select-lr__buttons ion-button {
   margin: 0;
+}
+
+.dd-input-select-lr__buttons ion-button.ion-color-orange {
+  --ion-color-base: #ff9800;
 }
 
 .dd-input-select-lr__buttons ion-icon {

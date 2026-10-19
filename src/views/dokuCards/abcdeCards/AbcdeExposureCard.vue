@@ -15,11 +15,9 @@
         <DodoItemModal label="Ausscheidung"
           :state="store.doku.xabcdE.excretionsState" lines="inset">
 
-          <IonItem :lines="fullIf(store.doku.xabcdE.excretions.assessed)">
-            <IonToggle v-model="store.doku.xabcdE.excretions.assessed" label-placement="end">
-              Ausscheidungen erfassen?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle :lines="fullIf(store.doku.xabcdE.excretions.assessed)" v-model="store.doku.xabcdE.excretions.assessed">
+            Ausscheidungen erfassen?
+          </DodoInputToggle>
 
           <template v-if="store.doku.xabcdE.excretions.assessed">
 
@@ -40,32 +38,24 @@
             <IonItemDivider>
               <IonLabel>Auffälligkeiten?</IonLabel>
             </IonItemDivider>
-            <IonItem lines="inset">
-              <IonToggle v-model="store.doku.xabcdE.excretions.value.urinaryAbnormalities" label-placement="end">
-                Wasserlassen auffällig?
-              </IonToggle>
-            </IonItem>
-            <IonItem lines="none">
-              <IonToggle v-model="store.doku.xabcdE.excretions.value.bowelAbnormalities" label-placement="end">
-                Stuhlgang auffällig?
-              </IonToggle>
-            </IonItem>
+            <DodoInputToggle lines="inset" v-model="store.doku.xabcdE.excretions.value.urinaryAbnormalities">
+              Wasserlassen auffällig?
+            </DodoInputToggle>
+            <DodoInputToggle lines="none" v-model="store.doku.xabcdE.excretions.value.bowelAbnormalities">
+              Stuhlgang auffällig?
+            </DodoInputToggle>
 
           </template>
 
         </DodoItemModal>
 
-        <IonItem lines="full">
-          <IonToggle v-model="store.doku.xabcdE.urinaryIncontinence" label-placement="end">
-            Eingenässt?
-          </IonToggle>
-        </IonItem>
+        <DodoInputToggle lines="full" v-model="store.doku.xabcdE.urinaryIncontinence">
+          Eingenässt?
+        </DodoInputToggle>
 
-        <IonItem v-if="!ctx.isNonVerbal">
-          <IonToggle v-model="store.doku.xabcdE.nausea" label-placement="end">
-            Übelkeit?
-          </IonToggle>
-        </IonItem>
+        <DodoInputToggle v-if="!ctx.isNonVerbal" v-model="store.doku.xabcdE.nausea">
+          Übelkeit?
+        </DodoInputToggle>
 
         <DodoItemModal label="Erbrechen" modal-label="Erbrechen"
           :state="store.doku.xabcdE.emesis.state" lines="full">
@@ -112,11 +102,9 @@
           label="Bauchbefund" modal-label="Bauchbefund"
           :state="store.doku.xabcdE.abdominalState" lines="none">
 
-          <IonItem :lines="store.doku.xabcdE.abdominal.assessed ? 'full' : 'none'">
-            <IonToggle v-model="store.doku.xabcdE.abdominal.assessed" label-placement="end">
-              Bauch untersucht?
-            </IonToggle>
-          </IonItem>
+          <DodoInputToggle :lines="store.doku.xabcdE.abdominal.assessed ? 'full' : 'none'" v-model="store.doku.xabcdE.abdominal.assessed">
+            Bauch untersucht?
+          </DodoInputToggle>
 
           <template v-if="store.doku.xabcdE.abdominal.assessed">
 
