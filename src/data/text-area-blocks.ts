@@ -1,14 +1,18 @@
 import { TextAreaBlock, type TextAreaBlockField, type TextAreaBlockSourceState } from '@/types/text-area-block'
 import type { SchwindelBlockSourceState } from '@/types/schwindel'
 import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/schwindel'
+import type { BauchschmerzBlockSourceState } from '@/types/bauchschmerz'
+import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock } from '@/data/bauchschmerz'
 
 export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
   schwindel: SchwindelBlockSourceState
+  bauchschmerz: BauchschmerzBlockSourceState
 }
 
 interface BlockSourceProtocol {
   flavors: { verlegung: boolean; einweisung: boolean }
   xabcDe: { dizziness: 'kein' | 'ungerichteter' | 'gerichteter' }
+  xabcdE: { abdominal: { isAssessed: boolean; value: { pain: 'keine' | 'leichte' | '' | 'starke' } } }
   textAreaBlocks: TextAreaBlockState
 }
 
@@ -48,6 +52,12 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
     isAvailable: protocol => protocol.xabcDe.dizziness === 'gerichteter',
     createState: createSchwindelBlockState,
     outputs: [new SchwindelTextAreaBlock()],
+  },
+  {
+    id: 'bauchschmerz', fields: [],
+    isAvailable: protocol => protocol.xabcdE.abdominal.isAssessed && protocol.xabcdE.abdominal.value.pain !== 'keine',
+    createState: createBauchschmerzBlockState,
+    outputs: [new BauchschmerzTextAreaBlock()],
   },
 ]
 

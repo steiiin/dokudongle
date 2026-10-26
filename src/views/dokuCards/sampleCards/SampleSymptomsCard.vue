@@ -5,6 +5,8 @@
     <BlockSchwindelCard
       v-if="ctx.requireSampleSymptoms && store.doku.xabcDe.dizziness === 'gerichteter'" />
 
+    <BlockBauchschmerzCard v-if="ctx.requireSampleSymptoms && ctx.hasAbdominalIssue" />
+
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
       assist-context-id="sampler.symptoms"
       :blocks="store.textAreaBlocks.filter(block => block.target === 'sampler.symptoms.additionalSymptoms')"
@@ -22,8 +24,9 @@
 import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
-import { QU_SYM_AbdominalPain, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST } from '@/data/quickies'
+import { QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST } from '@/data/quickies'
 import BlockSchwindelCard from '../blocksourceCards/BlockSchwindelCard.vue'
+import BlockBauchschmerzCard from '../blocksourceCards/BlockBauchschmerzCard.vue'
 
 const store = useDokuStore()
 const ctx = computed(() => store.context)
@@ -32,11 +35,6 @@ const ctx = computed(() => store.context)
 
 const quickieKeys = computed(() => {
   const list: Array<string> = []
-
-  if (store.doku.xabcdE.abdominal.isAssessed && store.doku.xabcdE.abdominal.value.pain != 'keine')
-  {
-    list.push(QU_SYM_AbdominalPain)
-  }
 
   if (store.doku.xabcdE.excretions.isAssessed)
   {

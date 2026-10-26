@@ -45,8 +45,8 @@
     </DodoInputToggle>
 
     <DodoExaminationItem id="abdominal" label="Bauchbefund" assessed-presets
-      v-model:assessed="store.doku.xabcdE.abdominal.assessed" show-line="full"
-      @select="resetAbdominal" @activate="abdominalModal?.open()" @remove="resetAbdominal">
+      :assessed="store.doku.xabcdE.abdominal.assessed" @update:assessed="store.setAbdominalAssessed" show-line="full"
+      @select="store.resetAbdominal" @activate="abdominalModal?.open()" @remove="store.resetAbdominal">
       <DodoItemModal ref="abdominalModal" label="Bauchbefund" modal-label="Bauchbefund"
         :state="store.doku.xabcdE.abdominalState" lines="none">
 
@@ -63,7 +63,8 @@
         <template v-if="!ctx.isNonVerbal">
 
           <DodoInputSelect
-            v-model="store.doku.xabcdE.abdominal.value.pain"
+            :model-value="store.doku.xabcdE.abdominal.value.pain"
+            @update:model-value="store.setAbdominalPain($event as ExposureAbdominal['pain'])"
             label="Bauchschmerzen" lines="inset"
             :options="[
               { value: 'keine', label: 'Keine' },
@@ -149,17 +150,13 @@ import { computed, ref, watch } from 'vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
 import DodoItemModal from '@/components/DodoItemModal.vue'
-import { ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
+import { ExposureExcretions, type ExposureAbdominal } from '@/types/protocol/abcde'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 const abdominalModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const excretionsModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
-
-function resetAbdominal() {
-  store.doku.xabcdE.abdominal.value = new ExposureAbdominal()
-}
 
 function resetExcretions() {
   store.doku.xabcdE.excretions.value = new ExposureExcretions()
@@ -169,14 +166,14 @@ function resetExcretions() {
 
 watch(() => store.doku.xabcdE.abdominal.value.guarding, (v) => {
   if (v != '' && store.doku.xabcdE.abdominal.value.pain == 'keine') {
-    store.doku.xabcdE.abdominal.value.pain = ''
+    store.setAbdominalPain('')
   }
 })
 
 watch(() => ctx.value.isNonVerbal, (v) => {
   if (isRestoringReanimation(store.doku)) return
   if (v && store.doku.xabcdE.abdominal.value.pain != 'keine') {
-    store.doku.xabcdE.abdominal.value.pain = 'keine'
+    store.setAbdominalPain('keine')
   }
 }, { flush: 'sync' })
 

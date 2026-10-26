@@ -10,6 +10,7 @@ import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
 import { createSchwindelBlockState } from '@/data/schwindel'
+import { createBauchschmerzBlockState } from '@/data/bauchschmerz'
 import { composeTextAreaText } from '@/types/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -29,7 +30,7 @@ import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/uti
 import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
-import { DisabilityNeuro, DisabilityPsych } from '@/types/protocol/abcde'
+import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal } from '@/types/protocol/abcde'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
@@ -759,6 +760,22 @@ export const useDokuStore = defineStore('doku', {
     setDizziness(value: Protocol['xabcDe']['dizziness']) {
       this.doku.xabcDe.dizziness = value
       if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
+    },
+    setAbdominalPain(value: ExposureAbdominal['pain']) {
+      this.doku.xabcdE.abdominal.value.pain = value
+      if (!this.doku.xabcdE.abdominal.isAssessed || value === 'keine') {
+        this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
+      }
+    },
+    setAbdominalAssessed(value: boolean) {
+      this.doku.xabcdE.abdominal.assessed = value
+      if (!this.doku.xabcdE.abdominal.isAssessed || this.doku.xabcdE.abdominal.value.pain === 'keine') {
+        this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
+      }
+    },
+    resetAbdominal() {
+      this.doku.xabcdE.abdominal.value = new ExposureAbdominal()
+      this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
     },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
       if (key === 'reanimation') {
