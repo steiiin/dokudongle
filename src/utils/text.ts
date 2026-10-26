@@ -34,6 +34,23 @@ export function prefix(prefix: string, text: string): string {
 }
 
 /**
+ * Adds a prefix unless one of the provided keywords is already present in the draft.
+ */
+export function conditionalPrefix(draft: string, condPrefix: string, condKeywords: Array<string>): string {
+
+  const caseInsensitiveDraft = draft.toLowerCase()
+  const caseInsensitiveKeywords = condKeywords.map(w => w.toLowerCase())
+  if (caseInsensitiveKeywords.length === 0) {
+    return prefix(condPrefix, draft)
+  }
+
+  const anyFound = caseInsensitiveKeywords.some(w => caseInsensitiveDraft.includes(w))
+  if (anyFound) { return draft }
+  return prefix(condPrefix, draft)
+
+}
+
+/**
  * Suffix given text with suffix if not empty
  */
 export function suffix(text: string, suffix: string): string {

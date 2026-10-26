@@ -135,7 +135,8 @@
       Kopfschmerzen?
     </DodoInputToggle>
 
-    <DodoInputSelect v-model="store.doku.xabcDe.dizziness"
+    <DodoInputSelect :model-value="store.doku.xabcDe.dizziness"
+      @update:model-value="store.setDizziness($event as typeof store.doku.xabcDe.dizziness)"
       label="Schwindel" lines="full"
       :options="[
         { value: 'kein', label: 'Keiner' },

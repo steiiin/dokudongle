@@ -3,7 +3,6 @@ import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQui
 import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
 import DodoQuickieSchwangerschaft from "@/components/quickie-components/DodoQuickieSchwangerschaft.vue"
-import DodoQuickieSchwindel from "@/components/quickie-components/DodoQuickieSchwindel.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
 import { AssessedValue, OptionalValue } from "@/types/protocol/input"
 import { PregnancySpan } from "@/types/protocol/pregnancy"
@@ -20,7 +19,6 @@ export const QU_SYM_AbdominalPain = 'abdominal_pain'
 export const QU_SYM_ExcretionsUrinary = 'excretions_urinary'
 export const QU_SYM_ExcretionsBowel = 'excretions_bowel'
 
-export const QU_SCHWINDEL = 'intern_schwindel'
 export const QU_SYM_OPQRST = 'intern_opqrst'
 
 export const QU_PLER_Schwangerschaft = 'pler_schwangerschaft'
@@ -289,29 +287,6 @@ export class QuickieExcretionsBowels extends Quickie
 
 // --------------------------------------------------------
 
-export class QuickieSchwindel extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieSchwindel))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Schwindel: ')
-  }
-
-  public onset: 'plötzlicher Beginn' | 'schleichender Beginn' = 'plötzlicher Beginn'
-  public onspan: '' | 'seit Stunden' | 'seit Tagen' | 'seit Wochen' | 'gestern' | string = ''
-
-  public provocation: string[] = []
-  public palliation: string[] = []
-  public quality: string[] = []
-  public radiation: string[] = []
-  public severity: 'minimal'|'leicht'|'mittel'|'stark'|'maximal' = 'mittel'
-  public time: string[] = []
-
-}
-
-// --------------------------------------------------------
-
 export class QuickieOPQRST extends Quickie
 {
   constructor(public key: string, public label: string) {
@@ -357,7 +332,9 @@ export class QuickieSchwangerschaft extends Quickie
 // ############################################################################
 
 const buildQuickies = (): Record<string, Quickie> => ({
-  ...Object.fromEntries(TEXT_AREA_BLOCK_SOURCES.map(source => [source.id,
+  ...Object.fromEntries(TEXT_AREA_BLOCK_SOURCES
+    .filter(source => source.id === QU_SIT_Verlegung || source.id === QU_SIT_Einweisung)
+    .map(source => [source.id,
     new QuickieTemplate(source.id, source.id === QU_SIT_Verlegung ? 'Verlegung' : 'Einweisung',
       source.outputs[0].template, source.fields),
   ])),
@@ -366,7 +343,6 @@ const buildQuickies = (): Record<string, Quickie> => ({
   [QU_SYM_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_SYM_ExcretionsUrinary, 'Wasserlassen'),
   [QU_SYM_ExcretionsBowel]: new QuickieExcretionsBowels(QU_SYM_ExcretionsBowel, 'Stuhlgang'),
 
-  [QU_SCHWINDEL]: new QuickieSchwindel(QU_SCHWINDEL, 'Schwindel'),
   [QU_SYM_OPQRST]: new QuickieOPQRST(QU_SYM_OPQRST, 'OPQRST'),
 
   [QU_PLER_Schwangerschaft]: new QuickieSchwangerschaft(QU_PLER_Schwangerschaft, 'Schwangerschaft'),

@@ -7,8 +7,9 @@ import { AssessedValue } from '@/types/protocol/input'
 import { AbcdeDisability, DisabilityNeuro, DisabilityPsych } from '@/types/protocol/abcde'
 import { ProtocolVerbosity } from '@/types/protocol'
 import SampleSymptomsCard from '@/views/dokuCards/sampleCards/SampleSymptomsCard.vue'
+import SampleContainerCard from '@/views/dokuCards/SampleContainerCard.vue'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
-import { QU_SCHWINDEL } from '@/data/quickies'
+import DodoItemModal from '@/components/DodoItemModal.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,
@@ -129,17 +130,34 @@ describe('Disability assessment semantics', () => {
     expect(store.context).toMatchObject({ hasHeadache: true, hasDizziness: true, isLowVigilant: false })
   })
 
-  test('shows the dizziness quickie only for directed dizziness', async () => {
-    const d = useDokuStore().doku.xabcDe
-    const wrapper = shallowMount(SampleSymptomsCard)
-    const quickies = () => wrapper.getComponent(DodoInputTextArea).props('quickieKeys')
-    expect(quickies()).not.toContain(QU_SCHWINDEL)
-    d.dizziness = 'gerichteter'
+  test.each([false, true])('shows the Schwindel modal inside symptoms before the textarea only when eligible, trauma=%s', async trauma => {
+    const store = useDokuStore()
+    store.setFlavor('trauma', trauma)
+    const wrapper = shallowMount(SampleContainerCard, {
+      global: { renderStubDefaultSlot: true, stubs: { SampleSymptomsCard: false } },
+    })
+    expect(wrapper.findComponent(DodoItemModal).exists()).toBe(false)
+    store.setDizziness('gerichteter')
     await wrapper.vm.$nextTick()
-    expect(quickies()).toContain(QU_SCHWINDEL)
-    d.dizziness = 'ungerichteter'
+    const modal = wrapper.getComponent(SampleSymptomsCard).getComponent(DodoItemModal)
+    const symptoms = wrapper.get('.sample-symptoms')
+    expect(symptoms.element.contains(modal.element)).toBe(true)
+    expect(modal.element.nextElementSibling).toBe(wrapper.getComponent(DodoInputTextArea).element)
+    expect(symptoms.find('hr').exists()).toBe(trauma)
+    if (trauma) expect(modal.element.previousElementSibling).toBe(symptoms.get('hr').element)
+    expect(wrapper.getComponent(DodoInputTextArea).props('quickieKeys')).not.toContain('intern_schwindel')
+    store.setDizziness('ungerichteter')
     await wrapper.vm.$nextTick()
-    expect(quickies()).not.toContain(QU_SCHWINDEL)
+    expect(wrapper.findComponent(DodoItemModal).exists()).toBe(false)
+    store.setDizziness('gerichteter')
+    store.setFlavor('verlegung', true)
+    await wrapper.vm.$nextTick()
+    expect(store.context.requireSampleSymptoms).toBe(false)
+    expect(store.doku.xabcDe.dizziness).toBe('gerichteter')
+    expect(wrapper.findComponent(DodoItemModal).exists()).toBe(false)
+    store.setFlavor('verlegung', false)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(DodoItemModal).exists()).toBe(true)
     wrapper.unmount()
   })
 

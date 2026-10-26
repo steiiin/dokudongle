@@ -620,7 +620,8 @@ describe('Disability examinations', () => {
   })
 
   test('keeps headache and dizziness editable without adding an examination', async () => {
-    const d = useDokuStore().doku.xabcDe
+    const store = useDokuStore()
+    const d = store.doku.xabcDe
     const f = disabilityFixture()
     await nextTick()
     const headache = f.wrapper.findAllComponents(IonToggle).find(toggle => toggle.text().includes('Kopfschmerzen?'))!
@@ -634,11 +635,15 @@ describe('Disability examinations', () => {
     await nextTick()
     expect(d.headache).toBe(true)
     expect(d.dizziness).toBe('gerichteter')
+    store.doku.textAreaBlocks.schwindel.details.quality = ['Drehschwindel']
+    store.setTextAreaBlockActive('schwindel.symptoms', false)
     headache.vm.$emit('update:modelValue', false)
     dizziness.vm.$emit('update:modelValue', 'kein')
     await nextTick()
     expect(d.headache).toBe(false)
     expect(d.dizziness).toBe('kein')
+    expect(store.doku.textAreaBlocks.schwindel.details.quality).toEqual([])
+    expect(store.doku.textAreaBlocks.schwindel.active['schwindel.symptoms']).toBe(true)
   })
 
   test('hides and clears headache for nonverbal patients while retaining dizziness', async () => {

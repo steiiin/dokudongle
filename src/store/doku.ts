@@ -9,6 +9,7 @@ import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
+import { createSchwindelBlockState } from '@/data/schwindel'
 import { composeTextAreaText } from '@/types/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -187,7 +188,7 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
 
   for (const source of TEXT_AREA_BLOCK_SOURCES) {
-    if (!hydratedProtocol.flavors[source.id]) {
+    if (!source.isAvailable(hydratedProtocol)) {
       hydratedProtocol.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
     }
   }
@@ -753,7 +754,11 @@ export const useDokuStore = defineStore('doku', {
     },
     setTextAreaBlockActive(id: string, active: boolean) {
       const source = TEXT_AREA_BLOCK_SOURCES.find(source => source.outputs.some(output => output.id === id))
-      if (source && this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id].active[id] = active
+      if (source?.isAvailable(this.doku)) this.doku.textAreaBlocks[source.id].active[id] = active
+    },
+    setDizziness(value: Protocol['xabcDe']['dizziness']) {
+      this.doku.xabcDe.dizziness = value
+      if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
     },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
       if (key === 'reanimation') {
@@ -769,7 +774,7 @@ export const useDokuStore = defineStore('doku', {
       }
 
       for (const source of TEXT_AREA_BLOCK_SOURCES) {
-        if (!this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
+        if (!source.isAvailable(this.doku)) this.doku.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
       }
 
       if (!enabled) {

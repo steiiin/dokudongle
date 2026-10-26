@@ -2,6 +2,9 @@
 
     <hr v-if="ctx.isTrauma">
 
+    <BlockSchwindelCard
+      v-if="ctx.requireSampleSymptoms && store.doku.xabcDe.dizziness === 'gerichteter'" />
+
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
       assist-context-id="sampler.symptoms"
       :blocks="store.textAreaBlocks.filter(block => block.target === 'sampler.symptoms.additionalSymptoms')"
@@ -19,7 +22,9 @@
 import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
-import { QU_SYM_AbdominalPain, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST, QU_SCHWINDEL } from '@/data/quickies'
+import { QU_SYM_AbdominalPain, QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST } from '@/data/quickies'
+import BlockSchwindelCard from '../blocksourceCards/BlockSchwindelCard.vue'
+
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 
@@ -37,11 +42,6 @@ const quickieKeys = computed(() => {
   {
     if (store.doku.xabcdE.excretions.value.urinaryAbnormalities) { list.push(QU_SYM_ExcretionsUrinary) }
     if (store.doku.xabcdE.excretions.value.bowelAbnormalities) { list.push(QU_SYM_ExcretionsBowel) }
-  }
-
-  if (store.doku.xabcDe.dizziness === 'gerichteter')
-  {
-    list.push(QU_SCHWINDEL)
   }
 
   list.push(QU_SYM_OPQRST)

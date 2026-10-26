@@ -978,10 +978,10 @@ defineExpose({
 }
 
 .dd-input-textarea .preview {
-  margin: 6px 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #999;
+  margin: .5rem 2px;
+  font-size: .8rem;
+  line-height: 1.3;
+  color: var(--ion-color-dark-shade);
   white-space: pre-wrap;
 }
 
