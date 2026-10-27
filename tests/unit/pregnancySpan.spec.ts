@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
+import { IonInput } from '@ionic/vue'
 
 import DodoInputGravTerm from '@/components/DodoInputGravTerm.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
@@ -65,6 +66,41 @@ describe('DodoInputGravTerm', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+  })
+
+  test('starts unrecorded, accepts an exact date without inventing one, and can be cleared', async () => {
+    const wrapper = shallowMount(DodoInputGravTerm, {
+      props: { modelValue: null, allowClear: true },
+      global: { renderStubDefaultSlot: true },
+    })
+    expect(wrapper.getComponent(DodoToggleGroup).props('modelValue')).toBe('unrecorded')
+    expect(wrapper.findComponent(DodoInputSelect).exists()).toBe(false)
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    wrapper.getComponent(DodoToggleGroup).vm.$emit('update:modelValue', 'known')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.getComponent(IonInput).props('modelValue')).toBe('')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    wrapper.getComponent(IonInput).vm.$emit('update:modelValue', '2026-02-31')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    wrapper.getComponent(IonInput).vm.$emit('update:modelValue', '2026-12-03')
+    const value = wrapper.emitted('update:modelValue')!.at(-1)![0] as PregnancySpan
+    expect(value.calculatedTerm).toEqual(new Date(2026, 11, 3))
+    await wrapper.setProps({ modelValue: value })
+    wrapper.getComponent(DodoToggleGroup).vm.$emit('update:modelValue', 'unrecorded')
+    expect(wrapper.emitted('update:modelValue')!.at(-1)).toEqual([null])
+    await wrapper.setProps({ modelValue: null })
+    expect(wrapper.getComponent(DodoToggleGroup).props('modelValue')).toBe('unrecorded')
+    wrapper.getComponent(DodoToggleGroup).vm.$emit('update:modelValue', 'unknown')
+    const approximate = wrapper.emitted('update:modelValue')!.at(-1)![0] as PregnancySpan
+    expect(approximate.approx).toBe('1. Trimenon')
+  })
+
+  test('clearing an exact date removes the recorded term', () => {
+    const wrapper = shallowMount(DodoInputGravTerm, {
+      props: { modelValue: new PregnancySpan(new Date(2026, 11, 3)), allowClear: true },
+    })
+    wrapper.getComponent(IonInput).vm.$emit('update:modelValue', '')
+    expect(wrapper.emitted('update:modelValue')!.at(-1)).toEqual([null])
   })
 
   test('shows both term modes and the trimester select for an approximation', () => {

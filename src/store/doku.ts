@@ -10,6 +10,7 @@ import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
 import { createSchwindelBlockState } from '@/data/schwindel'
+import { createSchwangerschaftBlockState } from '@/data/schwangerschaft'
 import { createBauchschmerzBlockState } from '@/data/bauchschmerz'
 import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/excretions'
 import { composeTextAreaText } from '@/types/text-area-block'
@@ -766,6 +767,19 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xabcDe.dizziness = value
       if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
     },
+    setPregnancyAssessed(value: boolean) {
+      if (this.doku.xabcdE.pregnancy.assessed !== value || !value) {
+        this.doku.xabcdE.pregnancy.value = true
+        this.doku.textAreaBlocks.schwangerschaft = createSchwangerschaftBlockState()
+      }
+      this.doku.xabcdE.pregnancy.assessed = value
+    },
+    setPregnancy(value: boolean) {
+      this.doku.xabcdE.pregnancy.value = value
+      if (!this.doku.xabcdE.pregnancy.isAssessed || !value) {
+        this.doku.textAreaBlocks.schwangerschaft = createSchwangerschaftBlockState()
+      }
+    },
     setExcretionsAssessed(value: boolean) {
       this.doku.xabcdE.excretions.assessed = value
       if (!value) {
@@ -847,6 +861,7 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xabCde = emptyProtocol.xabCde
       this.doku.xabcDe = emptyProtocol.xabcDe
       this.doku.xabcdE = emptyProtocol.xabcdE
+      this.doku.textAreaBlocks.schwangerschaft = emptyProtocol.textAreaBlocks.schwangerschaft
       this.doku.textAreaBlocks.excretions_bowel = emptyProtocol.textAreaBlocks.excretions_bowel
       this.doku.textAreaBlocks.excretions_urinary = emptyProtocol.textAreaBlocks.excretions_urinary
       this.doku.sampler.symptoms = emptyProtocol.sampler.symptoms

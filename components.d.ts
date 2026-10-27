@@ -40,7 +40,6 @@ declare module 'vue' {
     DodoMedInput: typeof import('./src/components/DodoMedInput.vue')['default']
     DodoProtocolCheckModal: typeof import('./src/components/DodoProtocolCheckModal.vue')['default']
     DodoQuickieOPRST: typeof import('./src/components/quickie-components/DodoQuickieOPRST.vue')['default']
-    DodoQuickieSchwangerschaft: typeof import('./src/components/quickie-components/DodoQuickieSchwangerschaft.vue')['default']
     DodoQuickieTemplate: typeof import('./src/components/quickie-components/DodoQuickieTemplate.vue')['default']
     DodoSendAction: typeof import('./src/components/DodoSendAction.vue')['default']
     DodoStateItem: typeof import('./src/components/DodoStateItem.vue')['default']

@@ -1,8 +1,5 @@
 import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
-import DodoQuickieSchwangerschaft from "@/components/quickie-components/DodoQuickieSchwangerschaft.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
-import { AssessedValue } from "@/types/protocol/input"
-import { PregnancySpan } from "@/types/protocol/pregnancy"
 
 import { Component, markRaw } from "vue"
 import { TEXT_AREA_BLOCK_SOURCES } from "@/data/text-area-blocks"
@@ -13,8 +10,6 @@ export const QU_SIT_Verlegung = 'verlegung'
 export const QU_SIT_Einweisung = 'einweisung'
 
 export const QU_SYM_OPQRST = 'intern_opqrst'
-
-export const QU_PLER_Schwangerschaft = 'pler_schwangerschaft'
 
 // ############################################################################
 
@@ -72,28 +67,6 @@ export class QuickieOPQRST extends Quickie
 
 }
 
-// --------------------------------------------------------
-
-export class QuickieSchwangerschaft extends Quickie
-{
-
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieSchwangerschaft))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Schwangerschaft: ')
-  }
-
-  public gravida: AssessedValue<number> = AssessedValue.unassessed(1)
-  public para: AssessedValue<number> = AssessedValue.unassessed(0)
-
-  public presentation: '' | 'SL'|'BEL'|'QL' = ''
-  public amnioticFluid: string = ''
-  public childCount: string = ''
-  public calculatedTerm: PregnancySpan = new PregnancySpan('1. Trimenon')
-
-}
-
 // ############################################################################
 
 const buildQuickies = (): Record<string, Quickie> => ({
@@ -105,8 +78,6 @@ const buildQuickies = (): Record<string, Quickie> => ({
   ])),
 
   [QU_SYM_OPQRST]: new QuickieOPQRST(QU_SYM_OPQRST, 'OPQRST'),
-
-  [QU_PLER_Schwangerschaft]: new QuickieSchwangerschaft(QU_PLER_Schwangerschaft, 'Schwangerschaft'),
 
 })
 

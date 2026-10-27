@@ -1,4 +1,4 @@
-import { onHigh, onNormal, textIf } from "@/utils/filter"
+import { assessedText, onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { ProtocolContext } from "@/types/protocol"
 import { AssessedValue } from "../input"
@@ -235,6 +235,7 @@ export class AbcdeExposure {
   public urinaryIncontinence: boolean
 
   public abdominal: AssessedValue<ExposureAbdominal>
+  public pregnancy: AssessedValue<boolean>
 
   public treatment: string
 
@@ -248,6 +249,7 @@ export class AbcdeExposure {
     this.excretions = AssessedValue.unassessed(new ExposureExcretions())
     this.urinaryIncontinence = false
     this.abdominal = AssessedValue.unassessed(new ExposureAbdominal())
+    this.pregnancy = AssessedValue.unassessed(true)
     this.treatment = ''
   }
 
@@ -314,6 +316,7 @@ export class AbcdeExposure {
       textIf(this.excretions.value.text, this.excretions.isAssessed || getCtx().hasAbdominalIssue),
       textIf('eingenässt', this.urinaryIncontinence),
       this.abdominalText,
+      assessedText(this.pregnancy, 'Schwangerschaft', 'Schwangerschaft ausgeschlossen'),
     ]))))
 
     const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)

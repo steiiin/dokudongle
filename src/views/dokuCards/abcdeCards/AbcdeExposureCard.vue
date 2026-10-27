@@ -136,6 +136,15 @@
 
     </DodoItemModal>
 
+    <DodoExaminationItem id="pregnancy" label="Schwangerschaft" show-line="full"
+      :available="ctx.isChildbearingAge || store.doku.xabcdE.pregnancy.assessed"
+      :assessed="store.doku.xabcdE.pregnancy.assessed" @update:assessed="store.setPregnancyAssessed">
+      <DodoInputToggle :model-value="store.doku.xabcdE.pregnancy.value"
+        @update:model-value="store.setPregnancy" lines="none">
+        Schwangerschaft
+      </DodoInputToggle>
+    </DodoExaminationItem>
+
     <template #footer>
       <DodoInputTreatment v-if="store.doku.xabcdE.needTreatment"
         v-model="store.doku.xabcdE.treatment"

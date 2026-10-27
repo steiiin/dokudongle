@@ -1,6 +1,7 @@
 <template>
   <div class="dd-grav-term">
     <DodoToggleGroup v-model="mode" class="dd-grav-term__switch">
+      <DodoToggleButton v-if="allowClear" value="unrecorded">Keine Angabe</DodoToggleButton>
       <DodoToggleButton value="unknown">Termin unbekannt</DodoToggleButton>
       <DodoToggleButton value="known">Bekannt</DodoToggleButton>
     </DodoToggleGroup>
@@ -14,7 +15,7 @@
       />
     </div>
 
-    <div v-else class="dd-grav-term__date">
+    <div v-else-if="mode === 'known'" class="dd-grav-term__date">
       <IonInput
         v-model="dateInput"
         class="dd-grav-term__date-input"
@@ -29,7 +30,7 @@
 
 <script setup lang="ts">
 
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import DodoInputSelect, { type SelectValue } from './DodoInputSelect.vue'
 import DodoToggleButton from './DodoToggleButton.vue'
@@ -42,14 +43,15 @@ import {
 
 // ############################################################################
 
-type TermMode = 'unknown' | 'known'
+type TermMode = 'unrecorded' | 'unknown' | 'known'
 
 const props = defineProps<{
-  modelValue: PregnancySpan
+  modelValue: PregnancySpan | null
+  allowClear?: boolean
 }>()
 
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: PregnancySpan): void
+  (event: 'update:modelValue', value: PregnancySpan | null): void
 }>()
 
 // ############################################################################
@@ -90,30 +92,48 @@ const isPregnancyTrimester = (value: string): value is PregnancyTrimester =>
 
 // ############################################################################
 
+const emptyMode = ref<TermMode>('unrecorded')
+watch(() => props.modelValue, value => {
+  if (!value) emptyMode.value = 'unrecorded'
+})
+
 const mode = computed<TermMode>({
-  get: () => props.modelValue.isApproximate ? 'unknown' : 'known',
+  get: () => props.modelValue ? (props.modelValue.isApproximate ? 'unknown' : 'known') : emptyMode.value,
   set: (value) => {
+    emptyMode.value = value
+    if (value === 'unrecorded') {
+      emit('update:modelValue', null)
+      return
+    }
     if (value === 'unknown') {
-      emit('update:modelValue', new PregnancySpan(trimesterFor(props.modelValue)))
+      emit('update:modelValue', new PregnancySpan(props.modelValue ? trimesterFor(props.modelValue) : '1. Trimenon'))
       return
     }
 
-    emit('update:modelValue', new PregnancySpan(props.modelValue.calculatedTerm))
+    if (props.modelValue) emit('update:modelValue', new PregnancySpan(props.modelValue.calculatedTerm))
   },
 })
 
 const approx = computed<SelectValue>({
-  get: () => isPregnancyTrimester(props.modelValue.approx)
+  get: () => !props.modelValue ? '' : isPregnancyTrimester(props.modelValue.approx)
     ? props.modelValue.approx
     : trimesterFor(props.modelValue),
   set: (value) => {
+    if (!value) {
+      if (props.allowClear) emit('update:modelValue', null)
+      return
+    }
     emit('update:modelValue', new PregnancySpan(String(value)))
   },
 })
 
 const dateInput = computed({
-  get: () => toDateInput(props.modelValue.calculatedTerm),
+  get: () => props.modelValue ? toDateInput(props.modelValue.calculatedTerm) : '',
   set: (value: string) => {
+    if (!value && props.allowClear) {
+      emit('update:modelValue', null)
+      return
+    }
     const date = parseDateInput(value)
     if (date) emit('update:modelValue', new PregnancySpan(date))
   },

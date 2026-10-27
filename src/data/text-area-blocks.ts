@@ -1,4 +1,6 @@
 import { TextAreaBlock, type TextAreaBlockField, type TextAreaBlockSourceState } from '@/types/text-area-block'
+import type { SchwangerschaftBlockSourceState } from '@/types/schwangerschaft'
+import { createSchwangerschaftBlockState, SchwangerschaftTextAreaBlock } from '@/data/schwangerschaft'
 import type { SchwindelBlockSourceState } from '@/types/schwindel'
 import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/schwindel'
 import type { BauchschmerzBlockSourceState } from '@/types/bauchschmerz'
@@ -10,6 +12,7 @@ import {
 } from '@/data/excretions'
 
 export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
+  schwangerschaft: SchwangerschaftBlockSourceState
   schwindel: SchwindelBlockSourceState
   excretions_bowel: ExcretionsBowelsBlockSourceState
   excretions_urinary: ExcretionsUrinaryBlockSourceState
@@ -20,6 +23,7 @@ interface BlockSourceProtocol {
   flavors: { verlegung: boolean; einweisung: boolean }
   xabcDe: { dizziness: 'kein' | 'ungerichteter' | 'gerichteter' }
   xabcdE: {
+    pregnancy: { isAssessed: boolean; value: boolean }
     abdominal: { isAssessed: boolean; value: { pain: 'keine' | 'leichte' | '' | 'starke' } }
     excretions: { isAssessed: boolean; value: { bowelAbnormalities: boolean; urinaryAbnormalities: boolean } }
   }
@@ -80,6 +84,12 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
     isAvailable: protocol => protocol.xabcdE.abdominal.isAssessed && protocol.xabcdE.abdominal.value.pain !== 'keine',
     createState: createBauchschmerzBlockState,
     outputs: [new BauchschmerzTextAreaBlock()],
+  },
+  {
+    id: 'schwangerschaft', fields: [],
+    isAvailable: protocol => protocol.xabcdE.pregnancy.isAssessed && protocol.xabcdE.pregnancy.value,
+    createState: createSchwangerschaftBlockState,
+    outputs: [new SchwangerschaftTextAreaBlock()],
   },
 ]
 
