@@ -96,7 +96,7 @@
     </DodoInputToggle>
 
     <DodoItemModal label="Erbrechen" modal-label="Erbrechen"
-      :state="store.doku.xabcdE.emesis.state" lines="none">
+      :state="store.doku.xabcdE.emesis.state" lines="full">
 
       <DodoInputSelect v-model="store.doku.xabcdE.emesis.incidences"
         label="Erbrechen" :lines="store.doku.xabcdE.emesis.incidences == '' ? 'none' : 'full'"
