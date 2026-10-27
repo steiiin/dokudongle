@@ -8,12 +8,11 @@ import { TreatmentRedflags } from "./protocol/treatment/treatmentRedflags"
 export { PregnancySpan } from "./protocol/pregnancy"
 export type { PregnancyTrimester } from "./protocol/pregnancy"
 
-import { createTextAreaBlockState } from "@/data/text-area-blocks"
-import type { TextAreaBlockSourceState } from "@/types/text-area-block"
+import { createTextAreaBlockState, type TextAreaBlockState } from "@/data/text-area-blocks"
 
 export interface Protocol {
 
-  textAreaBlocks: Record<string, TextAreaBlockSourceState>,
+  textAreaBlocks: TextAreaBlockState,
 
   course: ProtocolCourse,
   flavors: ProtocolFlavors,

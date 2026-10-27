@@ -8,25 +8,35 @@ import DodoExaminationCard from '../../../src/components/DodoExaminationCard.vue
 import DodoExaminationItem from '../../../src/components/DodoExaminationItem.vue'
 import DodoItemModal from '../../../src/components/DodoItemModal.vue'
 import DodoInputSelect from '../../../src/components/DodoInputSelect.vue'
+import AbcdeBreathingCard from '../../../src/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue'
 import AbcdeAirwayCard from '../../../src/views/dokuCards/abcdeCards/AbcdeAirwayCard.vue'
+import AbcdeCirculationCard from '../../../src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue'
+import AbcdeExposureCard from '../../../src/views/dokuCards/abcdeCards/AbcdeExposureCard.vue'
+import { useDokuStore } from '../../../src/store/doku'
 
 createApp(defineComponent({
   setup() {
+    const assessedPresets = new URLSearchParams(location.search).has('presets')
+    const circulation = new URLSearchParams(location.search).has('circulation')
+    const exposure = new URLSearchParams(location.search).has('exposure')
+    if (new URLSearchParams(location.search).has('nonverbal')) {
+      useDokuStore().doku.xabcDe.avpu = 'bewusstlos'
+    }
     const modalAssessed = ref(false)
     const selectAssessed = ref(false)
     const value = ref<string | number>('Alpha')
     const modal = ref<InstanceType<typeof DodoItemModal>>()
     const select = ref<InstanceType<typeof DodoInputSelect>>()
     return () => h(IonApp, {}, () => h(IonContent, {}, () => [
-      h(AbcdeAirwayCard),
+      ...(exposure ? [h(AbcdeExposureCard)] : circulation ? [h(AbcdeCirculationCard)] : [h(AbcdeAirwayCard), h(AbcdeBreathingCard)]),
       h(DodoExaminationCard, { title: 'Controls' }, () => [
         h(DodoExaminationItem, {
-          id: 'modal', label: 'Modal examination', assessed: modalAssessed.value,
+          assessedPresets, id: 'modal', label: 'Modal examination', assessed: modalAssessed.value,
           'onUpdate:assessed': (next: boolean) => { modalAssessed.value = next },
           onActivate: () => modal.value?.open(),
         }, () => h(DodoItemModal, { ref: modal, label: 'Details' }, () => h('p', 'Examination details'))),
         h(DodoExaminationItem, {
-          id: 'select', label: 'Select examination', assessed: selectAssessed.value,
+          assessedPresets, id: 'select', label: 'Select examination', assessed: selectAssessed.value,
           'onUpdate:assessed': (next: boolean) => { selectAssessed.value = next },
           onActivate: () => select.value?.open(),
           onRemove: () => { value.value = 'Alpha' },

@@ -5,12 +5,13 @@
     </IonCardHeader>
     <IonCardContent>
 
+      <BlockSchwangerschaftCard v-if="store.doku.xabcdE.pregnancy.matches(true)" />
+
       <DodoInputTextArea v-model="store.doku.sampler.pler.PLER"
         assist-context-id="sampler.pler"
         :blocks="store.textAreaBlocks.filter(block => block.target === 'sampler.pler.PLER')"
         @activation-change="store.setTextAreaBlockActive"
-        title="PLER" placeholder="Beschreibe ..."
-        :quickieKeys="quickieKeys">
+        title="PLER" placeholder="Beschreibe ...">
         <p><b>(P)</b> Beschreibung von:</p>
         <ul>
           <li>Vorerkrankungen</li>
@@ -28,24 +29,9 @@
 
 <script setup lang="ts">
 
-import { computed } from 'vue'
-
 import { useDokuStore } from '@/store/doku'
-import { QU_PLER_Schwangerschaft } from '@/data/quickies'
+import BlockSchwangerschaftCard from '../blocksourceCards/BlockSchwangerschaftCard.vue'
 const store = useDokuStore()
-const ctx = computed(() => store.context)
-
-// ############################################################################
-
-const quickieKeys = computed(() => {
-  const list: Array<string> = []
-
-  if (ctx.value.isChildbearingAge) {
-    list.push(QU_PLER_Schwangerschaft)
-  }
-
-  return list
-})
 
 </script>
 

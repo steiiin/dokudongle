@@ -28,6 +28,9 @@ ion-card.decent-card {
   padding: 0;
   --card-bg: #333;
 }
+ion-card.decent-card {
+  margin: 0 0 1rem 0;
+}
 
 ion-card-content.card-in-card ion-card-header,
 ion-card.decent-card ion-card-header {
@@ -55,12 +58,12 @@ ion-card.decent-card {
 
 ion-card-content.card-in-card .dd-input-textarea {
   /* treatment block*/
-  margin: .5rem .25rem;
-  width: calc(100% - .5rem);
+  margin: 8px 4px;
+  width: calc(100% - 8px);
 }
 
 ion-header ion-buttons {
-  padding-inline: .5rem;
+  padding-inline: 8px;
 }
 
 /* Decent colors */

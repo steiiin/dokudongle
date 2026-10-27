@@ -1,5 +1,6 @@
 <template>
   <div class="dd-input-textarea">
+
     <div v-if="!isCombinedEmpty" class="dd-input-preview">
       <div class="preview">{{ previewText }}</div>
     </div>
@@ -978,10 +979,10 @@ defineExpose({
 }
 
 .dd-input-textarea .preview {
-  margin: 6px 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: #999;
+  margin: 8px 4px;
+  font-size: .8rem;
+  line-height: 1.3;
+  color: var(--ion-color-dark-shade);
   white-space: pre-wrap;
 }
 

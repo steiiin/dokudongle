@@ -19,9 +19,15 @@
       @will-dismiss="pickerOpen = false" @did-dismiss="afterDismiss">
       <IonContent>
         <IonList lines="none">
-          <IonItem v-for="item in availableItems" :key="item.id" button :detail="false"
-            :data-examination="item.id" @click="select(item)">
+          <IonItem v-for="(item, index) in availableItems" :key="item.id" button :detail="false"
+            :lines="item.pickerSeparatorAfter && index < availableItems.length - 1 ? 'full' : 'none'"
+            :data-examination="item.id" @click="select(item, item.assessedPresets ? 'negative' : undefined)">
             <component :is="item.picker" />
+            <IonButton v-if="item.assessedPresets" slot="end" fill="clear" color="danger" size="default"
+              class="positive-examination" :aria-label="`${item.label}: Hinzufügen und bearbeiten`"
+              @click.stop="select(item, 'positive')">
+              <IonIcon slot="icon-only" :icon="create" aria-hidden="true" />
+            </IonButton>
           </IonItem>
         </IonList>
       </IonContent>
@@ -32,9 +38,9 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, provide, ref, shallowRef, watchEffect } from 'vue'
-import { duplicate } from 'ionicons/icons'
+import { create, duplicate } from 'ionicons/icons'
 import { IonButton } from '@ionic/vue'
-import { examinationCardKey, type ExaminationRegistration } from './examination'
+import { examinationCardKey, type ExaminationPreset, type ExaminationRegistration } from './examination'
 
 defineProps<{ title: string }>()
 
@@ -43,7 +49,7 @@ const addButton = ref<InstanceType<typeof IonButton> | null>(null)
 const pickerOpen = ref(false)
 const pickerEvent = shallowRef<Event>()
 const pickerBusy = ref(false)
-const pending = shallowRef<ExaminationRegistration | null>(null)
+const pending = shallowRef<{ item: ExaminationRegistration; preset?: ExaminationPreset } | null>(null)
 const availableItems = computed(() => items.value.filter(item => item.available && !item.assessed))
 let mounted = true
 
@@ -60,9 +66,11 @@ provide(examinationCardKey, {
     await nextTick()
     const button = addButton.value?.$el.shadowRoot?.querySelector('button') as HTMLButtonElement | undefined
     if (!button) return
-    // Stencil updates the native button's disabled state in its next render frame.
-    if (button.disabled) await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
-    if (mounted) button.focus()
+    // Stencil may need multiple frames to re-enable the native button.
+    while (mounted && availableItems.value.length && button.disabled) {
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+    }
+    if (mounted && availableItems.value.length && !button.disabled) button.focus()
   },
   register(item) {
     if (items.value.some(existing => existing.id === item.id)) {
@@ -71,30 +79,35 @@ provide(examinationCardKey, {
     items.value = [...items.value, item]
     return () => {
       items.value = items.value.filter(existing => existing !== item)
-      if (pending.value === item) pending.value = null
+      if (pending.value?.item === item) pending.value = null
     }
   },
 })
 
 watchEffect(() => {
-  if (pending.value && (!pending.value.available || !pending.value.assessed)) pending.value = null
+  if (pending.value && (!pending.value.item.available || !pending.value.item.assessed)) pending.value = null
 }, { flush: 'post' })
 
-function select(item: ExaminationRegistration) {
+function select(item: ExaminationRegistration, preset?: ExaminationPreset) {
   if (!pickerOpen.value || pickerBusy.value || !availableItems.value.includes(item)) return
   pickerBusy.value = true
-  pending.value = item
-  item.select()
+  pending.value = { item, preset }
+  item.select(preset)
   pickerOpen.value = false
 }
 
 async function afterDismiss() {
   pickerOpen.value = false
   await nextTick()
-  const item = pending.value
+  const selection = pending.value
   pending.value = null
   pickerBusy.value = false
-  if (mounted && item && items.value.includes(item) && item.available && item.assessed) item.activate()
+  if (!selection) return
+  const { item, preset } = selection
+  if (mounted && items.value.includes(item) && item.available && item.assessed) {
+    item.focus()
+    if (preset !== 'negative') item.activate()
+  }
 }
 
 onBeforeUnmount(() => {
@@ -113,8 +126,18 @@ ion-card-header {
   gap: .25rem;
   padding-block: 0 !important;
 }
+ion-card-content ion-list {
+  padding: 0;
+}
+
 .add-examination {
   flex: 0 1 auto;
   margin: 0;
+}
+
+.positive-examination {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
 }
 </style>

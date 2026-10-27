@@ -1,7 +1,7 @@
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { prefixIntox, prefixParaesthesis, prefixParesis } from "@/utils/prefix/disability"
-import { onHigh, onNormal, textIf } from "@/utils/filter"
-import { OptionalValue } from "../input"
+import { prefixIntox, prefixParaesthesis } from "@/utils/prefix/disability"
+import { onNormal, textIf } from "@/utils/filter"
+import { AssessedValue, OptionalValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }
@@ -287,7 +287,6 @@ export class DisabilityPsych {
   public dementia: boolean
   public perseveration: boolean
   public behavioralChange: boolean
-  public baseline: boolean
 
   constructor()
   {
@@ -298,7 +297,6 @@ export class DisabilityPsych {
     this.dementia = false
     this.perseveration = false
     this.behavioralChange = false
-    this.baseline = false
   }
 
   get needTreatment(): boolean {
@@ -356,12 +354,13 @@ export class AbcdeDisability {
 
   public dizziness: 'kein' | 'ungerichteter' | 'gerichteter'
 
-  public neuro: DisabilityNeuro
-  public psych: DisabilityPsych
+  public neuro: AssessedValue<DisabilityNeuro>
+  public psych: AssessedValue<DisabilityPsych>
+  public baseline: boolean
 
-  public bloodGlucose: '' | 'normal' | 'niedrig' | 'hoch'
+  public bloodGlucose: AssessedValue<'' | 'normal' | 'niedrig' | 'hoch'>
 
-  public intoxication: OptionalValue<string>
+  public intoxication: AssessedValue<string>
 
   public treatment: string
 
@@ -377,10 +376,11 @@ export class AbcdeDisability {
     this.paresthesia = OptionalValue.inactive('')
     this.headache = false
     this.dizziness = 'kein'
-    this.neuro = new DisabilityNeuro()
-    this.psych = new DisabilityPsych()
-    this.bloodGlucose = ''
-    this.intoxication = OptionalValue.inactive('')
+    this.neuro = AssessedValue.unassessed(new DisabilityNeuro())
+    this.psych = AssessedValue.unassessed(new DisabilityPsych())
+    this.baseline = false
+    this.bloodGlucose = AssessedValue.unassessed('normal')
+    this.intoxication = AssessedValue.unassessed('')
     this.treatment = ''
   }
 
@@ -390,16 +390,16 @@ export class AbcdeDisability {
     return this.avpu != 'wach'
       || !this.zops.isOriented
       || this.gcs.score < 15
-      || this.neuro.needTreatment
-      || this.psych.needTreatment
-      || this.bloodGlucose == 'hoch'
-      || this.bloodGlucose == 'niedrig'
+      || (this.neuro.isAssessed && this.neuro.value.needTreatment)
+      || (this.psych.isAssessed && this.psych.value.needTreatment)
+      || this.bloodGlucose.matches('hoch')
+      || this.bloodGlucose.matches('niedrig')
       || this.aphasia
       || this.paresis.active
       || this.paresthesia.active
       || this.headache
       || this.dizziness != 'kein'
-      || this.intoxication.active
+      || this.intoxication.assessed
   }
 
   // ##########################################################################
@@ -419,7 +419,7 @@ export class AbcdeDisability {
     return this.avpu != 'wach'
     || !this.zops.isOriented
     || this.gcsScore < 15
-    || this.psych.hasAbnormalities
+    || (this.psych.isAssessed && this.psych.value.hasAbnormalities)
     || this.aphasia
     || this.paresis.active
     || this.paresthesia.active
@@ -441,9 +441,7 @@ export class AbcdeDisability {
       const isNonVerbal = getCtx().isNonVerbal
       const isPediatric = getCtx().isPediatric
 
-      const headache = this.headache
-        ? 'Kopfschmerzen'
-        : onNormal('keine Kopfschmerzen')
+      const headache = this.headache ? 'Kopfschmerzen' : onNormal('keine Kopfschmerzen')
 
       const assessedLine: string = breakDoku(prefix('D:', capitalizeBegin(concatDoku([
         [
@@ -451,20 +449,17 @@ export class AbcdeDisability {
           textIf(this.zops.pediatricText, !isNonVerbal && isPediatric),
           textIf(this.zops.adultText, !isNonVerbal && !isPediatric),
         ],
-        this.gcsScore == 15
-          ? onHigh('GCS 15')
-          : onNormal(`GCS ${this.gcsScore}`),
-        textIf('Dysarthrie', this.aphasia),
+        this.gcsScore < 14 ? `GCS ${this.gcsScore}` : '',
         textIf(headache, !isNonVerbal),
         textIf(this.dizzinessText, !isNonVerbal),
-        this.neuro.text,
-        this.psych.text,
+        textIf(this.neuro.value.text, this.neuro.isAssessed),
+        textIf(this.psych.value.text, this.psych.isAssessed),
         textIf(
           onNormal('baseline: nichts akutes'),
-          this.psych.baseline
+          this.baseline
         ),
-        textIf(`BZ ${this.bloodGlucose}`, this.bloodGlucose != ''),
-        textIf(prefixIntox(this.intoxication.value), this.intoxication.active),
+        textIf(`BZ ${this.bloodGlucose.value}`, this.bloodGlucose.isAssessed),
+        textIf(prefixIntox(this.intoxication.value), this.intoxication.assessed),
       ]))))
 
       const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)

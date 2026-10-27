@@ -81,7 +81,7 @@ describe('Stridor persistence', () => {
       if (source !== 'saved') await expect(store.restoreProtocolFromHistory(store.protocolHistory[0].id)).resolves.toBe(true)
       expect(store.doku.xAbcde.stridor).toBeInstanceOf(AssessedValue)
       expect(store.doku.xAbcde.stridor).toEqual(new AssessedValue(value, value))
-      expect(store.doku.xabcDe.psych.dementia).toBe(true)
+      expect(store.doku.xabcDe.psych.value.dementia).toBe(true)
     }
   })
 

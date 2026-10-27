@@ -1,6 +1,11 @@
 <template>
   <DodoContainerCard :title="ctx.isTrauma ? 'Situation & Unfallmechanik' : 'Situation'">
 
+
+    <BlockVerlegungCard v-if="store.doku.flavors.verlegung" />
+    <BlockEinweisungCard v-if="store.doku.flavors.einweisung" />
+
+
     <DodoInputTextArea v-model="store.doku.situation"
       assist-context-id="situation"
       title="Situation" placeholder="Beschreibe ..." mandatory
@@ -22,6 +27,8 @@
 import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
+import BlockVerlegungCard from './blocksourceCards/BlockVerlegungCard.vue'
+import BlockEinweisungCard from './blocksourceCards/BlockEinweisungCard.vue'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 

@@ -1,11 +1,17 @@
 import type { FunctionalComponent, InjectionKey } from 'vue'
 
+export type ExaminationPreset = 'positive' | 'negative'
+
 export interface ExaminationRegistration {
   readonly id: string
+  readonly label: string
   readonly assessed: boolean
   readonly available: boolean
+  readonly assessedPresets: boolean
+  readonly pickerSeparatorAfter?: boolean
   picker: FunctionalComponent
-  select: () => void
+  select: (preset?: ExaminationPreset) => void
+  focus: () => void
   activate: () => void
 }
 

@@ -1,4 +1,4 @@
-import { conditionalPrefix } from "../filter";
+import { conditionalPrefix } from "../text";
 
 /**
  * Prepends with "seit" when no keyword is present yet.

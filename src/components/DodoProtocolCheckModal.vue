@@ -160,7 +160,7 @@ const severityColor = (severity: ProtocolCheckIssueSeverity) => {
 }
 
 .issue-content {
-  margin: 0.5rem 0 0.25rem;
+  margin: 4px 0 4px;
 }
 
 .issue-labels {

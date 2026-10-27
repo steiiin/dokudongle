@@ -9,6 +9,10 @@ import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
+import { createSchwindelBlockState } from '@/data/schwindel'
+import { createSchwangerschaftBlockState } from '@/data/schwangerschaft'
+import { createBauchschmerzBlockState } from '@/data/bauchschmerz'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/excretions'
 import { composeTextAreaText } from '@/types/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -28,6 +32,7 @@ import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/uti
 import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
+import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
@@ -80,28 +85,62 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
 
   const legacyCourse = input.course
-  // Normalize legacy psychiatric fields before hydrating the class instances.
+  // Normalize legacy disability findings before restoring their class instances.
   let normalizedInput = input
   if (isRecord(input.xabcDe)) {
-    const disability = input.xabcDe
-    const psych = isRecord(disability.psych) ? { ...disability.psych } : {}
+    const disability = { ...input.xabcDe }
+    const previousPsych = disability.psych
+    const wrappedPsych = isRecord(previousPsych) && 'assessed' in previousPsych
+    const psychInput = wrappedPsych ? previousPsych.value : previousPsych
+    const psych = isRecord(psychInput) ? { ...psychInput } : {}
     const legacyPsychFields = {
       rass: 'psychRass',
       disorder: 'psychDisorder',
       hallucinations: 'psychHallucinations',
       delusions: 'psychDelusions',
-      dementia: 'psychDementia',
       perseveration: 'psychPerseveration',
       behavioralChange: 'psychBehavioralChange',
-      baseline: 'psychBaseline',
     } as const
 
     for (const [key, legacyKey] of Object.entries(legacyPsychFields)) {
-      if (psych[key] === undefined) {
-        psych[key] = disability[legacyKey]
-      }
+      if (psych[key] === undefined) psych[key] = disability[legacyKey]
     }
-    normalizedInput = { ...input, xabcDe: { ...disability, psych } }
+    // Restore dementia under psych, including records with a separate assessment.
+    const separateDementia = disability.dementia
+    const migratedDementia = psych.dementia === undefined && separateDementia !== undefined
+    if (psych.dementia === undefined) {
+      psych.dementia = separateDementia === undefined
+        ? disability.psychDementia
+        : isRecord(separateDementia)
+          ? separateDementia.assessed === true && separateDementia.value === true
+          : separateDementia
+    }
+    disability.baseline = disability.baseline === undefined
+      ? (psych.baseline === undefined ? disability.psychBaseline : psych.baseline)
+      : disability.baseline
+    delete psych.baseline
+    disability.psych = wrappedPsych
+      ? { ...previousPsych, assessed: previousPsych.assessed || (migratedDementia && psych.dementia === true), value: psych }
+      : { assessed: hydrateLikeTemplate(new DisabilityPsych(), psych).hasAbnormalities, value: psych }
+
+    const neuro = disability.neuro
+    if (isRecord(neuro) && !('assessed' in neuro)) {
+      disability.neuro = { assessed: hydrateLikeTemplate(new DisabilityNeuro(), neuro).hasAbnormalities, value: neuro }
+    }
+    if (isRecord(disability.headache)) {
+      disability.headache = disability.headache.assessed === true ? disability.headache.value : false
+    }
+    if (isRecord(disability.dizziness)) {
+      disability.dizziness = disability.dizziness.assessed === true ? disability.dizziness.value : 'kein'
+    }
+    if (typeof disability.bloodGlucose === 'string') {
+      disability.bloodGlucose = { assessed: disability.bloodGlucose !== '', value: disability.bloodGlucose }
+    }
+    const intoxication = disability.intoxication
+    if (isRecord(intoxication) && !('assessed' in intoxication) && typeof intoxication.active === 'boolean') {
+      disability.intoxication = { assessed: intoxication.active, value: intoxication.value }
+    }
+    normalizedInput = { ...input, xabcDe: disability }
   }
   if (isRecord(normalizedInput.xAbcde)) {
     const airway = normalizedInput.xAbcde
@@ -114,6 +153,35 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       },
     }
   }
+  if (isRecord(normalizedInput.xaBcde)) {
+    const breathing = { ...normalizedInput.xaBcde }
+    const legacyBreathingFields = {
+      accessoryMuscles: 'useAccessoryMuscles',
+      retractions: 'hasRetractions',
+      paradoxical: 'isParadoxical',
+      jugularVenousDistension: 'hasJugularVenousDistension',
+      emphysema: 'hasEmphysema',
+      trachealDeviation: 'hasTrachealDeviation',
+    } as const
+    for (const [key, legacyKey] of Object.entries(legacyBreathingFields)) {
+      const finding = breathing[key] === undefined ? breathing[legacyKey] : breathing[key]
+      breathing[key] = typeof finding === 'boolean' ? { assessed: finding, value: finding } : finding
+    }
+    normalizedInput = { ...normalizedInput, xaBcde: breathing }
+  }
+  if (isRecord(normalizedInput.xabCde)) {
+    const circulation = normalizedInput.xabCde
+    const edema = circulation.edema
+    if (isRecord(edema) && edema.assessed === undefined && edema.value === undefined && typeof edema.grade === 'string') {
+      normalizedInput = {
+        ...normalizedInput,
+        xabCde: {
+          ...circulation,
+          edema: { assessed: edema.grade !== 'keine Ödeme', value: edema },
+        },
+      }
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
 
   if (legacyCourse === 1 || legacyCourse === 2) {
@@ -123,9 +191,13 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
 
   for (const source of TEXT_AREA_BLOCK_SOURCES) {
-    if (!hydratedProtocol.flavors[source.id]) {
+    if (!source.isAvailable(hydratedProtocol)) {
       hydratedProtocol.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
     }
+  }
+
+  if (!hydratedProtocol.xabcdE.excretions.value.catheterType) {
+    hydratedProtocol.textAreaBlocks.excretions_urinary.details.catheterIssues = ''
   }
 
   hydratedProtocol.sampler.medication.PlanMedication = hydratedProtocol.sampler.medication.PlanMedication
@@ -689,7 +761,68 @@ export const useDokuStore = defineStore('doku', {
     },
     setTextAreaBlockActive(id: string, active: boolean) {
       const source = TEXT_AREA_BLOCK_SOURCES.find(source => source.outputs.some(output => output.id === id))
-      if (source && this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id].active[id] = active
+      if (source?.isAvailable(this.doku)) this.doku.textAreaBlocks[source.id].active[id] = active
+    },
+    setDizziness(value: Protocol['xabcDe']['dizziness']) {
+      this.doku.xabcDe.dizziness = value
+      if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
+    },
+    setPregnancyAssessed(value: boolean) {
+      if (this.doku.xabcdE.pregnancy.assessed !== value || !value) {
+        this.doku.xabcdE.pregnancy.value = true
+        this.doku.textAreaBlocks.schwangerschaft = createSchwangerschaftBlockState()
+      }
+      this.doku.xabcdE.pregnancy.assessed = value
+    },
+    setPregnancy(value: boolean) {
+      this.doku.xabcdE.pregnancy.value = value
+      if (!this.doku.xabcdE.pregnancy.isAssessed || !value) {
+        this.doku.textAreaBlocks.schwangerschaft = createSchwangerschaftBlockState()
+      }
+    },
+    setExcretionsAssessed(value: boolean) {
+      this.doku.xabcdE.excretions.assessed = value
+      if (!value) {
+        this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
+        this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
+      }
+    },
+    setBowelAbnormalities(value: boolean) {
+      this.doku.xabcdE.excretions.value.bowelAbnormalities = value
+      if (!this.doku.xabcdE.excretions.isAssessed || !value) {
+        this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
+      }
+    },
+    setUrinaryAbnormalities(value: boolean) {
+      this.doku.xabcdE.excretions.value.urinaryAbnormalities = value
+      if (!this.doku.xabcdE.excretions.isAssessed || !value) {
+        this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
+      }
+    },
+    setCatheterType(value: ExposureExcretions['catheterType']) {
+      this.doku.xabcdE.excretions.value.catheterType = value
+      if (!value) this.doku.textAreaBlocks.excretions_urinary.details.catheterIssues = ''
+    },
+    resetExcretions() {
+      this.doku.xabcdE.excretions.value = new ExposureExcretions()
+      this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
+      this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
+    },
+    setAbdominalPain(value: ExposureAbdominal['pain']) {
+      this.doku.xabcdE.abdominal.value.pain = value
+      if (!this.doku.xabcdE.abdominal.isAssessed || value === 'keine') {
+        this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
+      }
+    },
+    setAbdominalAssessed(value: boolean) {
+      this.doku.xabcdE.abdominal.assessed = value
+      if (!this.doku.xabcdE.abdominal.isAssessed || this.doku.xabcdE.abdominal.value.pain === 'keine') {
+        this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
+      }
+    },
+    resetAbdominal() {
+      this.doku.xabcdE.abdominal.value = new ExposureAbdominal()
+      this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
     },
     setFlavor(key: keyof ProtocolFlavors, enabled: boolean) {
       if (key === 'reanimation') {
@@ -705,7 +838,7 @@ export const useDokuStore = defineStore('doku', {
       }
 
       for (const source of TEXT_AREA_BLOCK_SOURCES) {
-        if (!this.doku.flavors[source.id]) this.doku.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
+        if (!source.isAvailable(this.doku)) this.doku.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
       }
 
       if (!enabled) {
@@ -728,6 +861,9 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xabCde = emptyProtocol.xabCde
       this.doku.xabcDe = emptyProtocol.xabcDe
       this.doku.xabcdE = emptyProtocol.xabcdE
+      this.doku.textAreaBlocks.schwangerschaft = emptyProtocol.textAreaBlocks.schwangerschaft
+      this.doku.textAreaBlocks.excretions_bowel = emptyProtocol.textAreaBlocks.excretions_bowel
+      this.doku.textAreaBlocks.excretions_urinary = emptyProtocol.textAreaBlocks.excretions_urinary
       this.doku.sampler.symptoms = emptyProtocol.sampler.symptoms
       this.doku.saamed = emptyProtocol.saamed
       this.doku.redflags = emptyProtocol.redflags
@@ -1029,7 +1165,7 @@ export const useDokuStore = defineStore('doku', {
       )
 
       const gcs: number = state.doku.xabcDe.gcsScore
-      const isBaseline: boolean = state.doku.xabcDe.psych.baseline
+      const isBaseline: boolean = state.doku.xabcDe.baseline
 
       const isTrauma: boolean = requireABCDE && state.doku.flavors.trauma
 
@@ -1037,7 +1173,7 @@ export const useDokuStore = defineStore('doku', {
         !state.doku.xAbcde.isBreathing
         || state.doku.xaBcde.breathlessness == 'schwere'
         || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
-        || state.doku.xaBcde.hasTrachealDeviation
+        || state.doku.xaBcde.trachealDeviation.matches(true)
         || state.doku.xabCde.pulse.peripheralStrength == 'nicht'
         || state.doku.xabCde.pulse.centralStrength != 'gut'
         || (isTrauma && gcs <= 12 && !isBaseline)
@@ -1061,7 +1197,7 @@ export const useDokuStore = defineStore('doku', {
 
       const isLowVigilant: boolean =
         (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&
-        (!state.doku.xabcDe.psych.baseline && !state.doku.xabcDe.psych.dementia)
+        (!state.doku.xabcDe.baseline && !(state.doku.xabcDe.psych.isAssessed && state.doku.xabcDe.psych.value.dementia))
 
       const isChildbearingAge: boolean =
         (state.doku.ident.age?.totalYears >= 10) &&

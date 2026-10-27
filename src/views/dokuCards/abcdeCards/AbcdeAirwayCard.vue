@@ -1,11 +1,9 @@
 <template>
   <DodoExaminationCard title="A - Airway">
 
-    <IonItem lines="full">
-      <IonToggle v-model="store.doku.xAbcde.isBreathing" label-placement="end">
-        Atmung vorhanden?
-      </IonToggle>
-    </IonItem>
+    <DodoInputToggle lines="full" v-model="store.doku.xAbcde.isBreathing" color-off="red">
+      Atmung vorhanden?
+    </DodoInputToggle>
 
     <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction"
       lines="inset" empty-label="Keine"
@@ -24,11 +22,9 @@
       :available="store.doku.xAbcde.isBreathing" show-line="inset"
       @select="store.doku.xAbcde.stridor.value = true"
       @remove="store.doku.xAbcde.stridor.value = false">
-      <IonItem>
-        <IonToggle v-model="store.doku.xAbcde.stridor.value" label-placement="end">
-          Stridor?
-        </IonToggle>
-      </IonItem>
+      <DodoInputToggle v-model="store.doku.xAbcde.stridor.value">
+        Stridor?
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoItemModal label="Schleimhaut" modal-label="Mundschleimhaut"
@@ -65,11 +61,9 @@
 
     </DodoItemModal>
 
-    <IonItem lines="none">
-      <IonToggle v-model="store.doku.xAbcde.hasTongueBite" label-placement="end">
-        Zungenbiss?
-      </IonToggle>
-    </IonItem>
+    <DodoInputToggle lines="none" v-model="store.doku.xAbcde.hasTongueBite">
+      Zungenbiss?
+    </DodoInputToggle>
 
     <template #footer>
       <DodoInputTreatment v-if="store.doku.xAbcde.needTreatment"
@@ -103,18 +97,25 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
   store.doku.xaBcde.mechanics.depth = ''
   store.doku.xaBcde.mechanics.pattern = ''
 
-  store.doku.xaBcde.useAccessoryMuscles = false
-  store.doku.xaBcde.hasRetractions = false
+  store.doku.xaBcde.accessoryMuscles.assessed = false
+  store.doku.xaBcde.accessoryMuscles.value = false
+  store.doku.xaBcde.retractions.assessed = false
+  store.doku.xaBcde.retractions.value = false
   store.doku.xaBcde.hasHypoxia = !v
 
+  store.doku.xaBcde.auscultation.assessed = false
   store.doku.xaBcde.auscultation.value.wheezing = ''
   store.doku.xaBcde.auscultation.value.crackles = ''
   store.doku.xaBcde.auscultation.value.dimished = ''
 
-  store.doku.xaBcde.isParadoxical = false
-  store.doku.xaBcde.hasJugularVenousDistension = false
-  store.doku.xaBcde.hasEmphysema = false
-  store.doku.xaBcde.hasTrachealDeviation = false
+  store.doku.xaBcde.paradoxical.assessed = false
+  store.doku.xaBcde.paradoxical.value = false
+  store.doku.xaBcde.jugularVenousDistension.assessed = false
+  store.doku.xaBcde.jugularVenousDistension.value = false
+  store.doku.xaBcde.emphysema.assessed = false
+  store.doku.xaBcde.emphysema.value = false
+  store.doku.xaBcde.trachealDeviation.assessed = false
+  store.doku.xaBcde.trachealDeviation.value = false
 
 }, { flush: 'sync' })
 

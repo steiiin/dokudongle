@@ -1,275 +1,248 @@
 <template>
-  <IonCard>
-    <IonCardHeader>
-      <IonCardTitle>C - Circulation</IonCardTitle>
-    </IonCardHeader>
-    <IonCardContent>
-      <IonList lines="none">
+  <DodoExaminationCard title="C - Circulation">
 
-        <DodoItemModal label="Haut" modal-label="Hautbefund"
-          :state="store.doku.xabCde.skinText" lines="full">
+    <DodoItemModal label="Haut" modal-label="Hautbefund"
+      :state="store.doku.xabCde.skinText" lines="full">
 
-          <IonItemDivider>
-            <IonLabel>Farbe</IonLabel>
-          </IonItemDivider>
-          <IonRadioGroup v-model="store.doku.xabCde.skin.color">
-            <IonItem lines="inset">
-              <IonRadio value="rosig">Rosig</IonRadio>
-            </IonItem>
-            <IonItem lines="inset">
-              <IonRadio value="blass">Blass</IonRadio>
-            </IonItem>
-            <IonItem lines="inset">
-              <IonRadio value="marmoriert">Marmoriert</IonRadio>
-            </IonItem>
-            <IonItem>
-              <IonRadio value="zyanotisch">Zyanotisch</IonRadio>
-            </IonItem>
-          </IonRadioGroup>
+      <IonItemDivider>
+        <IonLabel>Farbe</IonLabel>
+      </IonItemDivider>
+      <IonRadioGroup v-model="store.doku.xabCde.skin.color">
+        <IonItem lines="inset">
+          <IonRadio value="rosig">Rosig</IonRadio>
+        </IonItem>
+        <IonItem lines="inset">
+          <IonRadio value="blass">Blass</IonRadio>
+        </IonItem>
+        <IonItem lines="inset">
+          <IonRadio value="marmoriert">Marmoriert</IonRadio>
+        </IonItem>
+        <IonItem>
+          <IonRadio value="zyanotisch">Zyanotisch</IonRadio>
+        </IonItem>
+      </IonRadioGroup>
 
-          <IonItemDivider>
-            <IonLabel>Beschaffenheit</IonLabel>
-          </IonItemDivider>
+      <IonItemDivider>
+        <IonLabel>Beschaffenheit</IonLabel>
+      </IonItemDivider>
+      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.clammy">
+        Schweißig?
+      </DodoInputToggle>
+      <DodoInputToggle lines="full" v-model="store.doku.xabCde.skin.poorSkinTurgor">
+        Stehende Hautfalten?
+      </DodoInputToggle>
+      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.hasUrtikaria">
+        Quaddeln?
+      </DodoInputToggle>
+      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.hasExanthem">
+        Exanthem (flächiger Ausschlag)?
+      </DodoInputToggle>
+      <DodoInputToggle v-model="store.doku.xabCde.skin.hasFlush">
+        Flush?
+      </DodoInputToggle>
+
+      <IonItemDivider>
+        <IonLabel>Temperatur (Extremitäten)</IonLabel>
+      </IonItemDivider>
+      <IonRadioGroup v-model="store.doku.xabCde.skin.peripheralTemp">
+        <IonItem lines="inset">
+          <IonRadio value="warm">Warm</IonRadio>
+        </IonItem>
+        <IonItem>
+          <IonRadio value="kühl">Kühl</IonRadio>
+        </IonItem>
+      </IonRadioGroup>
+
+      <template v-if="store.doku.xabCde.skin.peripheralTemp == 'kühl'">
+
+        <IonItemDivider>
+          <IonLabel>Temperatur (Stamm)</IonLabel>
+        </IonItemDivider>
+        <IonRadioGroup v-model="store.doku.xabCde.skin.centralTemp">
           <IonItem lines="inset">
-            <IonToggle v-model="store.doku.xabCde.skin.clammy" label-placement="end">
-              Schweißig?
-            </IonToggle>
-          </IonItem>
-          <IonItem lines="full">
-            <IonToggle v-model="store.doku.xabCde.skin.poorSkinTurgor" label-placement="end">
-              Stehende Hautfalten?
-            </IonToggle>
-          </IonItem>
-          <IonItem lines="inset">
-            <IonToggle v-model="store.doku.xabCde.skin.hasUrtikaria" label-placement="end">
-              Quaddeln?
-            </IonToggle>
-          </IonItem>
-          <IonItem lines="inset">
-            <IonToggle v-model="store.doku.xabCde.skin.hasExanthem" label-placement="end">
-              Exanthem (flächiger Ausschlag)?
-            </IonToggle>
+            <IonRadio value="warm">Warm</IonRadio>
           </IonItem>
           <IonItem>
-            <IonToggle v-model="store.doku.xabCde.skin.hasFlush" label-placement="end">
-              Flush?
-            </IonToggle>
+            <IonRadio value="kühl">Kühl</IonRadio>
           </IonItem>
+        </IonRadioGroup>
 
-          <IonItemDivider>
-            <IonLabel>Temperatur (Extremitäten)</IonLabel>
-          </IonItemDivider>
-          <IonRadioGroup v-model="store.doku.xabCde.skin.peripheralTemp">
-            <IonItem lines="inset">
-              <IonRadio value="warm">Warm</IonRadio>
-            </IonItem>
-            <IonItem>
-              <IonRadio value="kühl">Kühl</IonRadio>
-            </IonItem>
-          </IonRadioGroup>
+      </template>
 
-          <template v-if="store.doku.xabCde.skin.peripheralTemp == 'kühl'">
+    </DodoItemModal>
 
-            <IonItemDivider>
-              <IonLabel>Temperatur (Stamm)</IonLabel>
-            </IonItemDivider>
-            <IonRadioGroup v-model="store.doku.xabCde.skin.centralTemp">
-              <IonItem lines="inset">
-                <IonRadio value="warm">Warm</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="kühl">Kühl</IonRadio>
-              </IonItem>
-            </IonRadioGroup>
+    <DodoItemModal label="Puls"
+      :state="store.doku.xabCde.pulseText">
 
-          </template>
+      <IonItemDivider>
+        <IonLabel>Puls (Peripher)</IonLabel>
+      </IonItemDivider>
+      <IonRadioGroup v-model="store.doku.xabCde.pulse.peripheralStrength">
+        <IonItem>
+          <IonRadio value="gut">Gut tastbar</IonRadio>
+        </IonItem>
+        <IonItem>
+          <IonRadio value="schlecht">Schlecht tastbar</IonRadio>
+        </IonItem>
+        <IonItem>
+          <IonRadio value="nicht">Kein Puls</IonRadio>
+        </IonItem>
+      </IonRadioGroup>
 
-        </DodoItemModal>
+      <template v-if="store.doku.xabCde.pulse.peripheralStrength != 'gut'">
 
-        <DodoItemModal label="Puls"
-          :state="store.doku.xabCde.pulseText">
-
-          <IonItemDivider>
-            <IonLabel>Puls (Peripher)</IonLabel>
-          </IonItemDivider>
-          <IonRadioGroup v-model="store.doku.xabCde.pulse.peripheralStrength">
-            <IonItem>
-              <IonRadio value="gut">Gut tastbar</IonRadio>
-            </IonItem>
-            <IonItem>
-              <IonRadio value="schlecht">Schlecht tastbar</IonRadio>
-            </IonItem>
-            <IonItem>
-              <IonRadio value="nicht">Kein Puls</IonRadio>
-            </IonItem>
-          </IonRadioGroup>
-
-          <template v-if="store.doku.xabCde.pulse.peripheralStrength != 'gut'">
-
-            <IonItemDivider>
-              <IonLabel>Puls (Zentral)</IonLabel>
-            </IonItemDivider>
-            <IonRadioGroup v-model="store.doku.xabCde.pulse.centralStrength">
-              <IonItem>
-                <IonRadio value="gut">Gut tastbar</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="schlecht">Schlecht tastbar</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="nicht">Kein Puls</IonRadio>
-              </IonItem>
-            </IonRadioGroup>
-
-          </template>
-
-          <template v-if="ctx.hasPulse">
-
-            <IonItemDivider>
-              <IonLabel>Frequenz</IonLabel>
-            </IonItemDivider>
-            <IonItem lines="full">
-              <IonToggle v-model="store.doku.xabCde.pulse.rhythmic" label-placement="end">
-                Regelmäßig?
-              </IonToggle>
-            </IonItem>
-
-            <IonRadioGroup v-model="store.doku.xabCde.pulse.rate">
-              <IonItem>
-                <IonRadio value="normofrequent">Normofrequent</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="bradykard">Bradykard</IonRadio>
-              </IonItem>
-              <IonItem>
-                <IonRadio value="tachykard">Tachykard</IonRadio>
-              </IonItem>
-            </IonRadioGroup>
-
-          </template>
-
-        </DodoItemModal>
-
-        <DodoInputSelect v-model="store.doku.xabCde.rr" v-if="ctx.hasPulse"
-          label="Blutdruck" lines="full"
-          :options="[
-            { value: '', label: 'Normoton' },
-            { value: 'hypoton', label: 'Hypoton' },
-            { value: 'hyperton', label: 'Hyperton' },
-          ]">
-        </DodoInputSelect>
-
-        <DodoItemModal label="EKG"
-          :state="store.doku.xabCde.ecgState" lines="full">
-
-          <IonItem :lines="store.doku.xabCde.ecg.assessed ? 'full' : 'none'">
-            <IonToggle v-model="store.doku.xabCde.ecg.assessed" label-placement="end">
-              EKG geschrieben?
-            </IonToggle>
+        <IonItemDivider>
+          <IonLabel>Puls (Zentral)</IonLabel>
+        </IonItemDivider>
+        <IonRadioGroup v-model="store.doku.xabCde.pulse.centralStrength">
+          <IonItem>
+            <IonRadio value="gut">Gut tastbar</IonRadio>
           </IonItem>
-
-          <template v-if="store.doku.xabCde.ecg.assessed">
-
-            <DodoInputSelect v-model="store.doku.xabCde.ecg.value"
-              label="EKG" lines="none"
-              :options="[
-                { value: 'SR', label: 'Sinusrhythmus' },
-                { value: 'VHF', label: 'Vorhofflimmern' },
-              ]"
-              allow-custom custom-label="Rhythmus"
-              custom-placeholder="z.B. TAA 130-160/min">
-            </DodoInputSelect>
-
-          </template>
-
-        </DodoItemModal>
-
-        <DodoItemModal label="Brustschmerz" v-if="!ctx.isNonVerbal"
-          :state="store.doku.xabCde.chestpainState" lines="full">
-
-          <IonItem lines="full">
-            <IonToggle v-model="store.doku.xabCde.chest.tightness" label-placement="end">
-              Brustenge?
-            </IonToggle>
+          <IonItem>
+            <IonRadio value="schlecht">Schlecht tastbar</IonRadio>
           </IonItem>
+          <IonItem>
+            <IonRadio value="nicht">Kein Puls</IonRadio>
+          </IonItem>
+        </IonRadioGroup>
 
-          <DodoInputSelect v-model="store.doku.xabCde.chest.pain" v-if="ctx.hasPulse"
-            label="Brustschmerzen" :lines="insetIf(store.doku.xabCde.chest.pain != 'keine')"
-            :options="[
-              { value: 'keine', label: 'Keine' },
-              { value: 'leichte', label: 'Leicht' },
-              { value: '', label: 'Mittel' },
-              { value: 'starke', label: 'Stark' },
-            ]">
-          </DodoInputSelect>
+      </template>
 
-          <template v-if="store.doku.xabCde.chest.pain !== 'keine'">
+      <template v-if="ctx.hasPulse">
 
-            <IonItem lines="inset">
-              <IonToggle v-model="store.doku.xabCde.chest.tenderness" label-placement="end">
-                Druckdolent?
-              </IonToggle>
-            </IonItem>
+        <IonItemDivider>
+          <IonLabel>Frequenz</IonLabel>
+        </IonItemDivider>
+        <DodoInputToggle lines="full" v-model="store.doku.xabCde.pulse.rhythmic">
+          Regelmäßig?
+        </DodoInputToggle>
 
-            <IonItem lines="inset">
-              <IonToggle v-model="store.doku.xabCde.chest.aggravation" label-placement="end">
-                Bewegungsabhängig?
-              </IonToggle>
-            </IonItem>
+        <IonRadioGroup v-model="store.doku.xabCde.pulse.rate">
+          <IonItem>
+            <IonRadio value="normofrequent">Normofrequent</IonRadio>
+          </IonItem>
+          <IonItem>
+            <IonRadio value="bradykard">Bradykard</IonRadio>
+          </IonItem>
+          <IonItem>
+            <IonRadio value="tachykard">Tachykard</IonRadio>
+          </IonItem>
+        </IonRadioGroup>
 
-            <DodoInputTextOptional lines="none"
-              toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed"
-              text-label="Wohin?" text-placeholder="z.B. li. Arm" v-model:text="store.doku.xabCde.chest.radiation.value"
-              :ime-dictionary="{ /* activate IME */ }">
-            </DodoInputTextOptional>
+      </template>
 
-          </template>
+    </DodoItemModal>
 
-        </DodoItemModal>
+    <DodoInputSelect v-model="store.doku.xabCde.rr" v-if="ctx.hasPulse"
+      label="Blutdruck" lines="full"
+      :options="[
+        { value: '', label: 'Normoton' },
+        { value: 'hypoton', label: 'Hypoton' },
+        { value: 'hyperton', label: 'Hyperton' },
+      ]">
+    </DodoInputSelect>
 
-        <DodoInputSelect v-model="store.doku.xabCde.capillaryRefill" v-if="ctx.hasPulse"
-          label="Rekap-Zeit" lines="full"
+    <DodoItemModal label="Brustschmerz" v-if="!ctx.isNonVerbal"
+      :state="store.doku.xabCde.chestpainState" lines="full">
+
+      <DodoInputToggle lines="full" v-model="store.doku.xabCde.chest.tightness">
+        Brustenge?
+      </DodoInputToggle>
+
+      <DodoInputSelect v-model="store.doku.xabCde.chest.pain" v-if="ctx.hasPulse"
+        label="Brustschmerzen" :lines="insetIf(store.doku.xabCde.chest.pain != 'keine')"
+        :options="[
+          { value: 'keine', label: 'Keine' },
+          { value: 'leichte', label: 'Leicht' },
+          { value: '', label: 'Mittel' },
+          { value: 'starke', label: 'Stark' },
+        ]">
+      </DodoInputSelect>
+
+      <template v-if="store.doku.xabCde.chest.pain !== 'keine'">
+
+        <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.tenderness">
+          Druckdolent?
+        </DodoInputToggle>
+
+        <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.aggravation">
+          Bewegungsabhängig?
+        </DodoInputToggle>
+
+        <DodoInputTextOptional lines="none"
+          toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed"
+          text-label="Wohin?" text-placeholder="z.B. li. Arm" v-model:text="store.doku.xabCde.chest.radiation.value"
+          :ime-dictionary="{ /* activate IME */ }">
+        </DodoInputTextOptional>
+
+      </template>
+
+    </DodoItemModal>
+
+    <DodoExaminationItem id="ecg" label="EKG" assessed-presets
+      v-model:assessed="store.doku.xabCde.ecg.assessed" show-line="full"
+      @select="store.doku.xabCde.ecg.value = 'SR'"
+      @activate="ecgModal?.open()" @remove="store.doku.xabCde.ecg.value = 'SR'">
+      <DodoItemModal ref="ecgModal" label="EKG"
+        :state="store.doku.xabCde.ecgState" lines="none">
+        <DodoInputSelect v-model="store.doku.xabCde.ecg.value"
+          label="EKG" lines="none"
           :options="[
-            { value: '1s', label: '1s' },
-            { value: '2s', label: '2s' },
-            { value: '3s', label: '3s' },
-            { value: '>3s', label: '>3s' },
-          ]">
+            { value: 'SR', label: 'Sinusrhythmus' },
+            { value: 'VHF', label: 'Vorhofflimmern' },
+          ]"
+          allow-custom custom-label="Rhythmus"
+          custom-placeholder="z.B. TAA 130-160/min">
         </DodoInputSelect>
+      </DodoItemModal>
+    </DodoExaminationItem>
 
-        <DodoInputSelect v-model="store.doku.xabCde.edema.grade" v-if="ctx.hasPulse"
-          label="Ödeme" lines="none"
-          :options="[
-            'keine Ödeme',
-            'Knöchelödeme',
-            'Unterschenkelödeme',
-            'ausgeprägte abhängige Ödeme',
-          ]">
-        </DodoInputSelect>
-        <DodoInputSelect v-model="store.doku.xabCde.edema.variation" v-if="ctx.hasPulse && store.doku.xabCde.edema.grade != 'keine Ödeme'"
-          label="Verlauf" lines="none" empty-label="unklar"
-          :options="[
-            'neu aufgetreten',
-            'zunehmend',
-            'unverändert',
-            'rückläufig',
-          ]">
-        </DodoInputSelect>
+    <DodoExaminationItem id="edema" label="Ödeme" show-line="full" assessed-presets
+      v-model:assessed="store.doku.xabCde.edema.assessed" :available="ctx.hasPulse"
+      @select="resetEdema" @activate="edemaSelect?.open()" @remove="resetEdema">
+      <DodoInputSelect ref="edemaSelect" v-model="store.doku.xabCde.edema.value.grade"
+        label="Ödeme" lines="none"
+        :options="[
+          'keine Ödeme',
+          'Knöchelödeme',
+          'Unterschenkelödeme',
+          'ausgeprägte abhängige Ödeme',
+        ]">
+      </DodoInputSelect>
+      <DodoInputSelect v-model="store.doku.xabCde.edema.value.variation" v-if="store.doku.xabCde.edema.value.grade != 'keine Ödeme'"
+        label="Verlauf" lines="none" empty-label="unklar"
+        :options="[
+          'neu',
+          'zunehmend',
+          'bekannt',
+        ]">
+      </DodoInputSelect>
+    </DodoExaminationItem>
 
-      </IonList>
+    <DodoInputSelect v-model="store.doku.xabCde.capillaryRefill" v-if="ctx.hasPulse"
+      label="Rekap-Zeit" lines="none"
+      :options="[
+        { value: '1s', label: '1s' },
+        { value: '2s', label: '2s' },
+        { value: '3s', label: '3s' },
+        { value: '>3s', label: '>3s' },
+      ]">
+    </DodoInputSelect>
 
+    <template #footer>
       <DodoInputTreatment v-if="store.doku.xabCde.needTreatment"
         v-model="store.doku.xabCde.treatment"
         placeholder="Schocklagerung">
       </DodoInputTreatment>
-
-    </IonCardContent>
-  </IonCard>
+    </template>
+  </DodoExaminationCard>
 </template>
 
 <script setup lang="ts">
 
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import DodoItemModal from '@/components/DodoItemModal.vue'
+import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
 import { AssessedValue } from '@/types/protocol/input'
@@ -307,8 +280,15 @@ watch(() => store.doku.xabCde.chest.pain, (v) => {
   }
 })
 
-watch(() => store.doku.xabCde.edema.grade, (v) => {
-  if (v == 'keine Ödeme') { store.doku.xabCde.edema.variation = '' }
+const ecgModal = ref<InstanceType<typeof DodoItemModal>>()
+const edemaSelect = ref<InstanceType<typeof DodoInputSelect>>()
+
+function resetEdema() {
+  store.doku.xabCde.edema.value = { grade: 'keine Ödeme', variation: 'bekannt' }
+}
+
+watch(() => store.doku.xabCde.edema.value.grade, (v) => {
+  if (v == 'keine Ödeme') { store.doku.xabCde.edema.value.variation = '' }
 })
 
 </script>

@@ -28,9 +28,6 @@
           <SettingCard v-show="ctx.requireSceneDetails"></SettingCard>
 
           <!-- SITUATION -->
-          <BlockVerlegungCard v-if="store.doku.flavors.verlegung" />
-          <BlockEinweisungCard v-if="store.doku.flavors.einweisung" />
-
           <SituationCard></SituationCard>
 
           <!-- ABCDE -->

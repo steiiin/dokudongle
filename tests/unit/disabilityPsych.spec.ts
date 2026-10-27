@@ -27,33 +27,36 @@ beforeEach(() => {
 describe('DisabilityPsych', () => {
   test('keeps normal findings empty in protocol text', () => {
     const disability = useDokuStore().doku.xabcDe
-    expect(disability.psych).toBeInstanceOf(DisabilityPsych)
-    expect(disability.psych.state).toBe('normal')
-    expect(disability.psych.text).toBe('')
-    expect(disability.psych.hasAbnormalities).toBe(false)
+    expect(disability.psych.value).toBeInstanceOf(DisabilityPsych)
+    expect(disability.psych.value.state).toBe('normal')
+    expect(disability.psych.value.text).toBe('')
+    expect(disability.psych.value.hasAbnormalities).toBe(false)
     expect(disability.needTreatment).toBe(false)
     expect(disability.couldBeBaseline).toBe(false)
 
-    disability.psych.baseline = true
-    expect(disability.psych.hasAbnormalities).toBe(false)
+    disability.baseline = true
+    expect(disability.psych.value.hasAbnormalities).toBe(false)
     expect(disability.needTreatment).toBe(false)
   })
 
   test('preserves psychiatric wording and order in generated disability text', () => {
     const disability = useDokuStore().doku.xabcDe
-    Object.assign(disability.psych, {
+    Object.assign(disability.psych.value, {
       rass: 'agitiert', disorder: 'Delir', hallucinations: true, delusions: true,
-      behavioralChange: true, perseveration: true, dementia: true, baseline: true,
+      behavioralChange: true, perseveration: true,
     })
+    disability.psych.assessed = true
+    disability.psych.value.dementia = true
+    disability.baseline = true
     const text = 'agitiert; deliranter Zustand; halluziniert; wahnhaft; wesensverändert; verbale Perseveration; bek. Demenz'
-    expect(disability.psych.text).toBe(text)
-    expect(disability.psych.state).toBe(text)
+    expect(disability.psych.value.text).toBe(text)
+    expect(disability.psych.value.state).toBe(text)
     expect(disability.generateText()).toContain(`${text}; baseline: nichts akutes`)
     expect(disability.needTreatment).toBe(true)
     expect(disability.couldBeBaseline).toBe(true)
 
-    disability.psych.disorder = 'Stupor'
-    expect(disability.psych.disorderText).toBe('stuporöser Zustand')
+    disability.psych.value.disorder = 'Stupor'
+    expect(disability.psych.value.disorderText).toBe('stuporöser Zustand')
   })
 
   test.each([
@@ -61,57 +64,62 @@ describe('DisabilityPsych', () => {
     { delusions: true }, { behavioralChange: true }, { perseveration: true },
   ] satisfies Partial<DisabilityPsych>[])('recognizes an isolated acute finding: %j', (finding) => {
     const disability = useDokuStore().doku.xabcDe
-    Object.assign(disability.psych, finding)
-    expect(disability.psych.needTreatment).toBe(true)
-    expect(disability.psych.hasAbnormalities).toBe(true)
+    Object.assign(disability.psych.value, finding)
+    disability.psych.assessed = true
+    expect(disability.psych.value.needTreatment).toBe(true)
+    expect(disability.psych.value.hasAbnormalities).toBe(true)
     expect(disability.needTreatment).toBe(true)
     expect(disability.couldBeBaseline).toBe(true)
   })
 
   test('recognizes dementia without requiring treatment', () => {
     const disability = useDokuStore().doku.xabcDe
-    disability.psych.dementia = true
-    expect(disability.psych.state).toBe('bek. Demenz')
-    expect(disability.psych.hasAbnormalities).toBe(true)
-    expect(disability.psych.needTreatment).toBe(false)
+    disability.psych.assessed = true
+    disability.psych.value.dementia = true
+    expect(disability.generateText()).toContain('bek. Demenz')
+    expect(disability.psych.value.state).toBe('bek. Demenz')
+    expect(disability.psych.value.hasAbnormalities).toBe(true)
+    expect(disability.psych.value.needTreatment).toBe(false)
     expect(disability.needTreatment).toBe(false)
     expect(disability.couldBeBaseline).toBe(true)
   })
 
-  test('uses nested baseline and dementia in store context', () => {
+  test('uses independent baseline and dementia in store context', () => {
     const store = useDokuStore()
     store.doku.xabcDe.avpu = 'bewusstlos'
     expect(store.context.isCritical).toBe(true)
     expect(store.context.isLowVigilant).toBe(true)
 
-    store.doku.xabcDe.psych.baseline = true
+    store.doku.xabcDe.baseline = true
     expect(store.context.isCritical).toBe(false)
     expect(store.context.isLowVigilant).toBe(false)
 
-    store.doku.xabcDe.psych.baseline = false
-    store.doku.xabcDe.psych.dementia = true
+    store.doku.xabcDe.baseline = false
+    store.doku.xabcDe.psych.assessed = true
+    store.doku.xabcDe.psych.value.dementia = true
     expect(store.context.isCritical).toBe(true)
     expect(store.context.isLowVigilant).toBe(false)
   })
 
-  test('clears nested baseline when the card no longer has eligible findings', async () => {
+  test('clears baseline when the card no longer has eligible findings', async () => {
     const disability = useDokuStore().doku.xabcDe
-    disability.psych.dementia = true
-    disability.psych.baseline = true
+    disability.psych.assessed = true
+    disability.psych.value.dementia = true
+    disability.baseline = true
     const wrapper = shallowMount(AbcdeDisabilityCard)
-    expect(disability.psych.baseline).toBe(true)
+    expect(disability.baseline).toBe(true)
 
-    disability.psych.dementia = false
+    disability.psych.value.dementia = false
     await nextTick()
     expect(disability.couldBeBaseline).toBe(false)
-    expect(disability.psych.baseline).toBe(false)
+    expect(disability.baseline).toBe(false)
     wrapper.unmount()
   })
 })
 
 describe('Disability card paired motor assessments', () => {
   test('binds each side to the corresponding arm or leg field', async () => {
-    const neuro = useDokuStore().doku.xabcDe.neuro
+    const neuro = useDokuStore().doku.xabcDe.neuro.value
     const wrapper = shallowMount(AbcdeDisabilityCard, {
       global: { renderStubDefaultSlot: true },
     })
@@ -144,6 +152,11 @@ describe('psychiatric persistence', () => {
     behavioralChange: true, baseline: true,
   }
 
+  const psychiatric = {
+    rass: nested.rass, disorder: nested.disorder, hallucinations: nested.hallucinations,
+    dementia: nested.dementia, delusions: nested.delusions, perseveration: nested.perseveration, behavioralChange: nested.behavioralChange,
+  }
+
   test.each(['saved', 'temporary'] as const)('migrates all legacy fields from a %s protocol', async (source) => {
     const payload = {
       schemaVersion: 1, savedAt: new Date().toISOString(), doku: { xabcDe: legacy },
@@ -157,14 +170,17 @@ describe('psychiatric persistence', () => {
       await store.hydrateFromStorage()
       await expect(store.restoreProtocolFromHistory(store.protocolHistory[0].id)).resolves.toBe(true)
     }
-    expect(store.doku.xabcDe.psych).toBeInstanceOf(DisabilityPsych)
-    expect(store.doku.xabcDe.psych).toEqual(nested)
-    expect(store.doku.xabcDe.psych.disorderText).toBe('deliranter Zustand')
+    expect(store.doku.xabcDe.psych.value).toBeInstanceOf(DisabilityPsych)
+    expect(store.doku.xabcDe.psych.value).toEqual(psychiatric)
+    expect(store.doku.xabcDe.psych.value.disorderText).toBe('deliranter Zustand')
 
     await store.persistToStorage()
     const persisted = vi.mocked(saveDokuState).mock.lastCall![0]
     expect(persisted.schemaVersion).toBe(1)
-    expect(persisted.doku.xabcDe.psych).toEqual(nested)
+    expect(persisted.doku.xabcDe.psych.value).toEqual(psychiatric)
+    expect(persisted.doku.xabcDe.psych.assessed).toBe(true)
+    expect(persisted.doku.xabcDe).not.toHaveProperty('dementia')
+    expect(persisted.doku.xabcDe.baseline).toBe(true)
     for (const key of Object.keys(legacy)) {
       expect(persisted.doku.xabcDe).not.toHaveProperty(key)
     }
@@ -181,8 +197,8 @@ describe('psychiatric persistence', () => {
     })
     const store = useDokuStore()
     await store.hydrateFromStorage()
-    expect(store.doku.xabcDe.psych).toEqual({
-      rass: '', disorder: '', hallucinations: false, baseline: false,
+    expect(store.doku.xabcDe.psych.value).toEqual({
+      rass: '', disorder: '', hallucinations: false,
       dementia: true, delusions: false, perseveration: false, behavioralChange: false,
     })
   })
@@ -191,8 +207,8 @@ describe('psychiatric persistence', () => {
     vi.mocked(loadDokuState).mockResolvedValueOnce({ schemaVersion: 1, doku: { xabcDe } })
     const store = useDokuStore()
     await store.hydrateFromStorage()
-    expect(store.doku.xabcDe.psych).toBeInstanceOf(DisabilityPsych)
-    expect(store.doku.xabcDe.psych).toEqual(xabcDe?.psych ?? new DisabilityPsych())
-    expect(store.doku.xabcDe.psych.state).toBe(xabcDe?.psych ? store.doku.xabcDe.psych.text : 'normal')
+    expect(store.doku.xabcDe.psych.value).toBeInstanceOf(DisabilityPsych)
+    expect(store.doku.xabcDe.psych.value).toEqual(xabcDe?.psych ? psychiatric : new DisabilityPsych())
+    expect(store.doku.xabcDe.psych.value.state).toBe(xabcDe?.psych ? store.doku.xabcDe.psych.value.text : 'normal')
   })
 })

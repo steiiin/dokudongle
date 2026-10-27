@@ -65,9 +65,9 @@
           </DodoToggleChip> -->
         </IonItem>
 
-        <IonItem v-if="sampleMedOnMajor" :lines="noneIf(store.doku.sampler.medication.isPlanAvailable)">
-          <IonToggle v-model="store.doku.sampler.medication.isPlanAvailable" label-placement="end">MedPlan vorhanden?</IonToggle>
-        </IonItem>
+        <DodoInputToggle v-if="sampleMedOnMajor" :lines="noneIf(store.doku.sampler.medication.isPlanAvailable)" v-model="store.doku.sampler.medication.isPlanAvailable">
+          MedPlan vorhanden?
+        </DodoInputToggle>
         <DodoMedInput v-if="sampleMedOnMajor && !store.doku.sampler.medication.isPlanAvailable" v-model="store.doku.sampler.medication.PlanMedication">
         </DodoMedInput>
 
@@ -126,6 +126,10 @@ watch(() => ctx.value.isTrauma, () => {
   }
   .med-flags::part(container) {
     flex-wrap: wrap;
+  }
+
+  ion-card-content ion-list {
+    padding: 0;
   }
 
 </style>

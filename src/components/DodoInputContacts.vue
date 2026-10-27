@@ -174,7 +174,7 @@ const getContactKey = (contact: SampleContactsItem, index: number) => {
 
 .dodo-contact-input {
   --card-bg: transparent;
-  margin: .25rem;
+  margin: 4px;
 }
 .dodo-contact-input-content {
   padding: 0;

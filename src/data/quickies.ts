@@ -1,12 +1,5 @@
-import DodoQuickieAbdomonalPain from "@/components/quickie-components/DodoQuickieAbdomonalPain.vue"
-import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
-import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
-import DodoQuickieSchwangerschaft from "@/components/quickie-components/DodoQuickieSchwangerschaft.vue"
-import DodoQuickieSchwindel from "@/components/quickie-components/DodoQuickieSchwindel.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
-import { AssessedValue, OptionalValue } from "@/types/protocol/input"
-import { PregnancySpan } from "@/types/protocol/pregnancy"
 
 import { Component, markRaw } from "vue"
 import { TEXT_AREA_BLOCK_SOURCES } from "@/data/text-area-blocks"
@@ -16,14 +9,7 @@ import { TEXT_AREA_BLOCK_SOURCES } from "@/data/text-area-blocks"
 export const QU_SIT_Verlegung = 'verlegung'
 export const QU_SIT_Einweisung = 'einweisung'
 
-export const QU_SYM_AbdominalPain = 'abdominal_pain'
-export const QU_SYM_ExcretionsUrinary = 'excretions_urinary'
-export const QU_SYM_ExcretionsBowel = 'excretions_bowel'
-
-export const QU_SCHWINDEL = 'intern_schwindel'
 export const QU_SYM_OPQRST = 'intern_opqrst'
-
-export const QU_PLER_Schwangerschaft = 'pler_schwangerschaft'
 
 // ############################################################################
 
@@ -61,257 +47,6 @@ export class QuickieTemplate extends Quickie
 
 // --------------------------------------------------------
 
-export class QuickieAbdominalPainRegion {
-
-  public obli: boolean = false    // Oberbauch li
-  public obmi: boolean = false    // Oberbauch mittig
-  public obre: boolean = false    // Oberbauch re
-  public mbli: boolean = false    // Flanke li
-  public mbmi: boolean = false    // Nabelregion
-  public mbre: boolean = false    // Flanke re
-  public ubli: boolean = false    // Unterbauch li
-  public ubmi: boolean = false    // Unterbauch mittig
-  public ubre: boolean = false    // Unterbauch re
-
-  private get _structured(): Array<boolean> {
-    return [
-      this.obli /*0*/, this.obmi /*1*/, this.obre /*2*/,
-      this.mbli /*3*/, this.mbmi /*4*/, this.mbre /*5*/,
-      this.ubli /*6*/, this.ubmi /*7*/, this.ubre /*8*/,
-    ]
-  }
-
-  private testStruct(
-    testMandatory: number[][]|number[],
-    testForbidden: number[],
-    testAtLeast: number[]
-  ): boolean {
-
-    const structured = this._structured
-
-    // normalisieren
-    testMandatory = typeof testMandatory[0] === "number"
-      ? [testMandatory as number[]]
-      : testMandatory as number[][]
-
-    // Forbidden: alle müssen false sein
-    const forbiddenOk = testForbidden.every(i => structured[i] === false)
-    if (!forbiddenOk) return false
-
-    // AtLeast: mindestens einer muss true sein
-    const atLeastOk =
-      testAtLeast.length === 0 ||
-      testAtLeast.some(i => structured[i] === true)
-
-    if (!atLeastOk) return false
-
-    // Mandatory: mindestens eine Gruppe komplett erfüllt
-    const mandatoryOk =
-      testMandatory.length === 0 ||
-      testMandatory.some(group =>
-        group.every(i => structured[i] === true)
-      )
-
-    return mandatoryOk
-  }
-
-  private only(test: Array<number>): boolean
-  {
-    return this._structured.every((v,i) => test.includes(i) ? v === true : v === false)
-  }
-
-  private get onlyLeft(): boolean { return this.testStruct([0,6],[1,4,7,2,5,8],[]) }
-  private get onlyRight(): boolean { return this.testStruct([2,8],[0,3,6,1,4,7],[]) }
-  private get onlyUpper(): boolean { return this.testStruct([0,2],[3,4,5,6,7,8],[]) }
-  private get onlyBottom(): boolean { return this.testStruct([6,8],[0,1,2,3,4,5],[]) }
-  private get onlyCenter(): boolean { return this.only([4]) }
-
-  private get onlyQuadUpLeft(): boolean {
-    return this.testStruct([[0,1],[0,3],[1,3],[0,4]],[2,5,6,7,8],[])
-  }
-  private get onlyQuadUpRight(): boolean {
-    return this.testStruct([[1,2],[2,5],[4,2],[1,5]],[0,3,6,7,8],[])
-  }
-  private get onlyQuadBottomLeft(): boolean {
-    return this.testStruct([[3,6],[6,7],[3,7],[6,4]],[0,1,2,5,8],[])
-  }
-  private get onlyQuadBottomRight(): boolean {
-    return this.testStruct([[5,8],[7,8],[7,5],[4,8]],[0,3,6,1,2],[])
-  }
-
-  private get diffLeft(): boolean {
-    return this.testStruct([0,3,6], [2,5,8], [1,4,7])
-        || this.testStruct([0,3,7], [2,5,8], [])
-        || this.testStruct([3,6,1], [2,5,8], [])
-  }
-  private get diffRight(): boolean {
-    return this.testStruct([2,5,8], [0,3,6], [1,4,7])
-        || this.testStruct([2,5,7], [0,3,6], [])
-        || this.testStruct([5,8,1], [0,3,6], [])
-  }
-  private get diffUpper(): boolean {
-    return this.testStruct([0,1,2], [6,7,8], [3,4,5])
-        || this.testStruct([0,1,5], [6,7,8], [])
-        || this.testStruct([1,2,3], [6,7,8], [])
-  }
-  private get diffBottom(): boolean {
-    return this.testStruct([6,7,8], [0,1,2], [3,4,5])
-        || this.testStruct([6,7,5], [0,1,2], [])
-        || this.testStruct([7,8,3], [0,1,2], [])
-  }
-
-  private get crossH(): boolean {
-    return this.testStruct([3,4,5],[0,1,2,6,7,8],[])
-  }
-  private get crossHUpp(): boolean {
-    return this.testStruct([3,4,5],[6,7,8],[0,1,2])
-  }
-  private get crossHBot(): boolean {
-    return this.testStruct([3,4,5],[0,1,2],[6,7,8])
-  }
-  private get crossV(): boolean {
-    return this.testStruct([1,4,7],[0,3,6,2,5,8],[])
-  }
-
-  private get eachRowColumn(): boolean {
-    return (this._structured.some((v,i) => [0,1,2].includes(i) ? v===true : false))
-      && (this._structured.some((v,i) => [3,4,5].includes(i) ? v===true : false))
-      && (this._structured.some((v,i) => [6,7,8].includes(i) ? v===true : false))
-  }
-
-  get regionText(): string
-  {
-
-    if (this.onlyLeft) { return 'linksseitig' }
-    if (this.onlyRight) { return 'rechtsseitig' }
-    if (this.onlyUpper) { return 'OB' }
-    if (this.onlyBottom) { return 'UB' }
-    if (this.onlyCenter) { return 'Nabelregion' }
-
-    if (this.diffLeft) { return 'diffus linksseitig' }
-    if (this.diffRight) { return 'diffus rechtsseitig' }
-    if (this.diffUpper) { return 'diffus OB' }
-    if (this.diffBottom) { return 'diffus UB' }
-
-    if (this.onlyQuadUpLeft) { return 'diffus oben/li.' }
-    if (this.onlyQuadUpRight) { return 'diffus oben/re.' }
-    if (this.onlyQuadBottomLeft) { return 'diffus unten/li.' }
-    if (this.onlyQuadBottomRight) { return 'diffus unten/re.' }
-
-    if (this.crossH) { return 'Mittelbauch' }
-    if (this.crossHUpp) { return 'diffus OB' }
-    if (this.crossHBot) { return 'diffus UB' }
-    if (this.crossV) { return 'Mittellinie' }
-
-    if (this.only([3,4])) { return 'Nabel linksbetont' }
-    if (this.only([1,4])) { return 'Nabel+Richtung OB ' }
-    if (this.only([4,5])) { return 'Nabel rechtsbetont' }
-    if (this.only([4,7])) { return 'Nabel+Richtung UB' }
-
-    if (this.eachRowColumn) { return 'diffus' }
-
-    const regions: Array<string> = []
-    if (this.obli) { regions.push('OB li.') }
-    if (this.obmi) { regions.push('epigastr.') }
-    if (this.obre) { regions.push('OB re.') }
-    if (this.mbli) { regions.push('Flanke li.') }
-    if (this.mbmi) { regions.push('Nabelregion') }
-    if (this.mbre) { regions.push('Flanke re.') }
-    if (this.ubli) { regions.push('UB li') }
-    if (this.ubmi) { regions.push('unterhalb Nabel') }
-    if (this.ubre) { regions.push('UB re.') }
-    return regions.length<=2&&regions.length>0 ? regions.join(', ') : 'diffus'
-
-  }
-
-}
-
-export class QuickieAbdominalPain extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieAbdomonalPain))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Bauchschmerz: ')
-  }
-
-  public region: QuickieAbdominalPainRegion = new QuickieAbdominalPainRegion()
-
-  public onset: 'plötzlicher Beginn' | 'schleichender Beginn' = 'plötzlicher Beginn'
-  public onspan: '' | 'seit Stunden' | 'seit Tagen' | 'seit Wochen' | 'gestern' | string = ''
-
-  public provocation: string[] = []
-  public palliation: string[] = []
-  public quality: string[] = []
-  public radiation: string[] = []
-  public severity: 'minimal'|'leicht'|'mittel'|'stark'|'maximal' = 'mittel'
-  public time: string[] = []
-
-}
-
-// --------------------------------------------------------
-
-export class QuickieExcretionsUrinary extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieExcretionsUrinary))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Wasserlassen: ')
-  }
-
-  public catheterIssues: '' | 'disloziert' | 'gezogen' | 'verstopft' = ''
-  public output: string[] = []
-  public pain: string[] = []
-
-  public hematuria: '' | 'minimal Blut im Urin' | 'etwas Blut im Urin' | 'viel Blut im Urin' = ''
-  public anomalies: string[] = []
-
-}
-
-export class QuickieExcretionsBowels extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieExcretionsBowels))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Stuhlgang: ')
-  }
-
-  public pattern: '' | 'Obstipation' | 'Durchfall' = ''
-  public consistency: '' | 'kügelchenförmig' | 'hart' | 'geformt' | 'breiig' | 'wässrig' = ''
-  public lastBowel: OptionalValue<string> = OptionalValue.inactive('')
-  public bowelSounds: '' | 'normal' | 'vermehrt' | 'vermindert' | 'fehlend' | 'hochgestellt' = ''
-  public blood: '' | 'kein Blut' | 'Blut am Klopapier' | 'Blut im Stuhl' | 'Teerstuhl' = ''
-  public bowelPain: boolean = false
-
-}
-
-// --------------------------------------------------------
-
-export class QuickieSchwindel extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieSchwindel))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Schwindel: ')
-  }
-
-  public onset: 'plötzlicher Beginn' | 'schleichender Beginn' = 'plötzlicher Beginn'
-  public onspan: '' | 'seit Stunden' | 'seit Tagen' | 'seit Wochen' | 'gestern' | string = ''
-
-  public provocation: string[] = []
-  public palliation: string[] = []
-  public quality: string[] = []
-  public radiation: string[] = []
-  public severity: 'minimal'|'leicht'|'mittel'|'stark'|'maximal' = 'mittel'
-  public time: string[] = []
-
-}
-
-// --------------------------------------------------------
-
 export class QuickieOPQRST extends Quickie
 {
   constructor(public key: string, public label: string) {
@@ -332,44 +67,17 @@ export class QuickieOPQRST extends Quickie
 
 }
 
-// --------------------------------------------------------
-
-export class QuickieSchwangerschaft extends Quickie
-{
-
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieSchwangerschaft))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Schwangerschaft: ')
-  }
-
-  public gravida: AssessedValue<number> = AssessedValue.unassessed(1)
-  public para: AssessedValue<number> = AssessedValue.unassessed(0)
-
-  public presentation: '' | 'SL'|'BEL'|'QL' = ''
-  public amnioticFluid: string = ''
-  public childCount: string = ''
-  public calculatedTerm: PregnancySpan = new PregnancySpan('1. Trimenon')
-
-}
-
 // ############################################################################
 
 const buildQuickies = (): Record<string, Quickie> => ({
-  ...Object.fromEntries(TEXT_AREA_BLOCK_SOURCES.map(source => [source.id,
+  ...Object.fromEntries(TEXT_AREA_BLOCK_SOURCES
+    .filter(source => source.id === QU_SIT_Verlegung || source.id === QU_SIT_Einweisung)
+    .map(source => [source.id,
     new QuickieTemplate(source.id, source.id === QU_SIT_Verlegung ? 'Verlegung' : 'Einweisung',
       source.outputs[0].template, source.fields),
   ])),
 
-  [QU_SYM_AbdominalPain]: new QuickieAbdominalPain(QU_SYM_AbdominalPain, 'Bauchschmerz'),
-  [QU_SYM_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_SYM_ExcretionsUrinary, 'Wasserlassen'),
-  [QU_SYM_ExcretionsBowel]: new QuickieExcretionsBowels(QU_SYM_ExcretionsBowel, 'Stuhlgang'),
-
-  [QU_SCHWINDEL]: new QuickieSchwindel(QU_SCHWINDEL, 'Schwindel'),
   [QU_SYM_OPQRST]: new QuickieOPQRST(QU_SYM_OPQRST, 'OPQRST'),
-
-  [QU_PLER_Schwangerschaft]: new QuickieSchwangerschaft(QU_PLER_Schwangerschaft, 'Schwangerschaft'),
 
 })
 

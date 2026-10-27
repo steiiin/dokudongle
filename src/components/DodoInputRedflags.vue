@@ -376,7 +376,7 @@ const fuzzyMatch = (search: string, target: string): boolean => {
   }
   .dodo-redflag-input-content {
     padding: 0;
-    margin: .25rem;
+    margin: 4px;
   }
 
   .chip-container {
@@ -388,7 +388,7 @@ const fuzzyMatch = (search: string, target: string): boolean => {
     font-size: .75rem;
     font-weight: 600;
     letter-spacing: .04em;
-    margin: 0 0 .25rem .25rem;
+    margin: 0 0 4px 4px;
     text-transform: uppercase;
   }
 

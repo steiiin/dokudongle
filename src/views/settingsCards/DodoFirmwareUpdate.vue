@@ -102,7 +102,7 @@ ion-modal { --width: 100%; --height: 100%; --border-radius: 0; }
   }
 
   & .dd-hint {
-    margin: 0 auto .25rem auto;
+    margin: 0 auto 4px auto;
     max-width: 400px;
   }
 

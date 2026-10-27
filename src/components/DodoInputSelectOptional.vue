@@ -1,12 +1,9 @@
 <template>
 
-  <IonItem :lines="props.toggle ? 'none' : props.lines">
-    <IonToggle :model-value="props.toggle"
-      label-placement="end"
-      @update:model-value="onToggleChange">
-      {{ props.toggleLabel }}
-    </IonToggle>
-  </IonItem>
+  <DodoInputToggle :lines="props.toggle ? 'none' : props.lines" :model-value="props.toggle"
+    @update:model-value="onToggleChange">
+    {{ props.toggleLabel }}
+  </DodoInputToggle>
 
   <IonItem v-if="props.toggle" :lines="props.lines">
 
