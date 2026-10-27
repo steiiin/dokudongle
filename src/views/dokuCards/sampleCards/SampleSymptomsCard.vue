@@ -5,6 +5,11 @@
     <BlockSchwindelCard
       v-if="ctx.requireSampleSymptoms && store.doku.xabcDe.dizziness === 'gerichteter'" />
 
+    <BlockExcretionsBowelsCard
+      v-if="ctx.requireSampleSymptoms && store.doku.xabcdE.excretions.isAssessed && store.doku.xabcdE.excretions.value.bowelAbnormalities" />
+    <BlockExcretionsUrinaryCard
+      v-if="ctx.requireSampleSymptoms && store.doku.xabcdE.excretions.isAssessed && store.doku.xabcdE.excretions.value.urinaryAbnormalities" />
+
     <BlockBauchschmerzCard v-if="ctx.requireSampleSymptoms && ctx.hasAbdominalIssue" />
 
     <DodoInputTextArea v-model="store.doku.sampler.symptoms.additionalSymptoms"
@@ -24,8 +29,10 @@
 import { computed } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
-import { QU_SYM_ExcretionsBowel, QU_SYM_ExcretionsUrinary, QU_SYM_OPQRST } from '@/data/quickies'
+import { QU_SYM_OPQRST } from '@/data/quickies'
 import BlockSchwindelCard from '../blocksourceCards/BlockSchwindelCard.vue'
+import BlockExcretionsBowelsCard from '../blocksourceCards/BlockExcretionsBowelsCard.vue'
+import BlockExcretionsUrinaryCard from '../blocksourceCards/BlockExcretionsUrinaryCard.vue'
 import BlockBauchschmerzCard from '../blocksourceCards/BlockBauchschmerzCard.vue'
 
 const store = useDokuStore()
@@ -33,19 +40,7 @@ const ctx = computed(() => store.context)
 
 // ############################################################################
 
-const quickieKeys = computed(() => {
-  const list: Array<string> = []
-
-  if (store.doku.xabcdE.excretions.isAssessed)
-  {
-    if (store.doku.xabcdE.excretions.value.urinaryAbnormalities) { list.push(QU_SYM_ExcretionsUrinary) }
-    if (store.doku.xabcdE.excretions.value.bowelAbnormalities) { list.push(QU_SYM_ExcretionsBowel) }
-  }
-
-  list.push(QU_SYM_OPQRST)
-
-  return list
-})
+const quickieKeys = [QU_SYM_OPQRST]
 
 </script>
 <style scoped>

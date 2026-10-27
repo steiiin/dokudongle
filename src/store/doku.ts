@@ -11,6 +11,7 @@ import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
 import { createSchwindelBlockState } from '@/data/schwindel'
 import { createBauchschmerzBlockState } from '@/data/bauchschmerz'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/excretions'
 import { composeTextAreaText } from '@/types/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -30,7 +31,7 @@ import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/uti
 import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
-import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal } from '@/types/protocol/abcde'
+import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
@@ -192,6 +193,10 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     if (!source.isAvailable(hydratedProtocol)) {
       hydratedProtocol.textAreaBlocks[source.id] = createTextAreaBlockSourceState(source)
     }
+  }
+
+  if (!hydratedProtocol.xabcdE.excretions.value.catheterType) {
+    hydratedProtocol.textAreaBlocks.excretions_urinary.details.catheterIssues = ''
   }
 
   hydratedProtocol.sampler.medication.PlanMedication = hydratedProtocol.sampler.medication.PlanMedication
@@ -761,6 +766,34 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xabcDe.dizziness = value
       if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
     },
+    setExcretionsAssessed(value: boolean) {
+      this.doku.xabcdE.excretions.assessed = value
+      if (!value) {
+        this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
+        this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
+      }
+    },
+    setBowelAbnormalities(value: boolean) {
+      this.doku.xabcdE.excretions.value.bowelAbnormalities = value
+      if (!this.doku.xabcdE.excretions.isAssessed || !value) {
+        this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
+      }
+    },
+    setUrinaryAbnormalities(value: boolean) {
+      this.doku.xabcdE.excretions.value.urinaryAbnormalities = value
+      if (!this.doku.xabcdE.excretions.isAssessed || !value) {
+        this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
+      }
+    },
+    setCatheterType(value: ExposureExcretions['catheterType']) {
+      this.doku.xabcdE.excretions.value.catheterType = value
+      if (!value) this.doku.textAreaBlocks.excretions_urinary.details.catheterIssues = ''
+    },
+    resetExcretions() {
+      this.doku.xabcdE.excretions.value = new ExposureExcretions()
+      this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
+      this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
+    },
     setAbdominalPain(value: ExposureAbdominal['pain']) {
       this.doku.xabcdE.abdominal.value.pain = value
       if (!this.doku.xabcdE.abdominal.isAssessed || value === 'keine') {
@@ -814,6 +847,8 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xabCde = emptyProtocol.xabCde
       this.doku.xabcDe = emptyProtocol.xabcDe
       this.doku.xabcdE = emptyProtocol.xabcdE
+      this.doku.textAreaBlocks.excretions_bowel = emptyProtocol.textAreaBlocks.excretions_bowel
+      this.doku.textAreaBlocks.excretions_urinary = emptyProtocol.textAreaBlocks.excretions_urinary
       this.doku.sampler.symptoms = emptyProtocol.sampler.symptoms
       this.doku.saamed = emptyProtocol.saamed
       this.doku.redflags = emptyProtocol.redflags

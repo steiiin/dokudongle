@@ -3,16 +3,26 @@ import type { SchwindelBlockSourceState } from '@/types/schwindel'
 import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/schwindel'
 import type { BauchschmerzBlockSourceState } from '@/types/bauchschmerz'
 import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock } from '@/data/bauchschmerz'
+import type { ExcretionsBowelsBlockSourceState, ExcretionsUrinaryBlockSourceState } from '@/types/excretions'
+import {
+  createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState,
+  ExcretionsBowelsTextAreaBlock, ExcretionsUrinaryTextAreaBlock,
+} from '@/data/excretions'
 
 export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
   schwindel: SchwindelBlockSourceState
+  excretions_bowel: ExcretionsBowelsBlockSourceState
+  excretions_urinary: ExcretionsUrinaryBlockSourceState
   bauchschmerz: BauchschmerzBlockSourceState
 }
 
 interface BlockSourceProtocol {
   flavors: { verlegung: boolean; einweisung: boolean }
   xabcDe: { dizziness: 'kein' | 'ungerichteter' | 'gerichteter' }
-  xabcdE: { abdominal: { isAssessed: boolean; value: { pain: 'keine' | 'leichte' | '' | 'starke' } } }
+  xabcdE: {
+    abdominal: { isAssessed: boolean; value: { pain: 'keine' | 'leichte' | '' | 'starke' } }
+    excretions: { isAssessed: boolean; value: { bowelAbnormalities: boolean; urinaryAbnormalities: boolean } }
+  }
   textAreaBlocks: TextAreaBlockState
 }
 
@@ -52,6 +62,18 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
     isAvailable: protocol => protocol.xabcDe.dizziness === 'gerichteter',
     createState: createSchwindelBlockState,
     outputs: [new SchwindelTextAreaBlock()],
+  },
+  {
+    id: 'excretions_bowel', fields: [],
+    isAvailable: protocol => protocol.xabcdE.excretions.isAssessed && protocol.xabcdE.excretions.value.bowelAbnormalities,
+    createState: createExcretionsBowelsBlockState,
+    outputs: [new ExcretionsBowelsTextAreaBlock()],
+  },
+  {
+    id: 'excretions_urinary', fields: [],
+    isAvailable: protocol => protocol.xabcdE.excretions.isAssessed && protocol.xabcdE.excretions.value.urinaryAbnormalities,
+    createState: createExcretionsUrinaryBlockState,
+    outputs: [new ExcretionsUrinaryTextAreaBlock()],
   },
   {
     id: 'bauchschmerz', fields: [],

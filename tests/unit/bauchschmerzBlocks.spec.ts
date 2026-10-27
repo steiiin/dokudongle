@@ -15,6 +15,8 @@ import DodoItemModal from '@/components/DodoItemModal.vue'
 import SampleSymptomsCard from '@/views/dokuCards/sampleCards/SampleSymptomsCard.vue'
 import BlockBauchschmerzCard from '@/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue'
 import BlockSchwindelCard from '@/views/dokuCards/blocksourceCards/BlockSchwindelCard.vue'
+import BlockExcretionsBowelsCard from '@/views/dokuCards/blocksourceCards/BlockExcretionsBowelsCard.vue'
+import BlockExcretionsUrinaryCard from '@/views/dokuCards/blocksourceCards/BlockExcretionsUrinaryCard.vue'
 import AbcdeExposureCard from '@/views/dokuCards/abcdeCards/AbcdeExposureCard.vue'
 import DodoExaminationItem from '@/components/DodoExaminationItem.vue'
 
@@ -124,7 +126,7 @@ describe('Bauchschmerz text rendering', () => {
 })
 
 describe('Bauchschmerz source lifecycle', () => {
-  test('appears after Schwindel only when symptoms and the abdominal finding are available', async () => {
+  test('appears after Schwindel and excretions only when symptoms and the abdominal finding are available', async () => {
     const store = useDokuStore()
     store.setDizziness('gerichteter')
     const symptoms = shallowMount(SampleSymptomsCard)
@@ -135,9 +137,17 @@ describe('Bauchschmerz source lifecycle', () => {
     store.setAbdominalPain('')
     await nextTick()
     expect(symptoms.findComponent(BlockBauchschmerzCard).exists()).toBe(true)
+    store.setExcretionsAssessed(true)
+    store.setBowelAbnormalities(true)
+    store.setUrinaryAbnormalities(true)
+    await nextTick()
     const schwindel = symptoms.getComponent(BlockSchwindelCard).element
+    const bowels = symptoms.getComponent(BlockExcretionsBowelsCard).element
+    const urinary = symptoms.getComponent(BlockExcretionsUrinaryCard).element
     const bauchschmerz = symptoms.getComponent(BlockBauchschmerzCard).element
-    expect(schwindel.nextElementSibling).toBe(bauchschmerz)
+    expect(schwindel.nextElementSibling).toBe(bowels)
+    expect(bowels.nextElementSibling).toBe(urinary)
+    expect(urinary.nextElementSibling).toBe(bauchschmerz)
     expect(bauchschmerz.nextElementSibling).toBe(symptoms.getComponent(DodoInputTextArea).element)
     expect(symptoms.getComponent(DodoInputTextArea).props('quickieKeys')).not.toContain('abdominal_pain')
     store.setFlavor('no_emergency_call', true)

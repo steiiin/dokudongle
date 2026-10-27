@@ -1,9 +1,7 @@
-import DodoQuickieExcretionsBowels from "@/components/quickie-components/DodoQuickieExcretionsBowels.vue"
-import DodoQuickieExcretionsUrinary from "@/components/quickie-components/DodoQuickieExcretionsUrinary.vue"
 import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
 import DodoQuickieSchwangerschaft from "@/components/quickie-components/DodoQuickieSchwangerschaft.vue"
 import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
-import { AssessedValue, OptionalValue } from "@/types/protocol/input"
+import { AssessedValue } from "@/types/protocol/input"
 import { PregnancySpan } from "@/types/protocol/pregnancy"
 
 import { Component, markRaw } from "vue"
@@ -13,9 +11,6 @@ import { TEXT_AREA_BLOCK_SOURCES } from "@/data/text-area-blocks"
 
 export const QU_SIT_Verlegung = 'verlegung'
 export const QU_SIT_Einweisung = 'einweisung'
-
-export const QU_SYM_ExcretionsUrinary = 'excretions_urinary'
-export const QU_SYM_ExcretionsBowel = 'excretions_bowel'
 
 export const QU_SYM_OPQRST = 'intern_opqrst'
 
@@ -53,44 +48,6 @@ export class QuickieTemplate extends Quickie
     }, this.template.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     return !(new RegExp(templatePattern, 'm').test(text))
   }
-}
-
-// --------------------------------------------------------
-
-export class QuickieExcretionsUrinary extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieExcretionsUrinary))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Wasserlassen: ')
-  }
-
-  public catheterIssues: '' | 'disloziert' | 'gezogen' | 'verstopft' = ''
-  public output: string[] = []
-  public pain: string[] = []
-
-  public hematuria: '' | 'minimal Blut im Urin' | 'etwas Blut im Urin' | 'viel Blut im Urin' = ''
-  public anomalies: string[] = []
-
-}
-
-export class QuickieExcretionsBowels extends Quickie
-{
-  constructor(public key: string, public label: string) {
-    super(key, label, markRaw(DodoQuickieExcretionsBowels))
-  }
-  public isAvailable(text: string): boolean {
-    return !text.includes('Stuhlgang: ')
-  }
-
-  public pattern: '' | 'Obstipation' | 'Durchfall' = ''
-  public consistency: '' | 'kügelchenförmig' | 'hart' | 'geformt' | 'breiig' | 'wässrig' = ''
-  public lastBowel: OptionalValue<string> = OptionalValue.inactive('')
-  public bowelSounds: '' | 'normal' | 'vermehrt' | 'vermindert' | 'fehlend' | 'hochgestellt' = ''
-  public blood: '' | 'kein Blut' | 'Blut am Klopapier' | 'Blut im Stuhl' | 'Teerstuhl' = ''
-  public bowelPain: boolean = false
-
 }
 
 // --------------------------------------------------------
@@ -146,9 +103,6 @@ const buildQuickies = (): Record<string, Quickie> => ({
     new QuickieTemplate(source.id, source.id === QU_SIT_Verlegung ? 'Verlegung' : 'Einweisung',
       source.outputs[0].template, source.fields),
   ])),
-
-  [QU_SYM_ExcretionsUrinary]: new QuickieExcretionsUrinary(QU_SYM_ExcretionsUrinary, 'Wasserlassen'),
-  [QU_SYM_ExcretionsBowel]: new QuickieExcretionsBowels(QU_SYM_ExcretionsBowel, 'Stuhlgang'),
 
   [QU_SYM_OPQRST]: new QuickieOPQRST(QU_SYM_OPQRST, 'OPQRST'),
 

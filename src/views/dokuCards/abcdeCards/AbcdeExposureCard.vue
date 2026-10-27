@@ -8,15 +8,16 @@
     </IonItem>
 
     <DodoExaminationItem id="excretions" label="Ausscheidung" assessed-presets show-line="inset"
-      v-model:assessed="store.doku.xabcdE.excretions.assessed"
-      @select="resetExcretions" @activate="excretionsModal?.open()" @remove="resetExcretions">
+      :assessed="store.doku.xabcdE.excretions.assessed" @update:assessed="store.setExcretionsAssessed"
+      @select="store.resetExcretions" @activate="excretionsModal?.open()" @remove="store.resetExcretions">
       <DodoItemModal ref="excretionsModal" label="Ausscheidung"
         :state="store.doku.xabcdE.excretionsState" lines="none">
 
         <IonItemDivider>
           <IonLabel>Katheter</IonLabel>
         </IonItemDivider>
-        <DodoInputSelect v-model="store.doku.xabcdE.excretions.value.catheterType"
+        <DodoInputSelect :model-value="store.doku.xabcdE.excretions.value.catheterType"
+          @update:model-value="store.setCatheterType($event as ExposureExcretions['catheterType'])"
           label="Typ" lines="none"
           :options="[
             { value: '', label: 'Kein Katheter' },
@@ -30,10 +31,10 @@
         <IonItemDivider>
           <IonLabel>Auffälligkeiten?</IonLabel>
         </IonItemDivider>
-        <DodoInputToggle lines="inset" v-model="store.doku.xabcdE.excretions.value.urinaryAbnormalities">
+        <DodoInputToggle lines="inset" :model-value="store.doku.xabcdE.excretions.value.urinaryAbnormalities" @update:model-value="store.setUrinaryAbnormalities">
           Wasserlassen auffällig?
         </DodoInputToggle>
-        <DodoInputToggle lines="none" v-model="store.doku.xabcdE.excretions.value.bowelAbnormalities">
+        <DodoInputToggle lines="none" :model-value="store.doku.xabcdE.excretions.value.bowelAbnormalities" @update:model-value="store.setBowelAbnormalities">
           Stuhlgang auffällig?
         </DodoInputToggle>
 
@@ -150,17 +151,13 @@ import { computed, ref, watch } from 'vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
 import DodoItemModal from '@/components/DodoItemModal.vue'
-import { ExposureExcretions, type ExposureAbdominal } from '@/types/protocol/abcde'
+import type { ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 const abdominalModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const excretionsModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
-
-function resetExcretions() {
-  store.doku.xabcdE.excretions.value = new ExposureExcretions()
-}
 
 // ############################################################################
 
