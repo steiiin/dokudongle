@@ -60,4 +60,8 @@ const placeholder = computed(() => {
     --card-bg: #865830;
   }
 
+  ion-card-content ion-list {
+    padding: 0;
+  }
+
 </style>

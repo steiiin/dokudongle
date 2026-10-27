@@ -979,7 +979,7 @@ defineExpose({
 }
 
 .dd-input-textarea .preview {
-  margin: .5rem 4px;
+  margin: 8px 4px;
   font-size: .8rem;
   line-height: 1.3;
   color: var(--ion-color-dark-shade);

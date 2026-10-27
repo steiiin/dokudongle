@@ -127,7 +127,7 @@ ion-card-header {
   padding-block: 0 !important;
 }
 ion-card-content ion-list {
-  padding-bottom: 0;
+  padding: 0;
 }
 
 .add-examination {

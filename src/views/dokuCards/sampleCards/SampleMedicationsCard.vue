@@ -128,4 +128,8 @@ watch(() => ctx.value.isTrauma, () => {
     flex-wrap: wrap;
   }
 
+  ion-card-content ion-list {
+    padding: 0;
+  }
+
 </style>

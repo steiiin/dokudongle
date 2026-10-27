@@ -87,7 +87,7 @@ const treatmentValue = computed({
   }
 
   .add-treatment {
-    margin: .25rem .5rem 0 .5rem;
+    margin: 4px 8px 0 8px;
     background-color: var(--card-bg);
   }
 
