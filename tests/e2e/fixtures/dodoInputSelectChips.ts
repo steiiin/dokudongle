@@ -14,7 +14,15 @@ document.documentElement.classList.toggle('ion-palette-dark', new URLSearchParam
 createApp(defineComponent({
   setup() {
     const values = ref<SelectValue[]>([])
+    const backgroundClicks = ref(0)
     return () => h(IonApp, {}, () => h(IonContent, {}, () => [
+      h('button', {
+        id: 'background-action',
+        style: 'position: fixed; top: 0; left: 0; width: 12px; height: 12px; z-index: 10;',
+        onClick: () => { backgroundClicks.value++ },
+        'aria-label': 'Background action',
+      }),
+      h('output', { id: 'background-clicks' }, backgroundClicks.value),
       h(IonList, {}, () => h(DodoInputSelectChips, {
         label: 'Auswahl mit ausführlicher Beschreibung',
         description: 'Mehrere Werte auswählen oder einen eigenen Wert eingeben.',

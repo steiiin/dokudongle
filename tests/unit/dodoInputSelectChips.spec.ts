@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils'
 import { defineComponent, nextTick } from 'vue'
-import { IonItem, IonPopover } from '@ionic/vue'
+import { IonItem, IonModal } from '@ionic/vue'
 import { describe, expect, test, vi } from 'vitest'
 import DodoInputSelectChips from '@/components/DodoInputSelectChips.vue'
 import DodoInputText from '@/components/DodoInputText.vue'
@@ -74,11 +74,13 @@ describe('DodoInputSelectChips', () => {
     expect(wrapper.get('[aria-live="polite"]').text()).toBe('b, First')
   })
 
-  test('places the accessible pencil in the last row, including with no options', async () => {
+  test('places the accessible custom action in its own row, including with no options', async () => {
     const wrapper = mountSelect({ options: [['a'], ['b']], allowCustom: true })
     const rows = wrapper.findAll('.dd-input-select-chips__row')
     expect(rows[0].find('.dd-input-select-chips__custom').exists()).toBe(false)
-    expect(rows[1].get('button:last-child').attributes('aria-label')).toBe('Eigenen Wert eingeben')
+    expect(rows).toHaveLength(3)
+    expect(rows[1].find('.dd-input-select-chips__custom').exists()).toBe(false)
+    expect(rows[2].get('button:last-child').attributes('aria-label')).toBe('Eigenen Wert eingeben')
     await wrapper.setProps({ options: [[], ['']] })
     expect(wrapper.findAll('.dd-input-select-chips__row')).toHaveLength(1)
     expect(chips(wrapper)).toHaveLength(1)
@@ -86,16 +88,16 @@ describe('DodoInputSelectChips', () => {
     expect(wrapper.findAll('.dd-input-select-chips__row')).toHaveLength(0)
   })
 
-  test.each([false, true])('Speichern only closes the popover (allowCustom=%s)', async allowCustom => {
+  test.each([false, true])('Übernehmen only closes the dialog (allowCustom=%s)', async allowCustom => {
     const wrapper = mountSelect({ allowCustom })
     await wrapper.get('.dd-input-select-chips').trigger('click')
     await chip(wrapper, 'Alpha').trigger('click')
     await acceptUpdate(wrapper)
     const updates = wrapper.emitted('update:modelValue')?.length
-    const save = wrapper.get('.dd-input-select-chips__save')
-    expect(save.text()).toBe('Speichern')
+    const save = wrapper.get('.dd-input-select-chips__apply')
+    expect(save.text()).toBe('Übernehmen')
     await save.trigger('click')
-    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(false)
+    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(false)
     expect(wrapper.emitted('update:modelValue')).toHaveLength(updates!)
     expect(model(wrapper)).toEqual(['a'])
   })
@@ -105,9 +107,10 @@ describe('DodoInputSelectChips', () => {
     Object.freeze(original)
     const wrapper = mountSelect({ modelValue: original })
     await wrapper.get('.dd-input-select-chips').trigger('click')
-    const popover = wrapper.getComponent(IonPopover)
-    expect(popover.props('isOpen')).toBe(true)
-    expect(popover.props('event')).toBeInstanceOf(Event)
+    const dialog = wrapper.getComponent(IonModal)
+    expect(dialog.props('isOpen')).toBe(true)
+    expect(dialog.props('backdropDismiss')).toBe(true)
+    expect(dialog.attributes('aria-label')).toBe('Selection')
     expect(chip(wrapper, 'Beta').attributes('aria-pressed')).toBe('true')
     await chip(wrapper, 'Alpha').trigger('click')
     expect(model(wrapper)).toEqual(['b', 'a'])
@@ -117,7 +120,7 @@ describe('DodoInputSelectChips', () => {
     await chip(wrapper, 'Beta').trigger('click')
     expect(model(wrapper)).toEqual(['a'])
     expect(original).toEqual(['b'])
-    expect(popover.props('isOpen')).toBe(true)
+    expect(dialog.props('isOpen')).toBe(true)
   })
 
   test('deduplicates options and emitted values while distinguishing numbers and strings', async () => {
@@ -152,18 +155,41 @@ describe('DodoInputSelectChips', () => {
 
   test('uses semantic buttons and synchronizes dismissal without updating the model', async () => {
     const wrapper = mountSelect()
-    const initialEvent = wrapper.getComponent(IonPopover).props('event')
     const trigger = wrapper.get('button.dd-input-select-chips')
     expect(trigger.attributes('type')).toBe('button')
     expect(trigger.attributes('aria-haspopup')).toBe('dialog')
     expect(chips(wrapper).every(button => button.element.tagName === 'BUTTON' && button.attributes('type') === 'button')).toBe(true)
     await trigger.trigger('click')
     expect(trigger.attributes('aria-expanded')).toBe('true')
-    wrapper.getComponent(IonPopover).vm.$emit('didDismiss')
+    wrapper.getComponent(IonModal).vm.$emit('didDismiss')
     await nextTick()
     expect(trigger.attributes('aria-expanded')).toBe('false')
-    expect(wrapper.getComponent(IonPopover).props('event')).toBe(initialEvent)
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+
+  test.each(['backdrop', 'confirm'])('retains selections after %s dismissal and reopening', async role => {
+    const wrapper = mountSelect()
+    await wrapper.setProps({ description: 'Choose multiple values' })
+    expect(wrapper.get('.dd-input-select-chips__heading h2').text()).toBe('Selection')
+    expect(wrapper.get('.dd-input-select-chips__heading p').text()).toBe('Choose multiple values')
+    await wrapper.get('.dd-input-select-chips').trigger('click')
+    await chip(wrapper, 'Alpha').trigger('click')
+    await acceptUpdate(wrapper)
+    await chip(wrapper, 'Beta').trigger('click')
+    await acceptUpdate(wrapper)
+    const updates = wrapper.emitted('update:modelValue')?.length
+    if (role === 'confirm') await wrapper.get('.dd-input-select-chips__apply').trigger('click')
+    wrapper.getComponent(IonModal).vm.$emit('didDismiss', { detail: { role } })
+    await nextTick()
+    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(false)
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(updates!)
+    expect(model(wrapper)).toEqual(['a', 'b'])
+    await wrapper.get('.dd-input-select-chips').trigger('click')
+    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(true)
+    expect(chip(wrapper, 'Alpha').attributes('aria-pressed')).toBe('true')
+    expect(chip(wrapper, 'Beta').attributes('aria-pressed')).toBe('true')
+    await wrapper.setProps({ description: undefined })
+    expect(wrapper.find('.dd-input-select-chips__heading p').exists()).toBe(false)
   })
 
   test('opens and focuses one custom input after dismissal and forwards input props', async () => {
@@ -178,13 +204,13 @@ describe('DodoInputSelectChips', () => {
     expect(model(wrapper)).toEqual([])
     await acceptUpdate(wrapper)
     expect(wrapper.get('[aria-live="polite"]').text()).toBe('Andere')
-    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(false)
+    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(false)
     expect(wrapper.find('.dd-input-select-chips__custom').exists()).toBe(false)
     expect(focus).not.toHaveBeenCalled()
     const input = wrapper.getComponent(DodoInputText)
     expect(input.props()).toMatchObject({ modelValue: '', label: '↳ Details', placeholder: 'Type here', labelColor: 'warning', assistContextId: 'example' })
     expect(wrapper.findAllComponents(IonItem).slice(0, 2).map(item => item.props('lines'))).toEqual(['none', 'inset'])
-    wrapper.getComponent(IonPopover).vm.$emit('didDismiss')
+    wrapper.getComponent(IonModal).vm.$emit('didDismiss')
     await nextTick()
     expect(focus).toHaveBeenCalledOnce()
     await edit(wrapper, 'custom')
@@ -199,7 +225,7 @@ describe('DodoInputSelectChips', () => {
     expect(model(wrapper)).toEqual(['b'])
     expect(wrapper.findComponent(DodoInputText).exists()).toBe(false)
     expect(wrapper.find('.dd-input-select-chips__custom').exists()).toBe(true)
-    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(true)
+    expect(wrapper.getComponent(IonModal).props('isOpen')).toBe(true)
     await chip(wrapper, 'Alpha').trigger('click')
     await acceptUpdate(wrapper)
     expect(model(wrapper)).toEqual(['b', 'a'])

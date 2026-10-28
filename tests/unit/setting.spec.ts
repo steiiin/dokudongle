@@ -55,7 +55,7 @@ describe('setting nursing wording', () => {
     const selects = wrapper.findAllComponents(DodoInputSelect)
     const helpers = wrapper.getComponent(DodoInputSelectChips)
     const location = selects.find(select => select.props('label') === 'Einsatzort')!
-    expect(helpers.props('options')).toContainEqual({ value: 'nursing', label: 'Pflege' })
+    expect(helpers.props('options').flat()).toContainEqual({ value: 'nursing', label: 'Pflege' })
 
     helpers.vm.$emit('update:modelValue', ['nursing'])
     for (const [value, expected] of [

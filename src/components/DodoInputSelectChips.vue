@@ -1,7 +1,7 @@
 <template>
   <IonItem :lines="isCustomMode ? 'none' : lines">
-    <button type="button" class="dd-input-select-chips" aria-haspopup="dialog"
-      :aria-expanded="isPopoverOpen" @click="openPopover">
+    <button ref="trigger" type="button" class="dd-input-select-chips" aria-haspopup="dialog"
+      :aria-expanded="isDialogOpen" @click="openDialog">
       <span class="dd-input-select-chips__label">
         <span :style="{ color: resolvedLabelColor }">{{ label }}</span>
         <span v-if="description" class="dd-input-select-chips__description">{{ description }}</span>
@@ -18,27 +18,38 @@
       @update:model-value="updateCustomText" @leaved-empty="leaveEmpty" />
   </IonItem>
 
-  <IonPopover class="dd-input-select-chips-popover" :is-open="isPopoverOpen"
-    :event="popoverEvent" reference="trigger" :aria-label="label" @didDismiss="onDismiss">
-    <div class="dd-input-select-chips__cloud">
-      <div v-for="(row, index) in visibleRows" :key="index" class="dd-input-select-chips__row">
-        <button v-for="option in row" :key="`${typeof option.value}:${option.value}`"
-          type="button" class="dd-input-select-chips__chip"
-          :aria-pressed="!isCustomMode && selectedValues.includes(option.value)" @click="toggleValue(option.value)">
-          <IonIcon v-if="!isCustomMode && selectedValues.includes(option.value)" :icon="checkmark" aria-hidden="true" />
-          {{ option.label }}
-        </button>
+  <IonModal class="dd-input-select-chips-modal" :is-open="isDialogOpen"
+    :backdrop-dismiss="true" :aria-label="label" @didDismiss="onDismiss">
+    <div class="dd-input-select-chips__dialog">
+      <header class="dd-input-select-chips__heading">
+        <h2>{{ label }}</h2>
+        <p v-if="description">{{ description }}</p>
+      </header>
+      <div class="dd-input-select-chips__cloud">
+        <div v-for="(row, index) in visibleRows" :key="index" class="dd-input-select-chips__row">
+          <button v-for="option in row" :key="`${typeof option.value}:${option.value}`"
+            type="button" class="dd-input-select-chips__chip"
+            :aria-pressed="!isCustomMode && selectedValues.includes(option.value)" @click="toggleValue(option.value)">
+            <IonIcon v-if="!isCustomMode && selectedValues.includes(option.value)" :icon="checkmark" aria-hidden="true" />
+            {{ option.label }}
+          </button>
+        </div>
+        <div class="dd-input-select-chips__row" v-if="allowCustom && !isCustomMode">
+          <button
+            type="button" class="dd-input-select-chips__chip dd-input-select-chips__custom"
+            aria-label="Eigenen Wert eingeben" @click="enterCustom">
+            <IonIcon :icon="pencil" aria-hidden="true" />
+            Andere
+          </button>
+        </div>
       </div>
-      <div class="dd-input-select-chips__row" v-if="allowCustom && !isCustomMode">
-        <button
-          type="button" class="dd-input-select-chips__chip dd-input-select-chips__custom"
-          aria-label="Eigenen Wert eingeben" @click="enterCustom">
-          <IonIcon :icon="pencil" aria-hidden="true" />
-          Andere
-        </button>
-      </div>
+      <footer class="dd-input-select-chips__actions">
+        <IonButton type="button" fill="clear" class="dd-input-select-chips__apply" @click="isDialogOpen = false">
+          Übernehmen
+        </IonButton>
+      </footer>
     </div>
-  </IonPopover>
+  </IonModal>
 </template>
 
 <script setup lang="ts">
@@ -105,7 +116,6 @@ const visibleRows = computed(() => {
       seen.add(value)
     }
   }
-  if (rows.length === 0 && props.allowCustom && !isCustomMode.value) rows.push([])
   return rows
 })
 const summary = computed(() => {
@@ -125,8 +135,8 @@ const resolvedLabelColor = computed(() => {
   return /^(#|rgb|hsl|var\()/.test(color) ? color : `var(--ion-color-${color})`
 })
 
-const isPopoverOpen = ref(false)
-const popoverEvent = ref<Event>()
+const isDialogOpen = ref(false)
+const trigger = ref<HTMLButtonElement | null>(null)
 const customInput = ref<InstanceType<typeof DodoInputText> | null>(null)
 const isCustomMode = ref(false)
 const customText = ref('')
@@ -163,18 +173,18 @@ watch([() => props.modelValue.slice(), normalizedOptions, () => props.allowCusto
     customText.value = customEntry.value === undefined ? '' : String(customEntry.value)
   }, { immediate: true })
 
-const openPopover = (event: Event) => {
-  popoverEvent.value = event
-  isPopoverOpen.value = true
+const openDialog = () => {
+  isDialogOpen.value = true
 }
 
 const onDismiss = async () => {
-  isPopoverOpen.value = false
-  popoverEvent.value = undefined
+  isDialogOpen.value = false
+  await nextTick()
   if (focusCustomAfterDismiss) {
     focusCustomAfterDismiss = false
-    await nextTick()
     customInput.value?.setFocus()
+  } else {
+    trigger.value?.focus()
   }
 }
 
@@ -200,7 +210,7 @@ const enterCustom = () => {
   isCustomMode.value = true
   updateModel([])
   focusCustomAfterDismiss = true
-  isPopoverOpen.value = false
+  isDialogOpen.value = false
 }
 
 const updateCustomText = (text: string) => {
@@ -265,9 +275,38 @@ const leaveEmpty = () => {
   width: 0.8125rem;
 }
 
-.dd-input-select-chips-popover {
+.dd-input-select-chips-modal {
   --width: 22rem;
   --max-width: calc(100vw - 2rem);
+  --height: auto;
+  --max-height: calc(100dvh - 2rem);
+  --border-radius: 14px;
+  --backdrop-opacity: .4;
+  --box-shadow: 0 12px 32px rgba(0, 0, 0, .2);
+}
+
+.dd-input-select-chips__dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 2rem);
+}
+
+.dd-input-select-chips__heading {
+  flex-shrink: 0;
+  padding: 1rem 1rem 0;
+  overflow-wrap: anywhere;
+}
+
+.dd-input-select-chips__heading h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.dd-input-select-chips__heading p {
+  margin: .5rem 0 0;
+  color: var(--ion-color-medium);
+  font-size: .875rem;
 }
 
 .dd-input-select-chips__cloud {
@@ -275,7 +314,7 @@ const leaveEmpty = () => {
   flex-direction: column;
   gap: .5rem;
   padding: 1rem;
-  max-height: 60vh;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -304,13 +343,12 @@ const leaveEmpty = () => {
 }
 
 .dd-input-select-chips__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
   margin: 0;
-  padding: 0;
+  padding: .25rem .5rem;
   border-top: 1px solid var(--ion-background-color-step-150);
-}
-
-.dd-input-select-chips__save {
-  text-align: end;
 }
 
 .dd-input-select-chips__chip[aria-pressed="true"] {
