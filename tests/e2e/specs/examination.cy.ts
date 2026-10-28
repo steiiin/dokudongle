@@ -347,7 +347,7 @@ for (const width of [320, 1024]) {
     it('adds default auscultation by keyboard and offers an independent create action', () => {
       openPickerForKeyboard('@breathing')
       cy.get('ion-popover.examination-picker:visible').find('.positive-examination').should('have.length', 1)
-        .and('have.attr', 'slot', 'end').and('have.attr', 'color', 'danger')
+        .and('have.attr', 'slot', 'start').and('have.attr', 'color', 'danger')
       cy.get('ion-popover.examination-picker:visible').find('[data-examination="auscultation"]')
         .shadow().find('button').focus().should('be.focused')
       pressKey('Enter')

@@ -23,7 +23,7 @@
             :lines="item.pickerSeparatorAfter && index < availableItems.length - 1 ? 'full' : 'none'"
             :data-examination="item.id" @click="select(item, item.assessedPresets ? 'negative' : undefined)">
             <component :is="item.picker" />
-            <IonButton v-if="item.assessedPresets" slot="end" fill="clear" color="danger" size="default"
+            <IonButton v-if="item.assessedPresets" slot="start" fill="clear" color="danger" size="default"
               class="positive-examination" :aria-label="`${item.label}: Hinzufügen und bearbeiten`"
               @click.stop="select(item, 'positive')">
               <IonIcon slot="icon-only" :icon="create" aria-hidden="true" />

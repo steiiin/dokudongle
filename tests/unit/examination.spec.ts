@@ -86,7 +86,7 @@ describe('examination picker', () => {
     await f.open()
     const row = f.rows()[0]
     const button = row.get('.positive-examination')
-    expect(button.attributes()).toMatchObject({ slot: 'end', color: 'danger', 'aria-label': 'First: Hinzufügen und bearbeiten' })
+    expect(button.attributes()).toMatchObject({ slot: 'start', color: 'danger', 'aria-label': 'First: Hinzufügen und bearbeiten' })
     await (preset === 'negative' ? row : button).trigger('click')
     await button.trigger('click')
     expect(f.selected).toHaveBeenCalledExactlyOnceWith(preset)
