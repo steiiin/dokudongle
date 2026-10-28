@@ -1,7 +1,7 @@
 <template>
   <IonCard v-show="ctx.isTrauma">
     <IonCardHeader>
-      <IonCardTitle>c - Blutung</IonCardTitle>
+      <IonCardTitle>x - Blutung</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
       <IonList lines="none">
