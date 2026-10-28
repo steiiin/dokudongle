@@ -37,4 +37,8 @@ const ctx = computed(() => store.context)
     --card-bg: #e41a1d71;
   }
 
+  ion-card-content ion-list {
+    padding: 0;
+  }
+
 </style>
