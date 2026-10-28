@@ -202,7 +202,7 @@
         </DodoInputSelectLR>
 
         <DodoInputSelect v-model="store.doku.xabcDe.neuro.value.msMeningism"
-          label="Meningismus" lines="full"
+          label="Nackensteife" lines="full"
           :options="[
             { value: '', label: 'Nicht Anwendbar' },
             { value: 'kein', label: 'Nein' },

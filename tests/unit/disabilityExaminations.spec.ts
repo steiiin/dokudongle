@@ -31,12 +31,151 @@ const keys = [ 'neuro', 'psych', 'bloodGlucose', 'intoxication'] as const
 const plain = <T>(value: T): T => JSON.parse(JSON.stringify(value))
 
 const findings: [typeof keys[number], (d: Pick<AbcdeDisability, typeof keys[number]>) => void, string, boolean, boolean][] = [
-  ['neuro', d => { d.neuro.value.msArmLeft = 'Absinken' }, 'Arm links: Absinken', false, false],
+  ['neuro', d => { d.neuro.value.msArmLeft = 'Absinken' }, 'Armparese', false, false],
   ['psych', d => { d.psych.value.disorder = 'Delir' }, 'deliranter Zustand', true, true],
   ['psych', d => { d.psych.value.dementia = true }, 'bek. Demenz', false, true],
   ['bloodGlucose', d => { d.bloodGlucose.value = 'niedrig' }, 'BZ niedrig', true, false],
   ['intoxication', d => { d.intoxication.value = 'C2-Geruch' }, 'Intox: C2-Geruch', true, false],
 ]
+
+describe('Neuro protocol placement', () => {
+  test.each([
+    ['leichter', 'leichte Nackensteife', ''],
+    ['ausgeprägter', 'ausgeprägte Nackensteife', ''],
+    ['kein', '', 'keine Nackensteife'],
+    ['', '', ''],
+  ] as const)('places neck stiffness %j once and updates after assessment changes', (value, positive, negative) => {
+    const store = useDokuStore()
+    const d = store.doku.xabcDe
+    const symptoms = store.doku.sampler.symptoms.additionalSymptoms
+    symptoms.setText('Weitere Beschwerden\nEigener Text')
+    d.neuro.value.msMeningism = value
+    expect(store.generatedProtocol).not.toMatch(/Nackensteife|Neuro:/)
+    d.neuro.assessed = true
+
+    for (const withOtherFindings of [false, true]) {
+      d.neuro.value.msArmLeft = withOtherFindings ? 'Absinken' : 'ohne Absinken'
+      d.neuro.value.msTremor = withOtherFindings
+      const protocol = store.generatedProtocol
+      const dLine = protocol.split('\n').find(line => line.startsWith('D:'))!
+      if (positive) expect(dLine).toContain(positive)
+      else expect(dLine).not.toContain('Nackensteife')
+      const details = [
+        withOtherFindings ? 'Absinken Arm li' : '',
+        negative,
+        withOtherFindings ? 'Tremor/Myoklonien' : '',
+      ].filter(Boolean).join('; ')
+      if (details) expect(protocol).toContain(`Neuro: ${details}\nWeitere Beschwerden\nEigener Text`)
+      else expect(protocol).not.toContain('Neuro:')
+      expect(protocol.match(/Nackensteife/g) ?? []).toHaveLength(value === '' ? 0 : 1)
+      expect(protocol).not.toContain('Meningismus')
+      expect(symptoms.value).toBe('Weitere Beschwerden\nEigener Text')
+    }
+
+    d.neuro.assessed = false
+    expect(store.generatedProtocol).not.toMatch(/Nackensteife|Neuro:/)
+    expect(store.generatedProtocol).toContain('Weitere Beschwerden\nEigener Text')
+  })
+
+  test('renders grouped limb findings and recomputes them in the Neuro section', () => {
+    const store = useDokuStore()
+    const neuro = store.doku.xabcDe.neuro
+    neuro.assessed = true
+    Object.assign(neuro.value, {
+      msArmLeft: 'Absinken', msArmRight: 'Absinken',
+      msLegLeft: 'Absinken', msLegRight: 'Absinken',
+    })
+    expect(store.generatedProtocol).toContain('Neuro: Absinken Extremitäten')
+
+    neuro.value.msLegRight = 'ohne Absinken'
+    expect(store.generatedProtocol).toContain('Neuro: Absinken Arme und Bein li')
+    expect(store.generatedProtocol).not.toContain('Absinken Extremitäten')
+
+    neuro.value.msArmRight = 'leichtes Absinken'
+    expect(store.generatedProtocol).toContain('Neuro: Absinken li; leichtes Absinken Arm re')
+    expect(store.generatedProtocol).not.toContain('ohne Absinken')
+    neuro.assessed = false
+    expect(store.generatedProtocol).not.toContain('Neuro:')
+  })
+
+  test('puts the summary in D and the complete details before existing symptoms', () => {
+    const store = useDokuStore()
+    const d = store.doku.xabcDe
+    d.neuro.assessed = true
+    Object.assign(d.neuro.value, {
+      msArmLeft: 'Absinken', msLegRight: 'nur Restbewegungen',
+      aphasia: 'schwere', dysarthria: 'verwaschen', msTremor: true,
+    })
+    const symptoms = store.doku.sampler.symptoms.additionalSymptoms
+    symptoms.setText('Weitere Beschwerden\nEigener Text')
+
+    const details = 'Absinken Arm li; nur Restbewegungen Bein re; keine Nackensteife; '
+      + 'Tremor/Myoklonien; verwaschene Artikulation; schwere Aphasie'
+    const protocol = store.generatedProtocol
+    const dLine = protocol.split('\n').find(line => line.startsWith('D:'))!
+    expect(dLine).toContain('Aphasie, Paresen')
+    expect(dLine.match(/Aphasie/g)).toHaveLength(1)
+    expect(dLine).not.toMatch(/Arm li|Bein re|Tremor|Artikulation|schwere/)
+    expect(protocol).toContain(`Neuro: ${details}\nWeitere Beschwerden\nEigener Text`)
+    expect(protocol.split(details)).toHaveLength(2)
+    expect(protocol.indexOf('Neuro:')).toBeGreaterThan(protocol.indexOf('E:'))
+    expect(symptoms.value).toBe('Weitere Beschwerden\nEigener Text')
+  })
+
+  test('updates both outputs and suppresses unassessed or removed findings', () => {
+    const store = useDokuStore()
+    const d = store.doku.xabcDe
+    d.neuro.value.msArmLeft = 'Absinken'
+    expect(store.generatedProtocol).not.toMatch(/Armparese|Neuro:|keine Paresen/)
+
+    d.neuro.assessed = true
+    expect(store.generatedProtocol).toContain('Armparese')
+    expect(store.generatedProtocol).toContain('Neuro: Absinken Arm li')
+
+    d.neuro.value.msArmLeft = 'ohne Absinken'
+    d.neuro.value.msMeningism = 'leichter'
+    expect(d.generateText()).toContain('; leichte Nackensteife.')
+    expect(store.generatedProtocol).not.toContain('Neuro:')
+    expect(store.generatedProtocol).not.toMatch(/Armparese|Arm li/)
+
+    d.neuro.assessed = false
+    expect(store.generatedProtocol).not.toMatch(/Nackensteife|Neuro:/)
+    d.neuro.value = new DisabilityNeuro()
+    d.neuro.assessed = true
+    expect(d.generateText()).toContain('keine Paresen/Parästhesien')
+    expect(store.generatedProtocol).toContain('Neuro: keine Nackensteife')
+  })
+
+  test.each([
+    [{ msTremor: true }, 'Tremor/Myoklonien'],
+    [{ followInstructions: 'teilweise befolgt' }, 'Anweisungen teilweise befolgt'],
+    [{ followInstructions: 'nicht befolgt' }, 'Anweisungen nicht befolgt'],
+  ] satisfies [Partial<DisabilityNeuro>, string][])(
+    'keeps detail-only finding %j in symptoms alongside the negative D summary', (finding, detail) => {
+      const store = useDokuStore()
+      const d = store.doku.xabcDe
+      d.neuro.assessed = true
+      Object.assign(d.neuro.value, finding)
+      expect(d.generateText()).toContain('keine Paresen/Parästhesien')
+      expect(d.generateText()).not.toContain(detail)
+      expect(store.generatedProtocol).toContain(`Neuro: ${d.neuro.value.symptomsText}`)
+      expect(d.neuro.value.symptomsText).toContain(detail)
+      expect(d.neuro.value.symptomsText).toContain('keine Nackensteife')
+    },
+  )
+
+  test.each(['no_emergency_call', 'verlegung'] as const)('omits neuro details when %s hides symptoms', flavor => {
+    const store = useDokuStore()
+    store.doku.xabcDe.neuro.assessed = true
+    store.doku.xabcDe.neuro.value.msArmLeft = 'Absinken'
+    expect(store.generatedProtocol).toContain('Neuro: Absinken Arm li')
+    // Set directly to check the output gates independently of data resets.
+    store.doku.flavors[flavor] = true
+    expect(store.context.requireSampleSymptoms).toBe(false)
+    expect(store.context.requireSampler).toBe(flavor === 'no_emergency_call')
+    expect(store.generatedProtocol).not.toMatch(/Neuro:|Absinken Arm li|Nackensteife/)
+  })
+})
 
 describe('Disability assessment semantics', () => {
   test('defaults to unassessed findings with independent baseline', () => {
@@ -80,6 +219,7 @@ describe('Disability assessment semantics', () => {
       expect(d.generateText()).not.toContain('BZ')
       for (const key of keys.filter(key => key !== 'intoxication')) d[key].assessed = true
       expect(d.generateText()).toContain('BZ normal')
+      expect(d.generateText()).toContain('keine Paresen/Parästhesien')
       expect(d.generateText().includes('keine Kopfschmerzen')).toBe(verbosity !== ProtocolVerbosity.LOW)
       expect(d.generateText().includes('kein Schwindel')).toBe(verbosity !== ProtocolVerbosity.LOW)
       expect(d.generateText()).not.toContain('bek. Demenz')

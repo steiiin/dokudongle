@@ -25,7 +25,7 @@
     :aria-label="`${label}: ${activeSide === 'left' ? 'Links' : 'Rechts'}`"
     @didDismiss="onDismiss">
     <IonContent>
-      <IonList lines="full">
+      <IonList lines="none">
         <IonItem v-for="opt in normalizedOptions" :key="`${typeof opt.value}:${opt.value}`"
           button :detail="false" :aria-current="selectedValue === opt.value ? 'true' : undefined"
           @click="selectOption(opt.value)">

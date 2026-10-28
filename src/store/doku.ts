@@ -36,7 +36,7 @@ import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
-import { breakDoku, multiline, placeholder } from '@/utils/text'
+import { breakDoku, multiline, placeholder, prefix } from '@/utils/text'
 import { textIf } from '@/utils/filter'
 
 // ############################################################################
@@ -1303,7 +1303,10 @@ export const useDokuStore = defineStore('doku', {
       {
 
         // SAMPLE
-        text += textIf(breakDoku(this.freeformText['sampler.symptoms.additionalSymptoms'], true), this.context.requireSampleSymptoms)
+        text += textIf(breakDoku([
+          textIf(prefix('Neuro:', state.doku.xabcDe.neuro.value.symptomsText), state.doku.xabcDe.neuro.isAssessed),
+          this.freeformText['sampler.symptoms.additionalSymptoms'],
+        ], true), this.context.requireSampleSymptoms)
         text += breakDoku([
           state.doku.sampler.allergies.generateText(),
           state.doku.sampler.medication.generateText(),

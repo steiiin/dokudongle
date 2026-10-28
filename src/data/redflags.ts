@@ -405,7 +405,7 @@ export const _SignalDefs = [
 
   defSg(
     'neuro-meningismus',
-    'Meningismus (Nackensteife/Kopfschmerz/Erbrechen/Lichtempfindlichkeit)'),
+    'Nackensteife (Kopfschmerz/Erbrechen/Lichtempfindlichkeit)'),
 
   defSg(
     'neuro-hypoglyk-rezidiv',

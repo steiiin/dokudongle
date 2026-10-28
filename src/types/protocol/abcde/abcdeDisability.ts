@@ -249,7 +249,38 @@ export class DisabilityNeuro {
     return this.hasAbnormalities ? this.text : 'normal'
   }
 
+  get summaryText(): string {
+    const pareses = [
+      textIf('Facialparese', this.msFace != ''),
+      textIf('Armparese', this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'),
+      textIf('Beinparese', this.msLegLeft != 'ohne Absinken' || this.msLegRight != 'ohne Absinken'),
+    ].filter(Boolean)
+
+    return [
+      textIf('Aphasie', (this.aphasia != '' && this.aphasia != 'keine')
+        || (this.dysarthria != '' && this.dysarthria != 'normal')),
+      pareses.length > 1 ? 'Parese' : pareses[0],
+      textIf('Störung Sensibilität', this.sensitivity.isActive),
+      textIf('Parästhesien', this.paraesthesia.isActive),
+      this.neckStiffnessText,
+    ].filter(Boolean).join(', ') || 'keine Paresen/Parästhesien'
+  }
+
+  get neckStiffnessText(): string {
+    if (this.msMeningism === 'leichter') return 'leichte Nackensteife'
+    if (this.msMeningism === 'ausgeprägter') return 'ausgeprägte Nackensteife'
+    return ''
+  }
+
   get text(): string {
+    return this.buildDetailsText(this.neckStiffnessText)
+  }
+
+  get symptomsText(): string {
+    return this.buildDetailsText(this.msMeningism === 'kein' ? 'keine Nackensteife' : '')
+  }
+
+  buildDetailsText(neckStiffness: string): string {
     const articulation: Record<typeof this.dysarthria, string> = {
       normal: '',
       verwaschen: 'verwaschene Artikulation',
@@ -258,14 +289,28 @@ export class DisabilityNeuro {
       '': '',
     }
 
+    const limbFindings = [...new Set([
+      this.msArmLeft, this.msArmRight, this.msLegLeft, this.msLegRight,
+    ])].filter(finding => finding !== 'ohne Absinken').map(finding => {
+      const armLeft = this.msArmLeft === finding
+      const armRight = this.msArmRight === finding
+      const legLeft = this.msLegLeft === finding
+      const legRight = this.msLegRight === finding
+
+      if (armLeft && armRight && legLeft && legRight) return `${finding} Extremitäten`
+      if (armLeft && legLeft && !armRight && !legRight) return `${finding} li`
+      if (armRight && legRight && !armLeft && !legLeft) return `${finding} re`
+
+      const arms = armLeft && armRight ? 'Arme' : armLeft ? 'Arm li' : armRight ? 'Arm re' : ''
+      const legs = legLeft && legRight ? 'Beine' : legLeft ? 'Bein li' : legRight ? 'Bein re' : ''
+      return `${finding} ${[arms, legs].filter(Boolean).join(' und ')}`
+    })
+
     return concatDoku([
       textIf(`Anweisungen ${this.followInstructions}`, this.followInstructions != 'befolgt'),
       textIf(`${this.msFace} Fazialisparese`, this.msFace != ''),
-      textIf(`Arm links: ${this.msArmLeft}`, this.msArmLeft != 'ohne Absinken'),
-      textIf(`Arm rechts: ${this.msArmRight}`, this.msArmRight != 'ohne Absinken'),
-      textIf(`Bein links: ${this.msLegLeft}`, this.msLegLeft != 'ohne Absinken'),
-      textIf(`Bein rechts: ${this.msLegRight}`, this.msLegRight != 'ohne Absinken'),
-      textIf(`${this.msMeningism} Meningismus`, this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'),
+      ...limbFindings,
+      neckStiffness,
       textIf('Tremor/Myoklonien', this.msTremor),
       textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), this.sensitivity.isActive),
       textIf(prefixParaesthesis(this.paraesthesia.value), this.paraesthesia.isActive),
@@ -452,7 +497,7 @@ export class AbcdeDisability {
         this.gcsScore < 14 ? `GCS ${this.gcsScore}` : '',
         textIf(headache, !isNonVerbal),
         textIf(this.dizzinessText, !isNonVerbal),
-        textIf(this.neuro.value.text, this.neuro.isAssessed),
+        textIf(this.neuro.value.summaryText, this.neuro.isAssessed),
         textIf(this.psych.value.text, this.psych.isAssessed),
         textIf(
           onNormal('baseline: nichts akutes'),
