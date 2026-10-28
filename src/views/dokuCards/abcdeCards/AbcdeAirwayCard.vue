@@ -65,13 +65,6 @@
       Zungenbiss?
     </DodoInputToggle>
 
-    <template #footer>
-      <DodoInputTreatment v-if="store.doku.xAbcde.needTreatment"
-        v-model="store.doku.xAbcde.treatment"
-        placeholder="Absaugen, Guedel-Tubus">
-      </DodoInputTreatment>
-
-    </template>
   </DodoExaminationCard>
 </template>
 

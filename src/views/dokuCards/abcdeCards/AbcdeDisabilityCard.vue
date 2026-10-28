@@ -330,12 +330,6 @@
       Entspricht Baseline?
     </DodoInputToggle>
 
-    <template #footer>
-      <DodoInputTreatment v-if="store.doku.xabcDe.needTreatment"
-        v-model="store.doku.xabcDe.treatment"
-        placeholder="Buccolam">
-      </DodoInputTreatment>
-    </template>
   </DodoExaminationCard>
 </template>
 

@@ -229,12 +229,6 @@
       ]">
     </DodoInputSelect>
 
-    <template #footer>
-      <DodoInputTreatment v-if="store.doku.xabCde.needTreatment"
-        v-model="store.doku.xabCde.treatment"
-        placeholder="Schocklagerung">
-      </DodoInputTreatment>
-    </template>
   </DodoExaminationCard>
 </template>
 

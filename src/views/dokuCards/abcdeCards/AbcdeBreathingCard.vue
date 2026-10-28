@@ -158,12 +158,6 @@
       Hypoxie (&lt;90%)?
     </DodoInputToggle>
 
-    <template #footer>
-      <DodoInputTreatment v-if="store.doku.xaBcde.needTreatment"
-        v-model="store.doku.xaBcde.treatment"
-        placeholder="Sauerstoffgabe, Beutel-Masken-Beatmung">
-      </DodoInputTreatment>
-    </template>
   </DodoExaminationCard>
 </template>
 

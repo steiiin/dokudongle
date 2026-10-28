@@ -36,8 +36,6 @@ export class AbcdeBreathing {
   public emphysema: AssessedValue<boolean>
   public trachealDeviation: AssessedValue<boolean>
 
-  public treatment: string
-
   // #####################################################################
 
   constructor()
@@ -55,7 +53,6 @@ export class AbcdeBreathing {
     this.emphysema = AssessedValue.unassessed(false)
     this.trachealDeviation = AssessedValue.unassessed(false)
 
-    this.treatment = ''
   }
 
   // #####################################################################
@@ -215,9 +212,7 @@ export class AbcdeBreathing {
       this.thoraxText,
     ]))))
 
-    const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)
-
-    return breakDoku([ assessedLine, treatmentLine ])
+    return assessedLine
 
   }
 

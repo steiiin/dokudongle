@@ -145,12 +145,6 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
-    <template #footer>
-      <DodoInputTreatment v-if="store.doku.xabcdE.needTreatment"
-        v-model="store.doku.xabcdE.treatment"
-        placeholder="Rettungsdecke">
-      </DodoInputTreatment>
-    </template>
   </DodoExaminationCard>
 </template>
 

@@ -237,8 +237,6 @@ export class AbcdeExposure {
   public abdominal: AssessedValue<ExposureAbdominal>
   public pregnancy: AssessedValue<boolean>
 
-  public treatment: string
-
   // #####################################################################
 
   constructor()
@@ -250,7 +248,6 @@ export class AbcdeExposure {
     this.urinaryIncontinence = false
     this.abdominal = AssessedValue.unassessed(new ExposureAbdominal())
     this.pregnancy = AssessedValue.unassessed(true)
-    this.treatment = ''
   }
 
   // #####################################################################
@@ -319,9 +316,7 @@ export class AbcdeExposure {
       assessedText(this.pregnancy, 'Schwangerschaft', 'Schwangerschaft ausgeschlossen'),
     ]))))
 
-    const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)
-
-    return breakDoku([ assessedLine, treatmentLine ])
+    return assessedLine
 
   }
 

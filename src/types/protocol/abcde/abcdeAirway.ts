@@ -21,8 +21,6 @@ export class AbcdeAirway {
   public hasTongueBite: boolean
   public stridor: AssessedValue<boolean>
 
-  public treatment: string
-
   // #####################################################################
 
   constructor()
@@ -32,7 +30,6 @@ export class AbcdeAirway {
     this.obstruction = ''
     this.stridor = AssessedValue.unassessed(false)
     this.hasTongueBite = false
-    this.treatment = ''
   }
 
   // #####################################################################
@@ -77,9 +74,7 @@ export class AbcdeAirway {
         : onNormal('kein Zungenbiss')
     ]))))
 
-    const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)
-
-    return breakDoku([ assessedLine, treatmentLine ])
+    return assessedLine
 
   }
 

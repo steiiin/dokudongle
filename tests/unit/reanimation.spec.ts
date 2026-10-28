@@ -59,7 +59,7 @@ function seedFindings(store: ReturnType<typeof useDokuStore>) {
   p.xabcDe.headache = true
   p.xabcDe.baseline = true
   p.xabcdE.abdominal.value.pain = 'starke'
-  p.xaBcde.treatment = 'Existing treatment'
+  p.treatment.setText('Existing treatment')
   p.situation.setText('Existing situation')
 }
 
@@ -164,7 +164,7 @@ describe('Reanimation restoration', () => {
     store.doku.xaBcde.mechanics.frequency = 'Bradypnoe'
     store.doku.xaBcde.auscultation.value.crackles = 'bds.'
     store.doku.xabcdE.abdominal.value.pain = 'leichte'
-    store.doku.xaBcde.treatment = 'New treatment'
+    store.doku.treatment.setText('New treatment')
     store.doku.situation.setText('New situation')
 
     store.setFlavor('reanimation', false)
@@ -176,7 +176,7 @@ describe('Reanimation restoration', () => {
     expect(store.doku.xaBcde.mechanics).toEqual({ pattern: 'Kußmaul-Atmung', frequency: 'Bradypnoe', depth: 'Vertieft' })
     expect(store.doku.xaBcde.auscultation.value.crackles).toBe('bds.')
     expect(store.doku.xabcdE.abdominal.value.pain).toBe('leichte')
-    expect(store.doku.xaBcde.treatment).toBe('New treatment')
+    expect(store.doku.treatment.value).toBe('New treatment')
     expect(store.doku.situation.value).toBe('New situation')
     expect(store.doku.xAbcde.stridor).toMatchObject({ assessed: true, value: true })
   })

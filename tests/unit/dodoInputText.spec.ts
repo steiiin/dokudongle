@@ -7,7 +7,6 @@ import DodoInputSelectOptional from '@/components/DodoInputSelectOptional.vue'
 import DodoInputQuick from '@/components/DodoInputQuick.vue'
 import DodoInputText from '@/components/DodoInputText.vue'
 import DodoInputTextOptional from '@/components/DodoInputTextOptional.vue'
-import DodoInputTreatment from '@/components/DodoInputTreatment.vue'
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
@@ -437,22 +436,6 @@ describe('single-line IME dictionary forwarding', () => {
     })
 
     await wrapper.get('ion-item-stub').trigger('click')
-    await nextTick()
-
-    expect(wrapper.getComponent(DodoInputText).props('imeDictionary')).toEqual(dictionary)
-  })
-
-  test('forwards the dictionary from DodoInputTreatment to DodoInputText', async () => {
-    const wrapper = shallowMount(DodoInputTreatment, {
-      props: {
-        modelValue: '',
-        placeholder: 'Treatment input',
-        imeDictionary: dictionary,
-      },
-      global: { renderStubDefaultSlot: true },
-    })
-
-    await wrapper.get('.add-treatment').trigger('click')
     await nextTick()
 
     expect(wrapper.getComponent(DodoInputText).props('imeDictionary')).toEqual(dictionary)
