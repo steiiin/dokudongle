@@ -1,8 +1,8 @@
 <template>
   <DodoContainerCard title="Aufgaben" card-in-card>
 
-    <TreatmentTasksCard />
     <TreatmentMedicationsCard v-show="ctx.requireSaamed" />
+    <TreatmentTasksCard />
     <TreatmentRedflagsCard v-show="ctx.requireRedflags" />
 
   </DodoContainerCard>

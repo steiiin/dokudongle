@@ -1,7 +1,7 @@
 <template>
   <IonCard>
     <IonCardHeader>
-      <IonCardTitle>SAA Medikamente</IonCardTitle>
+      <IonCardTitle>Medikamente</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
 
