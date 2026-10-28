@@ -1,0 +1,28 @@
+<template>
+  <DodoContainerCard title="Aufgaben" card-in-card>
+
+    <DodoContainerCard title="Maßnahmen" card-in-card
+      v-show="ctx.requireSaamed || ctx.requireRedflags">
+      <TaskMedicationsCard v-show="ctx.requireSaamed" />
+      <TaskConsentCard v-show="ctx.requireRedflags" />
+    </DodoContainerCard>
+    <TaskCourseCard />
+    <TaskRedflagsCard v-show="ctx.requireRedflags" />
+
+  </DodoContainerCard>
+</template>
+
+<script setup lang="ts">
+
+import TaskRedflagsCard from './taskCards/TaskRedflagsCard.vue'
+import TaskMedicationsCard from './taskCards/TaskMedicationsCard.vue'
+import TaskCourseCard from './taskCards/TaskCourseCard.vue'
+import TaskConsentCard from './taskCards/TaskConsentCard.vue'
+
+import { computed } from 'vue'
+
+import { useDokuStore } from '@/store/doku'
+const store = useDokuStore()
+const ctx = computed(() => store.context)
+
+</script>

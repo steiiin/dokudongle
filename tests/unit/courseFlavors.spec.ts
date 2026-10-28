@@ -12,7 +12,7 @@ import { ProtocolCourse } from '@/types/protocol'
 import DetailLevelCard from '@/views/dokuCards/DetailLevelCard.vue'
 import FlavorsCard from '@/views/dokuCards/FlavorsCard.vue'
 import SituationCard from '@/views/dokuCards/SituationCard.vue'
-import TreatmentTasksCard from '@/views/dokuCards/treatmentCards/TreatmentTasksCard.vue'
+import TaskCourseCard from '@/views/dokuCards/taskCards/TaskCourseCard.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,
@@ -126,14 +126,14 @@ describe('Verlegung and Einweisung flavors', () => {
       'Einweisung',
       'Trauma',
       'Reanimation',
-      'Non-Verbal',
+      'Non-Verbal / Unkooperativ',
     ])
     expect(wrapper.findAllComponents(DodoToggleChip).slice(0, 3)
       .every((chip) => chip.props('color') === 'primary')).toBe(true)
 
     store.setFlavor('verlegung', true)
     await nextTick()
-    expect(flavorLabels(wrapper)).toEqual(['Verlegung', 'Non-Verbal'])
+    expect(flavorLabels(wrapper)).toEqual(['Verlegung', 'Non-Verbal / Unkooperativ'])
 
     store.setFlavor('verlegung', false)
     store.setFlavor('einweisung', true)
@@ -142,7 +142,7 @@ describe('Verlegung and Einweisung flavors', () => {
       'Einweisung',
       'Trauma',
       'Reanimation',
-      'Non-Verbal',
+      'Non-Verbal / Unkooperativ',
     ])
 
     store.setFlavor('reanimation', true)
@@ -170,7 +170,7 @@ describe('Verlegung and Einweisung flavors', () => {
     expect(situation.findComponent(DodoInputTextArea).props('quickieKeys')).toBeUndefined()
     expect(situation.findComponent(DodoInputTextArea).props('blocks')).toEqual([])
 
-    const treatment = shallowMount(TreatmentTasksCard, {
+    const treatment = shallowMount(TaskCourseCard, {
       global: { renderStubDefaultSlot: true },
     })
     expect(treatment.findComponent(DodoInputTextArea).props('mandatory')).toBe(false)
@@ -201,7 +201,7 @@ describe('Verlegung and Einweisung flavors', () => {
     expect(situation.findComponent(DodoInputTextArea).props('quickieKeys')).toBeUndefined()
     expect(situation.findComponent(DodoInputTextArea).props('blocks')).toEqual([])
 
-    const treatment = shallowMount(TreatmentTasksCard, {
+    const treatment = shallowMount(TaskCourseCard, {
       global: { renderStubDefaultSlot: true },
     })
     expect(treatment.findComponent(DodoInputTextArea).props('mandatory')).toBe(false)

@@ -1320,7 +1320,7 @@ export const useDokuStore = defineStore('doku', {
       text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
       text += breakDoku(
         this.context.requireTasks
-        ? placeholder(this.freeformText.treatment, 'Maßnahmen')
+        ? placeholder(this.freeformText.treatment, 'Verlauf')
         : this.freeformText.treatment.trim(), true)
       text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
       text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
