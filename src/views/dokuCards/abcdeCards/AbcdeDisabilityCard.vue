@@ -151,10 +151,10 @@
       <DodoItemModal ref="neuroModal" label="Neuro-Befund" modal-label="Neurologischer Befund"
         :state="store.doku.xabcDe.neuro.value.state" lines="none">
 
-        <IonItemDivider>
+        <IonItemDivider v-if="!ctx.isNonVerbal">
           <IonLabel>Bewusstsein</IonLabel>
         </IonItemDivider>
-        <DodoInputSelect v-model="store.doku.xabcDe.neuro.value.followInstructions"
+        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.followInstructions"
           label="Anweisungen befolgen" description="Zwinkern + nicht-paretische Hand öffnen/schließen"
           lines="none"
           :options="[
@@ -201,7 +201,7 @@
           ]">
         </DodoInputSelectLR>
 
-        <DodoInputSelect v-model="store.doku.xabcDe.neuro.value.msMeningism"
+        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.msMeningism"
           label="Nackensteife" lines="full"
           :options="[
             { value: '', label: 'Nicht Anwendbar' },
@@ -215,22 +215,22 @@
           Tremor/Myoklonien?
         </DodoInputToggle>
 
-        <IonItemDivider>
+        <IonItemDivider v-if="!ctx.isNonVerbal">
           <IonLabel>Sensorik</IonLabel>
         </IonItemDivider>
-        <DodoInputTextOptional lines="inset"
+        <DodoInputTextOptional v-if="!ctx.isNonVerbal" lines="inset"
           toggle-label="Sensibilität gestört?" v-model:toggle="store.doku.xabcDe.neuro.value.sensitivity.active"
           text-label="Wie?" text-placeholder="z.B. Taubheit li. Arm" v-model:text="store.doku.xabcDe.neuro.value.sensitivity.value">
         </DodoInputTextOptional>
-        <DodoInputTextOptional lines="none"
+        <DodoInputTextOptional v-if="!ctx.isNonVerbal" lines="none"
           toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.neuro.value.paraesthesia.active"
           text-label="Wie?" text-placeholder="z.B. Kribbeln li. Arm" v-model:text="store.doku.xabcDe.neuro.value.paraesthesia.value">
         </DodoInputTextOptional>
 
-        <IonItemDivider>
+        <IonItemDivider v-if="!ctx.isNonVerbal">
           <IonLabel>Sprache</IonLabel>
         </IonItemDivider>
-        <DodoInputSelect v-model="store.doku.xabcDe.neuro.value.dysarthria"
+        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.dysarthria"
           label="Artikulation" lines="inset"
           :options="[
             { value: '', label: 'Nicht Anwendbar' },
@@ -240,7 +240,7 @@
             { value: 'stumm', label: 'Stumm' },
           ]">
         </DodoInputSelect>
-        <DodoInputSelect v-model="store.doku.xabcDe.neuro.value.aphasia"
+        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.aphasia"
           label="Aphasie" :description=" !aphasiaNote ? 'Sprachbildung + Verständnis' : aphasiaNote" lines="none"
           :options="[
             { value: '', label: 'Nicht Anwendbar' },
@@ -423,9 +423,19 @@ const aphasiaNote = computed(() => {
 
 // ############################################################################
 
-watch(() => ctx.value.isNonVerbal, () => {
+watch(() => ctx.value.isNonVerbal, (isNonVerbal) => {
   if (isRestoringReanimation(store.doku)) return
   store.doku.xabcDe.headache = false
+  if (isNonVerbal) {
+    const defaults = new DisabilityNeuro()
+    const neuro = store.doku.xabcDe.neuro.value
+    neuro.followInstructions = defaults.followInstructions
+    neuro.msMeningism = defaults.msMeningism
+    neuro.sensitivity = defaults.sensitivity
+    neuro.paraesthesia = defaults.paraesthesia
+    neuro.dysarthria = defaults.dysarthria
+    neuro.aphasia = defaults.aphasia
+  }
 }, { flush: 'sync' })
 
 watch(() => store.doku.xabcDe.couldBeBaseline, () => {

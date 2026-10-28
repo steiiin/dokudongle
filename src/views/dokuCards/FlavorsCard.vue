@@ -40,7 +40,7 @@
 
         <DodoToggleChip :model-value="store.doku.flavors.non_verbal" color="success"
           @update:modelValue="setFlavor('non_verbal', $event)">
-          Non-Verbal
+          Non-Verbal / Unkooperativ
         </DodoToggleChip>
 
       </ion-item>

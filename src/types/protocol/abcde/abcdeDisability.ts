@@ -230,15 +230,17 @@ export class DisabilityNeuro {
   }
 
   get hasAbnormalities(): boolean {
-    return this.followInstructions !== 'befolgt'
-      || this.msFace == 'leichte' ||this.msFace == 'ausgeprägte' || this.msFace == 'komplette'
+    return this.msFace == 'leichte' ||this.msFace == 'ausgeprägte' || this.msFace == 'komplette'
       || this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'
       || this.msLegLeft != 'ohne Absinken' || this.msLegRight != 'ohne Absinken'
-      || this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'
       || this.msTremor
-      || this.sensitivity.isActive || this.paraesthesia.isActive
-      || this.dysarthria == 'stumm' || this.dysarthria == 'unverständlich' || this.dysarthria == 'verwaschen'
-      || this.aphasia == 'globale' || this.aphasia == 'leichte' || this.aphasia == 'schwere'
+      || (!getCtx().isNonVerbal && (
+        this.followInstructions !== 'befolgt'
+        || this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'
+        || this.sensitivity.isActive || this.paraesthesia.isActive
+        || this.dysarthria == 'stumm' || this.dysarthria == 'unverständlich' || this.dysarthria == 'verwaschen'
+        || this.aphasia == 'globale' || this.aphasia == 'leichte' || this.aphasia == 'schwere'
+      ))
   }
 
   get needTreatment(): boolean {
@@ -250,6 +252,7 @@ export class DisabilityNeuro {
   }
 
   get summaryText(): string {
+    const isNonVerbal = getCtx().isNonVerbal
     const pareses = [
       textIf('Facialparese', this.msFace != ''),
       textIf('Armparese', this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'),
@@ -257,16 +260,17 @@ export class DisabilityNeuro {
     ].filter(Boolean)
 
     return [
-      textIf('Aphasie', (this.aphasia != '' && this.aphasia != 'keine')
-        || (this.dysarthria != '' && this.dysarthria != 'normal')),
+      textIf('Aphasie', !isNonVerbal && ((this.aphasia != '' && this.aphasia != 'keine')
+        || (this.dysarthria != '' && this.dysarthria != 'normal'))),
       pareses.length > 1 ? 'Parese' : pareses[0],
-      textIf('Störung Sensibilität', this.sensitivity.isActive),
-      textIf('Parästhesien', this.paraesthesia.isActive),
+      textIf('Störung Sensibilität', !isNonVerbal && this.sensitivity.isActive),
+      textIf('Parästhesien', !isNonVerbal && this.paraesthesia.isActive),
       this.neckStiffnessText,
-    ].filter(Boolean).join(', ') || 'keine Paresen/Parästhesien'
+    ].filter(Boolean).join(', ') || (isNonVerbal ? 'keine Paresen' : 'keine Paresen/Parästhesien')
   }
 
   get neckStiffnessText(): string {
+    if (getCtx().isNonVerbal) return ''
     if (this.msMeningism === 'leichter') return 'leichte Nackensteife'
     if (this.msMeningism === 'ausgeprägter') return 'ausgeprägte Nackensteife'
     return ''
@@ -281,6 +285,7 @@ export class DisabilityNeuro {
   }
 
   buildDetailsText(neckStiffness: string): string {
+    const isNonVerbal = getCtx().isNonVerbal
     const articulation: Record<typeof this.dysarthria, string> = {
       normal: '',
       verwaschen: 'verwaschene Artikulation',
@@ -307,15 +312,15 @@ export class DisabilityNeuro {
     })
 
     return concatDoku([
-      textIf(`Anweisungen ${this.followInstructions}`, this.followInstructions != 'befolgt'),
+      textIf(`Anweisungen ${this.followInstructions}`, !isNonVerbal && this.followInstructions != 'befolgt'),
       textIf(`${this.msFace} Fazialisparese`, this.msFace != ''),
       ...limbFindings,
-      neckStiffness,
+      textIf(neckStiffness, !isNonVerbal),
       textIf('Tremor/Myoklonien', this.msTremor),
-      textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), this.sensitivity.isActive),
-      textIf(prefixParaesthesis(this.paraesthesia.value), this.paraesthesia.isActive),
-      articulation[this.dysarthria],
-      textIf(`${this.aphasia} Aphasie`, this.aphasia != '' && this.aphasia != 'keine'),
+      textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), !isNonVerbal && this.sensitivity.isActive),
+      textIf(prefixParaesthesis(this.paraesthesia.value), !isNonVerbal && this.paraesthesia.isActive),
+      textIf(articulation[this.dysarthria], !isNonVerbal),
+      textIf(`${this.aphasia} Aphasie`, !isNonVerbal && this.aphasia != '' && this.aphasia != 'keine'),
     ], false)
   }
 

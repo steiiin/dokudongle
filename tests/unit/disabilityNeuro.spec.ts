@@ -1,7 +1,67 @@
-import { describe, expect, test } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { beforeEach, describe, expect, test } from 'vitest'
 
+import { useDokuStore } from '@/store/doku'
 import { DisabilityNeuro } from '@/types/protocol/abcde'
 import { OptionalValue } from '@/types/protocol/input'
+
+beforeEach(() => {
+  setActivePinia(createPinia())
+})
+
+describe('DisabilityNeuro non-verbal context', () => {
+  test.each([
+    {},
+    { followInstructions: 'teilweise befolgt' },
+    { followInstructions: 'nicht befolgt' },
+    { msMeningism: '' },
+    { msMeningism: 'kein' },
+    { msMeningism: 'leichter' },
+    { msMeningism: 'ausgeprägter' },
+    { sensitivity: OptionalValue.active('Taubheit li. Arm') },
+    { paraesthesia: OptionalValue.active('Kribbeln li. Arm') },
+    { dysarthria: '' },
+    { dysarthria: 'verwaschen' },
+    { dysarthria: 'unverständlich' },
+    { dysarthria: 'stumm' },
+    { aphasia: '' },
+    { aphasia: 'leichte' },
+    { aphasia: 'schwere' },
+    { aphasia: 'globale' },
+  ] satisfies Partial<DisabilityNeuro>[])('ignores inapplicable findings without mutating stored values: %j', finding => {
+    const store = useDokuStore()
+    const neuro: DisabilityNeuro = Object.assign(new DisabilityNeuro(), finding)
+    const originalValues = JSON.stringify(neuro)
+    const originalOutput = [neuro.text, neuro.symptomsText, neuro.summaryText, neuro.state, neuro.hasAbnormalities]
+
+    store.doku.flavors.non_verbal = true
+    expect(neuro.text).toBe('')
+    expect(neuro.symptomsText).toBe('')
+    expect(neuro.neckStiffnessText).toBe('')
+    expect(neuro.summaryText).toBe('keine Paresen')
+    expect(neuro.state).toBe('normal')
+    expect(neuro.hasAbnormalities).toBe(false)
+    expect(JSON.stringify(neuro)).toBe(originalValues)
+
+    store.doku.flavors.non_verbal = false
+    expect([neuro.text, neuro.symptomsText, neuro.summaryText, neuro.state, neuro.hasAbnormalities])
+      .toEqual(originalOutput)
+  })
+
+  test.each([
+    [{ msFace: 'leichte' }, 'leichte Fazialisparese', 'Facialparese'],
+    [{ msArmLeft: 'Absinken' }, 'Absinken Arm li', 'Armparese'],
+    [{ msLegRight: 'Absinken' }, 'Absinken Bein re', 'Beinparese'],
+    [{ msTremor: true }, 'Tremor/Myoklonien', 'keine Paresen'],
+  ] satisfies [Partial<DisabilityNeuro>, string, string][])('keeps applicable findings: %j', (finding, detail, summary) => {
+    useDokuStore().doku.flavors.non_verbal = true
+    const neuro = Object.assign(new DisabilityNeuro(), finding)
+    expect(neuro.text).toBe(detail)
+    expect(neuro.state).toBe(detail)
+    expect(neuro.hasAbnormalities).toBe(true)
+    expect(neuro.summaryText).toBe(summary)
+  })
+})
 
 describe('DisabilityNeuro text', () => {
   test('omits normal defaults and keeps the normal state', () => {
