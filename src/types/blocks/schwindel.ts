@@ -1,4 +1,4 @@
-import type { TextAreaBlockSourceState } from '@/types/text-area-block'
+import type { TextAreaBlockSourceState } from '@/types/blocks/text-area-block'
 
 export interface SchwindelDetails {
   onset: '' | 'plötzlicher Beginn' | 'schleichender Beginn'

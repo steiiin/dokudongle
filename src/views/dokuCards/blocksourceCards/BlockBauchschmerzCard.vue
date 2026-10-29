@@ -119,7 +119,7 @@ import { useDokuStore } from '@/store/doku'
 import {
   provocationOptions, palliationOptions, qualityOptions, radiationOptions, severityOptions, timeOptions,
   renderBauchschmerzText,
-} from '@/data/bauchschmerz'
+} from '@/data/blocks/bauchschmerz'
 
 const store = useDokuStore()
 const details = computed(() => store.doku.textAreaBlocks.bauchschmerz.details)

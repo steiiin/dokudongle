@@ -1,5 +1,5 @@
 import type { AssessedValue } from '@/types/protocol/input'
-import type { TextAreaBlockSourceState } from '@/types/text-area-block'
+import type { TextAreaBlockSourceState } from '@/types/blocks/text-area-block'
 
 export interface SchwangerschaftTerm {
   approx: string

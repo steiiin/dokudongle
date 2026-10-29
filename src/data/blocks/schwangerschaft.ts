@@ -1,7 +1,7 @@
 import { AssessedValue } from '@/types/protocol/input'
 import { PregnancySpan } from '@/types/protocol/pregnancy'
-import { TextAreaBlock } from '@/types/text-area-block'
-import type { SchwangerschaftBlockSourceState, SchwangerschaftDetails, SchwangerschaftTerm } from '@/types/schwangerschaft'
+import { TextAreaBlock } from '@/types/blocks/text-area-block'
+import type { SchwangerschaftBlockSourceState, SchwangerschaftDetails, SchwangerschaftTerm } from '@/types/blocks/schwangerschaft'
 import { concatDoku, prefix } from '@/utils/text'
 
 export function createSchwangerschaftBlockState(): SchwangerschaftBlockSourceState {

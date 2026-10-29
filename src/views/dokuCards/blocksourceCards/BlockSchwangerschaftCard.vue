@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useDokuStore } from '@/store/doku'
-import { pregnancySpanFromTerm, pregnancyTermFromSpan, renderSchwangerschaftText } from '@/data/schwangerschaft'
+import { pregnancySpanFromTerm, pregnancyTermFromSpan, renderSchwangerschaftText } from '@/data/blocks/schwangerschaft'
 import type { PregnancySpan } from '@/types/protocol/pregnancy'
 
 const store = useDokuStore()

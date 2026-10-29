@@ -1,15 +1,15 @@
-import { TextAreaBlock, type TextAreaBlockField, type TextAreaBlockSourceState } from '@/types/text-area-block'
-import type { SchwangerschaftBlockSourceState } from '@/types/schwangerschaft'
-import { createSchwangerschaftBlockState, SchwangerschaftTextAreaBlock } from '@/data/schwangerschaft'
-import type { SchwindelBlockSourceState } from '@/types/schwindel'
-import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/schwindel'
-import type { BauchschmerzBlockSourceState } from '@/types/bauchschmerz'
-import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock } from '@/data/bauchschmerz'
-import type { ExcretionsBowelsBlockSourceState, ExcretionsUrinaryBlockSourceState } from '@/types/excretions'
+import { TextAreaBlock, type TextAreaBlockField, type TextAreaBlockSourceState } from '@/types/blocks/text-area-block'
+import type { SchwangerschaftBlockSourceState } from '@/types/blocks/schwangerschaft'
+import { createSchwangerschaftBlockState, SchwangerschaftTextAreaBlock } from '@/data/blocks/schwangerschaft'
+import type { SchwindelBlockSourceState } from '@/types/blocks/schwindel'
+import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/blocks/schwindel'
+import type { BauchschmerzBlockSourceState } from '@/types/blocks/bauchschmerz'
+import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock } from '@/data/blocks/bauchschmerz'
+import type { ExcretionsBowelsBlockSourceState, ExcretionsUrinaryBlockSourceState } from '@/types/blocks/excretions'
 import {
   createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState,
   ExcretionsBowelsTextAreaBlock, ExcretionsUrinaryTextAreaBlock,
-} from '@/data/excretions'
+} from '@/data/blocks/excretions'
 
 export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
   schwangerschaft: SchwangerschaftBlockSourceState

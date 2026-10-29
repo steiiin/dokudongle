@@ -62,7 +62,7 @@ import { useDokuStore } from '@/store/doku'
 import {
   catheterIssuesOptions, hematuriaOptions, urinaryOutputOptions, urinaryPainOptions, urinaryAnomaliesOptions,
   renderExcretionsUrinaryText,
-} from '@/data/excretions'
+} from '@/data/blocks/excretions'
 
 const store = useDokuStore()
 const details = computed(() => store.doku.textAreaBlocks.excretions_urinary.details)

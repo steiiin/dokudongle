@@ -1,9 +1,9 @@
-import { TextAreaBlock } from '@/types/text-area-block'
+import { TextAreaBlock } from '@/types/blocks/text-area-block'
 import { OptionalValue } from '@/types/protocol/input'
 import type {
   ExcretionsBowelsBlockSourceState, ExcretionsBowelsDetails,
   ExcretionsUrinaryBlockSourceState, ExcretionsUrinaryDetails,
-} from '@/types/excretions'
+} from '@/types/blocks/excretions'
 import { concatDoku, prefix } from '@/utils/text'
 import { prefixVor } from '@/utils/prefix/general'
 

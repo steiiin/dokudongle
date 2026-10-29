@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState,
   ExcretionsBowelsTextAreaBlock, ExcretionsUrinaryTextAreaBlock,
-} from '@/data/excretions'
+} from '@/data/blocks/excretions'
 import { DATA_Quickies, resetQuickies } from '@/data/quickies'
 import { OptionalValue } from '@/types/protocol/input'
 import { useDokuStore } from '@/store/doku'

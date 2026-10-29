@@ -8,12 +8,12 @@ import { defineStore } from 'pinia'
 import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
-import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
-import { createSchwindelBlockState } from '@/data/schwindel'
-import { createSchwangerschaftBlockState } from '@/data/schwangerschaft'
-import { createBauchschmerzBlockState } from '@/data/bauchschmerz'
-import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/excretions'
-import { composeTextAreaText } from '@/types/text-area-block'
+import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
+import { createSchwindelBlockState } from '@/data/blocks/schwindel'
+import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
+import { createBauchschmerzBlockState } from '@/data/blocks/bauchschmerz'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/blocks/excretions'
+import { composeTextAreaText } from '@/types/blocks/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
   ProtocolAuditEntry,
