@@ -1,26 +1,24 @@
 <template>
 
-  <IonCard class="dodo-saamed-input">
-    <IonCardContent class="dodo-saamed-input-content">
-      <IonList v-if="modelValue.length > 0">
-        <IonReorderGroup :disabled="false" @ionItemReorder="handleReorder">
-          <IonItem v-for="(item, index) in modelValue"
-            :key="`${item.MedId}-${item.MedIndication}-${index}`"
-            @click="editItem(index)" lines="none" button>
-            <IonLabel>
-              <h3>{{ getMedName(item) }}</h3>
-              <p>{{ getIndicationName(item) }}</p>
-            </IonLabel>
-            <IonReorder slot="end" />
-          </IonItem>
-        </IonReorderGroup>
-      </IonList>
-      <IonButton expand="block" fill="solid" color="light" @click="openSelectModal">
-        <IonIcon slot="start" :icon="addCircle"></IonIcon>
-          Medikament hinzufügen
-      </IonButton>
-    </IonCardContent>
-  </IonCard>
+  <div class="dodo-saamed-input">
+    <IonList v-if="modelValue.length > 0">
+      <IonReorderGroup :disabled="false" @ionItemReorder="handleReorder">
+        <IonItem v-for="(item, index) in modelValue"
+          :key="`${item.MedId}-${item.MedIndication}-${index}`"
+          @click="editItem(index)" lines="none" button>
+          <IonLabel>
+            <h3>{{ getMedName(item) }}</h3>
+            <p>{{ getIndicationName(item) }}</p>
+          </IonLabel>
+          <IonReorder slot="end" />
+        </IonItem>
+      </IonReorderGroup>
+    </IonList>
+    <IonButton expand="block" fill="solid" color="light" @click="openSelectModal">
+      <IonIcon slot="start" :icon="addCircle"></IonIcon>
+        Medikament hinzufügen
+    </IonButton>
+  </div>
 
   <IonModal :is-open="isSelectModalOpen" @did-present="gainFocus(selectSearchbar)" @will-dismiss="closeSelectModal">
     <IonHeader>
@@ -349,11 +347,7 @@ const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
 
 <style scoped>
 .dodo-saamed-input {
-  --card-bg: transparent;
   margin: 4px;
-}
-.dodo-saamed-input-content {
-  padding: 0;
 }
 
 .dodo-saamed-dosage-chips {

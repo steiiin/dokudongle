@@ -3,7 +3,7 @@
 
     <DodoContainerCard title="Maßnahmen" card-in-card
       v-show="ctx.requireSaamed || ctx.requireRedflags">
-      <TaskMedicationsCard v-show="ctx.requireSaamed" />
+      <TaskInterventionsCard v-show="ctx.requireSaamed" />
       <TaskConsentCard v-show="ctx.requireRedflags" />
     </DodoContainerCard>
     <TaskCourseCard />
@@ -15,7 +15,7 @@
 <script setup lang="ts">
 
 import TaskRedflagsCard from './taskCards/TaskRedflagsCard.vue'
-import TaskMedicationsCard from './taskCards/TaskMedicationsCard.vue'
+import TaskInterventionsCard from './taskCards/TaskInterventionsCard.vue'
 import TaskCourseCard from './taskCards/TaskCourseCard.vue'
 import TaskConsentCard from './taskCards/TaskConsentCard.vue'
 

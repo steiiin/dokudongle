@@ -871,6 +871,7 @@ export const useDokuStore = defineStore('doku', {
       this.doku.textAreaBlocks.excretions_urinary = emptyProtocol.textAreaBlocks.excretions_urinary
       this.doku.sampler.symptoms = emptyProtocol.sampler.symptoms
       this.doku.saamed = emptyProtocol.saamed
+      this.doku.saatreats = emptyProtocol.saatreats
       this.doku.redflags = emptyProtocol.redflags
     },
     async downloadProtocolAuditJsonl() {
@@ -1244,6 +1245,7 @@ export const useDokuStore = defineStore('doku', {
       }
 
       // TREATMENT
+      text += textIf(breakDoku(state.doku.saatreats.getBlock(), true), this.context.requireSaamed)
       text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
       text += breakDoku(
         this.context.requireTasks
