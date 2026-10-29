@@ -5,7 +5,7 @@
       :disabled="store.isProtocolChanging" @click="reset">Neu
     </IonButton>
     <IonButton v-if="!store.isDongleConnected"
-      :fill="store.isDongleConnecting ? 'clear' : 'solid'" color="dark" :disabled="store.isDongleConnecting || store.connection.isSavingSettings"
+      :fill="store.isDongleConnecting ? 'clear' : 'solid'" color="dark" :disabled="store.isDongleConnecting || store.connection.isSavingSettings || store.connection.isTransmitting"
       @click="connectDongle">
       <IonSpinner v-if="store.isDongleConnecting" name="crescent" slot="end" style="width:16px;margin-left:.5rem"></IonSpinner>
       Verbinden

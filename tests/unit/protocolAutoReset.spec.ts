@@ -14,7 +14,7 @@ import { resetProtocol } from '@/types/protocol'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
 vi.mock('@capacitor-community/bluetooth-le', () => ({
-  BleClient: { startNotifications: vi.fn(), stopNotifications: vi.fn(), write: vi.fn() },
+  BleClient: { startNotifications: vi.fn(), stopNotifications: vi.fn(), write: vi.fn(), connect: vi.fn(), disconnect: vi.fn() },
 }))
 
 vi.mock('@/store/persistence', () => ({
@@ -334,6 +334,7 @@ describe('protocol lifecycle', () => {
     const { store, change } = await startLifecycle()
     store.doku.situation.setText('unfinished send')
     prepareSend(store)
+    vi.mocked(BleClient.connect).mockRejectedValue(new Error('Dongle unavailable'))
     const packet = deferred()
     vi.mocked(BleClient.write).mockImplementationOnce(async () => {
       await packet.promise
@@ -344,6 +345,13 @@ describe('protocol lifecycle', () => {
     await change(false)
     if (outcome === 'cancel') await store.cancelSend()
     packet.resolve()
+    if (outcome === 'failure') {
+      await flushPromises()
+      expect(store.connection.isTransmitting).toBe(true)
+      expect(store.wasCurrentProtocolSent()).toBe(false)
+      expect(store.doku.situation.value).toBe('unfinished send')
+      await store.cancelSend()
+    }
     expect(await send).toBe(false)
     await flushPromises()
     expect(store.wasCurrentProtocolSent()).toBe(false)
