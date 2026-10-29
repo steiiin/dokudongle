@@ -52,6 +52,20 @@ export class TreatmentSaamed {
     for (const indId of indicationOrder) {
       const group = tasks.filter(t => t.MedIndication === indId);
 
+      if (group.length === 1) {
+        const task = group[0];
+        const note = capitalizeBegin(task.noteText);
+        const doseAndNote = [task.dosageText, note].filter(Boolean).join(", ");
+        const cave = capitalizeBegin(task.contraText);
+        const caveSuffix = cave.length > 0 ? ` cave: ${cave};` : "";
+        const doseSuffix = doseAndNote.length > 0 ? ` ${doseAndNote};` : "";
+        saaLines.push(`SAA ${this.getMedName(task.MedId)} (${this.getIndicationName(indId)});${caveSuffix}${doseSuffix}`);
+
+        const consentHint = this.getIndication(task)?.consentHint ?? "";
+        if (consentHint.length > 0) saaLines.push(`${consentHint};`);
+        continue;
+      }
+
       // 3a) Cave lines: each task with contraText gets its own SAA line
       const caveTasks = group.filter(t => capitalizeBegin(t.contraText).length > 0);
       for (const t of caveTasks) {
@@ -91,6 +105,7 @@ export class TreatmentSaamed {
 
     for (const indId of indicationOrder) {
       const group = tasks.filter(t => t.MedIndication === indId);
+      if (group.length === 1) continue;
 
       const parts: string[] = [];
       for (const t of group) {

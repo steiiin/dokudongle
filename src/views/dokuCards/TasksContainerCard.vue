@@ -2,8 +2,8 @@
   <DodoContainerCard title="Aufgaben" card-in-card>
 
     <DodoContainerCard title="Maßnahmen" card-in-card
-      v-show="ctx.requireSaamed || ctx.requireRedflags">
-      <TaskInterventionsCard v-show="ctx.requireSaamed" />
+      v-show="ctx.allowInterventions || ctx.requireRedflags">
+      <TaskInterventionsCard v-show="ctx.allowInterventions" />
       <TaskConsentCard v-show="ctx.requireRedflags" />
     </DodoContainerCard>
     <TaskCourseCard />

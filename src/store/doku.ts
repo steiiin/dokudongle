@@ -1077,7 +1077,7 @@ export const useDokuStore = defineStore('doku', {
       const requireABCDE: boolean = isTransport && !isNoEmergencyCall && !isVerlegung
       const requireSampler: boolean = isTransport && !isVerlegung
       const requireSampleSymptoms: boolean = requireSampler && !isNoEmergencyCall
-      const requireSaamed: boolean = !isNoEmergencyCall
+      const allowInterventions: boolean = !isNoEmergencyCall
       const requireRedflags: boolean = !isNoEmergencyCall && isTransport && !isVerlegung
       const requireTasks: boolean = !(isEinweisung || isVerlegung)
       const isPediatric: boolean = state.doku.ident.age?.totalYears <= 4
@@ -1143,7 +1143,7 @@ export const useDokuStore = defineStore('doku', {
         requireABCDE,
         requireSampler,
         requireSampleSymptoms,
-        requireSaamed,
+        allowInterventions,
         requireRedflags,
         requireTasks,
 
@@ -1245,8 +1245,14 @@ export const useDokuStore = defineStore('doku', {
       }
 
       // TREATMENT
-      text += textIf(breakDoku(state.doku.saatreats.getBlock(), true), this.context.requireSaamed)
-      text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
+      text += textIf(
+        breakDoku(
+          [
+            state.doku.saatreats.getBlock(),
+            state.doku.saamed.getBlock()
+          ], true
+        ), this.context.allowInterventions
+      )
       text += breakDoku(
         this.context.requireTasks
         ? placeholder(this.freeformText.treatment, 'Verlauf')

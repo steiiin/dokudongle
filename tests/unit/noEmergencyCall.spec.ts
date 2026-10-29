@@ -157,7 +157,7 @@ describe('Fehlfahrt flavor', () => {
     expect(store.context.requireABCDE).toBe(false)
     expect(store.context.requireSampler).toBe(true)
     expect(store.context.requireSampleSymptoms).toBe(false)
-    expect(store.context.requireSaamed).toBe(false)
+    expect(store.context.allowInterventions).toBe(false)
     expect(store.context.requireRedflags).toBe(false)
 
     expect(store.generatedProtocol).toContain('SITUATION_MARKER')

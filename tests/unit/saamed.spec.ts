@@ -7,6 +7,59 @@ describe('SAAMED compatibility', () => {
   const originalAdrenalin = DATA_SaamedMeta.adrenalin
   afterEach(() => { DATA_SaamedMeta.adrenalin = originalAdrenalin })
 
+  test('renders no block without medication entries', () => {
+    expect(new TreatmentSaamed().getBlock()).toBe('')
+  })
+
+  test.each([
+    ['250mg iv', '', 'SAA ASS (ACS); 250mg iv;'],
+    ['', '', 'SAA ASS (ACS);'],
+    ['250mg iv', 'notiz', 'SAA ASS (ACS); 250mg iv, Notiz;'],
+    ['', 'notiz', 'SAA ASS (ACS); Notiz;'],
+  ])('renders a single entry with dose %j and note %j inline', (dose, note, line) => {
+    const treatment = new TreatmentSaamed()
+    treatment.medTasks = [new ConsentMedTask('ass', 'acs', dose, true, '', note)]
+    expect(treatment.getBlock()).toBe([
+      line,
+      'keine Unverträglichkeit; kein Hinweis auf relevante KI:',
+    ].join('\n'))
+  })
+
+  test('renders single entries inline in indication order', () => {
+    const treatment = new TreatmentSaamed()
+    treatment.medTasks = [
+      new ConsentMedTask('furosemid', 'lungenödem', '40mg iv', true, '', ''),
+      new ConsentMedTask('ass', 'acs', '250mg iv', true, '', ''),
+    ]
+    expect(treatment.getBlock()).toBe([
+      'SAA Furosemid (Lungenödem); 40mg iv;',
+      'SAA ASS (ACS); 250mg iv;',
+      'keine Unverträglichkeit; kein Hinweis auf relevante KI:',
+    ].join('\n'))
+  })
+
+  test('preserves cave, note and consent text for a single entry', () => {
+    const treatment = new TreatmentSaamed()
+    treatment.medTasks = [new ConsentMedTask('dimenhydrinat', 'erbrechen', 'dokumentierte Dosis', false, 'begründung', 'notiz')]
+    expect(treatment.getBlock()).toBe([
+      'SAA Dimenhydrinat (Anhaltendes Erbrechen); cave: Begründung; dokumentierte Dosis, Notiz;',
+      'Aufkl.: kein Fahrzeug führen/Sturzrisiko bis 24h;',
+      'sonst keine Hinweise auf relevante KI oder Unverträglichkeit:',
+    ].join('\n'))
+  })
+
+  test('keeps separate dose output for repeated entries of the same medication and indication', () => {
+    const treatment = new TreatmentSaamed()
+    treatment.medTasks = [
+      new ConsentMedTask('adrenalin', 'rea', 'erste Dosis', true, '', ''),
+      new ConsentMedTask('adrenalin', 'rea', 'zweite Dosis', true, '', 'notiz'),
+    ]
+    expect(treatment.getBlock()).toBe([
+      'SAA Adrenalin (Reanimation);',
+      'Adrenalin erste Dosis (Reanimation); Adrenalin zweite Dosis (Reanimation), Notiz;',
+    ].join('\n'))
+  })
+
   test.each([
     ['ass', 'acs', 'ACS'],
     ['dimenhydrinat', 'erbrechen', 'Anhaltendes Erbrechen'],
@@ -66,10 +119,9 @@ describe('SAAMED compatibility', () => {
     ]))
     expect(treatment.getBlock()).toBe([
       'SAA ASS+Heparin (ACS);',
-      'SAA Furosemid (Lungenödem);',
+      'SAA Furosemid (Lungenödem); 40mg iv;',
       'keine Unverträglichkeit; kein Hinweis auf relevante KI:',
       'ASS 250mg iv; Heparin 5000IE iv;',
-      'Furosemid 40mg iv;',
     ].join('\n'))
   })
 
@@ -78,9 +130,8 @@ describe('SAAMED compatibility', () => {
     treatment.medTasks = [new ConsentMedTask('dimenhydrinat', 'erbrechen', '', true, '', '')]
     expect(treatment.getBlock()).toBe([
       'SAA Dimenhydrinat (Anhaltendes Erbrechen);',
-      'keine Unverträglichkeit; kein Hinweis auf relevante KI:',
-      'Dimenhydrinat',
       'Aufkl.: kein Fahrzeug führen/Sturzrisiko bis 24h;',
+      'keine Unverträglichkeit; kein Hinweis auf relevante KI:',
     ].join('\n'))
   })
 
@@ -96,7 +147,6 @@ describe('SAAMED compatibility', () => {
     expect(treatment.getBlock()).toBe([
       `SAA Adrenalin (${name});`,
       ...(requiresCheck ? ['keine Unverträglichkeit; kein Hinweis auf relevante KI:'] : []),
-      'Adrenalin;',
     ].join('\n'))
   })
 
@@ -105,7 +155,6 @@ describe('SAAMED compatibility', () => {
     treatment.medTasks = [new ConsentMedTask('adrenalin', 'alte indikation', '', true, '', '')]
     expect(treatment.getBlock()).toBe([
       'SAA Adrenalin (Alte indikation);',
-      'Adrenalin;',
     ].join('\n'))
   })
 
@@ -115,7 +164,6 @@ describe('SAAMED compatibility', () => {
     expect(treatment.getBlock()).toBe([
       'SAA ASS (ACS);',
       'sonst keine Hinweise auf relevante KI oder Unverträglichkeit:',
-      'ASS;',
     ].join('\n'))
   })
 
@@ -123,8 +171,7 @@ describe('SAAMED compatibility', () => {
     const treatment = new TreatmentSaamed()
     treatment.medTasks = [new ConsentMedTask('altes medikament', 'alte indikation', 'eigene Dosis', true, '', '')]
     expect(treatment.getBlock()).toBe([
-      'SAA Altes medikament (Alte indikation);',
-      'Altes medikament eigene Dosis;',
+      'SAA Altes medikament (Alte indikation); eigene Dosis;',
     ].join('\n'))
   })
 
@@ -143,14 +190,14 @@ describe('SAAMED compatibility', () => {
     DATA_SaamedMeta.adrenalin = med
     const treatment = new TreatmentSaamed()
     treatment.medTasks = [new ConsentMedTask('adrenalin', 'rea', 'dokumentierte Dosis', true, '', '')]
-    expect(treatment.getBlock()).toBe('SAA Adrenalin (Reanimation);\nAdrenalin dokumentierte Dosis\nErster Hinweis;')
+    expect(treatment.getBlock()).toBe('SAA Adrenalin (Reanimation); dokumentierte Dosis;\nErster Hinweis;')
     treatment.medTasks.push(new ConsentMedTask('adrenalin', 'bradykardie', '', true, '', 'notiz'))
     expect(treatment.getBlock()).toBe([
-      'SAA Adrenalin (Reanimation);',
-      'SAA Adrenalin (Bradykardie);',
+      'SAA Adrenalin (Reanimation); dokumentierte Dosis;',
+      'Erster Hinweis;',
+      'SAA Adrenalin (Bradykardie); Notiz;',
+      'Zweiter Hinweis;',
       'keine Unverträglichkeit; kein Hinweis auf relevante KI:',
-      'Adrenalin dokumentierte Dosis (Reanimation)\nErster Hinweis;',
-      'Adrenalin (Bradykardie), Notiz\nZweiter Hinweis;',
     ].join('\n'))
   })
 

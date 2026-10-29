@@ -38,3 +38,8 @@ watch(() => store.doku.saamed.medTasks.length, (length) => {
   }
 })
 </script>
+<style scoped>
+  ion-card-content {
+    padding: 2px 0 !important;
+  }
+</style>

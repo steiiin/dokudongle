@@ -3,7 +3,9 @@
     <IonList v-if="selectedChips.length">
       <IonReorderGroup :disabled="false" @ionItemReorder="handleReorder">
         <IonItem v-for="chip in selectedChips" :key="chip.id" lines="none" button @click="openModal">
-          <IonLabel>{{ chip.label }}</IonLabel>
+          <IonLabel>
+            <h3>{{ chip.label }}</h3>
+          </IonLabel>
           <IonReorder slot="end" />
         </IonItem>
       </IonReorderGroup>

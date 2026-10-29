@@ -1,24 +1,13 @@
 import type { SaatreatGroup } from '@/types/lists/saatreats'
 
-// Preliminary example catalog. The PVK exclusion demonstrates the selection
-// behavior and is not a clinical rule; adapt the catalog before expanding it.
 export const DATA_Saatreats: SaatreatGroup[] = [
   {
     id: 'gefaesszugang',
-    name: 'Gefäßzugang',
+    name: 'Zugang',
     chips: [
-      { id: 'pvk-18g', label: 'PVK 18 G', protocolText: 'PVK 18 G', exclusiveGroupId: 'pvk' },
-      { id: 'pvk-20g', label: 'PVK 20 G', protocolText: 'PVK 20 G', exclusiveGroupId: 'pvk' },
-      { id: 'pvk-22g', label: 'PVK 22 G', protocolText: 'PVK 22 G', exclusiveGroupId: 'pvk' },
-      { id: 'intraossaer', label: 'Intraossärer Zugang', protocolText: 'Intraossärer Zugang' },
-    ],
-  },
-  {
-    id: 'atemweg',
-    name: 'Atemweg',
-    chips: [
-      { id: 'endotracheal', label: 'Endotracheale Intubation', protocolText: 'Endotracheale Intubation' },
-      { id: 'supraglottisch', label: 'Supraglottischer Atemweg', protocolText: 'Supraglottischer Atemweg' },
+      { id: 'pvk', label: 'i.v.-Zugang', protocolText: 'pVK', exclusiveGroupId: 'pvk' },
+      { id: 'pvk-vel', label: 'i.v.-Zugang+Infusion', protocolText: 'pVK+VEL', exclusiveGroupId: 'pvk' },
+      { id: 'io', label: 'i.o.-Zugang', protocolText: 'iO-Zugang' },
     ],
   },
 ]

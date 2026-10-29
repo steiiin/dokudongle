@@ -155,7 +155,7 @@ export interface ProtocolContext {
   requireABCDE: boolean,
   requireSampler: boolean,
   requireSampleSymptoms: boolean,
-  requireSaamed: boolean,
+  allowInterventions: boolean,
   requireRedflags: boolean,
   requireTasks: boolean,
 

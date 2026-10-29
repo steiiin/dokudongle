@@ -5,6 +5,6 @@ export class TreatmentSaatreats {
 
   public getBlock(): string {
     const texts = selectedSaatreatChips(this.selectedIds).map(chip => chip.protocolText)
-    return texts.length ? `${texts.join('; ')};` : ''
+    return texts.length ? `${texts.join('; ')}.` : ''
   }
 }

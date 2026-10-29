@@ -50,7 +50,7 @@
     </IonContent>
   </IonModal>
 
-  <IonModal :is-open="isEditModalOpen" @will-dismiss="cancelEdit">
+  <IonModal :is-open="isEditModalOpen" @did-present="focusEmptyDosage" @will-dismiss="cancelEdit">
     <IonHeader>
       <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
@@ -78,6 +78,7 @@
         </IonItemDivider>
         <IonItem lines="none">
           <DodoInputText v-model="currentTask.dosageText"
+            ref="dosageInput"
             label="Dosierung" :placeholder="currentOption?.indication.dosageHint">
           </DodoInputText>
         </IonItem>
@@ -202,6 +203,7 @@ const closeSelectModal = () => {
 // ############################################################################
 
 const currentNew = ref(false)
+const dosageInput = ref<{ setFocus: () => void } | null>(null)
 const currentTask = ref<ConsentMedTask>(new ConsentMedTask('', '', '', true, '', ''))
 const currentIndex = ref<number>(-1)
 const currentOption = ref<ConsentMedOption | null>(null)
@@ -223,6 +225,12 @@ const visibleDosageChips = computed(() => (
     color: dosageChipPalette[groupIndex % dosageChipPalette.length],
   }))
 }))
+
+const focusEmptyDosage = () => {
+  if (currentNew.value && !currentTask.value.dosageText.trim()) {
+    dosageInput.value?.setFocus()
+  }
+}
 
 const appendDosageChip = (chip: DosageChip) => {
   if (!visibleDosageChips.value.some(visibleChip => visibleChip.id === chip.id)) return
