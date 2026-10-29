@@ -195,9 +195,7 @@ for (const width of [320, 1024]) {
         close()
         cy.get('@exposure').find(`[data-examination="${id}"]`).should('contain.text',
           id === 'excretions' ? 'transurethraler DK, Wasserlassen/Stuhlgang path.' : 'starke Abwehrspannung')
-        if (id === 'excretions') cy.get('@exposure').find('.add-treatment').should('be.visible')
         cy.get('@exposure').find(`[data-examination="${id}"] .remove-examination`).click()
-        cy.get('@exposure').find('.add-treatment').should('not.exist')
         add(id)
         cy.get('@exposure').find(`[data-examination="${id}"]`).should('contain.text', summary)
       }
@@ -213,18 +211,14 @@ for (const width of [320, 1024]) {
         .and('have.attr', 'data-examination', 'abdominal')
     })
 
-    it('keeps permanent Exposure controls and the treatment footer usable', () => {
+    it('keeps permanent Exposure controls usable', () => {
       cy.visit('/tests/e2e/fixtures/examination.html?exposure')
       cy.contains('ion-card', 'E - Exposure').as('exposure')
       cy.get('@exposure').find('.dd-input-temp input').clear().type('38').blur()
-      cy.get('@exposure').find('.add-treatment').should('be.visible')
       cy.get('@exposure').find('.dd-input-temp input').clear().type('36.5').blur()
-      cy.get('@exposure').find('.add-treatment').should('not.exist')
       for (const label of ['Eingenässt?', 'Übelkeit?']) {
         cy.get('@exposure').contains('ion-toggle', label).click().should('have.prop', 'checked', true)
-        cy.get('@exposure').find('.add-treatment').should('be.visible')
         cy.get('@exposure').contains('ion-toggle', label).click().should('have.prop', 'checked', false)
-        cy.get('@exposure').find('.add-treatment').should('not.exist')
       }
       cy.get('@exposure').contains('ion-item', 'Erbrechen').click()
       cy.get('ion-modal:visible').should(expectFocusWithin)
@@ -235,10 +229,6 @@ for (const width of [320, 1024]) {
       cy.get('ion-modal:visible').find('ion-header ion-button').click()
       cy.get('ion-modal:visible').should('not.exist')
       cy.get('@exposure').should('contain.text', 'einmalig erbrochen')
-      cy.get('@exposure').find('.add-treatment').click()
-      cy.get('@exposure').find('.dd-input-text input').should('have.attr', 'placeholder', 'z.B. Rettungsdecke')
-        .type('Rettungsdecke').blur()
-      cy.get('@exposure').find('.dd-input-text').should('have.prop', 'value', 'Rettungsdecke')
       cy.get('@exposure').find('.examination-item').should('not.exist')
     })
 

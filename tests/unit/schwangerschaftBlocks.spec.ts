@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   createSchwangerschaftBlockState, pregnancySpanFromTerm, pregnancyTermFromSpan,
   SchwangerschaftTextAreaBlock,
-} from '@/data/schwangerschaft'
+} from '@/data/blocks/schwangerschaft'
 import { DATA_Quickies, resetQuickies } from '@/data/quickies'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
@@ -82,7 +82,7 @@ describe('pregnancy findings in E', () => {
         renderStubDefaultSlot: true,
         stubs: {
           ...Object.fromEntries(Object.keys(Ionic).filter(key => key.startsWith('Ion')).map(key => [key, true])),
-          DodoInputTemperature: true, DodoInputTreatment: true,
+          DodoInputTemperature: true,
         },
       },
     })

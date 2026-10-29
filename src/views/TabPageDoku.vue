@@ -36,8 +36,8 @@
           <!-- SAMPLE -->
           <SampleContainerCard v-show="ctx.requireSampler"></SampleContainerCard>
 
-          <!-- BEHANDLUNG -->
-          <TreatmentContainerCard></TreatmentContainerCard>
+          <!-- AUFGABEN -->
+          <TasksContainerCard></TasksContainerCard>
 
         </div>
 
@@ -63,7 +63,7 @@ import BlockVerlegungCard from './dokuCards/blocksourceCards/BlockVerlegungCard.
 import BlockEinweisungCard from './dokuCards/blocksourceCards/BlockEinweisungCard.vue'
 import AbcdeContainerCard from './dokuCards/AbcdeContainerCard.vue'
 import SampleContainerCard from './dokuCards/SampleContainerCard.vue'
-import TreatmentContainerCard from './dokuCards/TreatmentContainerCard.vue'
+import TasksContainerCard from './dokuCards/TasksContainerCard.vue'
 
 // ############################################################################
 

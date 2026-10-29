@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { IonIcon } from '@ionic/vue'
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons'
-import type { RenderedTextAreaBlock } from '@/types/text-area-block'
+import type { RenderedTextAreaBlock } from '@/types/blocks/text-area-block'
 
 defineProps<{ blocks: readonly RenderedTextAreaBlock[] }>()
 defineEmits<{ (e: 'activation-change', id: string, active: boolean): void }>()

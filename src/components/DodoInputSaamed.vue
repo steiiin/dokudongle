@@ -1,26 +1,24 @@
 <template>
 
-  <IonCard class="dodo-saamed-input">
-    <IonCardContent class="dodo-saamed-input-content">
-      <IonList v-if="modelValue.length > 0">
-        <IonReorderGroup :disabled="false" @ionItemReorder="handleReorder">
-          <IonItem v-for="(item, index) in modelValue"
-            :key="`${item.MedId}-${item.MedIndication}-${index}`"
-            @click="editItem(index)" lines="none" button>
-            <IonLabel>
-              <h3>{{ getMedName(item) }}</h3>
-              <p>{{ getIndicationName(item) }}</p>
-            </IonLabel>
-            <IonReorder slot="end" />
-          </IonItem>
-        </IonReorderGroup>
-      </IonList>
-      <IonButton expand="block" fill="solid" color="light" @click="openSelectModal">
-        <IonIcon slot="start" :icon="addCircle"></IonIcon>
-          Medikament hinzufügen
-      </IonButton>
-    </IonCardContent>
-  </IonCard>
+  <div class="dodo-saamed-input">
+    <IonList v-if="modelValue.length > 0">
+      <IonReorderGroup :disabled="false" @ionItemReorder="handleReorder">
+        <IonItem v-for="(item, index) in modelValue"
+          :key="`${item.MedId}-${item.MedIndication}-${index}`"
+          @click="editItem(index)" lines="none" button>
+          <IonLabel>
+            <h3>{{ getMedName(item) }}</h3>
+            <p>{{ getIndicationName(item) }}</p>
+          </IonLabel>
+          <IonReorder slot="end" />
+        </IonItem>
+      </IonReorderGroup>
+    </IonList>
+    <IonButton expand="block" fill="solid" color="light" @click="openSelectModal">
+      <IonIcon slot="start" :icon="addCircle"></IonIcon>
+        Medikament hinzufügen
+    </IonButton>
+  </div>
 
   <IonModal :is-open="isSelectModalOpen" @did-present="gainFocus(selectSearchbar)" @will-dismiss="closeSelectModal">
     <IonHeader>
@@ -38,11 +36,11 @@
         ref="selectSearchbar" placeholder="Medikament suchen">
       </IonSearchbar>
       <IonList>
-        <template v-for="group in groupedOptions" :key="group.indication.Id">
+        <template v-for="group in groupedOptions" :key="group.indicationId">
           <IonItemDivider>
-            <IonLabel class="saamed-indication">{{ group.indication.Name }}</IonLabel>
+            <IonLabel class="saamed-indication">{{ group.indication.name }}</IonLabel>
           </IonItemDivider>
-          <IonItem v-for="option in group.options" :key="`${group.indication.Id}-${option.med.id}`"
+          <IonItem v-for="option in group.options" :key="`${group.indicationId}-${option.med.id}`"
             lines="none" button
             @click="selectOption(option)">
             <IonLabel>{{ option.med.Name }}</IonLabel>
@@ -52,7 +50,7 @@
     </IonContent>
   </IonModal>
 
-  <IonModal :is-open="isEditModalOpen" @will-dismiss="cancelEdit">
+  <IonModal :is-open="isEditModalOpen" @did-present="focusEmptyDosage" @will-dismiss="cancelEdit">
     <IonHeader>
       <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
@@ -80,20 +78,30 @@
         </IonItemDivider>
         <IonItem lines="none">
           <DodoInputText v-model="currentTask.dosageText"
-            label="Dosierung" placeholder="z.B. 1g KI">
+            ref="dosageInput"
+            label="Dosierung" :placeholder="currentOption?.indication.dosageHint">
           </DodoInputText>
         </IonItem>
+
+        <div v-if="visibleDosageChips.length > 0" class="dodo-saamed-dosage-chips">
+          <IonChip v-for="chip in visibleDosageChips" :key="chip.id" :color="chip.color"
+            role="button" tabindex="0" @click="appendDosageChip(chip)"
+            @keydown.enter.prevent="appendDosageChip(chip)"
+            @keydown.space.prevent="appendDosageChip(chip)">
+            {{ chip.text }}
+          </IonChip>
+        </div>
 
         <template v-if="requiresContraCheck">
           <IonItemDivider>
             <IonLabel>Kontraindikationen</IonLabel>
           </IonItemDivider>
-          <DodoInputToggle lines="full" v-model="currentTask.contraOk">
-            Kontraindikationen ausgeschlossen?
+          <DodoInputToggle lines="none" v-model="currentTask.contraOk">
+            {{ currentTask.contraOk ? 'Kontraindikationen ausgeschlossen?' : 'Relative Kontraindikationen' }}
           </DodoInputToggle>
           <IonItem v-if="currentTask.contraOk === false" lines="none">
             <DodoInputText v-model="currentTask.contraText"
-              label="Kontraindikationen" placeholder="z.B. Schwangerschaft">
+              label="Warum trotzdem?" :placeholder="currentOption?.indication.contraReason ?? 'Begründung eingeben …'">
             </DodoInputText>
           </IonItem>
         </template>
@@ -110,11 +118,13 @@
 
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { closeOutline, addCircle } from 'ionicons/icons'
 
 import type { ItemReorderEventDetail } from '@ionic/core'
-import { ConsentMedOption, ConsentMedTask, DATA_SaamedOptions } from '@/data/meds'
+import { DATA_SaamedOptions } from '@/data/lists/saamed'
+import { ConsentMedTask } from '@/types/lists/saamed'
+import type { ConsentMedOption } from '@/types/lists/saamed'
 import { gainFocus } from '@/utils/input';
 
 // ############################################################################
@@ -136,7 +146,7 @@ const selectSearchbar = ref<any | null>(null)
 
 const isSelectedOption = (option: ConsentMedOption): boolean => {
   return props.modelValue.some((task) => (
-    task.MedId === option.med.id && task.MedIndication === option.indication.Id
+    task.MedId === option.med.id && task.MedIndication === option.indicationId
   ))
 }
 
@@ -148,12 +158,12 @@ const groupedOptions = computed(() => {
       `${option.med.Name} ${option.med.alternativeName ?? ''}`
     )
   ))
-  const groups = new Map<string, { indication: ConsentMedOption['indication'], options: Array<ConsentMedOption> }>()
+  const groups = new Map<string, { indicationId: ConsentMedOption['indicationId'], indication: ConsentMedOption['indication'], options: Array<ConsentMedOption> }>()
   for (const option of options) {
-    if (!groups.has(option.indication.Id)) {
-      groups.set(option.indication.Id, { indication: option.indication, options: [] })
+    if (!groups.has(option.indicationId)) {
+      groups.set(option.indicationId, { indicationId: option.indicationId, indication: option.indication, options: [] })
     }
-    groups.get(option.indication.Id)?.options.push(option)
+    groups.get(option.indicationId)?.options.push(option)
   }
   return Array.from(groups.values())
 })
@@ -169,14 +179,14 @@ const currentOptionLabel = computed(() => {
   if (!currentOption.value) {
     return ''
   }
-  return `${currentOption.value.indication.Name} · ${currentOption.value.med.Name}`
+  return `${currentOption.value.indication.name} · ${currentOption.value.med.Name}`
 })
 
 const requiresContraCheck = computed(() => {
   if (!currentOption.value) {
     return false
   }
-  return currentOption.value.med.requiresContraCheck?.has(currentOption.value.indication.Id) ?? false
+  return currentOption.value.indication.requiresContracheck
 })
 
 // ############################################################################
@@ -193,9 +203,41 @@ const closeSelectModal = () => {
 // ############################################################################
 
 const currentNew = ref(false)
+const dosageInput = ref<{ setFocus: () => void } | null>(null)
 const currentTask = ref<ConsentMedTask>(new ConsentMedTask('', '', '', true, '', ''))
 const currentIndex = ref<number>(-1)
 const currentOption = ref<ConsentMedOption | null>(null)
+type DosageChip = { id: string, groupIndex: number, text: string, color: string }
+const dosageChipPalette = ['primary', 'tertiary', 'success', 'warning', 'secondary']
+const usedDosageGroups = ref(new Set<number>())
+const dosageChipsLocked = ref(false)
+watch(() => currentTask.value.dosageText, (dosage) => {
+  if (!dosage.trim()) dosageChipsLocked.value = false
+})
+const visibleDosageChips = computed(() => (
+  dosageChipsLocked.value ? [] : currentOption.value?.indication.dosageChips ?? []
+).flatMap((entry, groupIndex): DosageChip[] => {
+  if (usedDosageGroups.value.has(groupIndex)) return []
+  return (Array.isArray(entry) ? entry : [entry]).map((text, chipIndex) => ({
+    id: `${groupIndex}-${chipIndex}`,
+    groupIndex,
+    text,
+    color: dosageChipPalette[groupIndex % dosageChipPalette.length],
+  }))
+}))
+
+const focusEmptyDosage = () => {
+  if (currentNew.value && !currentTask.value.dosageText.trim()) {
+    dosageInput.value?.setFocus()
+  }
+}
+
+const appendDosageChip = (chip: DosageChip) => {
+  if (!visibleDosageChips.value.some(visibleChip => visibleChip.id === chip.id)) return
+  const dosage = currentTask.value.dosageText.trimEnd()
+  currentTask.value.dosageText = dosage ? `${dosage} ${chip.text}` : chip.text
+  usedDosageGroups.value.add(chip.groupIndex)
+}
 
 const selectOption = (option: ConsentMedOption) => {
   closeSelectModal()
@@ -203,13 +245,15 @@ const selectOption = (option: ConsentMedOption) => {
 }
 
 const startNewTask = (option: ConsentMedOption) => {
+  dosageChipsLocked.value = false
   currentNew.value = true
   currentIndex.value = -1
   currentOption.value = option
+  usedDosageGroups.value = new Set()
   currentTask.value = new ConsentMedTask(
     option.med.id,
-    option.indication.Id,
-    option.med.defaultDosage,
+    option.indicationId,
+    '',
     true,
     '',
     ''
@@ -226,6 +270,8 @@ const editItem = (index: number) => {
   currentNew.value = false
   currentIndex.value = index
   currentOption.value = option
+  usedDosageGroups.value = new Set()
+  dosageChipsLocked.value = Boolean(task.dosageText.trim())
   currentTask.value = new ConsentMedTask(
     task.MedId,
     task.MedIndication,
@@ -241,6 +287,8 @@ const cancelEdit = () => {
   currentNew.value = false
   currentIndex.value = -1
   currentOption.value = null
+  usedDosageGroups.value = new Set()
+  dosageChipsLocked.value = false
   currentTask.value = new ConsentMedTask('', '', '', false, '', '')
   isEditModalOpen.value = false
 }
@@ -285,7 +333,7 @@ const fuzzyMatch = (search: string, target: string): boolean => {
 }
 
 const findOption = (medId: string, indicationId: string): ConsentMedOption | null => {
-  return DATA_SaamedOptions().find(option => option.med.id === medId && option.indication.Id === indicationId) ?? null
+  return DATA_SaamedOptions().find(option => option.med.id === medId && option.indicationId === indicationId) ?? null
 }
 
 const getMedName = (task: ConsentMedTask): string => {
@@ -293,7 +341,7 @@ const getMedName = (task: ConsentMedTask): string => {
 }
 
 const getIndicationName = (task: ConsentMedTask): string => {
-  return findOption(task.MedId, task.MedIndication)?.indication.Name ?? task.MedIndication
+  return findOption(task.MedId, task.MedIndication)?.indication.name ?? task.MedIndication
 }
 
 const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
@@ -307,17 +355,14 @@ const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
 
 <style scoped>
 .dodo-saamed-input {
-  --card-bg: transparent;
   margin: 4px;
 }
-.dodo-saamed-input-content {
-  padding: 0;
-}
 
-.dodo-saamed-input-dosage {
-  margin: 4px 0 0 0;
-  font-size: 0.9rem;
-  color: var(--ion-color-medium);
+.dodo-saamed-dosage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 16px 8px 16px;
+  margin-inline: -6px;
 }
 
 .saamed-indication  {

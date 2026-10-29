@@ -1,5 +1,5 @@
-import { TextAreaBlock } from '@/types/text-area-block'
-import type { BauchschmerzBlockSourceState, BauchschmerzDetails, BauchschmerzRegion } from '@/types/bauchschmerz'
+import { TextAreaBlock } from '@/types/blocks/text-area-block'
+import type { BauchschmerzBlockSourceState, BauchschmerzDetails, BauchschmerzRegion } from '@/types/blocks/bauchschmerz'
 import { concatDoku, prefix } from '@/utils/text'
 import { prefixSeit } from '@/utils/prefix/general'
 

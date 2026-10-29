@@ -18,7 +18,7 @@ import { useDokuStore } from '@/store/doku'
 
 const global = {
   renderStubDefaultSlot: true,
-  stubs: { ...Object.fromEntries(Object.keys(Ionic).filter(key => key.startsWith('Ion')).map(key => [key, true])), DodoInputText: true, DodoInputTreatment: true },
+  stubs: { ...Object.fromEntries(Object.keys(Ionic).filter(key => key.startsWith('Ion')).map(key => [key, true])), DodoInputText: true },
 }
 enableAutoUnmount(afterEach)
 beforeEach(() => setActivePinia(createPinia()))
@@ -44,7 +44,6 @@ function fixture(assessedPresets = false) {
         <DodoItemModal ref="modal" label="Details"><span>Modal content</span></DodoItemModal>
       </DodoExaminationItem>
       <DodoExaminationItem id="select" label="Select" v-model:assessed="selectAssessed" @activate="select.open()" />
-      <template #footer><span class="footer">Treatment</span></template>
     </DodoExaminationCard>`,
     data: () => ({ selectAssessed: false }),
   }), { global })
@@ -66,7 +65,6 @@ describe('examination picker', () => {
     await nextTick()
     expect(f.rows().map(row => row.text())).toEqual(['First', 'Custom second', 'Select'])
     expect(f.card.find('.finding').exists()).toBe(false)
-    expect(f.card.find('.footer').text()).toBe('Treatment')
     await f.open()
     const row = f.rows()[0]
     await row.trigger('click')

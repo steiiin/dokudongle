@@ -1,4 +1,4 @@
-import type { TextAreaBlockSourceState } from '@/types/text-area-block'
+import type { TextAreaBlockSourceState } from '@/types/blocks/text-area-block'
 
 export type BauchschmerzRegion = Record<
   'obli' | 'obmi' | 'obre' | 'mbli' | 'mbmi' | 'mbre' | 'ubli' | 'ubmi' | 'ubre', boolean

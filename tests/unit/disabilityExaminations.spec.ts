@@ -388,8 +388,7 @@ describe('Disability persistence', () => {
         const store = useDokuStore()
         const payload = {
           schemaVersion: 1, savedAt: new Date().toISOString(),
-          doku: { xabcDe: {
-            treatment: 'Existing treatment',
+          doku: { situation: { _text: 'Existing situation' }, xabcDe: {
             headache: { assessed, value: abnormal },
             dizziness: { assessed, value: abnormal ? 'gerichteter' : 'kein' },
           } },

@@ -1,5 +1,7 @@
 import { capitalizeBegin } from "@/utils/text";
-import { DATA_SaamedIndications, DATA_SaamedMeta, ConsentMedTask } from "@/data/meds"
+import { DATA_SaamedIndicationNames, DATA_SaamedMeta } from "@/data/lists/saamed"
+import { isSaamedIndication } from "@/types/lists/saamed"
+import type { ConsentMedTask } from "@/types/lists/saamed"
 
 export class TreatmentSaamed {
 
@@ -12,8 +14,15 @@ export class TreatmentSaamed {
   private getMedName(medId: string): string {
     return DATA_SaamedMeta[medId]?.Name ?? capitalizeBegin(medId)
   }
+  private getIndication(task: ConsentMedTask) {
+    return isSaamedIndication(task.MedIndication)
+      ? DATA_SaamedMeta[task.MedId]?.Indications[task.MedIndication]
+      : undefined
+  }
   private getIndicationName(indicationid: string): string {
-    return DATA_SaamedIndications[indicationid]?.Name ?? capitalizeBegin(indicationid)
+    return isSaamedIndication(indicationid)
+      ? DATA_SaamedIndicationNames[indicationid]
+      : capitalizeBegin(indicationid)
   }
 
   public getBlock(): string {
@@ -42,6 +51,20 @@ export class TreatmentSaamed {
 
     for (const indId of indicationOrder) {
       const group = tasks.filter(t => t.MedIndication === indId);
+
+      if (group.length === 1) {
+        const task = group[0];
+        const note = capitalizeBegin(task.noteText);
+        const doseAndNote = [task.dosageText, note].filter(Boolean).join(", ");
+        const cave = capitalizeBegin(task.contraText);
+        const caveSuffix = cave.length > 0 ? ` cave: ${cave};` : "";
+        const doseSuffix = doseAndNote.length > 0 ? ` ${doseAndNote};` : "";
+        saaLines.push(`SAA ${this.getMedName(task.MedId)} (${this.getIndicationName(indId)});${caveSuffix}${doseSuffix}`);
+
+        const consentHint = this.getIndication(task)?.consentHint ?? "";
+        if (consentHint.length > 0) saaLines.push(`${consentHint};`);
+        continue;
+      }
 
       // 3a) Cave lines: each task with contraText gets its own SAA line
       const caveTasks = group.filter(t => capitalizeBegin(t.contraText).length > 0);
@@ -72,9 +95,7 @@ export class TreatmentSaamed {
 
     // 4) Global KI line
     const allContraOk = tasks.every(t => t.contraOk === true);
-    const shouldCheckContra = tasks.some(t =>
-      DATA_SaamedMeta[t.MedId]?.requiresContraCheck?.has(t.MedIndication)
-    );
+    const shouldCheckContra = tasks.some(t => this.getIndication(t)?.requiresContracheck);
     const kiLine = allContraOk
       ? (shouldCheckContra ? "keine Unverträglichkeit; kein Hinweis auf relevante KI:" : "")
       : "sonst keine Hinweise auf relevante KI oder Unverträglichkeit:";
@@ -84,6 +105,7 @@ export class TreatmentSaamed {
 
     for (const indId of indicationOrder) {
       const group = tasks.filter(t => t.MedIndication === indId);
+      if (group.length === 1) continue;
 
       const parts: string[] = [];
       for (const t of group) {
@@ -97,12 +119,11 @@ export class TreatmentSaamed {
         const note = capitalizeBegin(t.noteText);
         const noteSuffix = note.length > 0 ? `, ${note}` : "";
 
-        // If dosageText is empty, fall back to med default dosage (optional convenience)
-        const finalDose = dose.length > 0 ? dose : (DATA_SaamedMeta[t.MedId]?.defaultDosage ?? "");
-        const defaultHint = DATA_SaamedMeta[t.MedId]?.defaultHint ?? "";
-        const hintSuffix = defaultHint.length > 0 ? `\n${defaultHint}` : "";
+        const doseSuffix = dose.length > 0 ? ` ${dose}` : "";
+        const consentHint = this.getIndication(t)?.consentHint ?? "";
+        const hintSuffix = consentHint.length > 0 ? `\n${consentHint}` : "";
 
-        parts.push(`${medName} ${finalDose}${indSuffix}${noteSuffix}${hintSuffix}`);
+        parts.push(`${medName}${doseSuffix}${indSuffix}${noteSuffix}${hintSuffix}`);
       }
 
       if (parts.length > 0) {

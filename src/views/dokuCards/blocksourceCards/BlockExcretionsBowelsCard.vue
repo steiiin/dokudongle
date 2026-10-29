@@ -43,7 +43,7 @@ import { useDokuStore } from '@/store/doku'
 import {
   bowelPatternOptions, bowelConsistencyOptions, bowelBloodOptions, bowelSoundsOptions,
   renderExcretionsBowelsText,
-} from '@/data/excretions'
+} from '@/data/blocks/excretions'
 
 const store = useDokuStore()
 const details = computed(() => store.doku.textAreaBlocks.excretions_bowel.details)

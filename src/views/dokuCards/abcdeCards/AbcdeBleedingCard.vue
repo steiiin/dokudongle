@@ -1,7 +1,7 @@
 <template>
   <IonCard v-show="ctx.isTrauma">
     <IonCardHeader>
-      <IonCardTitle>c - Blutung</IonCardTitle>
+      <IonCardTitle>x - Blutung</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
       <IonList lines="none">
@@ -35,6 +35,10 @@ const ctx = computed(() => store.context)
 
   ion-card {
     --card-bg: #e41a1d71;
+  }
+
+  ion-card-content ion-list {
+    padding: 0;
   }
 
 </style>

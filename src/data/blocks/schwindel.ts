@@ -1,5 +1,5 @@
-import { TextAreaBlock } from '@/types/text-area-block'
-import type { SchwindelBlockSourceState, SchwindelDetails } from '@/types/schwindel'
+import { TextAreaBlock } from '@/types/blocks/text-area-block'
+import type { SchwindelBlockSourceState, SchwindelDetails } from '@/types/blocks/schwindel'
 import { concatDoku, prefix } from '@/utils/text'
 import { prefixSeit } from '@/utils/prefix/general'
 

@@ -35,6 +35,10 @@ export interface DeviceConnection {
   transmissionCurrent: number,
   transmissionLength: number,
   transmissionAbortController: AbortController | null,
+  transmissionPaused: boolean,
+  transmissionBlockPending: boolean,
+  transmissionWaitingForDongle: boolean,
+  transmissionReconnectCount: number,
 }
 
 export const ServiceUUID: string =  "00001888-0000-1000-8000-00805f9b34fb"

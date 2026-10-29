@@ -1,7 +1,7 @@
 <template>
   <IonCard>
     <IonCardHeader>
-      <IonCardTitle>Maßnahmen</IonCardTitle>
+      <IonCardTitle>Verlauf</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
 
@@ -9,7 +9,7 @@
         assist-context-id="treatment.tasks"
         :blocks="store.textAreaBlocks.filter(block => block.target === 'treatment')"
         @activation-change="store.setTextAreaBlockActive"
-        title="Maßnahmen" placeholder="Beschreibe ..." :mandatory="ctx.requireTasks">
+        title="Verlauf" placeholder="Beschreibe ..." :mandatory="ctx.requireTasks">
         <p><b>Arbeitsdiagnose</b></p>
         <p><b>Maßnahmen</b></p>
         <p>Ergriffene Maßnahmen + Begründung <i>(außer Medis)</i></p>

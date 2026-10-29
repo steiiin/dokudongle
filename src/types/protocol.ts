@@ -3,12 +3,13 @@ import { EnhanceableText } from "./protocol/input"
 import { Sampler } from "./protocol/sampler"
 import { Setting } from "./protocol/setting"
 import { TreatmentSaamed } from "./protocol/treatment/treatmentSaamed"
+import { TreatmentSaatreats } from "./protocol/treatment/treatmentSaatreats"
 import { TreatmentRedflags } from "./protocol/treatment/treatmentRedflags"
 
 export { PregnancySpan } from "./protocol/pregnancy"
 export type { PregnancyTrimester } from "./protocol/pregnancy"
 
-import { createTextAreaBlockState, type TextAreaBlockState } from "@/data/text-area-blocks"
+import { createTextAreaBlockState, type TextAreaBlockState } from "@/data/blocks/text-area-blocks"
 
 export interface Protocol {
 
@@ -30,6 +31,7 @@ export interface Protocol {
 
   sampler: Sampler,
 
+  saatreats: TreatmentSaatreats,
   saamed: TreatmentSaamed,
   treatment: EnhanceableText,
   redflags: TreatmentRedflags,
@@ -64,6 +66,7 @@ export function resetProtocol(): Protocol {
 
     sampler: new Sampler(),
 
+    saatreats: new TreatmentSaatreats(),
     saamed: new TreatmentSaamed(),
     treatment: new EnhanceableText(),
     redflags: new TreatmentRedflags(),
@@ -152,7 +155,7 @@ export interface ProtocolContext {
   requireABCDE: boolean,
   requireSampler: boolean,
   requireSampleSymptoms: boolean,
-  requireSaamed: boolean,
+  allowInterventions: boolean,
   requireRedflags: boolean,
   requireTasks: boolean,
 

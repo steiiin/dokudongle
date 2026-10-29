@@ -1,7 +1,7 @@
 <template>
   <IonPage>
     <DodoFirmwareUpdate />
-    <IonTabs :class="{ blurry: store.isDongleTransmitting }">
+    <IonTabs :class="{ blurry: store.isDongleTransmitting }" :inert="store.isDongleTransmitting">
       <IonRouterOutlet></IonRouterOutlet>
       <IonTabBar id="main-tab-bar" slot="bottom">
         <IonTabButton tab="settings" href="/tabs/settings">
@@ -20,30 +20,18 @@
         </IonTabButton>
       </IonTabBar>
     </IonTabs>
-    <div class="transmission" v-show="store.isDongleTransmitting ">
-      <div class="--abort">
-        <h2>Übertragung läuft</h2>
-        <IonProgressBar :value="store.transmissionProgress" color="medium" class="progress"></IonProgressBar>
-        <br>
-        <IonButton color="danger" @click="cancel">Abbrechen</IonButton>
-      </div>
-    </div>
+    <DodoTransmission />
   </IonPage>
 </template>
 
 <script setup lang="ts">
 
 import DodoFirmwareUpdate from '@/views/settingsCards/DodoFirmwareUpdate.vue'
+import DodoTransmission from '@/components/DodoTransmission.vue'
 import { cog, eye, flask } from 'ionicons/icons'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-
-// ############################################################################
-
-const cancel = () => {
-  store.cancelSend()
-}
 
 </script>
 <style lang="scss" scoped>
@@ -51,22 +39,4 @@ const cancel = () => {
   .blurry {
     filter: blur(4px);
   }
-  .transmission {
-
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    background-color: #00000053;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    & .progress {
-      margin-inline: -1rem;
-      width: calc(100% + 2rem);
-    }
-
-  }
-
 </style>

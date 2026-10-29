@@ -8,12 +8,12 @@ import { defineStore } from 'pinia'
 import { toRaw, type UnwrapRef } from 'vue'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
-import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/text-area-blocks'
-import { createSchwindelBlockState } from '@/data/schwindel'
-import { createSchwangerschaftBlockState } from '@/data/schwangerschaft'
-import { createBauchschmerzBlockState } from '@/data/bauchschmerz'
-import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/excretions'
-import { composeTextAreaText } from '@/types/text-area-block'
+import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
+import { createSchwindelBlockState } from '@/data/blocks/schwindel'
+import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
+import { createBauchschmerzBlockState } from '@/data/blocks/bauchschmerz'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/blocks/excretions'
+import { composeTextAreaText } from '@/types/blocks/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
   ProtocolAuditEntry,
@@ -27,10 +27,11 @@ import {
   saveDokuState,
 } from '@/store/persistence'
 import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
+import { transmitDongleEvents } from '@/services/dongle-transmission'
 import { AuditExport } from '@/plugins/audit-export'
 import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/utils/dongle-config'
 import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
-import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, SendAckUUID, SendTextUUID, ServiceUUID, ConfigUUID } from '@/types/dongle'
+import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
 import { EnhanceableText } from '@/types/protocol/input'
@@ -441,6 +442,10 @@ export const useDokuStore = defineStore('doku', {
       session: 0,
       transmissionCurrent: 0, transmissionLength: 0,
       transmissionAbortController: null,
+      transmissionPaused: false,
+      transmissionBlockPending: false,
+      transmissionWaitingForDongle: false,
+      transmissionReconnectCount: 0,
     } as DeviceConnection,
 
     doku: resetProtocolState(),
@@ -500,7 +505,7 @@ export const useDokuStore = defineStore('doku', {
       this.connection.firmware = null
       this.connection.firmwareStatus = 'unavailable'
       this.connection.hasDfu = false
-      void this.cancelSend()
+      if (this.connection.isTransmitting) this.connection.transmissionWaitingForDongle = true
     },
 
     async openDongleConnection(deviceId: string, timeout = dongleConnectionTimeout()) {
@@ -866,6 +871,7 @@ export const useDokuStore = defineStore('doku', {
       this.doku.textAreaBlocks.excretions_urinary = emptyProtocol.textAreaBlocks.excretions_urinary
       this.doku.sampler.symptoms = emptyProtocol.sampler.symptoms
       this.doku.saamed = emptyProtocol.saamed
+      this.doku.saatreats = emptyProtocol.saatreats
       this.doku.redflags = emptyProtocol.redflags
     },
     async downloadProtocolAuditJsonl() {
@@ -990,140 +996,62 @@ export const useDokuStore = defineStore('doku', {
     async sendProtocol() {
       if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
       this.connection.isTransmitting = true
+      this.connection.transmissionPaused = false
+      this.connection.transmissionWaitingForDongle = false
+      this.connection.transmissionBlockPending = false
+      this.connection.transmissionCurrent = 0
 
       const protocol = this.doku
       const protocolText = this.generatedProtocol
-
-      console.log('Protokoll gesendet:')
-      console.log(stripNotSupported(protocolText))
-      console.log(stripNotSupported(protocolText))
-
+      const deviceId = this.connection.device?.id
+      const wasConnected = this.connection.isConnected
       const controller = new AbortController()
       this.connection.transmissionAbortController = controller
-      const signal = controller.signal
 
-      try
-      {
-
-        // cancel if not connected
+      try {
         await this.checkConnection()
-        if (!this.isDongleConnected || signal?.aborted) { return false }
-        this.connection.isTransmitting = true
-
-        // set transmission info
-        this.connection.transmissionLength = protocolText.length
-        this.connection.transmissionCurrent = 0
-        const abortError = new Error('Send Cancelled')
-        abortError.name = 'AbortError'
-        const throwIfAborted = () => {
-          if (signal?.aborted) { throw abortError }
-        }
-
-        let notificationsStarted = false
-        try
-        {
-
-          // register acknowledge system
-          let resolveAck: (() => void) | null = null
-          const waitForAck = async (ackPromise: Promise<void>) => {
-            if (!signal) {
-              await ackPromise
-              return }
-            if (signal.aborted) { throw abortError }
-
-            await new Promise<void>((resolve, reject) => {
-              const onAbort = () => {
-                signal.removeEventListener('abort', onAbort)
-                reject(abortError)
-              }
-              ackPromise.then(() => {
-                signal.removeEventListener('abort', onAbort)
-                resolve()
-              }).catch((error) => {
-                signal.removeEventListener('abort', onAbort)
-                reject(error)
-              })
-              signal.addEventListener('abort', onAbort, { once: true })
-            })
-          }
-
-          await BleClient.startNotifications(this.connection.device!.id, ServiceUUID, SendAckUUID, () => {
-            resolveAck?.()
-          })
-          notificationsStarted = true
-
-          // send chunks
-          const events = textToHidEvents(stripNotSupported(protocolText));
-          const MTU_PAYLOAD = 20;
-          const EVENTS_PER_PKT = MTU_PAYLOAD / 2;
-
-          for (let i = 0; i < events.length; i += EVENTS_PER_PKT) {
-            throwIfAborted()
-            const slice = events.slice(i, i + EVENTS_PER_PKT)
-
-            // pack into a single ArrayBuffer
-            const buf = new ArrayBuffer(slice.length * 2)
-            const dv  = new DataView(buf)
-            slice.forEach(([key, mod], idx) => {
-              dv.setUint8(idx * 2 + 0, key)
-              dv.setUint8(idx * 2 + 1, mod)
-            })
-
-            const ackPromise = new Promise<void>(r => { resolveAck = r })
-            await BleClient.write(this.connection.device!.id, ServiceUUID, SendTextUUID, dv)
-            await waitForAck(ackPromise)
-            this.connection.transmissionCurrent += slice.length
-
-          }
-          throwIfAborted()
-
-          // send EOD
-          await BleClient.write(this.connection.device!.id, ServiceUUID, SendTextUUID, new DataView(new Uint8Array([0x00,0x00]).buffer))
-
-          // Persist completion before releasing the transmission guard: a queued
-          // background reset must see the send marker for this exact protocol.
-          await this.markProtocolSent(Date.now(), protocol)
-          return true
-
-        }
-        catch (error)
-        {
-          if ((error as Error).name === 'AbortError') {
-            console.info('sendText aborted')
-          } else {
-            console.warn(error)
-          }
-          return false
-        }
-        finally
-        {
-          if (notificationsStarted) {
-            try {
-              await BleClient.stopNotifications(this.connection.device!.id, ServiceUUID, SendAckUUID)
-            } catch (error) {
-              console.warn(error)
-            }
-          }
-
-          this.connection.isTransmitting = false
-          this.connection.transmissionCurrent = 0
-          this.connection.transmissionLength = 0
-
-        }
-
-      }
-      finally
-      {
+        if (!deviceId || !wasConnected || controller.signal.aborted) return false
+        const events = textToHidEvents(stripNotSupported(protocolText))
+        this.connection.transmissionLength = events.length
+        await transmitDongleEvents({
+          connection: this.connection,
+          deviceId,
+          events,
+          signal: controller.signal,
+          openConnection: () => this.openDongleConnection(deviceId),
+          refreshConnection: async () => {
+            await this.refreshDongleConfig()
+            await this.refreshDongleFirmware()
+          },
+          invalidateConnection: () => this.dongleDisconnected(deviceId, this.connection.session),
+        })
+        controller.signal.throwIfAborted()
+        // Keep the guard until completion is persisted for this exact protocol.
+        await this.markProtocolSent(Date.now(), protocol)
+        return true
+      } catch (error) {
+        if (!controller.signal.aborted) console.warn('Protokoll konnte nicht gesendet werden.', error)
+        return false
+      } finally {
         this.connection.transmissionAbortController = null
+        this.connection.transmissionCurrent = 0
+        this.connection.transmissionLength = 0
+        this.connection.transmissionPaused = false
+        this.connection.transmissionWaitingForDongle = false
+        this.connection.transmissionBlockPending = false
         this.connection.isTransmitting = false
       }
-
+    },
+    pauseSend() {
+      if (this.connection.isTransmitting) this.connection.transmissionPaused = true
+    },
+    resumeSend() {
+      if (this.connection.isTransmitting && this.isDongleConnected && !this.connection.transmissionWaitingForDongle) {
+        this.connection.transmissionPaused = false
+      }
     },
     async cancelSend() {
-      if (this.connection.transmissionAbortController) {
-        this.connection.transmissionAbortController.abort()
-        this.connection.transmissionAbortController = null
-      }
+      this.connection.transmissionAbortController?.abort()
     }
 
   },
@@ -1133,8 +1061,8 @@ export const useDokuStore = defineStore('doku', {
     // app status
     isDongleConnecting: (state) => state.connection.isConnecting,
     isDongleConnected: (state) => state.connection.isConnected && !state.connection.isConnecting,
-    isDongleTransmitting: (state) => state.connection.isConnected && state.connection.isTransmitting,
-    transmissionProgress: (state) => (state.connection.isConnected && state.connection.isTransmitting && state.connection.transmissionLength>0) ? (state.connection.transmissionCurrent / state.connection.transmissionLength) : 0,
+    isDongleTransmitting: (state) => state.connection.isTransmitting,
+    transmissionProgress: (state) => (state.connection.isTransmitting && state.connection.transmissionLength>0) ? (state.connection.transmissionCurrent / state.connection.transmissionLength) : 0,
     connectedDongleName: (state) => state.connection.isConnected ? (state.connection.config ? DONGLE_NAME_PREFIX + state.connection.config.name : state.connection.device?.name ?? 'Unbekanntes Dongle') : '',
 
     // context
@@ -1149,7 +1077,7 @@ export const useDokuStore = defineStore('doku', {
       const requireABCDE: boolean = isTransport && !isNoEmergencyCall && !isVerlegung
       const requireSampler: boolean = isTransport && !isVerlegung
       const requireSampleSymptoms: boolean = requireSampler && !isNoEmergencyCall
-      const requireSaamed: boolean = !isNoEmergencyCall
+      const allowInterventions: boolean = !isNoEmergencyCall
       const requireRedflags: boolean = !isNoEmergencyCall && isTransport && !isVerlegung
       const requireTasks: boolean = !(isEinweisung || isVerlegung)
       const isPediatric: boolean = state.doku.ident.age?.totalYears <= 4
@@ -1215,7 +1143,7 @@ export const useDokuStore = defineStore('doku', {
         requireABCDE,
         requireSampler,
         requireSampleSymptoms,
-        requireSaamed,
+        allowInterventions,
         requireRedflags,
         requireTasks,
 
@@ -1317,10 +1245,17 @@ export const useDokuStore = defineStore('doku', {
       }
 
       // TREATMENT
-      text += textIf(breakDoku(state.doku.saamed.getBlock(), true), this.context.requireSaamed)
+      text += textIf(
+        breakDoku(
+          [
+            state.doku.saatreats.getBlock(),
+            state.doku.saamed.getBlock()
+          ], true
+        ), this.context.allowInterventions
+      )
       text += breakDoku(
         this.context.requireTasks
-        ? placeholder(this.freeformText.treatment, 'Maßnahmen')
+        ? placeholder(this.freeformText.treatment, 'Verlauf')
         : this.freeformText.treatment.trim(), true)
       text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
       text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)

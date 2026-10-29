@@ -54,8 +54,6 @@ export class AbcdeCirculation {
 
   public ecg: AssessedValue<'SR' | 'VHF' | string>
 
-  public treatment: string
-
   // #####################################################################
 
   constructor()
@@ -90,7 +88,6 @@ export class AbcdeCirculation {
       variation: 'bekannt',
     })
     this.ecg = AssessedValue.unassessed('SR')
-    this.treatment = ''
   }
 
   // #####################################################################
@@ -237,9 +234,7 @@ export class AbcdeCirculation {
       this.ecgText,
     ]))))
 
-    const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)
-
-    return breakDoku([ assessedLine, treatmentLine ])
+    return assessedLine
 
   }
 

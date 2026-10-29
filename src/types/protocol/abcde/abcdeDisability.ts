@@ -412,8 +412,6 @@ export class AbcdeDisability {
 
   public intoxication: AssessedValue<string>
 
-  public treatment: string
-
   // ##########################################################################
 
   constructor()
@@ -431,7 +429,6 @@ export class AbcdeDisability {
     this.baseline = false
     this.bloodGlucose = AssessedValue.unassessed('normal')
     this.intoxication = AssessedValue.unassessed('')
-    this.treatment = ''
   }
 
   // ##########################################################################
@@ -512,9 +509,7 @@ export class AbcdeDisability {
         textIf(prefixIntox(this.intoxication.value), this.intoxication.assessed),
       ]))))
 
-      const treatmentLine: string = textIf(prefix('\n>> ', this.treatment), this.needTreatment)
-
-      return breakDoku([ assessedLine, treatmentLine ])
+      return assessedLine
 
   }
 

@@ -156,7 +156,7 @@
 <script setup lang="ts">
 import DodoHint from '@/components/DodoHint.vue'
 import DodoTextAreaBlocks from '@/components/DodoTextAreaBlocks.vue'
-import { composeTextAreaText, type RenderedTextAreaBlock } from '@/types/text-area-block'
+import { composeTextAreaText, type RenderedTextAreaBlock } from '@/types/blocks/text-area-block'
 
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useSlots, watch } from 'vue'
 import { chevronBackOutline, add, alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'

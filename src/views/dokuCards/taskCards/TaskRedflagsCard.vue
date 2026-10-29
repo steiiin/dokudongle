@@ -1,19 +1,9 @@
 <template>
   <IonCard>
     <IonCardHeader>
-      <IonCardTitle>Aufklärung / Einwilligung</IonCardTitle>
+      <IonCardTitle>Aufklärung</IonCardTitle>
     </IonCardHeader>
     <IonCardContent>
-
-      <DodoInputSelect v-model="store.doku.redflags.consent"
-        label="Einwilligung" lines="full"
-        :options="[
-          { value: '', label: 'Nicht Notwendig' },
-          { value: 'Fähig', label: 'Einwilligungsfähig' },
-          { value: 'Unfähig', label: 'Einwilligungsunfähig' },
-          { value: 'Zeitkritisch', label: 'Zeitkritisch' },
-        ]">
-      </DodoInputSelect>
 
       <DodoInputSelect
         v-model="store.doku.redflags.noTransportType"

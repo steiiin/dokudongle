@@ -4,15 +4,15 @@ import { mount, shallowMount } from '@vue/test-utils'
 import { IonIcon } from '@ionic/vue'
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { TextAreaBlock, composeTextAreaText } from '@/types/text-area-block'
-import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockState } from '@/data/text-area-blocks'
+import { TextAreaBlock, composeTextAreaText } from '@/types/blocks/text-area-block'
+import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockState } from '@/data/blocks/text-area-blocks'
 import DodoTextAreaBlocks from '@/components/DodoTextAreaBlocks.vue'
 import DodoInputText from '@/components/DodoInputText.vue'
 import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
 import BlockVerlegungCard from '@/views/dokuCards/blocksourceCards/BlockVerlegungCard.vue'
 import BlockEinweisungCard from '@/views/dokuCards/blocksourceCards/BlockEinweisungCard.vue'
 import SituationCard from '@/views/dokuCards/SituationCard.vue'
-import TreatmentTasksCard from '@/views/dokuCards/treatmentCards/TreatmentTasksCard.vue'
+import TaskCourseCard from '@/views/dokuCards/taskCards/TaskCourseCard.vue'
 import { useDokuStore } from '@/store/doku'
 import { appendProtocolAuditEntry, loadDokuState, saveDokuState } from '@/store/persistence'
 
@@ -105,9 +105,9 @@ describe('generated Situation blocks', () => {
   }
 
   test.each([
-    { flavor: 'verlegung' as const, component: BlockVerlegungCard, labels: ['START', 'ZIEL'],
+    { flavor: 'verlegung' as const, component: BlockVerlegungCard, labels: ['Start', 'Ziel'],
       values: ['KH Radebeul', 'FKH Coswig'], text: 'Verlegung von KH Radebeul nach FKH Coswig.' },
-    { flavor: 'einweisung' as const, component: BlockEinweisungCard, labels: ['ARZT', 'ZIEL', 'KRANKHEIT'],
+    { flavor: 'einweisung' as const, component: BlockEinweisungCard, labels: ['Arzt', 'Ziel', 'Grund'],
       values: ['HA Wegner', 'FKH Coswig', 'Thrombose'], text: 'Einweisung HA Wegner nach FKH Coswig wg. Thrombose.' },
   ])('titleless $flavor card updates the Situation preview and protocol live', async ({ flavor, component, labels, values, text }) => {
     const store = setup()
@@ -178,7 +178,7 @@ describe('generated Situation blocks', () => {
       store.setFlavor('einweisung', true)
       store.setFlavor('trauma', true)
       Object.assign(store.doku.textAreaBlocks.einweisung.values, { ARZT: 'Hausarzt', ZIEL: 'Klinik', KRANKHEIT: 'Diagnose' })
-      const treatment = shallowMount(TreatmentTasksCard, { global: { renderStubDefaultSlot: true } })
+      const treatment = shallowMount(TaskCourseCard, { global: { renderStubDefaultSlot: true } })
       expect(treatment.getComponent(DodoInputTextArea).props('blocks')![0].text).toBe('treatment: Klinik')
       for (const target of targets) expect(store.generatedProtocol).toContain(`${target}: Klinik`)
       treatment.getComponent(DodoInputTextArea).vm.$emit('activation-change', 'test.treatment', false)

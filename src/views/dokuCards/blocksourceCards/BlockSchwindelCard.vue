@@ -96,7 +96,7 @@ import { useDokuStore } from '@/store/doku'
 import {
   provocationOptions, palliationOptions, qualityOptions, radiationOptions, severityOptions, timeOptions,
   renderSchwindelText,
-} from '@/data/schwindel'
+} from '@/data/blocks/schwindel'
 
 const store = useDokuStore()
 const details = computed(() => store.doku.textAreaBlocks.schwindel.details)

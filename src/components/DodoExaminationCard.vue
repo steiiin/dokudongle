@@ -11,7 +11,6 @@
     </IonCardHeader>
     <IonCardContent>
       <IonList lines="none"><slot /></IonList>
-      <slot name="footer" />
     </IonCardContent>
 
     <IonPopover class="examination-picker" :is-open="pickerOpen" :event="pickerEvent"
