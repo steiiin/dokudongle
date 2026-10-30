@@ -52,10 +52,13 @@ const isModeBvO = computed(() => store.doku.redflags.noTransportType == 'BvO')
 
 watch(() => [
   store.doku.redflags.choosenScenarios.length,
+  JSON.stringify(store.doku.redflags.scenarioSelections),
   store.doku.redflags.choosenSignals.length,
   store.doku.redflags.noTransportType,
   store.doku.redflags.removedMajorSignals?.length ?? 0,
   store.doku.redflags.removedMinorSignals?.length ?? 0,
+  store.doku.redflags.removedMajorSignalIds.length,
+  store.doku.redflags.removedMinorSignalIds.length,
   store.doku.redflags.disableMinorBlock,
   store.doku.redflags.attendant.active
 ], async (oldV, newV) => {
