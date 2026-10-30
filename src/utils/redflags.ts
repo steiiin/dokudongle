@@ -39,6 +39,9 @@ export function resolveRedflagScenario(
   if (!selection || typeof selection.scenarioId !== 'string' || !Array.isArray(selection.subscenarioIds)) {
     return fail('Ungültige RedFlags-Auswahl')
   }
+  if (selection.subscenarioMode !== undefined && selection.subscenarioMode !== 'all' && selection.subscenarioMode !== 'selected') {
+    return fail('Ungültiger Unterszenario-Auswahlmodus')
+  }
   const scenario = scenarios.get(selection.scenarioId)
     ?? fail(`Unbekanntes Hauptszenario: ${selection.scenarioId}`)
   const selected = new Set(selection.subscenarioIds)
@@ -48,8 +51,10 @@ export function resolveRedflagScenario(
       fail(`Unterszenario ${id} gehört nicht zu ${scenario.id}`)
     }
   }
+  const includeAll = selection.subscenarioMode === 'all'
+    || (selection.subscenarioMode === undefined && selected.size === 0)
   const included = catalog.subscenarios.filter(subscenario => subscenario.parentId === scenario.id
-    && (selected.size === 0 || selected.has(subscenario.id)))
+    && (includeAll || selected.has(subscenario.id)))
   const content = [scenario, ...included]
   const unique = <T>(values: readonly T[]) => [...new Set(values)]
   const majorIds = unique(content.flatMap(entry => entry.majorSignalIds))
@@ -57,8 +62,12 @@ export function resolveRedflagScenario(
   const minorIds = unique(content.flatMap(entry => entry.minorSignalIds)).filter(id => !majorSet.has(id))
   return {
     scenario,
-    selection: { scenarioId: scenario.id, subscenarioIds: included.filter(entry => selected.has(entry.id)).map(entry => entry.id) },
-    aggregationMode: selected.size === 0 ? 'all-subscenarios' : 'selected-subscenarios',
+    selection: {
+      scenarioId: scenario.id,
+      subscenarioIds: includeAll ? [] : included.map(entry => entry.id),
+      ...(selection.subscenarioMode === undefined ? {} : { subscenarioMode: selection.subscenarioMode }),
+    },
+    aggregationMode: includeAll ? 'all-subscenarios' : 'selected-subscenarios',
     includedSubscenarioIds: included.map(entry => entry.id),
     requirements: unique(content.map(entry => entry.requirements).filter(text => text !== '')),
     majorSignals: majorIds.map(id => signals.get(id)!),
@@ -78,10 +87,11 @@ export function selectRedflagTarget(
     : catalog.subscenarios.find(entry => entry.id === target.id)?.parentId
       ?? fail(`Unbekanntes Unterszenario: ${target.id}`)
   const previous = selections.find(selection => selection?.scenarioId === parentId)
-  if (previous && target.type === 'subscenario') resolveRedflagScenario(catalog, previous)
+  const previousResolved = previous && target.type === 'subscenario' ? resolveRedflagScenario(catalog, previous) : undefined
   const selection = resolveRedflagScenario(catalog, {
     scenarioId: parentId,
-    subscenarioIds: target.type === 'scenario' ? [] : [...(previous?.subscenarioIds ?? []), target.id],
+    subscenarioMode: target.type === 'scenario' ? 'all' : 'selected',
+    subscenarioIds: target.type === 'scenario' ? [] : [...(previousResolved?.selection.subscenarioIds ?? []), target.id],
   }).selection
   return previous
     ? selections.map(entry => entry?.scenarioId === parentId ? selection : entry)

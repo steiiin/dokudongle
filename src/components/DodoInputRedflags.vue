@@ -13,8 +13,20 @@
             <IonLabel>{{ group.name }}{{ group.allSubscenarios ? ' (alle Unterfälle)' : '' }}</IonLabel>
             <IonIcon :icon="closeCircle" />
           </IonChip>
-          <IonChip v-for="child in group.children" :key="child.id" color="success" outline
-            class="subscenario-chip" @click="removeSubscenario(index, child.id)">
+          <div v-if="group.children.length" class="subscenario-chips">
+            <DodoToggleChip v-for="child in group.children" :key="child.id" color="success"
+              class="subscenario-chip" :model-value="child.active" :disabled="!!group.error"
+              role="button" :tabindex="group.error ? -1 : 0" :aria-pressed="child.active"
+              :aria-label="child.name"
+              @update:model-value="setSubscenarioActive(index, child.id, $event)"
+              @keydown.enter.prevent="setSubscenarioActive(index, child.id, !child.active)"
+              @keydown.space.prevent="setSubscenarioActive(index, child.id, !child.active)">
+              <IonLabel>{{ child.name }}</IonLabel>
+              <IonIcon v-if="child.active" :icon="checkmark" aria-hidden="true" />
+            </DodoToggleChip>
+          </div>
+          <IonChip v-for="child in group.invalidChildren" :key="child.id" color="danger"
+            class="invalid-subscenario-chip" @click="removeInvalidSubscenario(index, child.id)">
             <IonLabel>{{ child.name }}</IonLabel>
             <IonIcon :icon="closeCircle" />
           </IonChip>
@@ -107,7 +119,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
-import { closeOutline, addCircle, closeCircle } from 'ionicons/icons'
+import { closeOutline, addCircle, closeCircle, checkmark } from 'ionicons/icons'
 import { DATA_Redflags, DATA_Scenarios, DATA_Signals, DATA_Subscenarios } from '@/data/redflags'
 import type { RedflagApplication } from '@/types/redflags'
 import { selectRedflagTarget } from '@/utils/redflags'
@@ -124,10 +136,14 @@ const content = computed(() => props.modelValue.getResolvedContent())
 const selectedGroups = computed(() => content.value.resolutions.map(({ selection, resolved, error }) => {
   const scenario = DATA_Scenarios.find(entry => entry.id === selection?.scenarioId)
   const subIds = Array.isArray(selection?.subscenarioIds) ? selection.subscenarioIds : []
+  const children = DATA_Subscenarios.filter(entry => entry.parentId === scenario?.id)
+    .map(entry => ({ id: entry.id, name: entry.name, active: resolved?.includedSubscenarioIds.includes(entry.id) ?? false }))
   return {
     name: scenario?.name ?? selection?.scenarioId ?? 'Ungültige Auswahl',
-    allSubscenarios: !error && subIds.length === 0 && DATA_Subscenarios.some(entry => entry.parentId === scenario?.id),
-    children: subIds.map(id => ({ id, name: DATA_Subscenarios.find(entry => entry.id === id)?.name ?? id })),
+    allSubscenarios: children.length > 0 && children.every(child => child.active),
+    children,
+    invalidChildren: [...new Set(subIds)].filter(id => !children.some(child => child.id === id))
+      .map(id => ({ id, name: DATA_Subscenarios.find(entry => entry.id === id)?.name ?? id })),
     requirements: resolved?.requirements ?? [],
     error,
   }
@@ -188,9 +204,10 @@ const currentModalSections = computed(() => {
       if (currentFilter.value !== 'signal' || props.modelValue.choosenSignals.some(signal => signal.id === entry.id)) return false
     } else {
       if (currentFilter.value !== 'scenario' || entry.application !== application) return false
-      const selected = props.modelValue.scenarioSelections.find(selection => selection?.scenarioId === (entry.parentId ?? entry.id))
-      if (entry.type === 'scenario' && selected?.subscenarioIds?.length === 0) return false
-      if (entry.type === 'subscenario' && selected?.subscenarioIds?.includes(entry.id)) return false
+      const selected = content.value.resolutions.find(({ selection }) => selection?.scenarioId === (entry.parentId ?? entry.id))?.resolved
+      if (entry.type === 'scenario' && selected?.aggregationMode === 'all-subscenarios') return false
+      if (entry.type === 'subscenario' && selected?.aggregationMode === 'selected-subscenarios'
+        && selected.includedSubscenarioIds.includes(entry.id)) return false
     }
     return fuzzyMatch(currentSearchQuery.value, `${entry.name} ${entry.groupName} ${entry.subtitle}`)
   })
@@ -250,10 +267,19 @@ const removeScenario = (index: number) => {
   updated.scenarioSelections = updated.scenarioSelections.filter((_, i) => i !== index)
   emit('update:modelValue', updated)
 }
-const removeSubscenario = (index: number, id: string) => {
+const setSubscenarioActive = (index: number, id: string, active: boolean) => {
+  const group = selectedGroups.value[index]
+  if (!group || group.error || !group.children.some(child => child.id === id)) return
+  const updated = cloneModelValue()
+  const subscenarioIds = group.children.filter(child => child.id === id ? active : child.active).map(child => child.id)
+  updated.scenarioSelections = updated.scenarioSelections.map((selection, i) => i !== index ? selection
+    : { ...selection, subscenarioMode: 'selected', subscenarioIds })
+  emit('update:modelValue', updated)
+}
+const removeInvalidSubscenario = (index: number, id: string) => {
   const updated = cloneModelValue()
   updated.scenarioSelections = updated.scenarioSelections.map((selection, i) => i !== index ? selection
-    : { ...selection, subscenarioIds: selection.subscenarioIds.filter(childId => childId !== id) })
+    : { ...selection, subscenarioMode: 'selected', subscenarioIds: selection.subscenarioIds.filter(childId => childId !== id) })
   emit('update:modelValue', updated)
 }
 const setDisableMinorBlock = (checked: boolean) => {
@@ -296,7 +322,7 @@ const fuzzyMatch = (search: string, target: string): boolean => {
     font-size: .75rem;
     font-weight: 600;
     letter-spacing: .04em;
-    margin: 0 0 4px 4px;
+    margin: 0 0 4px 0;
     text-transform: uppercase;
   }
 
@@ -309,6 +335,41 @@ const fuzzyMatch = (search: string, target: string): boolean => {
     margin: 4px 8px 12px;
     color: var(--ion-color-medium);
     font-size: .8rem;
+  }
+
+  .subscenario-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 8px;
+  }
+
+  .subscenario-chip {
+    max-width: 100%;
+    min-width: 0;
+    min-height: 32px;
+    height: auto;
+    margin: 0;
+    white-space: normal;
+  }
+
+  .subscenario-chip ion-label {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .subscenario-chip ion-icon {
+    flex-shrink: 0;
+  }
+
+  .subscenario-chip.DdToggleChip--inactive {
+    color: var(--ion-text-color);
+  }
+
+  .subscenario-chip:focus-visible {
+    outline: 2px solid var(--ion-color-success);
+    outline-offset: 2px;
   }
 
   .selection-error {

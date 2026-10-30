@@ -144,11 +144,15 @@ export type RedflagSelectionTarget =
 /**
  * Auswahlzustand für genau ein Hauptszenario.
  *
- * subscenarioIds = []:
+ * subscenarioMode = 'all':
  *   Universelle Inhalte + Inhalte ALLER zugehörigen Unterszenarien.
  *
- * subscenarioIds = [eine oder mehrere IDs]:
- *   Universelle Inhalte + Inhalte NUR der ausgewählten Unterszenarien.
+ * subscenarioMode = 'selected':
+ *   Universelle Inhalte + Inhalte NUR der ausgewählten Unterszenarien;
+ *   subscenarioIds = [] enthält ausschließlich das Hauptszenario.
+ *
+ * Ohne Modus gilt für bestehende Datensätze: leere IDs bedeuten alle
+ * Unterszenarien, nichtleere IDs nur die ausgewählten Unterszenarien.
  *
  * Jede Unter-ID muss existieren und zu scenarioId gehören. Ein fehlerhafter
  * Verweis darf nicht stillschweigend ignoriert oder als leere Auswahl
@@ -157,6 +161,7 @@ export type RedflagSelectionTarget =
 export interface RedflagScenarioSelection {
   readonly scenarioId: ScenarioId
   readonly subscenarioIds: readonly SubscenarioId[]
+  readonly subscenarioMode?: 'all' | 'selected'
 }
 
 export type RedflagAggregationMode =
@@ -184,7 +189,7 @@ export interface ResolvedRedflagScenario {
   readonly selection: RedflagScenarioSelection
   readonly aggregationMode: RedflagAggregationMode
 
-  /** Tatsächlich einbezogene Subtypen; bei leerer Auswahl ggf. alle. */
+  /** Tatsächlich einbezogene Subtypen nach Anwendung des Auswahlmodus. */
   readonly includedSubscenarioIds: readonly SubscenarioId[]
 
   /**

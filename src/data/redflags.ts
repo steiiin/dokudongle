@@ -2937,8 +2937,11 @@ export const DATA_Redflags: RedflagCatalog = {
 
 /**
  * Auswahlvertrag (Implementierung bleibt Aufgabe der Anwendung):
- * - subscenarioIds: [] -> universelle Inhalte + alle zugehörigen Unterfälle.
- * - Eine/mehrere Unter-IDs -> universelle Inhalte + nur diese Unterfälle.
+ * - subscenarioMode: 'all' -> universelle Inhalte + alle zugehörigen Unterfälle.
+ * - subscenarioMode: 'selected' -> universelle Inhalte + nur die angegebenen
+ *   Unterfälle; leere Unter-IDs enthalten ausschließlich das Hauptszenario.
+ * - Ohne Modus bleiben leere Unter-IDs eine Auswahl aller Unterfälle;
+ *   eine/mehrere Unter-IDs enthalten nur diese Unterfälle.
  * - Direkte Unterfallauswahl wählt das Hauptszenario über parentId mit aus.
  * - Voraussetzungstexte verschiedener Unterfälle können Alternativen sein;
  *   sie sind keine gleichzeitig erhobenen Befunde und keine BvO-Checkliste.

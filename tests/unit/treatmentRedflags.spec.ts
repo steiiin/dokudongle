@@ -43,6 +43,26 @@ describe('RedFlags text generation', () => {
     expect(value.getRedflagBlock()).toBe('')
   })
 
+  test('removes and restores child contributions while retaining the parent content', () => {
+    const value = new TreatmentRedflags()
+    value.noTransportType = 'BvO'
+    value.scenarioSelections = [{ scenarioId: 'synkope-bvo', subscenarioMode: 'all', subscenarioIds: [] }]
+    const all = value.getRedflagBlock()
+    expect(all).toContain('orthostatische Synkope; vasovagale Ursache')
+    const parentSignals = value.getResolvedContent().majorSignals
+    value.scenarioSelections = [{ scenarioId: 'synkope-bvo', subscenarioMode: 'selected', subscenarioIds: [] }]
+    expect(value.getRedflagBlock()).not.toContain('Aufklärung bzgl.')
+    expect(value.getResolvedContent().minorSignals).toEqual([])
+    expect(value.getResolvedContent().majorSignals).toEqual(parentSignals)
+    for (const signal of parentSignals) expect(value.getRedflagBlock()).toContain(signal.text)
+    expect(value.getResolvedContent().resolutions[0].resolved?.requirements).toEqual(['kurzzeitiger Bewusstseinsverlust, vollständig erholt'])
+    value.scenarioSelections = [{ scenarioId: 'synkope-bvo', subscenarioMode: 'selected', subscenarioIds: ['synkope-bvo-orthostatisch'] }]
+    expect(value.getRedflagBlock()).toContain('Aufklärung bzgl. orthostatische Synkope.')
+    expect(value.getRedflagBlock()).not.toContain('vasovagale Ursache')
+    value.scenarioSelections = [{ scenarioId: 'synkope-bvo', subscenarioMode: 'all', subscenarioIds: [] }]
+    expect(value.getRedflagBlock()).toBe(all)
+  })
+
   test('deduplicates inherited/custom warnings, gives major priority and removes every contribution', () => {
     const value = new TreatmentRedflags()
     value.noTransportType = 'BvO'

@@ -20,11 +20,11 @@ beforeEach(() => {
 })
 
 describe('RedFlags persistence compatibility', () => {
-  test.each(['legacy', 'new', 'mixed'] as const)('round-trips %s selections through active, history and temporary protocols', async mode => {
+  test.each(['legacy', 'new', 'mixed', 'all', 'subset', 'parent-only', 'legacy-all'] as const)('round-trips %s selections through active, history and temporary protocols', async mode => {
     const protocol = resetProtocol()
     const flags = protocol.redflags
     flags.noTransportType = 'BvO'
-    if (mode !== 'new') {
+    if (mode === 'legacy' || mode === 'mixed') {
       flags.choosenScenarios = [{ id: 'old-id', name: 'Old name', requirements: 'Old requirement', application: 'BvO', category: 'neuro',
         majorSignals: ['Old major', 'Removed'], minorSignals: ['Old minor'], diagnoses: ['Old diagnosis'], consequences: 'Old risk' }]
       flags.choosenSignals = [{ id: 'removed-from-catalog', text: 'Old custom' }]
@@ -35,6 +35,15 @@ describe('RedFlags persistence compatibility', () => {
       flags.scenarioSelections = [{ scenarioId: 'synkope-bvo', subscenarioIds: ['synkope-bvo-orthostatisch'] }]
       flags.removedMajorSignalIds = ['atmung-luftnot']
       flags.removedMinorSignalIds = ['neuro-fallneigung-anhaltend']
+    }
+    if (mode === 'all' || mode === 'subset' || mode === 'parent-only') {
+      flags.scenarioSelections = [{
+        scenarioId: 'synkope-bvo',
+        subscenarioMode: mode === 'all' ? 'all' : 'selected',
+        subscenarioIds: mode === 'subset' ? ['synkope-bvo-orthostatisch'] : [],
+      }]
+    } else if (mode === 'legacy-all') {
+      flags.scenarioSelections = [{ scenarioId: 'synkope-bvo', subscenarioIds: [] }]
     }
     const expected = flags.getRedflagBlock()
     const raw = copy(protocol)
@@ -51,7 +60,10 @@ describe('RedFlags persistence compatibility', () => {
     expect(store.doku.redflags).toBeInstanceOf(TreatmentRedflags)
     expect(store.doku.redflags.getRedflagBlock()).toBe(expected)
     expect(store.protocolHistory).toHaveLength(2)
-    for (const entry of store.protocolHistory) expect(entry.doku.redflags.getRedflagBlock()).toBe(expected)
+    for (const entry of store.protocolHistory) {
+      expect(entry.doku.redflags.getRedflagBlock()).toBe(expected)
+      expect(entry.doku.redflags.scenarioSelections).toEqual(flags.scenarioSelections)
+    }
     expect(store.doku.redflags.scenarioSelections).toEqual(flags.scenarioSelections)
     await store.persistToStorage()
     const saved = copy(vi.mocked(saveDokuState).mock.lastCall![0])
@@ -60,8 +72,10 @@ describe('RedFlags persistence compatibility', () => {
     const restarted = useDokuStore()
     await restarted.hydrateFromStorage()
     expect(restarted.doku.redflags.getRedflagBlock()).toBe(expected)
+    expect(restarted.doku.redflags.scenarioSelections).toEqual(flags.scenarioSelections)
     expect(await restarted.restoreProtocolFromHistory('history')).toBe(true)
     expect(restarted.doku.redflags.getRedflagBlock()).toBe(expected)
+    expect(restarted.doku.redflags.scenarioSelections).toEqual(flags.scenarioSelections)
   })
 
   test('preserves unknown and wrongly assigned IDs without dropping the rest of a saved protocol', async () => {
