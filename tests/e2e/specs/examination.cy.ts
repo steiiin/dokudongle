@@ -14,6 +14,18 @@ const expectFocusWithin = (element: JQuery<HTMLElement>) => {
   expect(active === element[0] || element[0].contains(active)).to.equal(true)
 }
 const row = (id: string) => cy.get(`.examination-item[data-examination="${id}"]`)
+const breathingWork = ['paradoxical', 'accessoryMuscles', 'retractions']
+const openBreathingMechanics = () => {
+  cy.contains('ion-item', 'Atemmechanik').click()
+  cy.get('ion-modal:visible').should('contain.text', 'Atemarbeit')
+}
+const expectInactiveRowLayout = (item: JQuery<HTMLElement>) => {
+  expect(item[0].scrollWidth).to.be.at.most(item[0].clientWidth)
+  const button = item[0].querySelector<HTMLButtonElement>('.activate-examination')!
+  expect(button.disabled).to.equal(false)
+  expect(button.getBoundingClientRect().height).to.be.at.least(44)
+  expect(button.getBoundingClientRect().width).to.be.closeTo(item[0].getBoundingClientRect().width, 1)
+}
 const closeModal = () => {
   cy.get('ion-modal:visible').find('ion-header ion-button').click()
   cy.get('ion-modal:visible').should('not.exist')
@@ -28,26 +40,64 @@ for (const width of [320, 1024]) {
 
     it('shows full-width inactive activation rows without red actions or a picker', () => {
       cy.get('.add-examination').should('not.exist')
-      for (const id of ['stridor', 'auscultation', 'accessoryMuscles', 'retractions', 'paradoxical', 'jugularVenousDistension', 'emphysema', 'trachealDeviation']) {
+      for (const id of ['stridor', 'auscultation', 'jugularVenousDistension', 'emphysema', 'trachealDeviation']) {
         // Native scrolling reaches IonContent's shadow scroll container.
         row(id).then(item => item[0].scrollIntoView({ block: 'center' }))
-        row(id).should('be.visible').and('have.class', 'examination-inactive').and('contain.text', 'nicht untersucht')
+        row(id).should('be.visible').and('have.class', 'examination-inactive').and('have.attr', 'data-assessed', 'false')
         row(id).find('.positive-examination').should('not.exist')
       }
-      cy.get('.examination-inactive').each(item => {
-        expect(item[0].scrollWidth).to.be.at.most(item[0].clientWidth)
-        const button = item[0].querySelector<HTMLButtonElement>('.activate-examination')!
-        expect(button.disabled).to.equal(false)
-        expect(button.getBoundingClientRect().height).to.be.at.least(44)
-        expect(button.getBoundingClientRect().width).to.be.closeTo(item[0].getBoundingClientRect().width, 1)
-      })
+      cy.get('.examination-inactive').each(expectInactiveRowLayout)
       if (width === 320) {
         cy.get('ion-card').first().then(card => card[0].scrollIntoView())
         cy.screenshot('inline-examinations-mobile', { capture: 'viewport' })
       }
+      for (const id of breathingWork) row(id).should('not.exist')
+      openBreathingMechanics()
+      cy.get('ion-modal:visible ion-item-divider').then(dividers => {
+        expect(Array.from(dividers, divider => divider.textContent?.trim())).to.deep.equal(['Atemmuster', 'Parameter', 'Atemarbeit'])
+      })
+      cy.get('ion-modal:visible .examination-item').then(items => {
+        expect(Array.from(items, item => item.getAttribute('data-examination'))).to.deep.equal(breathingWork)
+      })
+      for (const id of breathingWork) {
+        row(id).then(item => item[0].scrollIntoView({ block: 'center' }))
+        row(id).should('be.visible').and('have.class', 'examination-inactive').and('have.attr', 'data-assessed', 'false')
+        row(id).should(expectInactiveRowLayout)
+      }
+      cy.contains('ion-modal:visible ion-radio', 'Hyperventilation').click()
+      cy.get('ion-modal:visible').should('not.contain.text', 'Parameter').and('contain.text', 'Atemarbeit')
+      for (const id of breathingWork) row(id).should('be.visible').and('have.attr', 'data-assessed', 'false')
+      closeModal()
     })
 
     it('activates booleans as true with Enter or Space and allows false before removal', () => {
+      openBreathingMechanics()
+      for (const id of breathingWork) {
+        row(id).find('.activate-examination').click()
+        row(id).find('ion-toggle').should('have.prop', 'checked', true)
+        row(id).should('have.attr', 'data-assessed', 'true')
+      }
+      closeModal()
+      openBreathingMechanics()
+      for (const id of breathingWork) {
+        row(id).find('ion-toggle').should('have.prop', 'checked', true).click()
+      }
+      closeModal()
+      openBreathingMechanics()
+      for (const id of breathingWork) {
+        row(id).should('have.attr', 'data-assessed', 'true')
+        row(id).find('ion-toggle').should('have.prop', 'checked', false)
+        row(id).find('.remove-examination').click()
+        row(id).find('.activate-examination').should('be.focused')
+      }
+      closeModal()
+      openBreathingMechanics()
+      for (const id of breathingWork) {
+        row(id).should('have.class', 'examination-inactive').and('have.attr', 'data-assessed', 'false')
+        row(id).find('.activate-examination').click()
+        row(id).find('ion-toggle').should('have.prop', 'checked', true)
+      }
+      closeModal()
       row('stridor').find('.activate-examination').focus()
       pressKey('Enter')
       row('stridor').find('ion-toggle').should('have.prop', 'checked', true)
@@ -62,6 +112,8 @@ for (const width of [320, 1024]) {
       row('stridor').should('not.exist')
       row('auscultation').should('not.exist')
       row('emphysema').should('exist')
+      cy.contains('ion-item', 'Atemmechanik').should('not.exist')
+      for (const id of breathingWork) row(id).should('not.exist')
     })
 
     it('opens the ECG modal on activation and keeps defaults when dismissed unchanged', () => {

@@ -63,6 +63,42 @@
 
       </template>
 
+      <IonItemDivider>
+        <IonLabel>Atemarbeit</IonLabel>
+      </IonItemDivider>
+      <DodoExaminationItem id="paradoxical" label="Paradoxe Atmung"
+        v-model:assessed="store.doku.xaBcde.paradoxical.assessed"
+        :available="store.doku.xAbcde.isBreathing"
+        show-line="inset"
+        @select="store.doku.xaBcde.paradoxical.value = true"
+        @remove="store.doku.xaBcde.paradoxical.value = false">
+        <DodoInputToggle lines="none" v-model="store.doku.xaBcde.paradoxical.value">
+          Paradoxe Atmung?
+        </DodoInputToggle>
+      </DodoExaminationItem>
+
+      <DodoExaminationItem id="accessoryMuscles" label="Hilfsmuskulatur"
+        v-model:assessed="store.doku.xaBcde.accessoryMuscles.assessed"
+        :available="store.doku.xAbcde.isBreathing"
+        show-line="inset"
+        @select="store.doku.xaBcde.accessoryMuscles.value = true"
+        @remove="store.doku.xaBcde.accessoryMuscles.value = false">
+        <DodoInputToggle lines="none" v-model="store.doku.xaBcde.accessoryMuscles.value">
+          Hilfsmuskulatur?
+        </DodoInputToggle>
+      </DodoExaminationItem>
+
+      <DodoExaminationItem id="retractions" label="Einziehungen"
+        v-model:assessed="store.doku.xaBcde.retractions.assessed"
+        :available="store.doku.xAbcde.isBreathing"
+        show-line="inset"
+        @select="store.doku.xaBcde.retractions.value = true"
+        @remove="store.doku.xaBcde.retractions.value = false">
+        <DodoInputToggle lines="none" v-model="store.doku.xaBcde.retractions.value">
+          Einziehungen?
+        </DodoInputToggle>
+      </DodoExaminationItem>
+
     </DodoItemModal>
 
     <DodoInputToggle lines="full" v-model="store.doku.xaBcde.hasHypoxia">
@@ -101,39 +137,6 @@
         </DodoInputSelect>
 
       </DodoItemModal>
-    </DodoExaminationItem>
-
-    <DodoExaminationItem id="accessoryMuscles" label="Hilfsmuskulatur"
-      v-model:assessed="store.doku.xaBcde.accessoryMuscles.assessed"
-      :available="store.doku.xAbcde.isBreathing"
-      show-line="inset"
-      @select="store.doku.xaBcde.accessoryMuscles.value = true"
-      @remove="store.doku.xaBcde.accessoryMuscles.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.accessoryMuscles.value">
-        Hilfsmuskulatur?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
-    <DodoExaminationItem id="retractions" label="Einziehungen"
-      v-model:assessed="store.doku.xaBcde.retractions.assessed"
-      :available="store.doku.xAbcde.isBreathing"
-      show-line="inset"
-      @select="store.doku.xaBcde.retractions.value = true"
-      @remove="store.doku.xaBcde.retractions.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.retractions.value">
-        Einziehungen?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
-    <DodoExaminationItem id="paradoxical" label="Paradoxe Atmung"
-      v-model:assessed="store.doku.xaBcde.paradoxical.assessed"
-      :available="store.doku.xAbcde.isBreathing"
-      show-line="inset"
-      @select="store.doku.xaBcde.paradoxical.value = true"
-      @remove="store.doku.xaBcde.paradoxical.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.paradoxical.value">
-        Paradoxe Atmung?
-      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="jugularVenousDistension" label="Halsvenenstauung"
