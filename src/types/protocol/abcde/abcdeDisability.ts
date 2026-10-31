@@ -1,3 +1,4 @@
+import { assessmentActive, assessmentDefaults } from '../assessment'
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { prefixIntox, prefixParaesthesis } from "@/utils/prefix/disability"
 import { onNormal, textIf } from "@/utils/filter"
@@ -195,6 +196,12 @@ export class DisabilityGcs {
 
 export class DisabilityNeuro {
 
+  public assessment = assessmentDefaults('followInstructions', 'msMeningism', 'sensitivity', 'paraesthesia', 'dysarthria', 'aphasia')
+
+  isExamined(field: keyof typeof this.assessment): boolean {
+    return assessmentActive(this.assessment[field], useDokuStore().doku)
+  }
+
   public followInstructions: 'befolgt' | 'teilweise befolgt' | 'nicht befolgt'
 
   public msFace: '' | 'leichte' | 'ausgeprägte' | 'komplette'
@@ -234,13 +241,12 @@ export class DisabilityNeuro {
       || this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'
       || this.msLegLeft != 'ohne Absinken' || this.msLegRight != 'ohne Absinken'
       || this.msTremor
-      || (!getCtx().isNonVerbal && (
-        this.followInstructions !== 'befolgt'
-        || this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'
-        || this.sensitivity.isActive || this.paraesthesia.isActive
-        || this.dysarthria == 'stumm' || this.dysarthria == 'unverständlich' || this.dysarthria == 'verwaschen'
-        || this.aphasia == 'globale' || this.aphasia == 'leichte' || this.aphasia == 'schwere'
-      ))
+      || (this.isExamined('followInstructions') && this.followInstructions !== 'befolgt')
+      || (this.isExamined('msMeningism') && (this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'))
+      || (this.isExamined('sensitivity') && this.sensitivity.isActive)
+      || (this.isExamined('paraesthesia') && this.paraesthesia.isActive)
+      || (this.isExamined('dysarthria') && this.dysarthria != '' && this.dysarthria != 'normal')
+      || (this.isExamined('aphasia') && this.aphasia != '' && this.aphasia != 'keine')
   }
 
   get needTreatment(): boolean {
@@ -252,7 +258,6 @@ export class DisabilityNeuro {
   }
 
   get summaryText(): string {
-    const isNonVerbal = getCtx().isNonVerbal
     const pareses = [
       textIf('Facialparese', this.msFace != ''),
       textIf('Armparese', this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'),
@@ -260,17 +265,17 @@ export class DisabilityNeuro {
     ].filter(Boolean)
 
     return [
-      textIf('Aphasie', !isNonVerbal && ((this.aphasia != '' && this.aphasia != 'keine')
-        || (this.dysarthria != '' && this.dysarthria != 'normal'))),
+      textIf('Aphasie', (this.isExamined('aphasia') && this.aphasia != '' && this.aphasia != 'keine')
+        || (this.isExamined('dysarthria') && this.dysarthria != '' && this.dysarthria != 'normal')),
       pareses.length > 1 ? 'Parese' : pareses[0],
-      textIf('Störung Sensibilität', !isNonVerbal && this.sensitivity.isActive),
-      textIf('Parästhesien', !isNonVerbal && this.paraesthesia.isActive),
+      textIf('Störung Sensibilität', this.isExamined('sensitivity') && this.sensitivity.isActive),
+      textIf('Parästhesien', this.isExamined('paraesthesia') && this.paraesthesia.isActive),
       this.neckStiffnessText,
-    ].filter(Boolean).join(', ') || (isNonVerbal ? 'keine Paresen' : 'keine Paresen/Parästhesien')
+    ].filter(Boolean).join(', ') || (this.isExamined('paraesthesia') ? 'keine Paresen/Parästhesien' : 'keine Paresen')
   }
 
   get neckStiffnessText(): string {
-    if (getCtx().isNonVerbal) return ''
+    if (!this.isExamined('msMeningism')) return ''
     if (this.msMeningism === 'leichter') return 'leichte Nackensteife'
     if (this.msMeningism === 'ausgeprägter') return 'ausgeprägte Nackensteife'
     return ''
@@ -285,7 +290,6 @@ export class DisabilityNeuro {
   }
 
   buildDetailsText(neckStiffness: string): string {
-    const isNonVerbal = getCtx().isNonVerbal
     const articulation: Record<typeof this.dysarthria, string> = {
       normal: '',
       verwaschen: 'verwaschene Artikulation',
@@ -312,15 +316,15 @@ export class DisabilityNeuro {
     })
 
     return concatDoku([
-      textIf(`Anweisungen ${this.followInstructions}`, !isNonVerbal && this.followInstructions != 'befolgt'),
+      textIf(`Anweisungen ${this.followInstructions}`, this.isExamined('followInstructions') && this.followInstructions != 'befolgt'),
       textIf(`${this.msFace} Fazialisparese`, this.msFace != ''),
       ...limbFindings,
-      textIf(neckStiffness, !isNonVerbal),
+      textIf(neckStiffness, this.isExamined('msMeningism')),
       textIf('Tremor/Myoklonien', this.msTremor),
-      textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), !isNonVerbal && this.sensitivity.isActive),
-      textIf(prefixParaesthesis(this.paraesthesia.value), !isNonVerbal && this.paraesthesia.isActive),
-      textIf(articulation[this.dysarthria], !isNonVerbal),
-      textIf(`${this.aphasia} Aphasie`, !isNonVerbal && this.aphasia != '' && this.aphasia != 'keine'),
+      textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), this.isExamined('sensitivity') && this.sensitivity.isActive),
+      textIf(prefixParaesthesis(this.paraesthesia.value), this.isExamined('paraesthesia') && this.paraesthesia.isActive),
+      textIf(articulation[this.dysarthria], this.isExamined('dysarthria')),
+      textIf(`${this.aphasia} Aphasie`, this.isExamined('aphasia') && this.aphasia != '' && this.aphasia != 'keine'),
     ], false)
   }
 
@@ -392,6 +396,12 @@ export class DisabilityPsych {
 
 export class AbcdeDisability {
 
+  public assessment = assessmentDefaults('zops', 'headache', 'dizziness')
+
+  isExamined(field: keyof typeof this.assessment): boolean {
+    return assessmentActive(this.assessment[field], useDokuStore().doku)
+  }
+
   public avpu: 'wach' | 'benommen' | 'somnolent' | 'soporös' | 'bewusstlos'
   public zops: DisabilityZops
   public gcs: DisabilityGcs
@@ -435,7 +445,7 @@ export class AbcdeDisability {
 
   get needTreatment(): boolean {
     return this.avpu != 'wach'
-      || !this.zops.isOriented
+      || (this.isExamined('zops') && !this.zops.isOriented)
       || this.gcs.score < 15
       || (this.neuro.isAssessed && this.neuro.value.needTreatment)
       || (this.psych.isAssessed && this.psych.value.needTreatment)
@@ -444,16 +454,16 @@ export class AbcdeDisability {
       || this.aphasia
       || this.paresis.active
       || this.paresthesia.active
-      || this.headache
-      || this.dizziness != 'kein'
-      || this.intoxication.assessed
+      || (this.isExamined('headache') && this.headache)
+      || (this.isExamined('dizziness') && this.dizziness != 'kein')
+      || this.intoxication.isAssessed
   }
 
   // ##########################################################################
 
   get gcsVerbalScore(): number {
     if (this.gcs.v >= 4) {
-      return this.zops.isOriented ? 5 : 4
+      return !this.isExamined('zops') || this.zops.isOriented ? 5 : 4
     }
     return this.gcs.v
   }
@@ -464,7 +474,7 @@ export class AbcdeDisability {
 
   get couldBeBaseline(): boolean {
     return this.avpu != 'wach'
-    || !this.zops.isOriented
+    || (this.isExamined('zops') && !this.zops.isOriented)
     || this.gcsScore < 15
     || (this.psych.isAssessed && this.psych.value.hasAbnormalities)
     || this.aphasia
@@ -475,6 +485,7 @@ export class AbcdeDisability {
   ///////////////////////////////////////////////
 
   get dizzinessText(): string {
+    if (!this.isExamined('dizziness')) return ''
     if (this.dizziness == 'kein') { return onNormal('kein Schwindel') }
     else if (this.dizziness == 'ungerichteter') { return 'diffuser/ungerichteter Schwindel' }
     else { return 'Dreh-/Schwankschwindel' }
@@ -485,7 +496,6 @@ export class AbcdeDisability {
   public generateText(): string
   {
 
-      const isNonVerbal = getCtx().isNonVerbal
       const isPediatric = getCtx().isPediatric
 
       const headache = this.headache ? 'Kopfschmerzen' : onNormal('keine Kopfschmerzen')
@@ -493,12 +503,12 @@ export class AbcdeDisability {
       const assessedLine: string = breakDoku(prefix('D:', capitalizeBegin(concatDoku([
         [
           this.avpu,
-          textIf(this.zops.pediatricText, !isNonVerbal && isPediatric),
-          textIf(this.zops.adultText, !isNonVerbal && !isPediatric),
+          textIf(this.zops.pediatricText, this.isExamined('zops') && isPediatric),
+          textIf(this.zops.adultText, this.isExamined('zops') && !isPediatric),
         ],
         this.gcsScore < 14 ? `GCS ${this.gcsScore}` : '',
-        textIf(headache, !isNonVerbal),
-        textIf(this.dizzinessText, !isNonVerbal),
+        textIf(headache, this.isExamined('headache')),
+        this.dizzinessText,
         textIf(this.neuro.value.summaryText, this.neuro.isAssessed),
         textIf(this.psych.value.text, this.psych.isAssessed),
         textIf(
@@ -506,7 +516,7 @@ export class AbcdeDisability {
           this.baseline
         ),
         textIf(`BZ ${this.bloodGlucose.value}`, this.bloodGlucose.isAssessed),
-        textIf(prefixIntox(this.intoxication.value), this.intoxication.assessed),
+        textIf(prefixIntox(this.intoxication.value), this.intoxication.isAssessed),
       ]))))
 
       return assessedLine

@@ -34,6 +34,7 @@ import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
+import { isNonVerbalProtocol } from '@/types/protocol/assessment'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
 
@@ -70,6 +71,31 @@ function hydrateLikeTemplate<T>(template: T, input: unknown): T {
 
   if (template !== null && typeof input !== typeof template) throw new Error('Invalid protocol value')
   return input as T
+}
+
+// Older records contain values but no explicit intent. Infer only from recorded
+// non-default values; new records retain even explicit normal/inactive choices.
+function restoreAssessmentIntents(value: unknown, input: unknown, defaults: unknown): void {
+  if (!isRecord(value) || !isRecord(defaults)) return
+  const source = isRecord(input) ? input : {}
+  if (isRecord(value.assessment)) {
+    const intents = isRecord(source.assessment) ? source.assessment : {}
+    for (const key of Object.keys(value.assessment)) {
+      const intent = intents[key]
+      if (intent === 'auto' || intent === 'active' || intent === 'inactive') {
+        value.assessment[key] = intent
+      } else {
+        const finding = value[key]
+        const entered = isRecord(finding) && typeof finding.active === 'boolean'
+          ? finding.active
+          : JSON.stringify(finding) !== JSON.stringify(defaults[key])
+        value.assessment[key] = entered ? 'active' : 'auto'
+      }
+    }
+  }
+  for (const key of Object.keys(defaults)) {
+    if (key !== 'assessment') restoreAssessmentIntents(value[key], source[key], defaults[key])
+  }
 }
 
 function hydrateProtocol(input: unknown): Protocol | null {
@@ -126,12 +152,22 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
 
     const neuro = disability.neuro
     if (isRecord(neuro) && !('assessed' in neuro)) {
-      disability.neuro = { assessed: hydrateLikeTemplate(new DisabilityNeuro(), neuro).hasAbnormalities, value: neuro }
+      const restoredNeuro = hydrateLikeTemplate(new DisabilityNeuro(), neuro)
+      restoreAssessmentIntents(restoredNeuro, neuro, new DisabilityNeuro())
+      disability.neuro = { assessed: restoredNeuro.hasAbnormalities, value: neuro }
     }
     if (isRecord(disability.headache)) {
+      disability.assessment = {
+        ...(isRecord(disability.assessment) ? disability.assessment : {}),
+        headache: disability.headache.assessed === true ? 'active' : 'inactive',
+      }
       disability.headache = disability.headache.assessed === true ? disability.headache.value : false
     }
     if (isRecord(disability.dizziness)) {
+      disability.assessment = {
+        ...(isRecord(disability.assessment) ? disability.assessment : {}),
+        dizziness: disability.dizziness.assessed === true ? 'active' : 'inactive',
+      }
       disability.dizziness = disability.dizziness.assessed === true ? disability.dizziness.value : 'kein'
     }
     if (typeof disability.bloodGlucose === 'string') {
@@ -184,6 +220,7 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     }
   }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
+  restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
 
   if (legacyCourse === 1 || legacyCourse === 2) {
     hydratedProtocol.course = ProtocolCourse.TRANSPORT
@@ -768,7 +805,8 @@ export const useDokuStore = defineStore('doku', {
       const source = TEXT_AREA_BLOCK_SOURCES.find(source => source.outputs.some(output => output.id === id))
       if (source?.isAvailable(this.doku)) this.doku.textAreaBlocks[source.id].active[id] = active
     },
-    setDizziness(value: Protocol['xabcDe']['dizziness']) {
+    setDizziness(value: Protocol['xabcDe']['dizziness'], assess = true) {
+      if (assess) this.doku.xabcDe.assessment.dizziness = 'active'
       this.doku.xabcDe.dizziness = value
       if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
     },
@@ -813,7 +851,8 @@ export const useDokuStore = defineStore('doku', {
       this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
       this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
     },
-    setAbdominalPain(value: ExposureAbdominal['pain']) {
+    setAbdominalPain(value: ExposureAbdominal['pain'], assess = true) {
+      if (assess) this.doku.xabcdE.abdominal.value.assessment.pain = 'active'
       this.doku.xabcdE.abdominal.value.pain = value
       if (!this.doku.xabcdE.abdominal.isAssessed || value === 'keine') {
         this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
@@ -1099,7 +1138,7 @@ export const useDokuStore = defineStore('doku', {
 
       const isCritical: boolean =
         !state.doku.xAbcde.isBreathing
-        || state.doku.xaBcde.breathlessness == 'schwere'
+        || (state.doku.xaBcde.isExamined('breathlessness') && state.doku.xaBcde.breathlessness == 'schwere')
         || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
         || state.doku.xaBcde.trachealDeviation.matches(true)
         || state.doku.xabCde.pulse.peripheralStrength == 'nicht'
@@ -1117,11 +1156,7 @@ export const useDokuStore = defineStore('doku', {
           ? ProtocolVerbosity.LOW
           : ProtocolVerbosity.NORMAL
 
-      const isNonVerbal: boolean = state.doku.flavors.non_verbal
-        || !state.doku.xAbcde.isBreathing
-        || state.doku.xabcDe.avpu == 'bewusstlos'
-        || state.doku.xabcDe.avpu == 'soporös'
-        || state.doku.xabcDe.gcs.v < 4
+      const isNonVerbal = isNonVerbalProtocol(state.doku)
 
       const isLowVigilant: boolean =
         (state.doku.xabcDe.gcsScore<14 || state.doku.xabcDe.avpu != 'wach') &&
@@ -1158,13 +1193,13 @@ export const useDokuStore = defineStore('doku', {
         gcs,
         isBaseline,
 
-        hasNausea: state.doku.xabcdE.nausea,
+        hasNausea: state.doku.xabcdE.isExamined('nausea') && state.doku.xabcdE.nausea,
         hasEmesis: state.doku.xabcdE.emesis.needTreatment,
-        hasHeadache: state.doku.xabcDe.headache,
-        hasDizziness: state.doku.xabcDe.dizziness != 'kein',
+        hasHeadache: state.doku.xabcDe.isExamined('headache') && state.doku.xabcDe.headache,
+        hasDizziness: state.doku.xabcDe.isExamined('dizziness') && state.doku.xabcDe.dizziness != 'kein',
         hasSensomotoricDeficit: state.doku.xabcDe.paresis.active,
-        hasHeartIssue: state.doku.xabCde.chest.pain != 'keine' || state.doku.xabCde.chest.tightness,
-        hasAbdominalIssue: state.doku.xabcdE.abdominal.isAssessed && state.doku.xabcdE.abdominal.value.pain != 'keine',
+        hasHeartIssue: state.doku.xabCde.isExamined('chest') && (state.doku.xabCde.chest.pain != 'keine' || state.doku.xabCde.chest.tightness),
+        hasAbdominalIssue: state.doku.xabcdE.abdominal.isAssessed && state.doku.xabcdE.abdominal.value.isExamined('pain') && state.doku.xabcdE.abdominal.value.pain != 'keine',
 
         isTrauma,
         isPediatric,

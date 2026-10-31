@@ -249,11 +249,11 @@ describe('Disability assessment semantics', () => {
     expect(d.needTreatment).toBe(false)
   })
 
-  test('an assessed intoxication suspicion needs no description to require treatment', () => {
+  test('empty intoxication input does not imply a finding or require treatment', () => {
     const d = useDokuStore().doku.xabcDe
     d.intoxication.assessed = true
     expect(d.intoxication.isAssessed).toBe(false)
-    expect(d.needTreatment).toBe(true)
+    expect(d.needTreatment).toBe(false)
     d.intoxication.assessed = false
     expect(d.needTreatment).toBe(false)
   })

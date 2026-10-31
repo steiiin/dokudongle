@@ -7,93 +7,19 @@
       </DodoInputTemperature>
     </IonItem>
 
-    <DodoExaminationItem id="excretions" label="Ausscheidung" assessed-presets show-line="inset"
-      :assessed="store.doku.xabcdE.excretions.assessed" @update:assessed="store.setExcretionsAssessed"
-      @select="store.resetExcretions" @activate="excretionsModal?.open()" @remove="store.resetExcretions">
-      <DodoItemModal ref="excretionsModal" label="Ausscheidung"
-        :state="store.doku.xabcdE.excretionsState" lines="none">
-
-        <IonItemDivider>
-          <IonLabel>Katheter</IonLabel>
-        </IonItemDivider>
-        <DodoInputSelect :model-value="store.doku.xabcdE.excretions.value.catheterType"
-          @update:model-value="store.setCatheterType($event as ExposureExcretions['catheterType'])"
-          label="Typ" lines="none"
-          :options="[
-            { value: '', label: 'Kein Katheter' },
-            { value: 'ISK', label: 'Einmalkatheter' },
-            { value: 'transurethraler DK', label: 'Transurethral' },
-            { value: 'suprapubischer DK', label: 'Suprapubisch' },
-            { value: 'Nierenkatheter', label: 'Nierenkatheter' },
-          ]">
-        </DodoInputSelect>
-
-        <IonItemDivider>
-          <IonLabel>Auffälligkeiten?</IonLabel>
-        </IonItemDivider>
-        <DodoInputToggle lines="inset" :model-value="store.doku.xabcdE.excretions.value.urinaryAbnormalities" @update:model-value="store.setUrinaryAbnormalities">
-          Wasserlassen auffällig?
-        </DodoInputToggle>
-        <DodoInputToggle lines="none" :model-value="store.doku.xabcdE.excretions.value.bowelAbnormalities" @update:model-value="store.setBowelAbnormalities">
-          Stuhlgang auffällig?
-        </DodoInputToggle>
-
-      </DodoItemModal>
-    </DodoExaminationItem>
-
     <DodoInputToggle lines="full" v-model="store.doku.xabcdE.urinaryIncontinence">
       Eingenässt?
     </DodoInputToggle>
 
-    <DodoExaminationItem id="abdominal" label="Bauchbefund" assessed-presets
-      :assessed="store.doku.xabcdE.abdominal.assessed" @update:assessed="store.setAbdominalAssessed" show-line="full"
-      @select="store.resetAbdominal" @activate="abdominalModal?.open()" @remove="store.resetAbdominal">
-      <DodoItemModal ref="abdominalModal" label="Bauchbefund" modal-label="Bauchbefund"
-        :state="store.doku.xabcdE.abdominalState" lines="none">
-
-        <DodoInputSelect
-          v-model="store.doku.xabcdE.abdominal.value.guarding"
-          label="Abwehrspannung" lines="full"
-          :options="[
-            { value: '', label: 'Keine' },
-            { value: 'leichte', label: 'Leicht' },
-            { value: 'starke', label: 'Stark' },
-          ]">
-        </DodoInputSelect>
-
-        <template v-if="!ctx.isNonVerbal">
-
-          <DodoInputSelect
-            :model-value="store.doku.xabcdE.abdominal.value.pain"
-            @update:model-value="store.setAbdominalPain($event as ExposureAbdominal['pain'])"
-            label="Bauchschmerzen" lines="inset"
-            :options="[
-              { value: 'keine', label: 'Keine' },
-              { value: 'leichte', label: 'Leicht' },
-              { value: '', label: 'Mittel' },
-              { value: 'starke', label: 'Stark' },
-            ]">
-          </DodoInputSelect>
-
-        </template>
-
-        <DodoInputSelect
-          v-model="store.doku.xabcdE.abdominal.value.peristalsis"
-          label="Peristaltik" lines="none"
-          :options="[
-            { value: '', label: 'Unauffällig' },
-            { value: 'spärlich', label: 'Vermindert' },
-            { value: 'fehlend', label: 'Fehlend' },
-            { value: 'hochgestellt', label: 'Hochgestellt' },
-          ]">
-        </DodoInputSelect>
-
-      </DodoItemModal>
+    <DodoExaminationItem id="nausea" label="Übelkeit" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xabcdE.isExamined('nausea')"
+      @update:assessed="store.doku.xabcdE.assessment.nausea = $event ? 'active' : 'inactive'"
+      @select="store.doku.xabcdE.nausea = true" @remove="store.doku.xabcdE.nausea = false">
+      <DodoInputToggle v-model="store.doku.xabcdE.nausea" @update:model-value="store.doku.xabcdE.assessment.nausea = 'active'" lines="none">
+        Übelkeit?
+      </DodoInputToggle>
     </DodoExaminationItem>
-
-    <DodoInputToggle v-if="!ctx.isNonVerbal" v-model="store.doku.xabcdE.nausea" lines="inset">
-      Übelkeit?
-    </DodoInputToggle>
 
     <DodoItemModal label="Erbrechen" modal-label="Erbrechen"
       :state="store.doku.xabcdE.emesis.state" lines="full">
@@ -136,9 +62,93 @@
 
     </DodoItemModal>
 
+    <DodoExaminationItem id="excretions" label="Ausscheidung" show-line="inset"
+      :assessed="store.doku.xabcdE.excretions.assessed" @update:assessed="store.setExcretionsAssessed"
+      @select="store.resetExcretions" @activate="excretionsModal?.open()" @remove="store.resetExcretions">
+      <DodoItemModal ref="excretionsModal" label="Ausscheidung"
+        :state="store.doku.xabcdE.excretionsState" lines="none">
+
+        <IonItemDivider>
+          <IonLabel>Katheter</IonLabel>
+        </IonItemDivider>
+        <DodoInputSelect :model-value="store.doku.xabcdE.excretions.value.catheterType"
+          @update:model-value="store.setCatheterType($event as ExposureExcretions['catheterType'])"
+          label="Typ" lines="none"
+          :options="[
+            { value: '', label: 'Kein Katheter' },
+            { value: 'ISK', label: 'Einmalkatheter' },
+            { value: 'transurethraler DK', label: 'Transurethral' },
+            { value: 'suprapubischer DK', label: 'Suprapubisch' },
+            { value: 'Nierenkatheter', label: 'Nierenkatheter' },
+          ]">
+        </DodoInputSelect>
+
+        <IonItemDivider>
+          <IonLabel>Auffälligkeiten?</IonLabel>
+        </IonItemDivider>
+        <DodoInputToggle lines="inset" :model-value="store.doku.xabcdE.excretions.value.urinaryAbnormalities" @update:model-value="store.setUrinaryAbnormalities">
+          Wasserlassen auffällig?
+        </DodoInputToggle>
+        <DodoInputToggle lines="none" :model-value="store.doku.xabcdE.excretions.value.bowelAbnormalities" @update:model-value="store.setBowelAbnormalities">
+          Stuhlgang auffällig?
+        </DodoInputToggle>
+
+      </DodoItemModal>
+    </DodoExaminationItem>
+
+    <DodoExaminationItem id="abdominal" label="Bauchbefund"
+      :assessed="store.doku.xabcdE.abdominal.assessed" @update:assessed="store.setAbdominalAssessed" show-line="full"
+      @select="selectAbdominal" @activate="abdominalModal?.open()" @remove="store.resetAbdominal">
+      <DodoItemModal ref="abdominalModal" label="Bauchbefund" modal-label="Bauchbefund"
+        :state="store.doku.xabcdE.abdominalState" lines="none">
+
+        <DodoInputSelect
+          v-model="store.doku.xabcdE.abdominal.value.guarding"
+          label="Abwehrspannung" lines="full"
+          :options="[
+            { value: '', label: 'Keine' },
+            { value: 'leichte', label: 'Leicht' },
+            { value: 'starke', label: 'Stark' },
+          ]">
+        </DodoInputSelect>
+
+        <DodoExaminationItem id="pain" label="Bauchschmerzen" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcdE.abdominal.value.isExamined('pain')"
+          @update:assessed="store.doku.xabcdE.abdominal.value.assessment.pain = $event ? 'active' : 'inactive'"
+          @select="store.setAbdominalPain('keine')" @remove="store.setAbdominalPain('keine', false)"
+          @activate="abdominalPainSelect?.open()">
+          <DodoInputSelect ref="abdominalPainSelect"
+            :model-value="store.doku.xabcdE.abdominal.value.pain"
+            @update:model-value="store.setAbdominalPain($event as ExposureAbdominal['pain'])"
+            label="Bauchschmerzen" lines="none"
+            :options="[
+              { value: 'keine', label: 'Keine' },
+              { value: 'leichte', label: 'Leicht' },
+              { value: '', label: 'Mittel' },
+              { value: 'starke', label: 'Stark' },
+            ]">
+          </DodoInputSelect>
+        </DodoExaminationItem>
+
+        <DodoInputSelect
+          v-model="store.doku.xabcdE.abdominal.value.peristalsis"
+          label="Peristaltik" lines="none"
+          :options="[
+            { value: '', label: 'Unauffällig' },
+            { value: 'spärlich', label: 'Vermindert' },
+            { value: 'fehlend', label: 'Fehlend' },
+            { value: 'hochgestellt', label: 'Hochgestellt' },
+          ]">
+        </DodoInputSelect>
+
+      </DodoItemModal>
+    </DodoExaminationItem>
+
     <DodoExaminationItem id="pregnancy" label="Schwangerschaft" show-line="full"
       :available="ctx.isChildbearingAge || store.doku.xabcdE.pregnancy.assessed"
-      :assessed="store.doku.xabcdE.pregnancy.assessed" @update:assessed="store.setPregnancyAssessed">
+      :assessed="store.doku.xabcdE.pregnancy.assessed" @update:assessed="store.setPregnancyAssessed"
+      @select="store.setPregnancy(true)">
       <DodoInputToggle :model-value="store.doku.xabcdE.pregnancy.value"
         @update:model-value="store.setPregnancy" lines="none">
         Schwangerschaft
@@ -151,7 +161,7 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { isRestoringReanimation } from '@/store/reanimation'
+import DodoInputSelect from '@/components/DodoInputSelect.vue'
 
 import DodoItemModal from '@/components/DodoItemModal.vue'
 import type { ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
@@ -159,23 +169,25 @@ import type { ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abc
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
+const abdominalPainSelect = ref<InstanceType<typeof DodoInputSelect>>()
+function selectAbdominal() {
+  const intent = { ...store.doku.xabcdE.abdominal.value.assessment }
+  store.resetAbdominal()
+  const abdominal = store.doku.xabcdE.abdominal.value
+  abdominal.assessment = intent
+}
 const abdominalModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const excretionsModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 
 // ############################################################################
 
 watch(() => store.doku.xabcdE.abdominal.value.guarding, (v) => {
-  if (v != '' && store.doku.xabcdE.abdominal.value.pain == 'keine') {
-    store.setAbdominalPain('')
+  if (v != '' && store.doku.xabcdE.abdominal.value.isExamined('pain') && store.doku.xabcdE.abdominal.value.pain == 'keine') {
+    store.setAbdominalPain('', false)
   }
 })
 
-watch(() => ctx.value.isNonVerbal, (v) => {
-  if (isRestoringReanimation(store.doku)) return
-  if (v && store.doku.xabcdE.abdominal.value.pain != 'keine') {
-    store.setAbdominalPain('keine')
-  }
-}, { flush: 'sync' })
+
 
 </script>
 <style scoped>

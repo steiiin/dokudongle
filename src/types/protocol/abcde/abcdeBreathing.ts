@@ -1,5 +1,6 @@
+import { assessmentActive, assessmentDefaults } from '../assessment'
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { assessedText, onNormal, textDef, textIf } from "@/utils/filter"
+import { assessedText, textDef, textIf } from "@/utils/filter"
 import { AssessedValue, ProtocolStateValue, PSV } from "../input"
 
 import { useDokuStore } from "@/store/doku"
@@ -22,6 +23,12 @@ export interface BreathingAuscultation {
 // ############################################################################
 
 export class AbcdeBreathing {
+
+  public assessment = assessmentDefaults('breathlessness')
+
+  isExamined(field: keyof typeof this.assessment): boolean {
+    return assessmentActive(this.assessment[field], useDokuStore().doku)
+  }
 
   public breathlessness: 'keine' | 'leichte' | '' | 'schwere'
   public hasHypoxia: boolean
@@ -58,7 +65,7 @@ export class AbcdeBreathing {
   // #####################################################################
 
   get needTreatment(): boolean {
-    return this.breathlessness != 'keine'
+    return (this.isExamined('breathlessness') && this.breathlessness != 'keine')
       || this.hasHypoxia
       || this.mechanics.frequency != ''
       || this.mechanics.depth != ''
@@ -79,7 +86,7 @@ export class AbcdeBreathing {
 
   // #####################################################################
 
-  get hasDyspnoe(): boolean { return this.breathlessness != 'keine' }
+  get hasDyspnoe(): boolean { return this.isExamined('breathlessness') && this.breathlessness != 'keine' }
 
   get dyspnoeText(): string { return `${this.breathlessness} Luftnot` }
 
@@ -195,7 +202,6 @@ export class AbcdeBreathing {
   {
 
     const isBreathing = getCtx().isBreathing
-    const isNonVerbal = getCtx().isNonVerbal
 
     const assessedLine: string = breakDoku(prefix('B:', capitalizeBegin(concatDoku([
       textIf('Apnoe', !isBreathing),
@@ -205,7 +211,7 @@ export class AbcdeBreathing {
             ? 'keine Luftnot'
             : this.dyspnoeText,
         isBreathing),
-      !isNonVerbal),
+      this.isExamined('breathlessness')),
       textIf(this.breathingText, isBreathing),
       textIf(this.auscultationText, isBreathing),
       textIf('Hypoxie', this.hasHypoxia),

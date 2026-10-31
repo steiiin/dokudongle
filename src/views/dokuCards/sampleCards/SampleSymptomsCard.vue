@@ -3,7 +3,7 @@
     <hr v-if="ctx.isTrauma">
 
     <BlockSchwindelCard
-      v-if="ctx.requireSampleSymptoms && store.doku.xabcDe.dizziness === 'gerichteter'" />
+      v-if="ctx.requireSampleSymptoms && ctx.hasDizziness && store.doku.xabcDe.dizziness === 'gerichteter'" />
 
     <BlockExcretionsBowelsCard
       v-if="ctx.requireSampleSymptoms && store.doku.xabcdE.excretions.isAssessed && store.doku.xabcdE.excretions.value.bowelAbnormalities" />

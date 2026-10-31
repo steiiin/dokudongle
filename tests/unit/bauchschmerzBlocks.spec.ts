@@ -173,8 +173,8 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(store.textAreaBlocks).toEqual([])
     store.doku.textAreaBlocks.bauchschmerz.details.quality = ['stechend']
     store.setFlavor('non_verbal', true)
-    expect(store.doku.xabcdE.abdominal.value.pain).toBe('keine')
-    expect(store.doku.textAreaBlocks.bauchschmerz).toEqual(createBauchschmerzBlockState())
+    expect(store.doku.xabcdE.abdominal.value.pain).toBe('')
+    expect(store.doku.textAreaBlocks.bauchschmerz.details.quality).toEqual(['stechend'])
     store.setFlavor('non_verbal', false)
     store.setAbdominalPain('starke')
     store.doku.textAreaBlocks.bauchschmerz.details.quality = ['stechend']

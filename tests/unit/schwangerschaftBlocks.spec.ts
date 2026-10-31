@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { enableAutoUnmount, mount, shallowMount } from '@vue/test-utils'
 import * as Ionic from '@ionic/vue'
-import { IonItem, IonModal, IonPopover } from '@ionic/vue'
+import { IonItem, IonModal } from '@ionic/vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   createSchwangerschaftBlockState, pregnancySpanFromTerm, pregnancyTermFromSpan,
@@ -75,7 +75,7 @@ describe('pregnancy findings in E', () => {
     },
   )
 
-  test('picker respects age boundaries, adds on, and keeps an added item editable after age changes', async () => {
+  test('inline examination respects age boundaries and stays editable after age changes', async () => {
     const store = useDokuStore()
     const exposure = mount(AbcdeExposureCard, {
       global: {
@@ -87,8 +87,7 @@ describe('pregnancy findings in E', () => {
       },
     })
     const card = exposure.getComponent(DodoExaminationCard)
-    const picker = card.getComponent(IonPopover)
-    const pregnancyRow = () => picker.find('[data-examination="pregnancy"]')
+    const pregnancyRow = () => card.find('[data-examination="pregnancy"]')
     for (const [age, available] of [[9, false], [10, true], [52, true], [53, false]] as const) {
       store.doku.ident.age = new PatientAge(age, 'years')
       await nextTick()
@@ -96,8 +95,7 @@ describe('pregnancy findings in E', () => {
     }
     store.doku.ident.age = new PatientAge(30, 'years')
     await nextTick()
-    await card.get('.add-examination').trigger('click')
-    await pregnancyRow().trigger('click')
+    await pregnancyRow().get('.activate-examination').trigger('click')
     expect(store.doku.xabcdE.pregnancy.matches(true)).toBe(true)
     store.doku.ident.age = new PatientAge(53, 'years')
     await nextTick()

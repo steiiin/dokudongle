@@ -142,44 +142,61 @@
       ]">
     </DodoInputSelect>
 
-    <DodoItemModal label="Brustschmerz" v-if="!ctx.isNonVerbal"
-      :state="store.doku.xabCde.chestpainState" lines="full">
+    <DodoExaminationItem id="chest" label="Brustschmerz" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xabCde.isExamined('chest')"
+      @update:assessed="store.doku.xabCde.assessment.chest = $event ? 'active' : 'inactive'"
+      @select="resetChest" @remove="resetChest"
+      @activate="chestModal?.open()">
+      <DodoItemModal ref="chestModal" label="Brustschmerz"
+        :state="store.doku.xabCde.chestpainState" lines="none">
 
-      <DodoInputToggle lines="full" v-model="store.doku.xabCde.chest.tightness">
-        Brustenge?
-      </DodoInputToggle>
-
-      <DodoInputSelect v-model="store.doku.xabCde.chest.pain" v-if="ctx.hasPulse"
-        label="Brustschmerzen" :lines="insetIf(store.doku.xabCde.chest.pain != 'keine')"
-        :options="[
-          { value: 'keine', label: 'Keine' },
-          { value: 'leichte', label: 'Leicht' },
-          { value: '', label: 'Mittel' },
-          { value: 'starke', label: 'Stark' },
-        ]">
-      </DodoInputSelect>
-
-      <template v-if="store.doku.xabCde.chest.pain !== 'keine'">
-
-        <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.tenderness">
-          Druckdolent?
+        <DodoInputToggle lines="full" v-model="store.doku.xabCde.chest.tightness" @update:model-value="store.doku.xabCde.assessment.chest = 'active'">
+          Brustenge?
         </DodoInputToggle>
 
-        <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.aggravation">
-          Bewegungsabhängig?
-        </DodoInputToggle>
+        <DodoInputSelect v-model="store.doku.xabCde.chest.pain" @update:model-value="store.doku.xabCde.assessment.chest = 'active'" v-if="ctx.hasPulse"
+          label="Brustschmerzen" :lines="insetIf(store.doku.xabCde.chest.pain != 'keine')"
+          :options="[
+            { value: 'keine', label: 'Keine' },
+            { value: 'leichte', label: 'Leicht' },
+            { value: '', label: 'Mittel' },
+            { value: 'starke', label: 'Stark' },
+          ]">
+        </DodoInputSelect>
 
-        <DodoInputTextOptional lines="none"
-          toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed"
-          text-label="Wohin?" text-placeholder="z.B. li. Arm" v-model:text="store.doku.xabCde.chest.radiation.value"
-          :ime-dictionary="{ /* activate IME */ }">
-        </DodoInputTextOptional>
+        <template v-if="store.doku.xabCde.chest.pain !== 'keine'">
 
-      </template>
+          <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.tenderness" @update:model-value="store.doku.xabCde.assessment.chest = 'active'">
+            Druckdolent?
+          </DodoInputToggle>
 
-    </DodoItemModal>
+          <DodoInputToggle lines="inset" v-model="store.doku.xabCde.chest.aggravation" @update:model-value="store.doku.xabCde.assessment.chest = 'active'">
+            Bewegungsabhängig?
+          </DodoInputToggle>
 
-    <DodoExaminationItem id="ecg" label="EKG" assessed-presets
+          <DodoInputTextOptional lines="none"
+            toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed" @update:toggle="store.doku.xabCde.assessment.chest = 'active'"
+            text-label="Wohin?" text-placeholder="z.B. li. Arm" v-model:text="store.doku.xabCde.chest.radiation.value" @update:text="store.doku.xabCde.assessment.chest = 'active'"
+            :ime-dictionary="{ /* activate IME */ }">
+          </DodoInputTextOptional>
+
+        </template>
+
+      </DodoItemModal>
+    </DodoExaminationItem>
+
+    <DodoInputSelect v-model="store.doku.xabCde.capillaryRefill" v-if="ctx.hasPulse"
+      label="Rekap-Zeit" lines="full"
+      :options="[
+        { value: '1s', label: '1s' },
+        { value: '2s', label: '2s' },
+        { value: '3s', label: '3s' },
+        { value: '>3s', label: '>3s' },
+      ]">
+    </DodoInputSelect>
+
+    <DodoExaminationItem id="ecg" label="EKG"
       v-model:assessed="store.doku.xabCde.ecg.assessed" show-line="full"
       @select="store.doku.xabCde.ecg.value = 'SR'"
       @activate="ecgModal?.open()" @remove="store.doku.xabCde.ecg.value = 'SR'">
@@ -197,7 +214,7 @@
       </DodoItemModal>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="edema" label="Ödeme" show-line="full" assessed-presets
+    <DodoExaminationItem id="edema" label="Ödeme" show-line="full"
       v-model:assessed="store.doku.xabCde.edema.assessed" :available="ctx.hasPulse"
       @select="resetEdema" @activate="edemaSelect?.open()" @remove="resetEdema">
       <DodoInputSelect ref="edemaSelect" v-model="store.doku.xabCde.edema.value.grade"
@@ -219,16 +236,6 @@
       </DodoInputSelect>
     </DodoExaminationItem>
 
-    <DodoInputSelect v-model="store.doku.xabCde.capillaryRefill" v-if="ctx.hasPulse"
-      label="Rekap-Zeit" lines="none"
-      :options="[
-        { value: '1s', label: '1s' },
-        { value: '2s', label: '2s' },
-        { value: '3s', label: '3s' },
-        { value: '>3s', label: '>3s' },
-      ]">
-    </DodoInputSelect>
-
   </DodoExaminationCard>
 </template>
 
@@ -239,6 +246,7 @@ import DodoItemModal from '@/components/DodoItemModal.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
+import { AbcdeCirculation } from '@/types/protocol/abcde'
 import { AssessedValue } from '@/types/protocol/input'
 import { insetIf } from '@/utils/filter'
 
@@ -273,6 +281,11 @@ watch(() => store.doku.xabCde.chest.pain, (v) => {
     store.doku.xabCde.chest.radiation = AssessedValue.unassessed('')
   }
 })
+
+const chestModal = ref<InstanceType<typeof DodoItemModal>>()
+function resetChest() {
+  store.doku.xabCde.chest = new AbcdeCirculation().chest
+}
 
 const ecgModal = ref<InstanceType<typeof DodoItemModal>>()
 const edemaSelect = ref<InstanceType<typeof DodoInputSelect>>()

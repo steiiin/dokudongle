@@ -1,3 +1,4 @@
+import { assessmentActive, assessmentDefaults } from '../assessment'
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
 import { prefixChestpainRadiation } from "@/utils/prefix/circulation"
@@ -42,6 +43,12 @@ export interface CirculationEdema {
 // ############################################################################
 
 export class AbcdeCirculation {
+
+  public assessment = assessmentDefaults('chest')
+
+  isExamined(field: keyof typeof this.assessment): boolean {
+    return assessmentActive(this.assessment[field], useDokuStore().doku)
+  }
 
   public pulse: CirculationPulse
   public rr: '' | 'hypoton' | 'hyperton'
@@ -101,8 +108,7 @@ export class AbcdeCirculation {
       || this.skin.color != 'rosig'
       || this.skin.centralTemp != 'warm'
       || this.skin.poorSkinTurgor
-      || this.chest.tightness
-      || this.chest.pain != 'keine'
+      || (this.isExamined('chest') && (this.chest.tightness || this.chest.pain != 'keine'))
       || this.capillaryRefill == '>3s'
   }
 
@@ -208,7 +214,7 @@ export class AbcdeCirculation {
   }
 
   get chestpainText(): string {
-    return this.chestpainPSV.protocolText
+    return this.isExamined('chest') ? this.chestpainPSV.protocolText : ''
   }
 
   // #####################################################################
@@ -217,7 +223,6 @@ export class AbcdeCirculation {
   {
 
     const hasPulse = getCtx().hasPulse
-    const isNonVerbal = getCtx().isNonVerbal
 
     const assessedLine: string = breakDoku(prefix('C:', capitalizeBegin(concatDoku([
       [
@@ -228,7 +233,7 @@ export class AbcdeCirculation {
         this.capillaryRefill == '>3s' ? 'Rekap>3s' : onNormal(`Rekap ${this.capillaryRefill}`),
         getCtx().hasPulse
       ),
-      textIf(this.chestpainText, !isNonVerbal),
+      this.chestpainText,
       textIf(this.rr, hasPulse),
       this.edemaText,
       this.ecgText,
