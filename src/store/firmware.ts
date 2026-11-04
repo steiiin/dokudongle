@@ -29,8 +29,8 @@ export const useFirmwareStore = defineStore('firmware', () => {
   const active = computed(() => ['searching', 'preparing', 'transferring', 'restarting', 'transferred', 'verifying'].includes(status.value.phase))
   const showRecovery = computed(() => android && (doku.connection.failedConnectionAttempts >= 2
     || hasFailedUpdate.value || (!!recovery.value && !active.value)))
-  // Keep failures visible after dismissing the dialog, including preflight failures
-  // that have not created a native recovery record yet.
+  // Fehler nach dem Schließen des Dialogs sichtbar halten, auch Fehler bei der Vorprüfung,
+  // für die noch kein nativer Wiederherstellungsdatensatz angelegt wurde.
   watch(() => status.value.phase, phase => {
     if (phase === 'error') hasFailedUpdate.value = true
     else if (phase === 'done') hasFailedUpdate.value = false
@@ -85,7 +85,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
   }
 
   function receive(next: FirmwareUpdateStatus) {
-    if (discovery) return // Discovery owns the UI until it hands BLE to the native service.
+    if (discovery) return // Die Gerätesuche steuert die Oberfläche, bis sie BLE an den nativen Dienst übergibt.
     if (next.updatedAt < latestNativeTimestamp) return
     latestNativeTimestamp = next.updatedAt
     if (verification && next.jobId === status.value.jobId && next.phase === 'transferred') return
@@ -133,7 +133,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
           doku.connection.firmwareStatus = isCompatibleFirmware(info) ? 'ready' : 'unsupported'
           verified = isCompatibleFirmware(info) && info.version === completed.version
           if (!verified) recordError(new Error(`Erwartet: ${completed.version}, empfangen: ${info.version}, Protokoll: ${info.protocolRevision}, Ziel: ${info.targetId}.`))
-          // A responsive device with the wrong version is a conclusive failure.
+          // Ein antwortendes Gerät mit der falschen Version bedeutet einen eindeutigen Fehlschlag.
           break
         } catch (error) {
           recordError(error)
@@ -170,7 +170,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
       nativeError.value = ''
     } catch {
       nativeError.value = 'Der Update-Status konnte nicht geladen werden. Bitte die App erneut öffnen.'
-      // Ownership is uncertain; keep dongle operations locked until status can be read.
+      // Die Zuständigkeit ist unklar; Dongle-Vorgänge sperren, bis der Status gelesen werden kann.
       doku.connection.isUpdatingFirmware = true
     }
   }
@@ -205,7 +205,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
     doku.connection.isUpdatingFirmware = true
     status.value = { phase: 'preparing', updatedAt: latestNativeTimestamp, deviceId: device.id, deviceName: device.name, version, progress: 0, recovery: recovery.value }
     try {
-      // Recheck the connected device immediately before transferring ownership.
+      // Das verbundene Gerät unmittelbar vor der Übergabe der Kontrolle erneut prüfen.
       const session = doku.connection.session
       const info = decodeFirmwareInfo(await awaitBleOperation(BleClient.read(device.id, ServiceUUID, FirmwareUUID, { timeout: 3000 }), 3000))
       if (session !== doku.connection.session || !doku.connection.isConnected || !updateAvailable(info, manifest.value)) {
@@ -215,7 +215,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
       doku.dongleDisconnected(device.id, doku.connection.session)
       receive(await DongleFirmware.start({ deviceId: device.id, deviceName: device.name, version }))
     } catch (error) {
-      // A native start failure can arrive after the service acquired ownership.
+      // Ein nativer Startfehler kann eintreffen, nachdem der Dienst die Kontrolle übernommen hat.
       try {
         const native = await DongleFirmware.getStatus()
         if (native.phase !== 'idle') { receive(native); return }
@@ -265,7 +265,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
     let resolveResult!: (address: string) => void
     let rejectResult!: (error: Error) => void
     const result = new Promise<string>((resolve, reject) => { resolveResult = resolve; rejectResult = reject })
-    // Attach the rejection handler before awaiting the native scan startup.
+    // Die Fehlerbehandlung registrieren, bevor auf den Start der nativen Gerätesuche gewartet wird.
     void result.catch(() => {})
     const finish = (address?: string, error?: Error) => {
       if (settled) return
@@ -280,7 +280,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
     }
     try {
       assertDiscovery(current)
-      // Await startup before stopping, including cancellation during permission prompts.
+      // Vor dem Beenden den Start abwarten, auch bei Abbruch während einer Berechtigungsabfrage.
       await BleClient.requestLEScan({ services: [DfuUUID], allowDuplicates: true }, (result: ScanResult) => {
         if (settled || !acceptingAdvertisements || current.cancelled || discovery !== current) return
         const address = result.device.deviceId.toUpperCase()
@@ -323,7 +323,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
       info = decodeFirmwareInfo(await awaitBleOperation(
         BleClient.read(deviceId, ServiceUUID, FirmwareUUID, { timeout: 3000 }), 3000,
       ))
-    } catch { /* A missing application may still be recoverable through DFU. */ }
+    } catch { /* Eine fehlende Anwendung lässt sich möglicherweise noch über DFU wiederherstellen. */ }
     await disconnectDongle(deviceId, { strict: connected })
     assertDiscovery(current)
     return info
@@ -333,7 +333,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
     try {
       await awaitBleOperation(BleClient.connect(deviceId, () => {}, { timeout: 3000 }), 3000)
       assertDiscovery(current)
-      // The application and bootloader may share an address; discard cached GATT services.
+      // Anwendung und Bootloader können dieselbe Adresse verwenden; zwischengespeicherte GATT-Dienste verwerfen.
       await discoverDongleServices(deviceId)
       assertDiscovery(current)
       const services = await withDongleTimeout(BleClient.getServices(deviceId), 3000)
@@ -354,7 +354,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
     if (!canRecover.value || starting || !manifest.value) return
     const target = manual ? undefined : recovery.value
     if (!manual && !target) {
-      // A failure before native ownership has not put the dongle into DFU.
+      // Ein Fehler vor der nativen Übernahme der Kontrolle hat den Dongle noch nicht in den DFU-Modus versetzt.
       if (canInstall.value) await install()
       else await recover(true)
       return
@@ -409,7 +409,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
       if (dfuDeviceId) await validateDfu(current, dfuDeviceId)
       assertDiscovery(current)
       if (!deviceId) throw new Error('Kein Update-Ziel vorhanden.')
-      // Discovery is over. The native service owns BLE from this point onward.
+      // Die Gerätesuche ist beendet. Ab jetzt hat der native Dienst die Kontrolle über BLE.
       discovery = null
       manualRecovery.value = false
       status.value = { ...status.value, phase: 'preparing', deviceId, deviceName, version, dfuDeviceId }
@@ -438,7 +438,7 @@ export const useFirmwareStore = defineStore('firmware', () => {
         await doku.refreshDongleFirmware()
       }
     }
-    // Version confirmation after a transfer uses verify(), including settings refresh.
+    // Die Versionsbestätigung nach einer Übertragung erfolgt über verify(), einschließlich der Aktualisierung der Einstellungen.
   }
 
   async function retry() { await recover() }

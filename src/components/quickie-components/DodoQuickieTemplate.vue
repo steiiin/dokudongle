@@ -29,7 +29,7 @@
               :label="field.key"
               :placeholder="field.customPlaceholder"
               :label-color="field.color"
-              :ime-dictionary="{ /* activate IME */ }"
+              :ime-dictionary="{ /* IME aktivieren */ }"
               :assist-context-id="fieldAssistContext(field.key)">
             </DodoInputText>
           </IonItem>

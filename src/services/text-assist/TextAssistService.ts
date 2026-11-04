@@ -305,7 +305,7 @@ export class TextAssistService {
 
   private insertsCompletionDelimiter(change: TextInputChange): boolean {
     if (!change.inputType.startsWith('insert')) return false
-    // Diff the actual edit: IMEs can omit event.data or replace existing text.
+    // Die tatsächliche Textänderung ermitteln: IMEs können event.data auslassen oder vorhandenen Text ersetzen.
     const before = change.before.text
     const after = change.after.text
     let start = 0

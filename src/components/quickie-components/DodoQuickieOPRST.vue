@@ -29,7 +29,7 @@
         </DodoListArticle> -->
         <IonItem>
           <DodoInputText v-model="localSymtom" label="Symptom"
-            :ime-dictionary="{ /* activate IME */ }"
+            :ime-dictionary="{ /* IME aktivieren */ }"
             assist-context-id="quickie.intern_opqrst.symptom">
           </DodoInputText>
         </IonItem>

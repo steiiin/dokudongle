@@ -3,30 +3,30 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ##########################
-// Modifiers
+// Modifikatortasten
 // ##########################
 
 export const MOD_SHIFT   = 0x02;
-export const MOD_ALTGR   = 0x40;   // Right-Alt (AltGr)
+export const MOD_ALTGR   = 0x40;   // Rechte Alt-Taste (AltGr)
 
 // ##########################
-// HID keyboard codes
+// HID-Tastaturcodes
 // ##########################
 
 const U = {
 
-  // Letters (US positions)
+  // Buchstaben (US-Tastenpositionen)
   A:0x04,B:0x05,C:0x06,D:0x07,E:0x08,F:0x09,G:0x0A,H:0x0B,I:0x0C,J:0x0D,
   K:0x0E,L:0x0F,M:0x10,N:0x11,O:0x12,P:0x13,Q:0x14,R:0x15,S:0x16,T:0x17,
   U:0x18,V:0x19,W:0x1A,X:0x1B,Y:0x1C,Z:0x1D,
 
-  // Digits row
+  // Ziffernreihe
   D1:0x1E,D2:0x1F,D3:0x20,D4:0x21,D5:0x22,D6:0x23,D7:0x24,D8:0x25,D9:0x26,D0:0x27,
 
-  // Controls & space
+  // Steuertasten und Leertaste
   ENTER:0x28, SPACE:0x2C,
 
-  // Punctuation (US physical keys)
+  // Satzzeichen (physische US-Tasten)
   MINUS:0x2D,
   EQUAL:0x2E,
   LBRACKET:0x2F,
@@ -41,16 +41,16 @@ const U = {
 };
 
 // ##########################
-// Keymapping: DE -> US
+// Tastenzuordnung: DE -> US
 // ##########################
 
 export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
 
-  // Controls / whitespace
+  // Steuer- und Leerzeichen
   '\n': [U.ENTER],
   ' ':  [U.SPACE],
 
-  // Top row (digits & shifted symbols)
+  // Obere Reihe (Ziffern und Symbole mit Umschalttaste)
   '1':[U.D1], '!':[U.D1, MOD_SHIFT],
   '2':[U.D2], '"':[U.D2, MOD_SHIFT],
   '3':[U.D3], '§':[U.D3, MOD_SHIFT],
@@ -64,7 +64,7 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
 
   'ß':[U.MINUS], '?':[U.MINUS, MOD_SHIFT],
 
-  // QWERTZ row + AltGr (€, @)
+  // QWERTZ-Reihe + AltGr (€, @)
   'q':[U.Q], 'Q':[U.Q, MOD_SHIFT], '@':[U.Q, MOD_ALTGR],
   'w':[U.W], 'W':[U.W, MOD_SHIFT],
   'e':[U.E], 'E':[U.E, MOD_SHIFT], '€':[U.E, MOD_ALTGR],
@@ -79,7 +79,7 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   'ü':[U.LBRACKET], 'Ü':[U.LBRACKET, MOD_SHIFT],
   '+':[U.RBRACKET], '*':[U.RBRACKET, MOD_SHIFT], '~':[U.RBRACKET, MOD_ALTGR],
 
-  // Home row
+  // Grundreihe
   'a':[U.A], 'A':[U.A, MOD_SHIFT],
   's':[U.S], 'S':[U.S, MOD_SHIFT],
   'd':[U.D], 'D':[U.D, MOD_SHIFT],
@@ -94,7 +94,7 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   'ä':[U.APOSTROPHE], 'Ä':[U.APOSTROPHE, MOD_SHIFT],
   '#':[U.BACKSLASH],  '\'':[U.BACKSLASH, MOD_SHIFT],
 
-  // Bottom row + ISO key
+  // Untere Reihe + ISO-Taste
   '<':[U.NONUS], '>':[U.NONUS, MOD_SHIFT],
 
   'y':[U.Z], 'Y':[U.Z, MOD_SHIFT],
@@ -110,13 +110,13 @@ export const DE_CHAR_TO_HID: Record<string, [number, number?]> = {
   '.':[U.DOT],   ':':[U.DOT,   MOD_SHIFT],
   '-':[U.SLASH], '_':[U.SLASH, MOD_SHIFT],
 
-  // Degree
+  // Gradzeichen
   '°':[U.GRAVE, MOD_SHIFT]
 
 }
 
 // ##########################
-// Mapping Functions
+// Zuordnungsfunktionen
 // ##########################
 
 export function textToHidEvents(text: string): Array<[number, number]> {

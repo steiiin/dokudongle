@@ -56,7 +56,7 @@ async function registerAppStateChange(handler: AppStateChangeHandler): Promise<v
     handler(isActive)
   })
 
-  // The listener intentionally lives for the lifetime of the application.
+  // Der Listener bleibt bewusst während der gesamten Laufzeit der Anwendung aktiv.
   void listener
   handler((await CapacitorApp.getState()).isActive)
 }
@@ -148,8 +148,8 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
       }
       errorMessage = 'Der Protokollstatus konnte nicht gespeichert werden.'
       if (event.isActive) {
-        // Check the previous opening time first. A failed reset must not restart
-        // the clock, otherwise the next lifecycle event could miss the retry.
+        // Zuerst den vorherigen Öffnungszeitpunkt prüfen. Ein fehlgeschlagenes Zurücksetzen darf die Zeitmessung
+        // nicht neu starten, sonst könnte beim nächsten Lebenszyklusereignis der erneute Versuch ausbleiben.
         await store.markProtocolOpened(event.openedAt)
       } else {
         await store.persistToStorage()
@@ -182,8 +182,8 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
         persistTimer = null
         void flushPersistence()
       }, PERSISTENCE_DEBOUNCE_MS)
-      // Busy transitions also come through this subscription. Retain lifecycle
-      // events until a send/restore/reset has finished instead of dropping them.
+      // Auch Änderungen des Beschäftigungsstatus gehen über dieses Abonnement ein. Lebenszyklusereignisse
+      // bis zum Abschluss des Sendens, Wiederherstellens oder Zurücksetzens aufbewahren, statt sie zu verwerfen.
       if (lifecycleEvents.length) void drainLifecycleEvents()
     }, { detached: true })
   }
@@ -196,8 +196,8 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
     if (!isActive) {
       if (persistTimer) clearTimeout(persistTimer)
       persistTimer = null
-      // A send may continue while hidden; save its current draft immediately,
-      // then reconsider resetting once the send has recorded its outcome.
+      // Ein Sendevorgang kann im Hintergrund weiterlaufen; seinen aktuellen Entwurf sofort speichern
+      // und das Zurücksetzen erneut prüfen, sobald der Sendevorgang sein Ergebnis festgehalten hat.
       if (isProtocolBusy() || processingLifecycle) void flushPersistence()
     }
     void drainLifecycleEvents()
@@ -222,8 +222,8 @@ export function createAppStartup(dependencies: AppStartupDependencies = defaultD
       logStartupStage('hydrating protocol state')
       await withStartupTimeout('Protocol hydration', store.hydrateFromStorage())
 
-      // Events received during hydration are represented by the latest app
-      // state. Further events are queued while this first evaluation runs.
+      // Während des Ladens gespeicherter Daten empfangene Ereignisse sind im jüngsten Anwendungszustand
+      // abgebildet. Weitere Ereignisse werden während dieser ersten Auswertung in die Warteschlange gestellt.
       lifecycleEvents.length = 0
       try {
         await withStartupTimeout('Protocol lifecycle initialization',

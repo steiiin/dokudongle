@@ -108,7 +108,7 @@ const visibleRows = computed(() => {
     seen.add(option.value)
     return true
   })).filter(row => row.length > 0)
-  // Keep externally supplied values removable even if their option disappeared.
+  // Von außen übergebene Werte müssen entfernbar bleiben, auch wenn ihre Option nicht mehr vorhanden ist.
   for (const value of selectedValues.value) {
     if (!seen.has(value) && value !== customEntry.value) {
       if (rows.length === 0) rows.push([])
@@ -140,8 +140,8 @@ const trigger = ref<HTMLButtonElement | null>(null)
 const customInput = ref<InstanceType<typeof DodoInputText> | null>(null)
 const isCustomMode = ref(false)
 const customText = ref('')
-// Track ownership separately from the draft: typing an already selected value
-// must not let subsequent edits remove a legacy mixed selection.
+// Die Zuordnung getrennt vom Entwurf verfolgen: Wird ein bereits ausgewählter Wert eingegeben,
+// dürfen spätere Änderungen eine bestehende gemischte Auswahl nicht entfernen.
 const customEntry = ref<SelectValue>()
 let pendingModel: SelectValue[] | undefined
 let focusCustomAfterDismiss = false
@@ -158,8 +158,8 @@ const updateModel = (values: SelectValue[]) => {
 
 watch([() => props.modelValue.slice(), normalizedOptions, () => props.allowCustom],
   ([values, options, allowCustom], previous) => {
-    // Inline option arrays are recreated on parent renders. Equivalent options
-    // must not reset the custom draft when the parent accepts our model update.
+    // Direkt definierte Optionsarrays werden beim Rendern der Elternkomponente neu erstellt. Gleichwertige Optionen
+    // dürfen den eigenen Entwurf nicht zurücksetzen, wenn die Elternkomponente unsere Modelländerung übernimmt.
     const previousOptions = previous?.[1]
     const sameOptions = previousOptions && options.length === previousOptions.length
       && options.every((option, index) => option.value === previousOptions[index].value

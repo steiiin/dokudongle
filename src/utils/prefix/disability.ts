@@ -1,7 +1,7 @@
 import { conditionalPrefix } from "../filter"
 
 /**
- * Adds a "Parese" prefix when the draft does not already include a matching keyword.
+ * Stellt „Parese“ voran, wenn der Entwurf noch kein passendes Schlüsselwort enthält.
  */
 export function prefixParesis(draft: string): string {
   return conditionalPrefix(draft, 'Parese:', [
@@ -15,7 +15,7 @@ export function prefixParesis(draft: string): string {
 }
 
 /**
- * Ensures paraesthesia notes are prefixed with "Parästhesie" if no keyword is present.
+ * Stellt Angaben zu Parästhesien „Parästhesie“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixParaesthesis(draft: string): string {
   return conditionalPrefix(draft, 'Parästhesie:', [
@@ -29,7 +29,7 @@ export function prefixParaesthesis(draft: string): string {
 }
 
 /**
- * Ensures sensibility notes are prefixed with "Sensibilität" if no keyword is present.
+ * Stellt Angaben zur Sensibilität „Sensibilität“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixSensibility(draft: string): string {
   return conditionalPrefix(draft, 'Sensibilitätsstörung:', [
@@ -45,7 +45,7 @@ export function prefixSensibility(draft: string): string {
 
 
 /**
- * Adds an "Intox" prefix to intoxication notes if no matching keyword is present.
+ * Stellt Angaben zu Intoxikationen „Intox“ voran, wenn noch kein passendes Schlüsselwort vorhanden ist.
  */
 export function prefixIntox(draft: string): string {
   return conditionalPrefix(draft, 'Intox:',

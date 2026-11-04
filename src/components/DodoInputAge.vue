@@ -113,7 +113,7 @@ const emitModel = () => {
     return
   }
 
-  // years === 0 => month mode
+  // years === 0 => Monatsmodus
   if (internalMonths.value === '') {
     emit('update:modelValue', null)
     return
@@ -131,7 +131,7 @@ const emitModel = () => {
 const onYearInput = (event: CustomEvent) => {
   let years = String(event.detail.value ?? '').replace(/\D+/g, '')
 
-  // keep exactly one zero if user types/selects-replaces with 0
+  // Genau eine Null beibehalten, wenn eine 0 eingegeben oder eine Auswahl durch 0 ersetzt wird.
   if (years === '0') {
     internalYears.value = '0'
     updateDisplayedValues()
@@ -140,7 +140,7 @@ const onYearInput = (event: CustomEvent) => {
     return
   }
 
-  // collapse values like 000, 01, 002 to first meaningful form
+  // Werte wie 000, 01 oder 002 auf ihre Form ohne überflüssige führende Nullen reduzieren.
   years = years.replace(/^0+/, '')
   if (years === '' && String(event.detail.value ?? '').includes('0')) {
     years = '0'

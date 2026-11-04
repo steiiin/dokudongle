@@ -1,7 +1,7 @@
 import { conditionalPrefix } from "../filter";
 
 /**
- * Prepends with "Allergie" when no keyword is present yet.
+ * Stellt „Allergie“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixAllergie(draft: string): string {
   return conditionalPrefix(draft, 'Allergie:', [

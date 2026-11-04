@@ -2,7 +2,7 @@ export interface SaatreatChip {
   id: string
   label: string
   protocolText: string
-  /** Alternatives are exclusive only within their parent group. */
+  /** Alternativen schließen sich nur innerhalb ihrer übergeordneten Gruppe gegenseitig aus. */
   exclusiveGroupId?: string
 }
 

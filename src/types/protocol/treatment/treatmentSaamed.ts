@@ -30,7 +30,7 @@ export class TreatmentSaamed {
     const tasks = this.medTasks
     if (!tasks || tasks.length === 0) return "";
 
-    // 1) Indication order in first-occurrence order
+    // 1) Indikationen nach ihrem ersten Auftreten ordnen
     const indicationOrder: string[] = [];
     const seenIndications = new Set<string>();
     for (const t of tasks) {
@@ -40,13 +40,13 @@ export class TreatmentSaamed {
       }
     }
 
-    // 2) Count meds across all tasks (for "(Indikation)" suffix on dose items)
+    // 2) Medikamente über alle Aufgaben hinweg zählen (für den Zusatz „(Indikation)“ bei Dosierungsangaben)
     const medCounts = new Map<string, number>();
     for (const t of tasks) {
       medCounts.set(t.MedId, (medCounts.get(t.MedId) ?? 0) + 1);
     }
 
-    // 3) Build SAA header lines
+    // 3) SAA-Kopfzeilen erstellen
     const saaLines: string[] = [];
 
     for (const indId of indicationOrder) {
@@ -66,7 +66,7 @@ export class TreatmentSaamed {
         continue;
       }
 
-      // 3a) Cave lines: each task with contraText gets its own SAA line
+      // 3a) Cave-Zeilen: Jede Aufgabe mit contraText erhält eine eigene SAA-Zeile
       const caveTasks = group.filter(t => capitalizeBegin(t.contraText).length > 0);
       for (const t of caveTasks) {
         saaLines.push(
@@ -74,10 +74,10 @@ export class TreatmentSaamed {
         );
       }
 
-      // 3b) Bundle the remaining meds (contraText empty)
+      // 3b) Die übrigen Medikamente bündeln (contraText leer)
       const bundleTasks = group.filter(t => capitalizeBegin(t.contraText).length === 0);
 
-      // Dedupe med IDs in order of appearance within this indication group
+      // Doppelte Medikamenten-IDs innerhalb dieser Indikationsgruppe in der Reihenfolge ihres Auftretens entfernen
       const bundleMedIds: string[] = [];
       const seenMedIds = new Set<string>();
       for (const t of bundleTasks) {
@@ -93,14 +93,14 @@ export class TreatmentSaamed {
       }
     }
 
-    // 4) Global KI line
+    // 4) Übergreifende KI-Zeile
     const allContraOk = tasks.every(t => t.contraOk === true);
     const shouldCheckContra = tasks.some(t => this.getIndication(t)?.requiresContracheck);
     const kiLine = allContraOk
       ? (shouldCheckContra ? "keine Unverträglichkeit; kein Hinweis auf relevante KI:" : "")
       : "sonst keine Hinweise auf relevante KI oder Unverträglichkeit:";
 
-    // 5) Dose lines per indication
+    // 5) Dosierungszeilen je Indikation
     const doseLines: string[] = [];
 
     for (const indId of indicationOrder) {
@@ -112,7 +112,7 @@ export class TreatmentSaamed {
         const medName = this.getMedName(t.MedId);
         const dose = t.dosageText;
 
-        // If med occurs more than once across tasks, append the indication
+        // Wenn ein Medikament in mehreren Aufgaben vorkommt, die Indikation anhängen
         const needsIndSuffix = (medCounts.get(t.MedId) ?? 0) > 1;
         const indSuffix = needsIndSuffix ? ` (${this.getIndicationName(indId)})` : "";
 
@@ -127,12 +127,12 @@ export class TreatmentSaamed {
       }
 
       if (parts.length > 0) {
-        // End each indication dose line with ';' (your style)
+        // Jede Dosierungszeile einer Indikation mit ';' abschließen (gemäß bestehendem Stil)
         doseLines.push(parts.join("; ") + ";");
       }
     }
 
-    // 6) Assemble final text
+    // 6) Abschließenden Text zusammensetzen
     return [
       ...saaLines,
       ...(kiLine ? [kiLine] : []),

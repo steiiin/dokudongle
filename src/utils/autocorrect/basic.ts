@@ -1,7 +1,7 @@
 import { capitalizeBegin } from "../text";
 
 /**
- * Capitalises only the first character of the provided draft.
+ * Schreibt nur das erste Zeichen des übergebenen Entwurfs groß.
  */
 export function basicCap(draft: string): string {
   return capitalizeBegin(draft)

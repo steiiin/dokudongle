@@ -8,15 +8,15 @@ import { IonicVue } from '@ionic/vue'
 import { createPinia } from 'pinia'
 const pinia = createPinia()
 
-/* Core CSS required for Ionic components to work properly */
+/* Erforderliche CSS-Grundlagen für die korrekte Funktion der Ionic-Komponenten */
 import '@ionic/vue/css/core.css'
 
-/* Basic CSS for apps built with Ionic */
+/* Grundlegende CSS-Stile für Ionic-Anwendungen */
 import '@ionic/vue/css/normalize.css'
 import '@ionic/vue/css/structure.css'
 import '@ionic/vue/css/typography.css'
 
-/* Optional CSS utils that can be commented out */
+/* Optionale CSS-Hilfsklassen, die auskommentiert werden können */
 import '@ionic/vue/css/padding.css'
 import '@ionic/vue/css/float-elements.css'
 import '@ionic/vue/css/text-alignment.css'
@@ -24,11 +24,11 @@ import '@ionic/vue/css/text-transformation.css'
 import '@ionic/vue/css/flex-utils.css'
 import '@ionic/vue/css/display.css'
 
-/* Theme variables */
+/* Variablen für das Erscheinungsbild */
 import '@ionic/vue/css/palettes/dark.always.css'
 import './theme/variables.css'
 
-/* Safe-Space */
+/* Sicherer Anzeigebereich */
 import { Capacitor } from '@capacitor/core'
 import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support'
 
@@ -46,6 +46,6 @@ const app = createApp(App)
   .use(router)
   .use(pinia)
 
-// Mount synchronously so the web view always has visible startup content.
+// Synchron einhängen, damit die Webansicht beim Start immer sichtbare Inhalte hat.
 app.mount('#app')
 void setupEdgeToEdge()

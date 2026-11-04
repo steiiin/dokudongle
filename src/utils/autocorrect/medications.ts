@@ -3,7 +3,7 @@ import { capitalizeBegin } from "../text";
 export const correctMedName = (draft: string): string => {
   let text = draft.trim();
 
-  // Normalize to lowercase first
+  // Zuerst in Kleinbuchstaben umwandeln.
   text = text.toLowerCase();
 
   const replacements: Array<[RegExp, string]> = [

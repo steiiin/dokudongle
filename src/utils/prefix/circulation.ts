@@ -1,7 +1,7 @@
 import { conditionalPrefix } from "../filter"
 
 /**
- * Prefixes chestpain radiation findings with "strahlen aus" unless one of the keywords already exists in the draft.
+ * Stellt Befunden zur Ausstrahlung von Thoraxschmerzen „strahlen aus“ voran, sofern der Entwurf noch keines der Schlüsselwörter enthält.
  */
 export const prefixChestpainRadiation = (draft: string): string => {
   return conditionalPrefix(draft, 'strahlen aus:', [
@@ -10,7 +10,7 @@ export const prefixChestpainRadiation = (draft: string): string => {
 }
 
 /**
- * Prefixes EKG findings with "EKG" unless one of the keywords already exists in the draft.
+ * Stellt EKG-Befunden „EKG“ voran, sofern der Entwurf noch keines der Schlüsselwörter enthält.
  */
 export function prefixEcg(draft: string): string {
   return conditionalPrefix(draft, 'EKG:', [

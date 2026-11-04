@@ -8,7 +8,7 @@ export function isValidDongleConfig(config: DongleConfig): boolean {
     && config.keyGapMs <= MAX_KEY_GAP_MS
 }
 
-// Shared BLE wire format: uint16 little-endian gap, then 1–18 ASCII name bytes.
+// Gemeinsames BLE-Übertragungsformat: Abstand als uint16 in Little-Endian-Reihenfolge, danach 1–18 ASCII-Bytes für den Namen.
 export function encodeDongleConfig(config: DongleConfig): DataView {
   if (!isValidDongleConfig(config)) throw new Error('Ungültige Dongle-Einstellungen.')
   const data = new DataView(new ArrayBuffer(2 + config.name.length))
@@ -28,7 +28,7 @@ export function decodeDongleConfig(data: DataView): DongleConfig {
   return config
 }
 
-// The browser BLE adapter does not enforce timeouts for reads/writes.
+// Der BLE-Adapter des Browsers erzwingt keine Zeitlimits für Lese- und Schreibzugriffe.
 export async function withDongleTimeout<T>(operation: Promise<T>, timeoutMs: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined
   try {

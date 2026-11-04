@@ -23,7 +23,7 @@ export function parseFirmwareManifest(value: unknown): FirmwareManifest {
   return manifest
 }
 
-/** Nordic changes only the last address byte, without carrying into the prefix. */
+/** Nordic ändert nur das letzte Adressbyte, ohne Übertrag in das Präfix. */
 export function offsetDfuAddress(address: string, offset: 1 | -1): string {
   if (!/^(?:[0-9a-f]{2}:){5}[0-9a-f]{2}$/i.test(address)) throw new Error('Ungültige Bluetooth-Adresse.')
   const normalized = address.toUpperCase()

@@ -77,7 +77,7 @@ export function resolveRedflagScenario(
   }
 }
 
-/** An explicit child narrows an unrestricted parent; subsequent children extend it. */
+/** Ein explizit ausgewähltes Unterszenario schränkt ein uneingeschränktes Hauptszenario ein; weitere Unterszenarien erweitern die Auswahl. */
 export function selectRedflagTarget(
   catalog: RedflagCatalog,
   selections: readonly RedflagScenarioSelection[],
@@ -98,7 +98,7 @@ export function selectRedflagTarget(
     : [...selections, selection]
 }
 
-/** Preserve the existing round-robin order across separately selected scenarios. */
+/** Die bestehende reihum wechselnde Reihenfolge über separat ausgewählte Szenarien hinweg beibehalten. */
 export function interleaveUnique<T>(lists: readonly (readonly T[])[], key: (value: T) => unknown = value => value): T[] {
   const result: T[] = []
   const seen = new Set<unknown>()

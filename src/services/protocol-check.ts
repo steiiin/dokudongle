@@ -163,7 +163,7 @@ export class ProtocolCheckService {
 
     const check = this.requestProtocolCheck(protocolText)
       .then(result => {
-        // A slower, older check must not replace a newer completed result.
+        // Eine langsamere, ältere Prüfung darf kein neueres abgeschlossenes Ergebnis ersetzen.
         if (!this.cachedCheck || requestId > this.cachedCheck.requestId) {
           this.cachedCheck = { hash, result, requestId }
         }

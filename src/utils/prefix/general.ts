@@ -1,7 +1,7 @@
 import { conditionalPrefix } from "../text";
 
 /**
- * Prepends with "seit" when no keyword is present yet.
+ * Stellt „seit“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixSeit(draft: string): string {
   return conditionalPrefix(draft, 'seit',
@@ -17,7 +17,7 @@ export function prefixSeit(draft: string): string {
 }
 
 /**
- * Prepends with "vor" when no keyword is present yet.
+ * Stellt „vor“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixVor(draft: string): string {
   return conditionalPrefix(draft, 'vor',

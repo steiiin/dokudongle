@@ -1,5 +1,5 @@
 
-/* Titlebar Badge */
+/* Abzeichen in der Titelleiste */
 .with-badge {
   display: flex;
   align-items: center;
@@ -15,12 +15,12 @@
   font-size: 1.25em;
 }
 
-/* ListInCard */
+/* Liste innerhalb einer Karte */
 ion-card-content.with-list {
   padding-inline: 0;
 }
 
-/* CardInCard */
+/* Karte innerhalb einer Karte */
 ion-card-content.card-in-card,
 ion-card.decent-card {
   padding-inline-start: 0;
@@ -57,7 +57,7 @@ ion-card.decent-card {
 }
 
 ion-card-content.card-in-card .dd-input-textarea {
-  /* treatment block*/
+  /* Behandlungsblock */
   margin: 8px 4px;
   width: calc(100% - 8px);
 }
@@ -66,12 +66,12 @@ ion-header ion-buttons {
   padding-inline: 8px;
 }
 
-/* Decent colors */
+/* Dezente Farben */
 :root {
   --decent-primary: color-mix(in srgb, var(--ion-color-primary) 18%, var(--ion-background-color, white));
 }
 
-/* Keep modal navigation and actions visible, including on compact/iOS layouts. */
+/* Navigation und Aktionen im modalen Dialog auch bei kompakten Layouts und unter iOS sichtbar halten. */
 .dd-modal-header-toolbar ion-title {
   position: static;
   min-width: 0;

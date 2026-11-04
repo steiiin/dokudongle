@@ -190,7 +190,7 @@ const saveSettings = async () => {
   try {
     saved = await store.updateDongleConfig({ name: newName.value, keyGapMs: newGapMs.value })
   } catch {
-    // Keep the draft open on validation, write, or reconnect errors.
+    // Den Entwurf bei Validierungs-, Schreib- oder Wiederverbindungsfehlern geöffnet lassen.
   } finally {
     isSaving.value = false
   }

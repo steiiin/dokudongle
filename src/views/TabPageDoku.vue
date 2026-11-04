@@ -21,10 +21,10 @@
 
         <div v-show="store.doku.course != ProtocolCourse.NEF_VOR_ORT">
 
-          <!-- FLAVORS -->
+          <!-- EINSATZBESONDERHEITEN -->
           <FlavorsCard v-show="ctx.requireFlavors" />
 
-          <!-- SETTING -->
+          <!-- EINSATZUMSTÄNDE -->
           <SettingCard v-show="ctx.requireSceneDetails"></SettingCard>
 
           <!-- SITUATION -->

@@ -109,7 +109,7 @@ const onNumInput = (event: CustomEvent) => {
 
   let numStr = String(event.detail.value ?? '').replace(/\D+/g, '')
 
-  // keep exactly one zero if user types/selects-replaces with 0
+  // Genau eine Null beibehalten, wenn eine 0 eingegeben oder eine Auswahl durch 0 ersetzt wird.
   if (numStr === '0') {
     internalNumber.value = '0'
     updateDisplayedValues()
@@ -118,7 +118,7 @@ const onNumInput = (event: CustomEvent) => {
     return
   }
 
-  // collapse values like 000, 01, 002 to first meaningful form
+  // Werte wie 000, 01 oder 002 auf ihre Form ohne überflüssige führende Nullen reduzieren.
   numStr = numStr.replace(/^0+/, '')
   if (numStr === '' && String(event.detail.value ?? '').includes('0')) {
     numStr = '0'

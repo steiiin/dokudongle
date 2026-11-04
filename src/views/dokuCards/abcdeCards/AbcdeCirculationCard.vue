@@ -178,7 +178,7 @@
           <DodoInputTextOptional lines="none"
             toggle-label="Strahlt aus?" v-model:toggle="store.doku.xabCde.chest.radiation.assessed" @update:toggle="store.doku.xabCde.assessment.chest = 'active'"
             text-label="Wohin?" text-placeholder="z.B. li. Arm" v-model:text="store.doku.xabCde.chest.radiation.value" @update:text="store.doku.xabCde.assessment.chest = 'active'"
-            :ime-dictionary="{ /* activate IME */ }">
+            :ime-dictionary="{ /* IME aktivieren */ }">
           </DodoInputTextOptional>
 
         </template>

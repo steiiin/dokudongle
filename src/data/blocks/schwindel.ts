@@ -104,7 +104,7 @@ export function renderSchwindelText(details: SchwindelDetails): string {
   ]))
 }
 
-/** Computes its template value at render time; only the structured details are persisted. */
+/** Berechnet den Vorlagenwert beim Rendern; nur die strukturierten Angaben werden gespeichert. */
 export class SchwindelTextAreaBlock extends TextAreaBlock {
   constructor() {
     super('schwindel.symptoms', 'schwindel', 'sampler.symptoms.additionalSymptoms',

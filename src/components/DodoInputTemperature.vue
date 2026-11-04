@@ -51,17 +51,17 @@ const syncInputElement = (value: string) => {
 function isValidPartial(value: string): boolean {
   if (value === '') return true
 
-  // only: 1-2 digits, optional dot, optional 1 decimal
+  // Nur 1–2 Ziffern, ein optionaler Punkt und eine optionale Nachkommastelle.
   if (!/^\d{0,2}(\.\d?)?$/.test(value)) return false
 
   const [intPart, decPart] = value.split('.')
 
-  // allow first digit only if 2, 3 or 4
+  // Als erste Ziffer nur 2, 3 oder 4 zulassen.
   if (intPart.length === 1) {
     return intPart === '2' || intPart === '3' || intPart === '4'
   }
 
-  // if 2 digits: must be in 20..42
+  // Bei zwei Ziffern muss der Wert im Bereich 20..42 liegen.
   if (intPart.length === 2) {
     const n = Number(intPart)
     if (Number.isNaN(n) || n < MIN_TEMP || n > MAX_TEMP) {
@@ -118,7 +118,7 @@ function handleInput(event: CustomEvent) {
   const raw = String(event.detail.value ?? '')
   const cleaned = sanitizeRaw(raw)
 
-  // critical part: write corrected value back into IonInput itself
+  // Entscheidend: den korrigierten Wert direkt in IonInput zurückschreiben.
   syncInputElement(cleaned)
   emitIfComplete(cleaned)
 }

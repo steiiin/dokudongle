@@ -1,7 +1,7 @@
 import { conditionalPrefix } from "../filter";
 
 /**
- * Prepends stool observations with "Stuhl" when no keyword is present yet.
+ * Stellt Stuhlbefunden „Stuhl“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixDefecation(draft: string): string {
   return conditionalPrefix(draft, 'Stuhl:',
@@ -16,7 +16,7 @@ export function prefixDefecation(draft: string): string {
 }
 
 /**
- * Adds the "Schmerzen" prefix to abdominal pain descriptions when no keyword is present.
+ * Stellt Beschreibungen von Bauchschmerzen „Schmerzen“ voran, wenn noch kein Schlüsselwort vorhanden ist.
  */
 export function prefixAbdominalPain(draft: string): string {
   return conditionalPrefix(draft, 'Schmerz:',
@@ -30,7 +30,7 @@ export function prefixAbdominalPain(draft: string): string {
 }
 
 /**
- * Ensures peristalsis notes start with the "DG" prefix unless already mentioned.
+ * Stellt sicher, dass Angaben zur Peristaltik mit „DG“ beginnen, sofern das Präfix noch nicht enthalten ist.
  */
 export function prefixAbdominalPeristalsis(draft: string): string {
   return conditionalPrefix(draft, 'DG:',

@@ -33,7 +33,7 @@ export function isSaamedIndication(value: string): value is SaamedIndication {
 export interface ConsentMedIndication {
   name: string
   dosageHint: string
-  /** Nested arrays share a color and are hidden together after selecting a chip. */
+  /** Verschachtelte Arrays teilen sich eine Farbe und werden nach Auswahl eines Chips gemeinsam ausgeblendet. */
   dosageChips?: Array<string | string[]>
   consentHint?: string
   requiresContracheck: boolean

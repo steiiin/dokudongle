@@ -28,7 +28,7 @@ const startup = appStartup
 const waitForFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 
 onMounted(async () => {
-  // Commit the loading shell before releasing the native splash screen.
+  // Die Ladeansicht übernehmen, bevor der native Startbildschirm ausgeblendet wird.
   await nextTick()
 
   if (Capacitor.isNativePlatform()) {
@@ -36,7 +36,7 @@ onMounted(async () => {
       .catch(error => console.warn('[startup] Could not hide the native splash screen.', error))
   }
 
-  // Give the web view a paint opportunity before storage or route work begins.
+  // Der Webansicht Gelegenheit zum Zeichnen geben, bevor Speicherzugriffe oder Routenverarbeitung beginnen.
   await waitForFrame()
   void startup.start()
 })

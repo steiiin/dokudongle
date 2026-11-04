@@ -15,7 +15,7 @@ export function gainFocus(inputRef: any|null, selectAll: boolean = false)
     if (typeof EL.setFocus === "function") { EL.setFocus() }
     else
     {
-      // fallback for multi-input components
+      // Ausweichlösung für Komponenten mit mehreren Eingabefeldern.
       const fallbackEL = EL.querySelector('ion-input')
       if (fallbackEL && typeof fallbackEL.setFocus === "function") { fallbackEL.setFocus() }
     }

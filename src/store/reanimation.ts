@@ -5,7 +5,7 @@ type ActiveProtocol = UnwrapRef<Protocol>
 type FieldValue = string | number | boolean
 type Change = { path: string[]; previous: FieldValue; applied: FieldValue }
 
-// Undo data belongs to this protocol instance only, never to persisted records.
+// Daten zum Rückgängigmachen gehören ausschließlich zu dieser Protokollinstanz, niemals zu gespeicherten Datensätzen.
 const snapshots = new WeakMap<object, Change[]>()
 const restoring = new WeakSet<object>()
 
@@ -54,7 +54,7 @@ export function setReanimation(protocol: ActiveProtocol, enabled: boolean): void
     protocol.xabcDe.gcs.v = 1
     protocol.xabcDe.gcs.m = 1
 
-    // Dependent clinical watchers run synchronously, so their changes are included.
+    // Abhängige klinische Beobachter laufen synchron, sodass ihre Änderungen enthalten sind.
     const applied = clinicalValues(protocol)
     const changes: Change[] = []
     for (const [path, value] of previous) {
@@ -67,7 +67,7 @@ export function setReanimation(protocol: ActiveProtocol, enabled: boolean): void
     return
   }
 
-  // Guard the whole rollback, including changes caused by the flavor itself.
+  // Das gesamte Zurücksetzen absichern, einschließlich der durch die Einsatzbesonderheit selbst ausgelösten Änderungen.
   restoring.add(identity)
   try {
     protocol.flavors.reanimation = false

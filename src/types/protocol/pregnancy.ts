@@ -39,11 +39,11 @@ const parseWeek = (value: string): number | null => {
 }
 
 /**
- * A pregnancy duration derived from the calculated term date.
+ * Eine aus dem errechneten Geburtstermin abgeleitete Schwangerschaftsdauer.
  *
- * All week values are getters, so they continue to advance as the current date
- * changes. Approximate values (for example a trimester or `20+3`) are converted
- * into a representative term date when assigned.
+ * Alle Wochenwerte sind Getter und schreiten daher mit dem aktuellen Datum
+ * fort. Näherungswerte (zum Beispiel ein Trimester oder `20+3`) werden bei der Zuweisung
+ * in einen repräsentativen Geburtstermin umgerechnet.
  */
 export class PregnancySpan {
   private _calculatedTerm: Date
@@ -73,7 +73,7 @@ export class PregnancySpan {
     this._approx = ''
   }
 
-  /** Alias for consumers that use the shorter domain name. */
+  /** Alias für Aufrufer, die den kürzeren Fachbegriff verwenden. */
   get termDate(): Date {
     return this.calculatedTerm
   }
@@ -103,7 +103,7 @@ export class PregnancySpan {
     return this._approx !== ''
   }
 
-  /** Completed gestational days, calculated from today's calendar date. */
+  /** Vollendete Schwangerschaftstage, berechnet anhand des heutigen Kalenderdatums. */
   get totalDays(): number {
     const daysUntilTerm = Math.round(
       (calendarDay(this._calculatedTerm) - calendarDay(new Date())) / 86_400_000,
@@ -111,7 +111,7 @@ export class PregnancySpan {
     return PREGNANCY_DAYS_AT_TERM - daysUntilTerm
   }
 
-  /** Gestational age as decimal weeks, e.g. 20.428... for 20+3. */
+  /** Schwangerschaftsalter als dezimale Wochenzahl, z. B. 20.428... für 20+3. */
   get total(): number {
     return this.totalDays / DAYS_PER_WEEK
   }
@@ -120,7 +120,7 @@ export class PregnancySpan {
     return this.total
   }
 
-  /** Gestational age in obstetric notation, e.g. `20+3`. */
+  /** Schwangerschaftsalter in geburtshilflicher Schreibweise, z. B. `20+3`. */
   get week(): string {
     const completedWeeks = Math.floor(this.totalDays / DAYS_PER_WEEK)
     const days = this.totalDays - completedWeeks * DAYS_PER_WEEK

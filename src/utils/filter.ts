@@ -7,56 +7,56 @@ import { AssessedValue } from "@/types/protocol/input"
 function getCtx() { return useDokuStore().context }
 
 /**
- * return given text if expression true, otherwise empty
+ * Gibt den übergebenen Text zurück, wenn der Ausdruck wahr ist, andernfalls eine leere Zeichenkette.
  */
 export function textIf(text: string, expr: boolean): string {
   return expr ? text : ''
 }
 
 /**
- * return true/false text if assessed, otherwise empty
+ * Gibt bei erfolgter Beurteilung den Text für true bzw. false zurück, andernfalls eine leere Zeichenkette.
  */
 export function assessedText(value: AssessedValue<boolean>, trueText: string, falseText: string): string {
   return value.isAssessed ? (value.value ? trueText : falseText) : ''
 }
 
 /**
- * return given default text if expression is empty, otherwise text
+ * Gibt bei leerem Text den übergebenen Standardtext zurück, andernfalls den Text selbst.
  */
 export function textDef(def: string, text: string): string {
   return text == '' ? def : text
 }
 
 /**
- * return 'full' if true, otherwise 'none'
+ * Gibt bei true 'full' zurück, andernfalls 'none'.
  */
 export function fullIf(expr: boolean): 'full' | 'none' {
   return expr ? 'full' : 'none'
 }
 
 /**
- * return 'inset' if true, otherwise 'none'
+ * Gibt bei true 'inset' zurück, andernfalls 'none'.
  */
 export function insetIf(expr: boolean): 'inset' | 'none' {
   return expr ? 'inset' : 'none'
 }
 
 /**
- * return 'none' if true, otherwise 'full'
+ * Gibt bei true 'none' zurück, andernfalls 'full'.
  */
 export function noneIf(expr: boolean): 'none' | 'full' {
   return expr ? 'none' : 'full'
 }
 
 /**
- * return true if string not empty, otherwise false
+ * Gibt bei einer nicht leeren Zeichenkette true zurück, andernfalls false.
  */
 export function notEmpty(text: string): boolean {
   return text?.trim().length>0
 }
 
 /**
- * return given text if verbosity == HIGH
+ * Gibt den übergebenen Text zurück, wenn verbosity == HIGH gilt.
  */
 export function onHigh(text: string): string {
   if (getCtx().verbosity == ProtocolVerbosity.HIGH) { return text }
@@ -64,7 +64,7 @@ export function onHigh(text: string): string {
 }
 
 /**
- * return given text if verbosity >= NORMAL
+ * Gibt den übergebenen Text zurück, wenn verbosity >= NORMAL gilt.
  */
 export function onNormal(text: string): string {
   const ctxVerbosity = getCtx().verbosity

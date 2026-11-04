@@ -21,7 +21,7 @@ export interface RenderedTextAreaBlock {
 
 const palette = ['primary', 'tertiary', 'success', 'warning', 'secondary']
 
-/** A generated output, independent of the editable text and its undo history. */
+/** Eine generierte Ausgabe, unabhängig vom bearbeitbaren Text und dessen Rückgängig-Verlauf. */
 export class TextAreaBlock {
   public readonly color: string
 
@@ -41,7 +41,7 @@ export class TextAreaBlock {
   render(state: TextAreaBlockSourceState): RenderedTextAreaBlock | null {
     const complete = this.fields.every(field => Boolean(state.values[field.key]?.trim()))
     if (!complete && !this.mandatory) return null
-    // Replace only template tokens, never tokens contained in a user's values.
+    // Nur Platzhalter der Vorlage ersetzen, niemals Platzhalter innerhalb der Benutzerwerte.
     const text = this.template.replace(/<([^<>]+)>/g, (token, key: string) => {
       if (!this.fields.some(field => field.key === key)) return token
       return state.values[key]?.trim() || `[${key}]`

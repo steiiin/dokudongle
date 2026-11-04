@@ -80,7 +80,7 @@ const emit = defineEmits<{
 const select = ref<InstanceType<typeof IonSelect> | null>(null)
 const open = () => {
   const element = select.value?.$el as HTMLIonSelectElement | undefined
-  // Ionic needs an event anchor for popovers; without one it opens an alert.
+  // Ionic benötigt ein Ereignis als Bezugspunkt für Popovers; ohne dieses öffnet es einen Hinweisdialog.
   return element?.open({ target: element } as unknown as UIEvent)
 }
 defineExpose({ open })

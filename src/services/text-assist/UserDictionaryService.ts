@@ -22,7 +22,7 @@ export class UserDictionaryService {
     return (await this.getEntries()).map(entry => entry.word)
   }
 
-  // Called by text assistance after repository initialization.
+  // Wird von der Textassistenz nach der Initialisierung des Datenspeichers aufgerufen.
   getCompletions(text: string, cursor: number): Array<{ entry: UserDictionaryEntry; start: number; end: number }> {
     const wordCharacter = /[\p{L}\p{M}\p{N}'’-]/u
     const nextCharacter = Array.from(text.slice(cursor))[0] ?? ''
@@ -34,7 +34,7 @@ export class UserDictionaryService {
     const prefix = text.slice(0, cursor)
     const candidates: Array<{ start: number; normalized: string }> = []
     const boundaries = Array.from(prefix.matchAll(/(?<![\p{L}\p{M}\p{N}'’-])(?=\S)/gu))
-    // Only normalize suffixes short enough to match a saved entry.
+    // Nur Suffixe normalisieren, die kurz genug sind, um einem gespeicherten Eintrag zu entsprechen.
     for (const boundary of boundaries.reverse()) {
       const start = boundary.index
       const normalized = normalizeKey(prefix.slice(start).replace(/\s+/gu, ' '))
@@ -44,7 +44,7 @@ export class UserDictionaryService {
     candidates.reverse()
 
     return entries.flatMap(entry => {
-      // Candidates are ordered by start offset, so the first match is longest.
+      // Kandidaten sind nach ihrer Startposition sortiert, sodass der erste Treffer der längste ist.
       const match = candidates.find(candidate => entry.normalized.startsWith(candidate.normalized))
       if (!match || match.normalized === entry.normalized) return []
       return [{ entry, start: match.start, end: cursor }]

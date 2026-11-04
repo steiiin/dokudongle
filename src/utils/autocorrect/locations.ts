@@ -3,10 +3,10 @@ import { capitalizeBegin } from "../text"
 export const correctHospital = (draft: string): string => {
   let text = draft.trim();
 
-  // Normalize to lowercase first
+  // Zuerst in Kleinbuchstaben umwandeln.
   text = text.toLowerCase();
 
-  // Apply replacements (order matters: fkh before kh)
+  // Ersetzungen anwenden (Reihenfolge beachten: fkh vor kh).
   const replacements: Array<[RegExp, string]> = [
     [/\bfkh\b/gi, "FKH"],
     [/\bkh\b/gi, "KH"],
@@ -28,10 +28,10 @@ export const correctHospital = (draft: string): string => {
 export const correctDoc = (draft: string): string => {
   let text = draft.trim();
 
-  // Normalize to lowercase first
+  // Zuerst in Kleinbuchstaben umwandeln.
   text = text.toLowerCase();
 
-  // Apply replacements (order matters: fkh before kh)
+  // Ersetzungen anwenden (Reihenfolge beachten: fkh vor kh).
   const replacements: Array<[RegExp, string]> = [
     [/\bha\b/gi, "HA"],
     [/\bfa\b/gi, "FA"],

@@ -20,7 +20,7 @@
           <DodoInputText ref="inputAllergiesDescription"
             v-model="store.doku.sampler.allergies.description"
             label="↳ Welche:" :placeholder="placeholder"
-            :ime-dictionary="{ /* activate IME */ }">
+            :ime-dictionary="{ /* IME aktivieren */ }">
           </DodoInputText>
         </IonItem>
 

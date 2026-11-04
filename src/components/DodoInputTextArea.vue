@@ -312,7 +312,7 @@ const handleModalDidPresent = async () => {
   isModalPresented = true
   textareaResizeObserver?.disconnect()
   textareaResizeObserver = new ResizeObserver(() => {
-    // Collapsing help resizes the observed editor; defer it out of this delivery.
+    // Das Einklappen der Hilfe ändert die Größe des beobachteten Editors; daher die Verarbeitung aufschieben.
     if (textareaResizeFrame !== null) return
     textareaResizeFrame = requestAnimationFrame(() => {
       textareaResizeFrame = null
@@ -351,7 +351,7 @@ const syncTextareaMirror = () => {
   const textarea = inputTextarea.value
   const mirror = textareaMirror.value
   if (!textarea || !mirror) return
-  // clientWidth excludes the native scrollbar, keeping line wrapping identical.
+  // clientWidth schließt die native Bildlaufleiste aus, sodass die Zeilenumbrüche identisch bleiben.
   mirror.style.width = `${textarea.clientWidth}px`
   mirror.scrollTop = textarea.scrollTop
   mirror.scrollLeft = textarea.scrollLeft
@@ -362,7 +362,7 @@ const keepCaretVisible = () => {
   const mirror = textareaMirror.value
   if (!textarea || !mirror || document.activeElement !== textarea || !textarea.clientHeight) return
 
-  // Measure without changing the visible overlay or scrolling any ancestor.
+  // Messen, ohne die sichtbare Überlagerung zu verändern oder ein übergeordnetes Element zu scrollen.
   const measurement = mirror.cloneNode(false) as HTMLDivElement
   measurement.style.visibility = 'hidden'
   const caret = document.createElement('span')
@@ -467,7 +467,7 @@ const applyAssistMutation = async (mutation: TextMutation) => {
   draft.value = draft.value.slice(0, mutation.start) + mutation.replacement + draft.value.slice(mutation.end)
   lastCursorStart.value = mutation.cursor
   lastCursorEnd.value = mutation.cursor
-  // Update the native control immediately, including during beforeinput.
+  // Das native Eingabeelement sofort aktualisieren, auch während beforeinput.
   if (inputTextarea.value) {
     inputTextarea.value.value = draft.value
     inputTextarea.value.setSelectionRange(mutation.cursor, mutation.cursor)
@@ -556,7 +556,7 @@ const handleBeforeInput = (event: InputEvent) => {
   const current = snapshotTextarea()
   const before = snapshotBeforeInput(current, lastInputSnapshot, event.inputType)
   pendingBeforeInput.value = before
-  // A native IME selection is verified after deletion, without cancelling it.
+  // Eine native IME-Auswahl wird nach dem Löschen geprüft, ohne den Löschvorgang abzubrechen.
   if (current.selectionStart !== current.selectionEnd) return
   if (event.isComposing || isComposing.value) return
   if (event.inputType !== 'deleteContentBackward' || !event.cancelable) return
@@ -758,7 +758,7 @@ const closeDictionary = async () => {
 
 const handleDictionaryAction = async () => {
   if (isDictionaryBusy.value || isComposing.value || !isTextAssistReady.value || !isTextAssistAvailable.value) return
-  // Capture before awaiting storage; later typing must not change what is saved.
+  // Vor dem Warten auf den Speicher erfassen; spätere Eingaben dürfen den zu speichernden Inhalt nicht ändern.
   const selectedText = selectedDictionaryText.value
   if (!selectedText) {
     await openDictionary()

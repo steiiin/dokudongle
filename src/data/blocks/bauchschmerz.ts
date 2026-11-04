@@ -127,7 +127,7 @@ export function renderBauchschmerzText(details: BauchschmerzDetails): string {
   ]))
 }
 
-/** Only structured details are persisted; the output is computed when rendered. */
+/** Nur strukturierte Angaben werden gespeichert; die Ausgabe wird beim Rendern berechnet. */
 export class BauchschmerzTextAreaBlock extends TextAreaBlock {
   constructor() {
     super('bauchschmerz.symptoms', 'bauchschmerz', 'sampler.symptoms.additionalSymptoms',
@@ -172,18 +172,18 @@ class AbdominalRegion {
       ? [testMandatory as number[]]
       : testMandatory as number[][]
 
-    // Forbidden: alle müssen false sein
+    // Ausgeschlossene Befunde: alle müssen false sein
     const forbiddenOk = testForbidden.every(i => structured[i] === false)
     if (!forbiddenOk) return false
 
-    // AtLeast: mindestens einer muss true sein
+    // Mindestauswahl: mindestens einer muss true sein
     const atLeastOk =
       testAtLeast.length === 0 ||
       testAtLeast.some(i => structured[i] === true)
 
     if (!atLeastOk) return false
 
-    // Mandatory: mindestens eine Gruppe komplett erfüllt
+    // Pflichtauswahl: mindestens eine Gruppe komplett erfüllt
     const mandatoryOk =
       testMandatory.length === 0 ||
       testMandatory.some(group =>

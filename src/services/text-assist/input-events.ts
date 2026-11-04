@@ -1,7 +1,7 @@
 import type { TextInputSnapshot, TextMutation } from './types'
 
 export const snippetStartMutation = (snapshot: TextInputSnapshot): TextMutation => {
-  // Match SnippetService's boundary rule, including Unicode letters and marks.
+  // Die Wortgrenzenregel von SnippetService übernehmen, einschließlich Unicode-Buchstaben und kombinierender Zeichen.
   const previous = Array.from(snapshot.text.slice(0, snapshot.selectionStart)).at(-1) ?? ''
   const replacement = /[\p{L}\p{M}\p{N}_]/u.test(previous) ? ' @' : '@'
   return {
@@ -19,9 +19,9 @@ export const sameInputSnapshot = (before: TextInputSnapshot | null, after: TextI
   && before.selectionEnd === after.selectionEnd
   && before.isComposing === after.isComposing
 
-// AOSP's deleteSurroundingText can select the character to delete immediately
-// before beforeinput, without first sending a selection notification. Preserve
-// the last collapsed caret only when this is exactly its backward-delete range.
+// deleteSurroundingText von AOSP kann das zu löschende Zeichen unmittelbar vor beforeinput
+// auswählen, ohne zuvor eine Auswahlbenachrichtigung zu senden. Die letzte Cursorposition ohne Auswahl
+// nur beibehalten, wenn die Auswahl exakt dem von dort rückwärts zu löschenden Bereich entspricht.
 export const snapshotBeforeInput = (
   current: TextInputSnapshot,
   previous: TextInputSnapshot | null,
@@ -39,8 +39,8 @@ export const snapshotBeforeInput = (
     : current
 }
 
-// Some IMEs omit beforeinput or make it non-cancellable. Only consume undo
-// after confirming that the native edit was one Backspace at the saved caret.
+// Manche IMEs lassen beforeinput aus oder erlauben keinen Abbruch. Das Rückgängigmachen erst auslösen,
+// wenn bestätigt ist, dass die native Änderung genau einem Rückschritt an der gespeicherten Cursorposition entsprach.
 export const undoAfterBackwardDeletion = (
   before: TextInputSnapshot,
   after: TextInputSnapshot,
@@ -60,7 +60,7 @@ export const undoAfterBackwardDeletion = (
   const mutation = undo(before)
   if (!mutation) return null
 
-  // The service's range refers to the pre-deletion text, not the current DOM.
+  // Der Bereich des Dienstes bezieht sich auf den Text vor dem Löschen, nicht auf das aktuelle DOM.
   return {
     start: 0,
     end: after.text.length,

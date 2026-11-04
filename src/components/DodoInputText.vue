@@ -247,7 +247,7 @@ const handleBeforeInput = (event: InputEvent) => {
   const current = snapshotInput()
   const before = snapshotBeforeInput(current, lastInputSnapshot, event.inputType)
   pendingBeforeInput.value = before
-  // A native IME selection is verified after deletion, without cancelling it.
+  // Eine native IME-Auswahl wird nach dem Löschen geprüft, ohne den Löschvorgang abzubrechen.
   if (current.selectionStart !== current.selectionEnd) return
   if (event.isComposing || isComposing.value || event.inputType !== 'deleteContentBackward' || !event.cancelable) return
 

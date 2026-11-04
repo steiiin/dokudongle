@@ -6,7 +6,7 @@ export interface NonVerbalProtocol {
   xabcDe: { avpu: string; gcs: { v: number } }
 }
 
-// Read raw values, never the context getter: assessment also feeds that getter.
+// Rohwerte lesen, niemals den context-Getter: Die Beurteilung fließt ebenfalls in diesen Getter ein.
 export function isNonVerbalProtocol(protocol: NonVerbalProtocol): boolean {
   return protocol.flavors.non_verbal
     || !protocol.xAbcde.isBreathing

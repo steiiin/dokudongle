@@ -73,8 +73,8 @@ function hydrateLikeTemplate<T>(template: T, input: unknown): T {
   return input as T
 }
 
-// Older records contain values but no explicit intent. Infer only from recorded
-// non-default values; new records retain even explicit normal/inactive choices.
+// Ältere Datensätze enthalten Werte, aber keine ausdrückliche Auswahlabsicht. Diese nur aus gespeicherten
+// Abweichungen vom Standard ableiten; neue Datensätze bewahren auch ausdrücklich normale oder inaktive Auswahlwerte.
 function restoreAssessmentIntents(value: unknown, input: unknown, defaults: unknown): void {
   if (!isRecord(value) || !isRecord(defaults)) return
   const source = isRecord(input) ? input : {}
@@ -112,7 +112,7 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
 
   const legacyCourse = input.course
-  // Normalize legacy disability findings before restoring their class instances.
+  // Ältere neurologische Befunde normalisieren, bevor ihre Klasseninstanzen wiederhergestellt werden.
   let normalizedInput = input
   if (isRecord(input.xabcDe)) {
     const disability = { ...input.xabcDe }
@@ -132,7 +132,7 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     for (const [key, legacyKey] of Object.entries(legacyPsychFields)) {
       if (psych[key] === undefined) psych[key] = disability[legacyKey]
     }
-    // Restore dementia under psych, including records with a separate assessment.
+    // Demenz unter psych wiederherstellen, auch bei Datensätzen mit separater Beurteilung.
     const separateDementia = disability.dementia
     const migratedDementia = psych.dementia === undefined && separateDementia !== undefined
     if (psych.dementia === undefined) {
@@ -268,8 +268,8 @@ function toPersistable<T>(value: T): T {
 }
 
 
-// Read through Vue proxies so the getter tracks nested changes. Only text values,
-// not the editor's transient state, determine whether a protocol contains data.
+// Über Vue-Proxys lesen, damit der Getter verschachtelte Änderungen erfasst. Nur Textwerte,
+// nicht der vorübergehende Editorzustand, bestimmen, ob ein Protokoll Daten enthält.
 function protocolValues(value: unknown): unknown {
   if (value instanceof EnhanceableText) return value.value
   if (Array.isArray(value)) return value.map(protocolValues)
@@ -279,7 +279,7 @@ function protocolValues(value: unknown): unknown {
   return value
 }
 
-// Protocol classes import store-dependent text helpers; initialize after module loading.
+// Protokollklassen importieren vom Store abhängige Texthilfsfunktionen; erst nach dem Laden der Module initialisieren.
 let emptyProtocolValues: string | undefined
 function containsProtocolData(protocol: unknown): boolean {
   emptyProtocolValues ??= JSON.stringify(protocolValues(resetProtocol()))
@@ -317,8 +317,8 @@ function updateHistoryEntry(
   const entry = history.find(entry => entry.id === activeHistoryEntryId)
   if (!entry) return history
   const doku = toPersistable(protocol)
-  // Keep the same reference when nothing changed so committing an autosave
-  // cannot keep triggering the persistence subscription indefinitely.
+  // Bei unverändertem Inhalt dieselbe Referenz beibehalten, damit das automatische Speichern
+  // das Speicherabonnement nicht endlos erneut auslösen kann.
   if (JSON.stringify(toPersistable(entry.doku)) === JSON.stringify(doku)) return history
   return history.map(item => item.id === entry.id ? { ...item, doku } : item)
 }
@@ -336,15 +336,15 @@ function archiveProtocol(
     archivedAt: new Date().toISOString(),
     doku: toPersistable(protocol),
   }, ...history]
-  // Opening the oldest entry must not evict the entry we are about to edit.
+  // Das Öffnen des ältesten Eintrags darf den gerade zu bearbeitenden Eintrag nicht verdrängen.
   while (next.length > 3) {
     next.splice(next.findLastIndex(entry => entry.id !== preserveId), 1)
   }
   return next
 }
 
-// Queue operations outside reactive state. Persist reads the current state when
-// its turn begins, so a queued autosave cannot overwrite a completed restore.
+// Vorgänge außerhalb des reaktiven Zustands einreihen. Die Speicherung liest den aktuellen Zustand,
+// sobald sie an der Reihe ist; so kann eine vorgemerkte automatische Speicherung keine abgeschlossene Wiederherstellung überschreiben.
 const storageQueues = new WeakMap<object, Promise<unknown>>()
 function serializeStorage<T>(store: object, operation: () => Promise<T>): Promise<T> {
   const pending = storageQueues.get(store) ?? Promise.resolve()
@@ -496,7 +496,7 @@ export const useDokuStore = defineStore('doku', {
   }),
   actions: {
 
-    // dongle
+    // Dongle
     async initDongle() {
 
       if (Capacitor.getPlatform() === 'android') {
@@ -673,7 +673,7 @@ export const useDokuStore = defineStore('doku', {
       const requested = { ...config }
       const payload = encodeDongleConfig(requested)
       const deviceId = this.connection.device!.id
-      // Lock before the first await, including programmatic callers.
+      // Vor dem ersten await sperren, auch bei programmatischen Aufrufen.
       this.connection.isSavingSettings = true
       this.connection.lastError = null
       try {
@@ -728,8 +728,8 @@ export const useDokuStore = defineStore('doku', {
         const connected = await BleClient.getConnectedDevices([ ServiceUUID ])
         let isConnected = connected.some(device => device.deviceId === deviceId)
         if (isConnected && deviceId && Capacitor.getPlatform() === 'android') {
-          // Android reports system-wide links, including a link whose local
-          // GATT client was closed on timeout. Only adopt a usable app client.
+          // Android meldet systemweite Verbindungen, auch wenn deren lokaler
+          // GATT-Client wegen Zeitüberschreitung geschlossen wurde. Nur einen nutzbaren App-Client übernehmen.
           try { await BleClient.getServices(deviceId) }
           catch { isConnected = false }
         }
@@ -748,7 +748,7 @@ export const useDokuStore = defineStore('doku', {
       }
     },
 
-    // protocol
+    // Protokoll
     async newProtocol() {
       if (this.isProtocolChanging) return
       this.isProtocolChanging = true
@@ -975,7 +975,7 @@ export const useDokuStore = defineStore('doku', {
         const temporary = await loadTemporaryProtocolState()
         if (temporary?.schemaVersion === DOKU_SCHEMA_VERSION) {
           const legacy = hydrateProtocol(temporary.doku)
-          // Deterministic identity makes migration safe if cleanup was interrupted.
+          // Eine deterministische Identität sichert die Migration bei unterbrochener Bereinigung ab.
           const id = `legacy-temporary:${temporary.savedAt}`
           if (legacy && containsProtocolData(legacy) && !protocolHistory.some(entry => entry.id === id)) {
             protocolHistory = hydrateHistory([
@@ -1065,7 +1065,7 @@ export const useDokuStore = defineStore('doku', {
           invalidateConnection: () => this.dongleDisconnected(deviceId, this.connection.session),
         })
         controller.signal.throwIfAborted()
-        // Keep the guard until completion is persisted for this exact protocol.
+        // Die Sperre beibehalten, bis der Abschluss für genau dieses Protokoll gespeichert ist.
         await this.markProtocolSent(Date.now(), protocol)
         return true
       } catch (error) {
@@ -1097,14 +1097,14 @@ export const useDokuStore = defineStore('doku', {
   getters: {
     hasProtocolData: (state): boolean => containsProtocolData(state.doku),
 
-    // app status
+    // Anwendungsstatus
     isDongleConnecting: (state) => state.connection.isConnecting,
     isDongleConnected: (state) => state.connection.isConnected && !state.connection.isConnecting,
     isDongleTransmitting: (state) => state.connection.isTransmitting,
     transmissionProgress: (state) => (state.connection.isTransmitting && state.connection.transmissionLength>0) ? (state.connection.transmissionCurrent / state.connection.transmissionLength) : 0,
     connectedDongleName: (state) => state.connection.isConnected ? (state.connection.config ? DONGLE_NAME_PREFIX + state.connection.config.name : state.connection.device?.name ?? 'Unbekanntes Dongle') : '',
 
-    // context
+    // Kontext
     context(state): ProtocolContext {
 
       const isNoEmergencyCall: boolean = state.doku.flavors.no_emergency_call
@@ -1209,7 +1209,7 @@ export const useDokuStore = defineStore('doku', {
       } as ProtocolContext
     },
 
-    // protocol
+    // Protokoll
     textAreaBlocks(state) {
       return resolveTextAreaBlocks(state.doku)
     },
@@ -1219,7 +1219,7 @@ export const useDokuStore = defineStore('doku', {
     generatedProtocol(state): string {
       let text = ''
 
-      // special course: NEF
+      // Besonderer Einsatzverlauf: NEF
       if (state.doku.course == ProtocolCourse.NEF_VOR_ORT) {
         return multiline([
           'Notarzt bereits vor Ort.',
@@ -1279,7 +1279,7 @@ export const useDokuStore = defineStore('doku', {
 
       }
 
-      // TREATMENT
+      // BEHANDLUNG
       text += textIf(
         breakDoku(
           [

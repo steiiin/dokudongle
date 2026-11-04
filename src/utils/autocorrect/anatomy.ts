@@ -3,10 +3,10 @@ import { capitalizeBegin } from "../text";
 export const correctAnatomy = (draft: string): string => {
   let text = draft.trim();
 
-  // Normalize to lowercase first
+  // Zuerst in Kleinbuchstaben umwandeln.
   text = text.toLowerCase();
 
-  // Apply replacements (order matters: fkh before kh)
+  // Ersetzungen anwenden (Reihenfolge beachten: fkh vor kh).
   const replacements: Array<[RegExp, string]> = [
     [/\bli\b/gi, "li."],
     [/\bre\b/gi, "re."],

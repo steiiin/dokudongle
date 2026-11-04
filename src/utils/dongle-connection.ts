@@ -2,7 +2,7 @@ import { Capacitor } from '@capacitor/core'
 import { BleClient } from '@capacitor-community/bluetooth-le'
 import { withDongleTimeout } from './dongle-config'
 
-// bluetooth-le 8.1.3: connect defaults to 10s; disconnect/discovery to 5s.
+// bluetooth-le 8.1.3: Das Standardzeitlimit beträgt für connect 10 s, für disconnect/discovery 5 s.
 const NATIVE_OPERATION_TIMEOUT = 5000
 
 export class DongleDeadlineError extends Error {
@@ -19,9 +19,9 @@ export function dongleTimeRemaining(deadline: number, maximum: number, minimum =
   return remaining
 }
 
-// Android owns the timeout and closes GATT before rejecting connect. Racing it
-// with a JS timer leaves native work in BleClient's queue after the caller exits.
-// The web adapter needs the JS deadline because it does not enforce timeouts.
+// Android verwaltet das Zeitlimit und schließt GATT, bevor connect fehlschlägt. Ein konkurrierender
+// JS-Timer lässt native Vorgänge in der Warteschlange von BleClient zurück, nachdem der Aufrufer beendet wurde.
+// Der Webadapter benötigt das JS-Zeitlimit, da er selbst keine Zeitlimits erzwingt.
 export function awaitBleOperation<T>(operation: Promise<T>, timeout: number): Promise<T> {
   return Capacitor.getPlatform() === 'android' ? operation : withDongleTimeout(operation, timeout)
 }
@@ -36,13 +36,13 @@ export async function disconnectDongle(deviceId: string, options: {
   try {
     await awaitBleOperation(BleClient.disconnect(deviceId), timeout)
   } catch (error) {
-    // Only a confirmed, already-disconnected Android target is safe to retry.
-    // In particular, never waive a failure while handing an active link to DFU.
+    // Nur bei einem nachweislich bereits getrennten Android-Ziel ist ein erneuter Versuch sicher.
+    // Insbesondere bei der Übergabe einer aktiven Verbindung an DFU niemals einen Fehler übergehen.
     if (!android || options.strict || !(error instanceof Error)
       || !/^Disconnection timeout\.?$/.test(error.message)) throw error
     const connected = await BleClient.getConnectedDevices([])
     if (connected.some(device => device.deviceId.toLowerCase() === deviceId.toLowerCase())) throw error
-    // The next native connect closes the stale handle before opening fresh GATT.
+    // Der nächste native connect-Aufruf schließt das veraltete Handle, bevor eine neue GATT-Verbindung geöffnet wird.
   }
 }
 

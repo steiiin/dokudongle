@@ -3,7 +3,7 @@ import type { RedflagSignal, RedflagApplication, RedflagCategory, RedflagScenari
 import { interleaveUnique, resolveRedflagScenario } from '@/utils/redflags'
 import { OptionalValue } from "../input"
 
-/** Stored snapshots from before the catalog replacement; never offered as new choices. */
+/** Gespeicherte Momentaufnahmen aus der Zeit vor dem Katalogaustausch; werden niemals als neue Auswahl angeboten. */
 export interface LegacyRedflagScenario {
   id: string
   name: string
@@ -103,7 +103,7 @@ export class TreatmentRedflags {
     const major = modern
       ? interleaveUnique([majorCandidates], signal => signal.key)
       : majorCandidates
-    // Priority is decided before exclusions so removing a major cannot promote its minor copy.
+    // Den Vorrang vor den Ausschlüssen bestimmen, damit das Entfernen eines major-Warnzeichens dessen minor-Kopie nicht aufwerten kann.
     const majorKeys = new Set([...inheritedMajor, ...custom.map(signalRow)].map(signal => signal.key))
     const minor = interleaveUnique(minorLists, signal => signal.key)
       .filter(signal => !removedMinor.has(signal.text))
@@ -113,7 +113,7 @@ export class TreatmentRedflags {
       majorSignals: major.filter(signal => !signal.id || !removedMajorIds.has(signal.id)),
       minorSignals: minor.filter(signal => !signal.id || !removedMinorIds.has(signal.id)),
       diagnoses: interleaveUnique([...legacy.map(entry => entry.diagnoses), ...resolved.map(entry => entry.diagnoses)]),
-      // Retain historical output (including empty legacy strings) for old records.
+      // Für alte Datensätze die historische Ausgabe beibehalten, einschließlich leerer Zeichenketten aus Altdaten.
       consequences: modern
         ? interleaveUnique([...legacy.map(entry => entry.consequences ? [entry.consequences] : []), ...resolved.map(entry => entry.consequences)])
         : legacy.map(entry => entry.consequences),
@@ -159,20 +159,20 @@ export class TreatmentRedflags {
 
   public getRedflagBlock(): string {
 
-    // skip if no redflags information needed
+    // Überspringen, wenn keine Angaben zu Warnzeichen benötigt werden
     if (this.noTransportType == '') { return '' }
 
     const content = this.getResolvedContent()
     let block = content.resolutions.filter(entry => entry.error)
       .map(entry => `[RedFlags-Auswahl prüfen: ${entry.error}] \n`).join('')
 
-    // create intro
+    // Einleitung erstellen
     const diagnoses = content.diagnoses
     if (diagnoses.length > 0) {
       block += `Aufklärung bzgl. ${diagnoses.map((d) => d).join('; ')}. \n`
     }
 
-    // create signals text
+    // Text zu Warnzeichen erstellen
     const majorTexts = content.majorSignals.map(signal => signal.text)
     const minorTexts = content.minorSignals.map(signal => signal.text)
 
@@ -187,7 +187,7 @@ export class TreatmentRedflags {
       block += `Bei ${this.getConcatText(minorTexts)} Rücksprache ${physician}. \n`
     }
 
-    // create information text
+    // Aufklärungstext erstellen
     if (this.noTransportType == 'Verweigerung')
     {
       block += 'Transport nicht gewünscht. Auch nach Verdeutlichung mgl. Konsequenzen'

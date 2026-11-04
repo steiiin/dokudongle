@@ -20,8 +20,8 @@ export function normalizeRedflagSearch(value: string): string {
     .replace(/ae/g, 'a').replace(/oe/g, 'o').replace(/ue/g, 'u')
 }
 
-// Optimal string alignment distance: insertions, deletions, substitutions,
-// and adjacent transpositions. Compare whole words, never scattered letters.
+// Distanz nach optimaler Zeichenfolgenausrichtung: Einfügungen, Löschungen, Ersetzungen
+// und Vertauschungen benachbarter Zeichen. Ganze Wörter vergleichen, niemals verstreute Buchstaben.
 function wordDistance(a: string, b: string, limit: number): number {
   if (Math.abs(a.length - b.length) > limit) return limit + 1
   let previousPrevious: number[] = []
@@ -71,8 +71,8 @@ function matchField(query: string, words: readonly string[], value: string): Mat
     if (!limit) return undefined
     let best = limit + 1
     for (const candidate of targetWords) {
-      // Keep the original spelling too: folding the "oe" in "synkpoe"
-      // would otherwise turn a single transposition into two edits.
+      // Auch die ursprüngliche Schreibweise beibehalten: Die Normalisierung von „oe“ in „synkpoe“
+      // würde sonst aus einer einzigen Vertauschung zwei Änderungen machen.
       best = Math.min(best, wordDistance(word, candidate.word, limit), wordDistance(folded, candidate.folded, limit))
     }
     if (best > limit) return undefined
@@ -81,7 +81,7 @@ function matchField(query: string, words: readonly string[], value: string): Mat
   return [edits ? 4 : 3, edits, unmatched]
 }
 
-/** Every query word must match in one field; titles always outrank metadata. */
+/** Jedes Suchwort muss innerhalb desselben Feldes passen; Titel haben stets Vorrang vor Metadaten. */
 export function searchRedflagEntries<T extends RedflagSearchEntry>(entries: readonly T[], search: string): T[] {
   const query = normalizeRedflagSearch(search)
   if (!query) return [...entries]

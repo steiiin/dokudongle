@@ -75,7 +75,7 @@
           <DodoInputText ref="inputMinormedDescription"
             v-model="store.doku.sampler.medication.MinormedDescription"
             label="Einnahme von:" placeholder="z.B. Pille"
-            :ime-dictionary="{ /* activate IME */ }">
+            :ime-dictionary="{ /* IME aktivieren */ }">
           </DodoInputText>
         </IonItem>
 

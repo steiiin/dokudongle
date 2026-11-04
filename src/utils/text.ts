@@ -1,12 +1,12 @@
 /**
- * Join the string parts to a multiline string
+ * Verbindet die Textteile zu einer mehrzeiligen Zeichenkette.
  */
 export function multiline(lines: string[]): string {
   return lines.join(' \n')
 }
 
 /**
- * Capitalises the first letter of every word in the given string.
+ * Schreibt den ersten Buchstaben jedes Wortes in der übergebenen Zeichenkette groß.
  */
 export function capitalizeWords(text: string): string {
   const trimmedSplitted = text.trim().split(' ')
@@ -14,7 +14,7 @@ export function capitalizeWords(text: string): string {
 }
 
 /**
- * Capitalises only the first non-space character of the input string.
+ * Schreibt nur das erste Zeichen nach führenden Leerzeichen in der Eingabezeichenkette groß.
  */
 export function capitalizeBegin(text: string, ignoreLength?: number): string {
   const trimmed = text.trimStart()
@@ -25,7 +25,7 @@ export function capitalizeBegin(text: string, ignoreLength?: number): string {
 }
 
 /**
- * Prefix given text with prefix if not empty
+ * Stellt dem übergebenen Text das Präfix voran, sofern der Text nicht leer ist.
  */
 export function prefix(prefix: string, text: string): string {
   const trimmed = text.trim()
@@ -34,7 +34,7 @@ export function prefix(prefix: string, text: string): string {
 }
 
 /**
- * Adds a prefix unless one of the provided keywords is already present in the draft.
+ * Fügt ein Präfix hinzu, sofern der Entwurf noch keines der übergebenen Schlüsselwörter enthält.
  */
 export function conditionalPrefix(draft: string, condPrefix: string, condKeywords: Array<string>): string {
 
@@ -51,7 +51,7 @@ export function conditionalPrefix(draft: string, condPrefix: string, condKeyword
 }
 
 /**
- * Suffix given text with suffix if not empty
+ * Hängt das Suffix an den übergebenen Text an, sofern der Text nicht leer ist.
  */
 export function suffix(text: string, suffix: string): string {
   const trimmed = text.trim()
@@ -60,7 +60,7 @@ export function suffix(text: string, suffix: string): string {
 }
 
 /**
- * Returns placeholder text if original text is empty
+ * Gibt den Platzhaltertext zurück, wenn der ursprüngliche Text leer ist.
  */
 export function placeholder(text: string, placeholder: string): string {
   const trimmed = text.trim()
@@ -69,22 +69,22 @@ export function placeholder(text: string, placeholder: string): string {
 }
 
 /**
- * Trims punctuation and whitespace from both ends of the provided string.
+ * Entfernt Satz- und Leerzeichen an beiden Enden der übergebenen Zeichenkette.
  */
 export function supertrim(text: string): string {
   return text.replace(/^[.,; ]+|[.,; ]+$/g, "")
 }
 
 /**
- * Trims breaks of the text
+ * Entfernt Zeilenumbrüche aus dem Text.
  */
 export function unbreak(text: string): string {
   return text.replace(/[\r\n]+/g, "")
 }
 
 /**
- * Appends a newline (or paragraph break) when the text contains content.
- * Accepts either a string or an array of strings.
+ * Hängt einen Zeilenumbruch (oder Absatzumbruch) an, wenn der Text Inhalt enthält.
+ * Akzeptiert eine Zeichenkette oder ein Array aus Zeichenketten.
  */
 export function breakDoku(text: string | string[], paragraph: boolean = false): string {
   const block = Array.isArray(text)
@@ -96,7 +96,7 @@ export function breakDoku(text: string | string[], paragraph: boolean = false): 
 }
 
 /**
- * Formats a string array (or sub-arrays) to a with comma/semicolon concatted string.
+ * Verbindet ein Array aus Zeichenketten (oder Unterarrays) zu einer durch Kommas und Semikolons getrennten Zeichenkette.
  *
  */
 export function concatDoku(array: Array<Array<string>|string>, finishWithDot: boolean = true): string {
