@@ -5,9 +5,12 @@ import { conditionalPrefix } from "../filter"
  */
 export function prefixParesis(draft: string): string {
   return conditionalPrefix(draft, 'Parese:', [
-      'Parese',
-      'Lähmung',
-      'Plegie',
+      'parese',
+      'paretisch',
+      'lähm',
+      'laehm',
+      'plegie',
+      'plegisch',
   ])
 }
 
@@ -16,10 +19,27 @@ export function prefixParesis(draft: string): string {
  */
 export function prefixParaesthesis(draft: string): string {
   return conditionalPrefix(draft, 'Parästhesie:', [
-      'Paraesthesie',
-      'Parästhesie',
-      'Kribbeln',
-      'Missempfindung',
+      'parästhes',
+      'kribbel',
+      'missempfind',
+      'ameisenlauf',
+      'ameisenkribbel',
+      'pelzig',
+  ])
+}
+
+/**
+ * Ensures sensibility notes are prefixed with "Sensibilität" if no keyword is present.
+ */
+export function prefixSensibility(draft: string): string {
+  return conditionalPrefix(draft, 'Sensibilitätsstörung:', [
+      'taub',
+      'sensibilität',
+      'hypästhes',
+      'hyperästhes',
+      'gefühllos',
+      'gefühlsstör',
+      'empfindungsstör',
   ])
 }
 
@@ -30,9 +50,9 @@ export function prefixParaesthesis(draft: string): string {
 export function prefixIntox(draft: string): string {
   return conditionalPrefix(draft, 'Intox:',
     [
-      'Intox',
-      'Vergift',
-      'Überdosis',
+      'intox',
+      'vergift',
+      'überdos',
     ]
   )
 }
