@@ -96,6 +96,11 @@ export interface RedflagContent {
 export interface RedflagScenario extends RedflagContent {
   readonly id: ScenarioId
   readonly name: string
+  /** Optionaler Alternativname für die Suche; angezeigt wird weiterhin name. */
+  readonly name_alt?: string
+
+  /** Facharzt für Minor-Warnzeichen, auch bei einbezogenen Unterszenarien. */
+  readonly minorSpecialist?: string | null
 
   /** Beschreibender Voraussetzungstext; kein automatischer Eignungsnachweis. */
   readonly requirements: string
@@ -115,6 +120,8 @@ export interface RedflagSubscenario extends RedflagContent {
   readonly id: SubscenarioId
   readonly parentId: ScenarioId
   readonly name: string
+  /** Optionaler Alternativname für die Suche; angezeigt wird weiterhin name. */
+  readonly name_alt?: string
 
   /** Zusätzliche Voraussetzungen; ersetzt nicht die des Hauptszenarios. */
   readonly requirements: string

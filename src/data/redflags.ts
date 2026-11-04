@@ -1,67 +1,3 @@
-/**
- * RedFlags – Szenariokatalog aus redflags_150_szenarien.md.
- *
- * Vorgesehene Ablage:
- *   data/redflags.ts
- *   types/redflags.d.ts
- *
- * Daten und Typ-Reexports; keine fachliche Auswahl-, Aggregations- oder
- * Textgeneratorlogik. Die beiden bisherigen Szenariolisten werden lediglich
- * aus einer gemeinsamen Pflegeliste abgeleitet (ohne Objektkopien).
- * IDs sind explizite, dauerhaft beizubehaltende Literale.
- *
- * Anordnung im Quelltext:
- * - Hauptszenarien alphabetisch nach name (deutsche Sortierung).
- * - Unterszenarien unmittelbar unter ihrem jeweiligen Hauptszenario, ebenfalls
- *   alphabetisch nach name. parentId bleibt die einzige Zuordnungsquelle.
- * - Bei gleichem Namen dient die unveränderte ID als zweites Sortierkriterium.
- * - Die Reihenfolge ist bereits so gespeichert; keine Sortierung zur Laufzeit.
- *
- * Umfang:
- * - Alle 150 Kandidaten sind genau einmal abgebildet: 118 Hauptszenarien und
- *   32 Unterszenarien (43 BvO, 107 Verweigerung nach Anwendung des Hauptszenarios).
- * - Nr. 36 aktualisiert den vorhandenen vasovagalen Subtyp, ohne neue ID.
- * - 15 im Markdown benannte, im Beispielset fehlende Hauptszenarien sind als
- *   strukturelle Platzhalter ergänzt. Deren universelle Inhalte bleiben leer.
- * - Insgesamt: 135 Hauptszenarien, 33 Unterszenarien und die neun bestehenden
- *   Warnzeichen. Die zwei ursprünglichen Hauptszenarien bleiben erhalten.
- *
- * Quellenübernahme:
- * - name = Szenario (ohne das redaktionelle Sternchen), requirements = Abgrenzung.
- *   Diese Texte und die Anwendung werden unverändert aus dem Markdown übernommen.
- * - Nummern in Kommentaren verweisen auf die 150er-Tabelle; sie sind keine IDs.
- * - Die explizite Unterfalltabelle bestimmt parentId, mit zwei dokumentierten
- *   Sonderfällen: Nr. 36 nutzt synkope-bvo; Nr. 142 bleibt ein Hauptszenario.
- * - Kategorien sind technische Zuordnungen anhand der Bereichsüberschriften,
- *   keine im Markdown bereits fachlich festgelegten Klassifikationen.
- *   Unterszenarien erben application und category ausschließlich vom Hauptszenario.
- * - Die zusätzlich benötigten Kategorien stehen in types/redflags.d.ts:
- *   umwelt, augen, uro, stoffwechsel, haut und paediatrie.
- *
- * Noch nicht ausgearbeitet:
- * - Keine neuen Signals und keine neuen Zuordnungen zu major/minor.
- * - Neue Datensätze haben leere majorSignalIds, minorSignalIds, diagnoses und
- *   consequences. Leer bedeutet NICHT: keine Warnzeichen, Diagnosen oder Risiken.
- * - Vorhandene Warnzeichen, Verweise, Diagnosen und Folgen bleiben erhalten.
- *   Neu zugeordnete Unterfälle erben gegebenenfalls vorhandene Elterninhalte.
- * - Fehlende universelle Voraussetzungen der ergänzten Sammelszenarien werden
- *   nicht erfunden. requirements: '' ist keine medizinische Freigabe.
- *
- * Sicherheitsrahmen der Quelle:
- * Konzeptentwurf zur ärztlichen Prüfung; keine validierte Nichttransport-Checkliste.
- * BvO erst nach vollständiger fallgerechter Untersuchung, plausibler
- * Niedrigrisikoeinschätzung, erforderlicher Verlaufskontrolle, gesicherter
- * Anschlussversorgung und Beachtung lokaler ärztlicher Vorgaben.
- * Die Kurzbeschreibung allein genügt nicht.
- * Verweigerung bezeichnet die tatsächliche Ablehnung indizierter dringlicher
- * Versorgung, nicht allein die Ablehnung eines Rettungswagentransports bei
- * medizinisch geeigneter alternativer Vorstellung. Transportindikation,
- * Transportart, Einwilligungsfähigkeit, Vertretung und Schutzmaßnahmen sind
- * getrennt zu prüfen. Voraussetzungen und mögliche Diagnosen sind keine
- * gesicherten Befunde; vor produktivem Einsatz ist eine fachliche Prüfung nötig.
- * Ein vollständiger Abgleich mit der nicht vorliegenden AGENTS.md steht aus.
- */
-
 
 import type {
   RedflagCatalog,
@@ -70,7 +6,6 @@ import type {
   RedflagSubscenario,
 } from '../types/redflags.js'
 
-// Konsumenten können auch die Typen über dieses Datenmodul importieren.
 export type {
   RedflagAggregationMode,
   RedflagApplication,
@@ -89,61 +24,918 @@ export type {
 } from '../types/redflags.js'
 
 // ---------------------------------------------------------------------------
-// Zentrale Warnzeichen: vorhandener Bestand unverändert, keine Ergänzungen.
+// Zentrale Warnzeichen
 // ---------------------------------------------------------------------------
 
 export const DATA_Signals: readonly RedflagSignal[] = [
-
   {
-    id: 'neuro-synkope-rezidiv',
-    text: 'erneutem/zunehmender Bewusstseinsverlust/-eintrübung',
+    id:   'abdomen__afterjuckreiz',
+    text: 'anhaltendem Juckreiz am After'
   },
-
   {
-    id: 'kreislauf-ap-neu',
-    text: 'zunehmenden, nicht mehr reproduzierbaren Brustschmerzen oder Ausstrahlung in Arm, Rücken oder Kiefer',
+    id:   'abdomen__anhaltende_verstopfung',
+    text: 'anhaltender Verstopfung'
   },
-
   {
-    id: 'atmung-luftnot',
-    text: 'Luftnot',
+    id:   'abdomen__anhaltender_durchfall',
+    text: 'anhaltendem Durchfall'
   },
-
   {
-    id: 'kreislauf-herzrhythmus-neu',
-    text: 'Herzstolpern/Herzrasen',
+    id:   'abdomen__anhaltendes_erbrechen',
+    text: 'anhaltendem Erbrechen'
   },
-
   {
-    id: 'neuro-ausfall-neu',
-    text: 'neurol. Ausfällen (Taubheit/Blässe/Kälte/Schwäche)',
+    id:   'abdomen__blut_im_stuhl',
+    text: 'Blut im Stuhl'
   },
-
   {
-    id: 'kreislauf-probleme-zunehmend',
-    text: 'zunehmenden Kreislaufbeschwerden (Schwindel/Schwäche)',
+    id:   'abdomen__blutiges_erbrechen',
+    text: 'blutigem/kaffeesatzartigem Erbrechen'
   },
-
   {
-    id: 'kreislauf-belastungsSchwaeche-anhaltend',
-    text: 'anhaltender Schwäche',
+    id:   'abdomen__durchfall',
+    text: 'Durchfall'
   },
-
   {
-    id: 'neuro-fallneigung-anhaltend',
-    text: 'anhaltenden Beschwerden mit Fallneigung',
+    id:   'abdomen__geringe_wiederkehrende_blutspuren',
+    text: 'geringen wiederkehrenden Blutspuren am Stuhl'
   },
-
   {
-    id: 'neuro-kopfschmerz-zunehmend',
-    text: 'zunehmende Kopfschmerzen',
+    id:   'abdomen__gruenes_erbrechen',
+    text: 'grünem Erbrechen'
   },
-
+  {
+    id:   'abdomen__hart_geblaeht',
+    text: 'hartem/aufgeblähtem Bauch'
+  },
+  {
+    id:   'abdomen__leichte_wiederkehrende_schmerzen',
+    text: 'wiederkehrenden leichten Bauchschmerzen'
+  },
+  {
+    id:   'abdomen__naechtliche_beschwerden',
+    text: 'nächtlichen Bauchbeschwerden'
+  },
+  {
+    id:   'abdomen__schmerzhafte_bruchvorwoelbung',
+    text: 'schmerzhafter/fester Bruchvorwölbung'
+  },
+  {
+    id:   'abdomen__starke_afterschmerzen',
+    text: 'starken Schmerzen am After'
+  },
+  {
+    id:   'abdomen__starke_rektalblutung',
+    text: 'starker/nicht stillbarer Blutung aus dem After'
+  },
+  {
+    id:   'abdomen__teerstuhl',
+    text: 'schwarzem/teerartigem Stuhl'
+  },
+  {
+    id:   'abdomen__wiederkehrendes_sodbrennen',
+    text: 'wiederkehrendem Sodbrennen'
+  },
+  {
+    id:   'abdomen__windverhalt_mit_blaehung',
+    text: 'fehlendem Windabgang mit zunehmender Bauchblähung'
+  },
+  {
+    id:   'abdomen__zunehmende_schmerzen',
+    text: 'zunehmenden Bauchschmerzen'
+  },
+  {
+    id:   'augen__anhaltende_roetung',
+    text: 'anhaltender Augenrötung'
+  },
+  {
+    id:   'augen__eitriges_sekret',
+    text: 'verklebten Augenlidern/eitrigem Augensekret'
+  },
+  {
+    id:   'augen__fremdkoerpergefuehl',
+    text: 'anhaltendem Fremdkörpergefühl im Auge'
+  },
+  {
+    id:   'augen__juckreiz_traenenfluss',
+    text: 'anhaltendem Augenjucken/Tränenfluss'
+  },
+  {
+    id:   'augen__lichtscheu',
+    text: 'ausgeprägter Lichtscheu'
+  },
+  {
+    id:   'augen__neue_ptosis',
+    text: 'einseitig hängendem Augenlid'
+  },
+  {
+    id:   'augen__neue_pupillendifferenz',
+    text: 'deutlicher Pupillendifferenz'
+  },
+  {
+    id:   'augen__starke_augenschmerzen',
+    text: 'starken Augenschmerzen'
+  },
+  {
+    id:   'augen__wiederkehrende_einblutung',
+    text: 'wiederkehrenden Einblutungen ins Augenweiß'
+  },
+  {
+    id:   'becken__zunehmende_schmerzen',
+    text: 'zunehmenden Beckenschmerzen'
+  },
+  {
+    id:   'blutung__nase_zahnfleisch',
+    text: 'Blutungen aus Nase/Zahnfleisch'
+  },
+  {
+    id:   'blutung__wiederkehrende_haut_schleimhautblutungen',
+    text: 'wiederkehrenden Haut-/Schleimhautblutungen'
+  },
+  {
+    id:   'extremitaet__belastungsunfaehigkeit',
+    text: 'fehlender Belastbarkeit'
+  },
+  {
+    id:   'extremitaet__bewegungsstoerung',
+    text: 'Bewegungsstörungen'
+  },
+  {
+    id:   'extremitaet__blaesse_blaufarbung',
+    text: 'auffälliger Blässe/Blaufärbung'
+  },
+  {
+    id:   'extremitaet__einseitige_schwellung_schmerz',
+    text: 'einseitiger schmerzhafter Beinschwellung'
+  },
+  {
+    id:   'extremitaet__gespannte_schwellung',
+    text: 'praller/gespannter Schwellung'
+  },
+  {
+    id:   'extremitaet__kalte_extremitaet',
+    text: 'auffällig kalter Hand/kaltem Fuß'
+  },
+  {
+    id:   'extremitaet__langsame_beidseitige_beinoedeme',
+    text: 'langsam zunehmenden beidseitigen Beinschwellungen'
+  },
+  {
+    id:   'extremitaet__pulsverlust',
+    text: 'fehlendem Puls an der Extremität'
+  },
+  {
+    id:   'extremitaet__sensibilitaetsstoerung',
+    text: 'Gefühlsstörungen'
+  },
+  {
+    id:   'extremitaet__starke_dehnungsschmerzen',
+    text: 'starken Schmerzen beim Strecken von Fingern/Zehen'
+  },
+  {
+    id:   'extremitaet__zunehmende_schmerzen',
+    text: 'zunehmenden Schmerzen'
+  },
+  {
+    id:   'gelenk__anhaltende_leichte_schmerzen',
+    text: 'anhaltenden leichten Gelenkschmerzen'
+  },
+  {
+    id:   'gelenk__anhaltende_schmerzen',
+    text: 'anhaltenden Gelenkschmerzen'
+  },
+  {
+    id:   'gelenk__bewegungsverlust',
+    text: 'eingeschränkter Beweglichkeit'
+  },
+  {
+    id:   'gelenk__roetung_ueberwaermung',
+    text: 'gerötetem/überwärmtem Gelenk'
+  },
+  {
+    id:   'gelenk__wiederkehrende_steifigkeit',
+    text: 'wiederkehrender Gelenksteifigkeit'
+  },
+  {
+    id:   'gelenk__zunehmende_schmerzen',
+    text: 'zunehmenden Gelenkschmerzen'
+  },
+  {
+    id:   'gelenk__zunehmende_schwellung',
+    text: 'zunehmender Gelenkschwellung'
+  },
+  {
+    id:   'gyn__anhaltende_brustverhaertung',
+    text: 'anhaltender Verhärtung der Brust'
+  },
+  {
+    id:   'gyn__anhaltende_stillbeschwerden',
+    text: 'anhaltenden Schmerzen beim Stillen'
+  },
+  {
+    id:   'gyn__auffaelliges_fruchtwasser',
+    text: 'grünem/braunem/übel riechendem Fruchtwasser'
+  },
+  {
+    id:   'gyn__fruchtwasserabgang',
+    text: 'wässrigem Flüssigkeitsabgang aus der Scheide'
+  },
+  {
+    id:   'gyn__grosse_blutklumpen_wochenfluss',
+    text: 'großen Blutklumpen im Wochenfluss'
+  },
+  {
+    id:   'gyn__pressdrang',
+    text: 'Pressdrang'
+  },
+  {
+    id:   'gyn__regelmaessige_schmerzhafte_wehen',
+    text: 'regelmäßigen schmerzhaften Wehen'
+  },
+  {
+    id:   'gyn__schulterspitzenschmerz',
+    text: 'Schmerzen an der Schulterspitze'
+  },
+  {
+    id:   'gyn__sichtbare_nabelschnur',
+    text: 'sichtbarer/tastbarer Nabelschnur an der Scheide'
+  },
+  {
+    id:   'gyn__starke_anhaltende_unterbauchschmerzen',
+    text: 'anhaltenden starken Unterbauchschmerzen'
+  },
+  {
+    id:   'gyn__starke_brustdruesenschmerzen',
+    text: 'starken Schmerzen in der Brustdrüse'
+  },
+  {
+    id:   'gyn__starke_einseitige_unterbauchschmerzen',
+    text: 'starken einseitigen Unterbauchschmerzen'
+  },
+  {
+    id:   'gyn__starke_vaginale_blutung',
+    text: 'starker/zunehmender vaginaler Blutung'
+  },
+  {
+    id:   'gyn__uebel_riechender_wochenfluss',
+    text: 'übel riechendem Wochenfluss'
+  },
+  {
+    id:   'gyn__vaginale_blutung',
+    text: 'vaginaler Blutung'
+  },
+  {
+    id:   'gyn__verminderte_kindsbewegungen',
+    text: 'verminderten/ausbleibenden Kindsbewegungen'
+  },
+  {
+    id:   'gyn__wiederkehrende_regelschmerzen',
+    text: 'wiederkehrenden Regelschmerzen'
+  },
+  {
+    id:   'gyn__zwischenblutungen',
+    text: 'wiederkehrenden Zwischenblutungen'
+  },
+  {
+    id:   'haut__anhaltende_brennende_schmerzen',
+    text: 'anhaltenden brennenden Hautschmerzen'
+  },
+  {
+    id:   'haut__anhaltende_taubheit',
+    text: 'anhaltender Taubheit der Haut'
+  },
+  {
+    id:   'haut__anhaltender_juckreiz',
+    text: 'anhaltendem Juckreiz'
+  },
+  {
+    id:   'haut__blaeschen_auge_nase_ohr',
+    text: 'Bläschen an Auge/Nasenspitze/Ohr'
+  },
+  {
+    id:   'haut__blasenbildung',
+    text: 'Hautblasen'
+  },
+  {
+    id:   'haut__dunkle_verfaerbung',
+    text: 'dunkler/schwarzer Hautverfärbung'
+  },
+  {
+    id:   'haut__eitriges_sekret',
+    text: 'eitrigem Sekret'
+  },
+  {
+    id:   'haut__grossflaechige_blaeschenausbreitung',
+    text: 'großflächiger Ausbreitung von Hautbläschen'
+  },
+  {
+    id:   'haut__marmorierung',
+    text: 'fleckiger/marmorierter Hautverfärbung'
+  },
+  {
+    id:   'haut__naessende_offene_stellen',
+    text: 'nässenden/offenen Hautstellen'
+  },
+  {
+    id:   'haut__nicht_wegdrueckbare_flecken',
+    text: 'nicht wegdrückbaren roten/violetten Hautflecken'
+  },
+  {
+    id:   'haut__rasch_ausbreitende_roetung',
+    text: 'rasch ausbreitender Rötung'
+  },
+  {
+    id:   'haut__schleimhautwunden',
+    text: 'wunden Stellen an Mund/Augen/Genitalien'
+  },
+  {
+    id:   'haut__schmerzhafte_blaeschen',
+    text: 'schmerzhaften Hautbläschen'
+  },
+  {
+    id:   'haut__sich_vergroessernde_roetung_nach_stich',
+    text: 'sich vergrößernder Rötung um die Stichstelle'
+  },
+  {
+    id:   'haut__starke_schmerzen',
+    text: 'starken Hautschmerzen'
+  },
+  {
+    id:   'haut__wiederkehrender_ausschlag',
+    text: 'wiederkehrendem Hautausschlag'
+  },
+  {
+    id:   'haut__zunehmende_lokale_roetung',
+    text: 'zunehmender örtlicher Rötung'
+  },
+  {
+    id:   'haut__zunehmende_lokale_schwellung',
+    text: 'zunehmender örtlicher Schwellung'
+  },
+  {
+    id:   'hno__anhaltende_halsschmerzen',
+    text: 'anhaltenden Halsschmerzen'
+  },
+  {
+    id:   'hno__anhaltende_leichte_ohrenschmerzen',
+    text: 'anhaltenden leichten Ohrenschmerzen'
+  },
+  {
+    id:   'hno__anhaltende_mundschmerzen',
+    text: 'anhaltenden Zahn-/Wundschmerzen im Mund'
+  },
+  {
+    id:   'hno__anhaltende_schluckbeschwerden',
+    text: 'anhaltenden Schluckbeschwerden'
+  },
+  {
+    id:   'hno__anhaltendes_ohrgeraeusch',
+    text: 'anhaltenden Ohrgeräuschen'
+  },
+  {
+    id:   'hno__auffaellig_haeufiges_schlucken',
+    text: 'auffällig häufigem Schlucken'
+  },
+  {
+    id:   'hno__blut_mund_rachen',
+    text: 'frischem Blut aus Mund/Rachen'
+  },
+  {
+    id:   'hno__eingeschraenkte_mundoeffnung',
+    text: 'erschwerter Mundöffnung'
+  },
+  {
+    id:   'hno__geringe_blutspuren_speichel',
+    text: 'wiederkehrenden geringen Blutspuren im Speichel'
+  },
+  {
+    id:   'hno__heiserkeit',
+    text: 'Heiserkeit'
+  },
+  {
+    id:   'hno__kieferklemme',
+    text: 'stark eingeschränkter Mundöffnung'
+  },
+  {
+    id:   'hno__kloessige_stimme',
+    text: 'kloßiger/veränderter Stimme'
+  },
+  {
+    id:   'hno__ohrsekret',
+    text: 'Flüssigkeits-/Eiteraustritt aus dem Ohr'
+  },
+  {
+    id:   'hno__ploetzliche_hoerminderung',
+    text: 'Hörminderung/Hörverlust'
+  },
+  {
+    id:   'hno__schwellung_hinter_ohr',
+    text: 'schmerzhafter Rötung/Schwellung hinter dem Ohr'
+  },
+  {
+    id:   'hno__speichel_nicht_schluckbar',
+    text: 'Unfähigkeit zum Schlucken von Speichel'
+  },
+  {
+    id:   'hno__wiederholtes_verschlucken',
+    text: 'wiederholtem Verschlucken beim Trinken/Essen'
+  },
+  {
+    id:   'hno__zunehmende_gesichtsschwellung',
+    text: 'zunehmender Gesichts-/Halsschwellung'
+  },
+  {
+    id:   'hno__zunge_rachenschwellung',
+    text: 'Zungen-/Rachenschwellung'
+  },
+  {
+    id:   'infekt__anhaltendes_fieber',
+    text: 'anhaltendem/wiederkehrendem Fieber'
+  },
+  {
+    id:   'infekt__fieber_schuettelfrost',
+    text: 'Fieber/Schüttelfrost'
+  },
+  {
+    id:   'infekt__grippeaehnliche_beschwerden',
+    text: 'grippeähnlichen Beschwerden mit Kopf-/Gliederschmerzen'
+  },
+  {
+    id:   'intox__starkes_zittern_schwitzen',
+    text: 'starkem Zittern/Schwitzen'
+  },
+  {
+    id:   'intox__uebelkeit_erbrechen',
+    text: 'Übelkeit/Erbrechen'
+  },
+  {
+    id:   'kreislauf__anhaltendes_herzrasen',
+    text: 'anhaltendem Herzrasen/Herzstolpern'
+  },
+  {
+    id:   'kreislauf__erneute_icd_schocks',
+    text: 'erneuten ICD-Schocks'
+  },
+  {
+    id:   'kreislauf__langsamer_herzschlag_mit_beschwerden',
+    text: 'langsamem Herzschlag mit Schwäche/Schwindel'
+  },
+  {
+    id:   'kreislauf__neue_probleme',
+    text: 'Kreislaufproblemen (starker Schwindel/auffällige Blässe/kalter Schweiß)'
+  },
+  {
+    id:   'muskeln__anhaltende_leichte_schmerzen',
+    text: 'anhaltenden leichten Muskelschmerzen'
+  },
+  {
+    id:   'muskeln__starke_schmerzen_schwellung',
+    text: 'starken Muskelschmerzen/-schwellungen'
+  },
+  {
+    id:   'neuro__anhaltende_leichte_kopfschmerzen',
+    text: 'anhaltenden leichten Kopfschmerzen'
+  },
+  {
+    id:   'neuro__anhaltende_neugedaechtnisstoerung',
+    text: 'anhaltender Unfähigkeit zum Merken neuer Informationen'
+  },
+  {
+    id:   'neuro__blasen_darmkontrollverlust',
+    text: 'Verlust der Blasen-/Darmkontrolle'
+  },
+  {
+    id:   'neuro__blitzartiger_maximalkopfschmerz',
+    text: 'schlagartig maximalen Kopfschmerzen'
+  },
+  {
+    id:   'neuro__erneute_gedaechtnisluecken',
+    text: 'erneuten Erinnerungslücken'
+  },
+  {
+    id:   'neuro__fehlende_erholung_nach_anfall',
+    text: 'fehlender Rückkehr zu normaler Ansprechbarkeit nach einem Krampfanfall'
+  },
+  {
+    id:   'neuro__gesichtslaehmung',
+    text: 'einseitiger Gesichtslähmung'
+  },
+  {
+    id:   'neuro__gesichtstaubheit',
+    text: 'Taubheit im Gesicht'
+  },
+  {
+    id:   'neuro__leichte_konzentrationsprobleme',
+    text: 'anhaltenden Konzentrationsproblemen'
+  },
+  {
+    id:   'neuro__leichter_lageschwindel',
+    text: 'kurzzeitigem Schwindel beim Aufstehen'
+  },
+  {
+    id:   'neuro__leichter_wiederkehrender_schwindel',
+    text: 'wiederkehrendem leichtem Schwindel'
+  },
+  {
+    id:   'neuro__muskelkraempfe',
+    text: 'Muskelkrämpfen'
+  },
+  {
+    id:   'neuro__neue_bewusstlosigkeit',
+    text: 'Bewusstlosigkeit'
+  },
+  {
+    id:   'neuro__neue_einseitige_schwaeche',
+    text: 'einseitiger Schwäche/Lähmung'
+  },
+  {
+    id:   'neuro__neue_gangunsicherheit',
+    text: 'ausgeprägter Gangunsicherheit'
+  },
+  {
+    id:   'neuro__neue_krampfanfaelle',
+    text: 'einem Krampfanfall'
+  },
+  {
+    id:   'neuro__neue_nackensteifigkeit',
+    text: 'Nackensteifigkeit'
+  },
+  {
+    id:   'neuro__neue_sprachstoerung',
+    text: 'Sprachstörungen'
+  },
+  {
+    id:   'neuro__neue_verwirrtheit',
+    text: 'Verwirrtheit'
+  },
+  {
+    id:   'neuro__ploetzliche_starke_kopfschmerzen',
+    text: 'starken Kopfschmerzen'
+  },
+  {
+    id:   'neuro__taubheit_schritt',
+    text: 'Taubheit im Schritt/Gesäßbereich'
+  },
+  {
+    id:   'neuro__wiederkehrende_gesichtsschmerzen',
+    text: 'wiederkehrenden Gesichtsschmerzattacken'
+  },
+  {
+    id:   'neuro__wiederkehrende_typische_kopfschmerzen',
+    text: 'wiederkehrenden Kopfschmerzen im bekannten Muster'
+  },
+  {
+    id:   'neuro__zunehmende_muskelschwaeche',
+    text: 'zunehmender Muskelschwäche'
+  },
+  {
+    id:   'neuro__zunehmende_schlaefrigkeit',
+    text: 'zunehmender Schläfrigkeit/erschwerter Weckbarkeit'
+  },
+  {
+    id:   'paediatrie__anfallsartiges_schreien_blaesse',
+    text: 'anfallsartigem Schreien mit Blässe'
+  },
+  {
+    id:   'paediatrie__angestrengte_atmung',
+    text: 'angestrengter Atmung mit Einziehungen/Stöhnen'
+  },
+  {
+    id:   'paediatrie__schlaff_teilnahmslos',
+    text: 'auffälliger Schlaffheit/Teilnahmslosigkeit'
+  },
+  {
+    id:   'paediatrie__trinkschwaeche',
+    text: 'deutlich vermindertem Trinken'
+  },
+  {
+    id:   'paediatrie__wenige_nasse_windeln',
+    text: 'deutlich weniger nassen Windeln'
+  },
+  {
+    id:   'paediatrie__wiederkehrender_bellender_husten',
+    text: 'wiederkehrendem bellendem Husten'
+  },
+  {
+    id:   'peg__fluessigkeitsaustritt',
+    text: 'Austritt von Nahrung/Mageninhalt an der Sondenöffnung'
+  },
+  {
+    id:   'psych__anhaltende_alltagsbeeintraechtigung',
+    text: 'anhaltenden Schwierigkeiten bei Bewältigung des Alltags'
+  },
+  {
+    id:   'psych__anhaltende_niedergeschlagenheit',
+    text: 'anhaltender Niedergeschlagenheit/Interesselosigkeit'
+  },
+  {
+    id:   'psych__anhaltende_schlafstoerungen',
+    text: 'anhaltenden Schlafstörungen'
+  },
+  {
+    id:   'psych__belastende_wiedererinnerungen',
+    text: 'wiederkehrenden belastenden Erinnerungen/Albträumen'
+  },
+  {
+    id:   'psych__fremdgefaehrdungsimpulse',
+    text: 'Fremdgefährdungsimpulsen'
+  },
+  {
+    id:   'psych__gefaehrliches_enthemmtes_verhalten',
+    text: 'unkontrollierbarem riskantem Verhalten'
+  },
+  {
+    id:   'psych__halluzinationen',
+    text: 'Stimmenhören/Halluzinationen'
+  },
+  {
+    id:   'psych__konkrete_suizidabsicht',
+    text: 'konkreten Absichten zur Selbsttötung'
+  },
+  {
+    id:   'psych__schlaflosigkeit_mit_ueberaktivitaet',
+    text: 'ausbleibendem Schlaf mit ausgeprägter Überaktivität'
+  },
+  {
+    id:   'psych__schwere_erregung',
+    text: 'extremen Erregungszuständen mit Kontrollverlust'
+  },
+  {
+    id:   'psych__suizidgedanken',
+    text: 'Gedanken an Suizid/Selbstverletzung'
+  },
+  {
+    id:   'psych__wiederkehrende_angstzustaende',
+    text: 'wiederkehrenden Angstzuständen'
+  },
+  {
+    id:   'psych__zunehmende_selbstvernachlaessigung',
+    text: 'Selbstvernachlässigung'
+  },
+  {
+    id:   'pulmo__anhaltender_husten',
+    text: 'anhaltendem Husten'
+  },
+  {
+    id:   'pulmo__atempausen',
+    text: 'Atempausen'
+  },
+  {
+    id:   'pulmo__blutspuren_im_auswurf',
+    text: 'einzelnen Blutspuren im Auswurf'
+  },
+  {
+    id:   'pulmo__langsame_flache_atmung',
+    text: 'auffällig langsamer/flacher Atmung'
+  },
+  {
+    id:   'pulmo__neue_luftnot',
+    text: 'Atemnot'
+  },
+  {
+    id:   'pulmo__relevante_haemoptyse',
+    text: 'stärkerem/wiederholtem Bluthusten'
+  },
+  {
+    id:   'pulmo__schaumiger_auswurf',
+    text: 'schaumigem/rosafarbenem Auswurf'
+  },
+  {
+    id:   'pulmo__stridor',
+    text: 'pfeifendem/ziehendem Geräusch beim Einatmen'
+  },
+  {
+    id:   'pulmo__stridor_in_ruhe',
+    text: 'pfeifendem/ziehendem Einatemgeräusch in Ruhe'
+  },
+  {
+    id:   'pulmo__zyanose',
+    text: 'bläulichen Lippen'
+  },
+  {
+    id:   'ruecken__starke_schmerzen',
+    text: 'starken Nacken-/Rückenschmerzen'
+  },
+  {
+    id:   'sehstoerung__neue_doppelbilder',
+    text: 'Doppelbildern'
+  },
+  {
+    id:   'sehstoerung__neue_lichtblitze',
+    text: 'Lichtblitzen'
+  },
+  {
+    id:   'sehstoerung__neuer_gesichtsfeldschatten',
+    text: 'dunklem Schatten/Vorhang im Gesichtsfeld'
+  },
+  {
+    id:   'sehstoerung__neuer_russregen',
+    text: 'zahlreichen schwarzen Punkten vorm Auge'
+  },
+  {
+    id:   'sehstoerung__ploetzlicher_sehverlust',
+    text: 'Sehverlust'
+  },
+  {
+    id:   'sehstoerung__rasche_sehverschlechterung',
+    text: 'rascher Sehverschlechterung'
+  },
+  {
+    id:   'shunt__anhaltende_erneute_blutung',
+    text: 'anhaltender/erneuter Blutung am Dialyseshunt'
+  },
+  {
+    id:   'shunt__roetung_schmerzen_verlauf',
+    text: 'Rötung/Schmerzen entlang des Shuntschlauchs'
+  },
+  {
+    id:   'stoffwechsel__anhaltende_muedigkeit',
+    text: 'anhaltender Müdigkeit'
+  },
+  {
+    id:   'stoffwechsel__durst_mundtrockenheit',
+    text: 'anhaltendem Durst/trockenem Mund'
+  },
+  {
+    id:   'stoffwechsel__fehlende_trinkfaehigkeit',
+    text: 'fehlender Trinkfähigkeit'
+  },
+  {
+    id:   'stoffwechsel__fruchtiger_atem',
+    text: 'fruchtig/azetonartig riechendem Atem'
+  },
+  {
+    id:   'stoffwechsel__gelbfaerbung',
+    text: 'Gelbfärbung von Haut/Augen'
+  },
+  {
+    id:   'stoffwechsel__starker_durst_polyurie',
+    text: 'starkem Durst mit häufigem Wasserlassen'
+  },
+  {
+    id:   'stoffwechsel__tiefe_schnelle_atmung',
+    text: 'auffällig tiefer/schneller Atmung'
+  },
+  {
+    id:   'stoffwechsel__ungewollter_gewichtsverlust',
+    text: 'ungewolltem Gewichtsverlust'
+  },
+  {
+    id:   'stoffwechsel__wiederkehrende_uebelkeit',
+    text: 'wiederkehrender Übelkeit'
+  },
+  {
+    id:   'stoma__dunkle_blasse_verfaerbung',
+    text: 'dunkler/auffällig blasser Verfärbung des Stomas'
+  },
+  {
+    id:   'stoma__foerderstopp',
+    text: 'plötzlich ausbleibender Ausscheidung'
+  },
+  {
+    id:   'stoma__hautreizung',
+    text: 'zunehmenden Hautreizungen im Stomabereich'
+  },
+  {
+    id:   'stoma__nicht_ruecklaeufiger_prolaps',
+    text: 'nicht rückläufigem Hervortreten'
+  },
+  {
+    id:   'stoma__starke_blutung',
+    text: 'starker Blutung aus dem Stoma'
+  },
+  {
+    id:   'stoma__vermehrte_duennfluessige_ausscheidung',
+    text: 'anhaltend vermehrter dünnflüssiger Ausscheidung'
+  },
+  {
+    id:   'stoma__verminderte_ausscheidung',
+    text: 'anhaltend verminderter Ausscheidung'
+  },
+  {
+    id:   'temperatur__auffaellig_kalte_haut',
+    text: 'auffällig kalter Haut'
+  },
+  {
+    id:   'temperatur__nachlassendes_kaeltezittern',
+    text: 'nachlassendem Zittern trotz anhaltender Kälte'
+  },
+  {
+    id:   'thorax__schmerzen_druck',
+    text: 'Brustschmerzen/Druckgefühl'
+  },
+  {
+    id:   'trachea__frische_blutung',
+    text: 'frischer Blutung aus/an der Trachealkanüle'
+  },
+  {
+    id:   'trachea__verminderter_luftstrom',
+    text: 'vermindertem/fehlendem Luftstrom an der Kanüle'
+  },
+  {
+    id:   'trauma__anhaltende_leichte_schmerzen',
+    text: 'anhaltenden leichten Schmerzen'
+  },
+  {
+    id:   'umwelt__sehr_heisse_haut',
+    text: 'sehr heißer Haut'
+  },
+  {
+    id:   'uro__anhaltende_oligurie_anurie',
+    text: 'anhaltend stark vermindertem/ausbleibendem Wasserlassen'
+  },
+  {
+    id:   'uro__anhaltende_schmerzhafte_erektion',
+    text: 'anhaltender schmerzhafter Erektion'
+  },
+  {
+    id:   'uro__dunkelbrauner_urin',
+    text: 'dunkelbraunem Urin'
+  },
+  {
+    id:   'uro__eichelreizung',
+    text: 'Rötung/Juckreiz an Eichel/Vorhaut'
+  },
+  {
+    id:   'uro__eichelsekret',
+    text: 'Sekret an Eichel/Vorhaut'
+  },
+  {
+    id:   'uro__eicheltaubheit',
+    text: 'Taubheit der Eichel'
+  },
+  {
+    id:   'uro__eichelverfaerbung',
+    text: 'dunkler/bläulicher Verfärbung der Eichel'
+  },
+  {
+    id:   'uro__eingeklemmte_vorhaut',
+    text: 'schmerzhaft hinter der Eichel festsitzender Vorhaut'
+  },
+  {
+    id:   'uro__flankenschmerzen',
+    text: 'starken Schmerzen in der Nierengegend/Flanke'
+  },
+  {
+    id:   'uro__gerinnsel_im_urin',
+    text: 'Blutgerinnseln im Urin'
+  },
+  {
+    id:   'uro__neue_haematurie',
+    text: 'Blut im Urin'
+  },
+  {
+    id:   'uro__rasch_zunehmende_oedeme',
+    text: 'rasch zunehmenden Bein-/Gesichtsschwellungen'
+  },
+  {
+    id:   'uro__rasche_penisschwellung',
+    text: 'rasch zunehmender Penisschwellung'
+  },
+  {
+    id:   'uro__starke_flankenschmerzen',
+    text: 'starken Schmerzen in der Nierengegend/Flanke'
+  },
+  {
+    id:   'uro__starke_penisschmerzen',
+    text: 'starken Schmerzen an Eichel/Vorhaut'
+  },
+  {
+    id:   'uro__truebes_dialysat',
+    text: 'trüber Flüssigkeit im Dialysebeutel'
+  },
+  {
+    id:   'uro__verfaerbung_hodensack',
+    text: 'dunkler/bläulicher Verfärbung'
+  },
+  {
+    id:   'uro__zunehmende_hodenschmerzen',
+    text: 'erneuten/zunehmenden Hodenschmerzen'
+  },
+  {
+    id:   'uro__zunehmende_hodenschwellung',
+    text: 'rasch zunehmender Schwellung'
+  },
+  {
+    id:   'verband__wiederkehrendes_druckgefuehl',
+    text: 'wiederkehrendem Druckgefühl unterm Verband'
+  },
+  {
+    id:   'wunde__rasch_zunehmender_bluterguss',
+    text: 'rasch zunehmendem Bluterguss'
+  },
+  {
+    id:   'wunde__starke_anhaltende_blutung',
+    text: 'starker/nicht stillbarer Blutung'
+  },
+  {
+    id:   'wunde__zunehmende_schmerzen',
+    text: 'zunehmenden Wundschmerzen'
+  }
 ]
 
 // ---------------------------------------------------------------------------
 // Alphabetische Pflegeliste: Hauptszenario, danach seine Unterszenarien.
-// Keine zusätzliche Eltern-/Kindliste: Maßgeblich ist ausschließlich parentId.
 // Die exportierten DATA_Scenarios und DATA_Subscenarios stehen am Dateiende.
 // ---------------------------------------------------------------------------
 
@@ -153,179 +945,230 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Abdominaltrauma mit Verdacht auf innere Verletzung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 8.
   {
-    id: 'abdominaltrauma-innere-verletzung-verweigerung',
-    name: 'Abdominaltrauma mit Verdacht auf innere Verletzung',
+    id: 'abdominaltrauma-verweigerung',
+    name: 'Abdominaltrauma (Vd. innere Verletzung)',
     requirements: 'Relevanter Mechanismus, Bauchschmerz, Druckschmerz oder Gurtmarke; initiale Kreislaufstabilität ist keine Entwarnung.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__blut_im_stuhl',
+      'uro__neue_haematurie', 'abdomen__anhaltendes_erbrechen', 'pulmo__neue_luftnot',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Innere Organverletzung', 'Darmverletzung', 'Innere Blutung'],
+    consequences: ['unentdeckten Organ-/Darmverletzungen, inneren Blutungen, Bauchfellentzündung, Kreislaufversagen, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
-  // Hauptszenario: Akut heißes, geschwollenes Gelenk [Verweigerung]
+  // Hauptszenario: Gelenksentzündung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 111.
   {
-    id: 'heisses-geschwollenes-gelenk-verweigerung',
-    name: 'Akut heißes, geschwollenes Gelenk',
+    id: 'gelenksentzuendung-verweigerung',
+    name: 'Akute Gelenksentzündung',
     requirements: 'Akute schmerzhafte Bewegungseinschränkung und Überwärmung; septische Arthritis ausschließen, nicht vorschnell als Gicht behandeln.',
     application: 'Verweigerung',
     category: 'haut',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gelenk__zunehmende_schmerzen', 'gelenk__zunehmende_schwellung', 'gelenk__bewegungsverlust',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+      'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Septische Arthritis', 'Gichtanfall', 'Sepsis'],
+    consequences: ['einer unerkannten Gelenkinfektion, dauerhaften Gelenkschäden, Funktionsverlust, Sepsis, Organversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
-  // Hauptszenario: Akute Belastungsreaktion ohne akute Gefährdung [BvO]
+  // Hauptszenario: Belastungsreaktion [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 123.
   {
-    id: 'belastungsreaktion-ohne-akute-gefaehrdung-bvo',
-    name: 'Akute Belastungsreaktion ohne akute Gefährdung',
+    id: 'belastungsreaktion-bvo',
+    name: 'Belastungsreaktion',
+    name_alt: 'Panikattacke',
     requirements: 'Nach belastendem Ereignis beruhigt und orientiert; keine Suizidalität, Psychose oder relevante Selbstvernachlässigung; Unterstützung gesichert.',
     application: 'BvO',
     category: 'psych',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'psych__suizidgedanken', 'psych__fremdgefaehrdungsimpulse', 'psych__halluzinationen',
+      'neuro__neue_verwirrtheit', 'psych__schwere_erregung', 'pulmo__neue_luftnot',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
+      'psych__belastende_wiedererinnerungen', 'psych__anhaltende_alltagsbeeintraechtigung',
+    ],
+    minorSpecialist: 'Psychiater',
+    diagnoses: ['Akute Belastungsreaktion', 'Anpassungsstörung'],
+    consequences: ['fortbestehenden Belastungsbeschwerden, zunehmenden Alltagsbeeinträchtigungen oder einer übersehenen psychischen Krise mit Selbstgefährdung'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akute Erregung/Fremdgefährdung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 129.
   {
     id: 'erregung-fremdgefaehrdung-verweigerung',
     name: 'Akute Erregung/Fremdgefährdung',
     requirements: 'Nicht sicher beherrschbare Erregung oder konkrete Gewaltgefahr; organische/toxische Ursachen und rechtliche Voraussetzungen gesondert prüfen.',
     application: 'Verweigerung',
     category: 'psych',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'psych__fremdgefaehrdungsimpulse', 'psych__schwere_erregung', 'psych__halluzinationen',
+      'psych__suizidgedanken', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
+      'psych__anhaltende_alltagsbeeintraechtigung',
+    ],
+    diagnoses: ['Psychose', 'Delir', 'Intoxikation'],
+    consequences: ['schweren Selbst-/Fremdverletzungen, übersehenen Vergiftungen/körperlichen Erkrankungen, bleibenden Schäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akute Extremitätenischämie [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 42.
   {
     id: 'extremitaetenischaemie-verweigerung',
     name: 'Akute Extremitätenischämie',
+    name_alt: 'Arterieller Verschluss',
     requirements: 'Plötzlich schmerzhafte, blasse/kalte Extremität mit Puls-, Sensibilitäts- oder Motorikstörung; keine traumatische Ursache notwendig.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+      'extremitaet__zunehmende_schmerzen', 'extremitaet__pulsverlust', 'extremitaet__sensibilitaetsstoerung',
+      'extremitaet__bewegungsstoerung',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Akuter arterieller Gefäßverschluss'],
+    consequences: ['einem unentdeckten Gefäßverschluss, Nerven-/Muskelschäden, absterbendem Gewebe, einer Amputation oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
-  // Hauptszenario: Akute Oligurie/Anurie ohne gesicherten Harnverhalt [Verweigerung]
+  // Hauptszenario: Oligurie/Anurie [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 96.
   {
-    id: 'oligurie-anurie-ohne-gesicherten-harnverhalt-verweigerung',
-    name: 'Akute Oligurie/Anurie ohne gesicherten Harnverhalt',
+    id: 'oligurie-anurie-verweigerung',
+    name: 'Oligurie/Anurie',
+    name_alt: 'Harnverhalt',
     requirements: 'Akut deutlich verminderte/fehlende Urinausscheidung gegenüber dem Ausgangszustand; mögliche Nierenschädigung, nicht bloß Blasenentleerungsstörung.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'uro__anhaltende_oligurie_anurie', 'pulmo__neue_luftnot', 'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme', 'infekt__fieber_schuettelfrost', 'uro__neue_haematurie',
+      'uro__starke_flankenschmerzen', 'uro__rasch_zunehmende_oedeme',
+    ],
+    minorSignalIds: [
+      'stoffwechsel__anhaltende_muedigkeit', 'stoffwechsel__wiederkehrende_uebelkeit',
+    ],
+    minorSpecialist: 'Urologen',
+    diagnoses: ['Akutes Nierenversagen', 'Harnverhalt', 'Elektrolytstörung'],
+    consequences: ['akutem Nierenversagen, lebensbedrohlichen Herzrhythmusstörungen, einem Lungenödem, bleibenden Nierenschäden, Dialysepflichtigkeit oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
-  // Hauptszenario: Akute Psychose mit Gefährdung [Verweigerung]
+  // Hauptszenario: Akute Psychose [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 127.
   {
-    id: 'psychose-mit-gefaehrdung-verweigerung',
-    name: 'Akute Psychose mit Gefährdung',
+    id: 'psychose-verweigerung',
+    name: 'Akute Psychose',
     requirements: 'Wahn/Halluzinationen mit erheblicher Eigen-/Fremdgefährdung oder aufgehobener Selbstversorgung; somatische Ursachen mitprüfen.',
     application: 'Verweigerung',
     category: 'psych',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'psych__suizidgedanken', 'psych__fremdgefaehrdungsimpulse', 'psych__halluzinationen',
+      'psych__schwere_erregung', 'neuro__neue_verwirrtheit', 'psych__zunehmende_selbstvernachlaessigung',
+      'neuro__neue_krampfanfaelle', 'neuro__neue_bewusstlosigkeit', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
+      'psych__anhaltende_alltagsbeeintraechtigung',
+    ],
+    diagnoses: ['Akute Psychose', 'Delir', 'Intoxikation'],
+    consequences: ['schweren Selbst-/Fremdverletzungen, übersehenen körperlichen Erkrankungen, fehlender Selbstversorgung, bleibenden Schäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akute Sehstörung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 64, 65; universelle Daten fehlen noch.
   {
     id: 'akute-sehstoerung-verweigerung',
     name: 'Akute Sehstörung',
     requirements: '',
     application: 'Verweigerung',
     category: 'augen',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'sehstoerung__ploetzlicher_sehverlust', 'sehstoerung__rasche_sehverschlechterung',
+      'sehstoerung__neue_doppelbilder', 'sehstoerung__neue_lichtblitze', 'sehstoerung__neuer_russregen',
+      'sehstoerung__neuer_gesichtsfeldschatten', 'augen__starke_augenschmerzen',
+      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_sprachstoerung',
+      'neuro__neue_einseitige_schwaeche', 'neuro__neue_gangunsicherheit', 'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Schlaganfall', 'Retinaler Gefäßverschluss', 'Netzhautablösung'],
+    consequences: ['bleibendem Sehverlust bis zur Erblindung, dauerhaften neurologischen Ausfällen oder dem Tod bei übersehener Gefäßerkrankung'],
   },
 
-  // Unterszenario zu „Akute Sehstörung“: Akute Doppelbilder
-  // Quelle: redflags_150_szenarien.md, Nr. 65.
   {
     id: 'akute-doppelbilder-verweigerung',
     parentId: 'akute-sehstoerung-verweigerung',
     name: 'Akute Doppelbilder',
     requirements: 'Neue Doppelbilder, auch ohne weitere erkennbare Ausfälle; okuläre oder neurologische Ursache dringlich abzuklären.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'sehstoerung__neue_doppelbilder', 'augen__neue_pupillendifferenz', 'augen__neue_ptosis',
+      'neuro__ploetzliche_starke_kopfschmerzen', 'augen__starke_augenschmerzen', 'neuro__neue_sprachstoerung',
+      'neuro__neue_einseitige_schwaeche', 'neuro__neue_gangunsicherheit',
+      'sehstoerung__ploetzlicher_sehverlust',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Schlaganfall', 'Hirnnervenlähmung', 'Hirnaneurysma'],
+    consequences: ['einem übersehenen Schlaganfall/Hirnaneurysma, bleibenden Seh-/Hirnschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Akute Sehstörung“: Lichtblitze/Rußregen/Gesichtsfeldschatten
-  // Quelle: redflags_150_szenarien.md, Nr. 64.
   {
     id: 'lichtblitze-russregen-gesichtsfeldschatten-verweigerung',
     parentId: 'akute-sehstoerung-verweigerung',
     name: 'Lichtblitze/Rußregen/Gesichtsfeldschatten',
+    name_alt: 'Netzhautablösung',
     requirements: 'Neu aufgetretene Symptome, insbesondere Vorhangphänomen; dringlicher Ausschluss von Netzhautriss oder -ablösung.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'sehstoerung__neue_lichtblitze', 'sehstoerung__neuer_russregen',
+      'sehstoerung__neuer_gesichtsfeldschatten', 'sehstoerung__rasche_sehverschlechterung',
+      'sehstoerung__ploetzlicher_sehverlust',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Netzhautriss', 'Netzhautablösung', 'Glaskörperblutung'],
+    consequences: ['fortschreitender Netzhautablösung, dauerhaften Gesichtsfeldausfällen oder bleibendem Sehverlust bis zur Erblindung'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akute Stomakomplikation mit Ischämie-/Ileuszeichen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 89.
   {
     id: 'stomakomplikation-ischaemie-ileuszeichen-verweigerung',
-    name: 'Akute Stomakomplikation mit Ischämie-/Ileuszeichen',
+    name: 'Stomakomplikation mit Ischämie-/Ileuszeichen',
     requirements: 'Dunkles/blasses Stoma, starke Schmerzen, nicht rückläufiger Prolaps oder Förderstopp mit Erbrechen/Distension.',
     application: 'Verweigerung',
     category: 'gastro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'stoma__dunkle_blasse_verfaerbung', 'stoma__nicht_ruecklaeufiger_prolaps', 'stoma__foerderstopp',
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__anhaltendes_erbrechen',
+      'kreislauf__neue_probleme', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'stoma__verminderte_ausscheidung', 'stoma__hautreizung',
+    ],
+    diagnoses: ['Stomaischämie', 'Darmverschluss', 'Peritonitis'],
+    consequences: ['absterbendem Darmgewebe, einem Darmverschluss, einer Bauchfellentzündung, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -339,74 +1182,100 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Aktuelle Absicht, Vorbereitung oder kürzlicher Versuch; psychiatrische Notfallbeurteilung und gesonderte Prüfung der Einwilligungsfähigkeit.',
     application: 'Verweigerung',
     category: 'psych',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'psych__suizidgedanken', 'psych__konkrete_suizidabsicht', 'psych__halluzinationen',
+      'psych__schwere_erregung', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+      'neuro__neue_krampfanfaelle', 'pulmo__neue_luftnot', 'psych__zunehmende_selbstvernachlaessigung',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
+      'psych__anhaltende_alltagsbeeintraechtigung',
+    ],
+    diagnoses: ['Akute Suizidalität', 'Intoxikation', 'Depressive Episode'],
+    consequences: ['erneuten Suizidhandlungen, unbemerkten Verletzungen/Vergiftungen, bleibenden Gesundheitsschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akute Verwirrtheit/Delir [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 55; universelle Daten fehlen noch.
   {
     id: 'akute-verwirrtheit-delir-verweigerung',
     name: 'Akute Verwirrtheit/Delir',
     requirements: '',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'neuro__zunehmende_schlaefrigkeit',
+      'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung', 'neuro__neue_krampfanfaelle',
+      'neuro__ploetzliche_starke_kopfschmerzen', 'infekt__fieber_schuettelfrost', 'psych__halluzinationen',
+      'psych__schwere_erregung', 'pulmo__neue_luftnot',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_schlafstoerungen', 'stoffwechsel__anhaltende_muedigkeit',
+      'neuro__leichte_konzentrationsprobleme',
+    ],
+    diagnoses: ['Delir', 'Schlaganfall', 'Sepsis'],
+    consequences: ['übersehenen Schlaganfällen, schweren Infektionen, Stoffwechselentgleisungen, Krampfanfällen, bleibenden Hirnschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Akute Verwirrtheit/Delir“: Akute Gedächtnisstörung/Amnesie
-  // Quelle: redflags_150_szenarien.md, Nr. 55.
   {
     id: 'gedaechtnisstoerung-amnesie-verweigerung',
     parentId: 'akute-verwirrtheit-delir-verweigerung',
     name: 'Akute Gedächtnisstörung/Amnesie',
     requirements: 'Neue Unfähigkeit, Informationen zu behalten, oder ungeklärte Erinnerungslücke; nicht vorschnell als harmlose transiente Amnesie einstufen.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__erneute_gedaechtnisluecken', 'neuro__anhaltende_neugedaechtnisstoerung',
+      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'neuro__neue_krampfanfaelle', 'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__neue_gangunsicherheit', 'sehstoerung__ploetzlicher_sehverlust', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'neuro__leichte_konzentrationsprobleme', 'stoffwechsel__anhaltende_muedigkeit',
+    ],
+    diagnoses: ['Schlaganfall', 'Epileptischer Anfall', 'Transiente globale Amnesie'],
+    consequences: ['übersehenen Schlaganfällen, epileptischen Anfällen, Gehirnentzündungen, bleibenden Gedächtnisstörungen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akuter Hodenschmerz/Torsionsverdacht [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 92.
   {
     id: 'hodenschmerz-torsionsverdacht-verweigerung',
     name: 'Akuter Hodenschmerz/Torsionsverdacht',
     requirements: 'Plötzlicher einseitiger Hodenschmerz oder akute Schwellung; Hodentorsion zeitkritisch auszuschließen.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'uro__zunehmende_hodenschmerzen', 'uro__zunehmende_hodenschwellung', 'uro__verfaerbung_hodensack',
+      'abdomen__anhaltendes_erbrechen', 'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hodentorsion', 'Nebenhodenentzündung', 'Eingeklemmter Leistenbruch'],
+    consequences: ['einer unentdeckten Hodentorsion, bleibenden Hodenschäden, dem Verlust des Hodens oder eingeschränkter Fruchtbarkeit'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Akuter Vernichtungskopfschmerz [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 52.
   {
     id: 'vernichtungskopfschmerz-verweigerung',
     name: 'Akuter Vernichtungskopfschmerz',
     requirements: 'Schlagartiger maximaler oder innerhalb weniger Minuten maximaler Kopfschmerz; Blutung/Gefäßereignis abklärungsbedürftig.',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_bewusstlosigkeit',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'neuro__neue_krampfanfaelle', 'sehstoerung__ploetzlicher_sehverlust',
+      'sehstoerung__neue_doppelbilder', 'neuro__neue_gangunsicherheit', 'abdomen__anhaltendes_erbrechen',
+      'neuro__neue_nackensteifigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Subarachnoidalblutung', 'Arterielle Dissektion', 'Hirnvenenthrombose'],
+    consequences: ['einer unerkannten Hirnblutung/Gefäßerkrankung, erneuten Blutungen, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -420,10 +1289,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Akute Dyspnoe, Orthopnoe, feuchte Atemgeräusche oder schaumiger Auswurf; mögliche kardiale Dekompensation.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'pulmo__schaumiger_auswurf', 'pulmo__zyanose', 'thorax__schmerzen_druck',
+      'kreislauf__neue_probleme', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Lungenödem', 'Akute Herzinsuffizienz', 'Akutes Koronarsyndrom'],
+    consequences: ['zunehmender Flüssigkeitsansammlung in der Lunge, schwerem Sauerstoffmangel, Atem-/Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -437,10 +1309,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Tremor und vegetative Überaktivität mit Halluzinationen, Verwirrtheit, Krampfanfall oder bekannter schwerer Entzugsvorgeschichte.',
     application: 'Verweigerung',
     category: 'intox',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'intox__starkes_zittern_schwitzen', 'psych__halluzinationen', 'neuro__neue_verwirrtheit',
+      'neuro__neue_krampfanfaelle', 'psych__schwere_erregung', 'kreislauf__anhaltendes_herzrasen',
+      'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Alkoholentzugssyndrom', 'Entzugsdelir', 'Entzugskrampfanfall'],
+    consequences: ['Krampfanfällen, einem Entzugsdelir, lebensbedrohlichen Herzrhythmusstörungen, Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -454,27 +1330,36 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Beidseitiger Juckreiz und Tränenfluss; Visus unverändert, keine Schmerzen, Lichtscheu oder Kontaktlinsen-Risikokonstellation.',
     application: 'BvO',
     category: 'augen',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung', 'augen__lichtscheu',
+    ],
+    minorSignalIds: [
+      'augen__juckreiz_traenenfluss', 'augen__anhaltende_roetung', 'augen__eitriges_sekret',
+    ],
+    diagnoses: ['Allergische Konjunktivitis', 'Keratitis', 'Uveitis'],
+    consequences: ['einer übersehenen Hornhautentzündung, anhaltenden Beschwerden oder bleibender Sehverschlechterung'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Allergische Reaktion (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 103; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 103.
   {
     id: 'allergische-reaktion-leicht-bvo',
     name: 'Allergische Reaktion (leicht)',
     requirements: '',
     application: 'BvO',
     category: 'haut',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'hno__zunge_rachenschwellung', 'hno__heiserkeit', 'hno__speichel_nicht_schluckbar',
+      'pulmo__neue_luftnot', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
+    minorSignalIds: [
+      'haut__anhaltender_juckreiz', 'haut__wiederkehrender_ausschlag',
+    ],
+    diagnoses: ['Allergische Reaktion', 'Anaphylaxie'],
+    consequences: ['einer fortschreitenden allergischen Reaktion mit Atemwegsverengung oder Kreislaufversagen'],
   },
 
   // Unterszenario zu „Allergische Reaktion (leicht)“: Insektenstich mit ausschließlich lokaler Reaktion
@@ -484,10 +1369,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'allergische-reaktion-leicht-bvo',
     name: 'Insektenstich mit ausschließlich lokaler Reaktion',
     requirements: 'Begrenzte Reaktion an der Stichstelle; kein Stich im Mund/Rachen, keine Allgemeinreaktion oder rasche Ausbreitung.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'hno__zunge_rachenschwellung', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit',
+    ],
+    minorSignalIds: [
+      'haut__zunehmende_lokale_roetung', 'haut__zunehmende_lokale_schwellung', 'haut__anhaltender_juckreiz',
+    ],
+    diagnoses: ['Lokale Stichreaktion', 'Anaphylaxie', 'Hautinfektion'],
+    consequences: ['einer übersehenen allergischen Allgemeinreaktion, Atemwegsverengung oder fortschreitenden Hautinfektion'],
   },
 
   // -------------------------------------------------------------------------
@@ -501,10 +1391,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Wiederkehrende Schmerz-/Schreiphasen, Blässe, Erbrechen oder auffällige Müdigkeit; blutiger Stuhl muss nicht vorliegen.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'paediatrie__anfallsartiges_schreien_blaesse', 'paediatrie__schlaff_teilnahmslos',
+      'abdomen__gruenes_erbrechen', 'abdomen__blut_im_stuhl', 'abdomen__hart_geblaeht',
+      'abdomen__zunehmende_schmerzen', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Invagination', 'Darmverschluss', 'Darmischämie'],
+    consequences: ['einem Darmverschluss, dem Absterben von Darmabschnitten, einem Darmdurchbruch, Bauchfellentzündung, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -518,10 +1412,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Zungen-, Mundboden- oder Rachenschwellung, gegebenenfalls ohne Hautausschlag; drohende Atemwegsverlegung.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__zunge_rachenschwellung', 'hno__heiserkeit', 'hno__speichel_nicht_schluckbar', 'pulmo__stridor',
+      'pulmo__neue_luftnot', 'pulmo__zyanose', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Angioödem', 'Anaphylaxie'],
+    consequences: ['fortschreitender Atemwegsverlegung, Erstickung, bleibenden Hirnschäden durch Sauerstoffmangel oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -535,10 +1432,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Bekannte Arthrose, übliche Beschwerden, belastbar; kein Trauma, heißes Gelenk, Fieber oder neuer Funktionsverlust.',
     application: 'BvO',
     category: 'trauma',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'gelenk__roetung_ueberwaermung', 'extremitaet__belastungsunfaehigkeit',
+      'extremitaet__sensibilitaetsstoerung', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'gelenk__anhaltende_leichte_schmerzen', 'gelenk__wiederkehrende_steifigkeit',
+    ],
+    diagnoses: ['Arthrose', 'Gelenkinfektion', 'Kristallarthritis'],
+    consequences: ['einer übersehenen Gelenkinfektion, fortschreitenden Gelenkschäden oder bleibender Bewegungseinschränkung'],
   },
 
   // -------------------------------------------------------------------------
@@ -552,10 +1454,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach Aspirationsereignis anhaltender Husten, Rasseln, Hypoxie oder Luftnot; nicht bloß kurzzeitiges Räuspern.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'pulmo__anhaltender_husten', 'pulmo__stridor', 'pulmo__zyanose',
+      'infekt__fieber_schuettelfrost', 'neuro__zunehmende_schlaefrigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Aspirationspneumonitis', 'Aspirationspneumonie', 'Atemwegsverlegung'],
+    consequences: ['verzögerter Lungenschädigung, Lungenentzündung, Atemversagen, bleibenden Hirnschäden durch Sauerstoffmangel oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -569,10 +1474,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Neue oder anhaltende Atemnot ohne hinreichend geklärte harmlose Ursache; keine BvO allein wegen normaler Sauerstoffsättigung.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__zyanose', 'pulmo__stridor',
+      'kreislauf__neue_probleme', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Lungenembolie', 'Akute Herzinsuffizienz', 'Asthma-/COPD-Exazerbation'],
+    consequences: ['unerkannter Herz-/Lungenerkrankung, schwerem Sauerstoffmangel, Atem-/Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -586,10 +1494,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Säure-/Laugenkontakt oder unbekannte Chemikalie im Auge; sofortige Versorgung und dringliche augenärztliche Kontrolle.',
     application: 'Verweigerung',
     category: 'augen',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung',
+      'sehstoerung__ploetzlicher_sehverlust', 'augen__lichtscheu',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hornhautverätzung', 'Bindehautverätzung', 'Sekundärglaukom'],
+    consequences: ['fortschreitenden Hornhautschäden, Vernarbungen, Infektionen oder bleibendem Sehverlust bis zur Erblindung'],
   },
 
   // -------------------------------------------------------------------------
@@ -603,10 +1514,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Beatmungsabhängiger Patient ohne zuverlässig funktionierenden Ersatz; erneuter Ausfall oder Ateminsuffizienz zu befürchten.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'pulmo__langsame_flache_atmung', 'pulmo__atempausen', 'pulmo__zyanose',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Akute Ateminsuffizienz', 'Hyperkapnie', 'Hypoxie'],
+    consequences: ['Sauerstoffmangel, gefährlicher Kohlendioxidanreicherung, Bewusstlosigkeit, Atemstillstand, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -620,10 +1534,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Bleibender Zahn ausgeschlagen; zeitkritische zahnärztliche Versorgung wird abgelehnt, unabhängig von der geeigneten Transportart.',
     application: 'Verweigerung',
     category: 'hno',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'hno__zunehmende_gesichtsschwellung', 'pulmo__neue_luftnot',
+      'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Zahnavulsion', 'Alveolarfortsatzfraktur'],
+    consequences: ['einem dauerhaften Zahnverlust, Knochenschwund sowie bleibenden Kau-/Sprechbeeinträchtigungen'],
   },
 
   // -------------------------------------------------------------------------
@@ -637,27 +1554,39 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Leichte lokale Rötung/Beschwerden; freie Miktion, kein Fieber, keine Paraphimose oder rasche Ausbreitung; Arztkontakt geplant.',
     application: 'BvO',
     category: 'uro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'uro__starke_penisschmerzen', 'uro__rasche_penisschwellung', 'uro__eichelverfaerbung',
+      'uro__eingeklemmte_vorhaut', 'uro__anhaltende_oligurie_anurie', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'uro__eichelreizung', 'uro__eichelsekret',
+    ],
+    diagnoses: ['Balanoposthitis', 'Paraphimose', 'Harnverhalt'],
+    consequences: ['einer fortschreitenden Entzündung, Vorhautverengung, Einklemmung der Vorhaut oder Harnverhalt'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Bauchschmerzen (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 76, 77, 78; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 76, 77, 78.
   {
     id: 'bauchschmerzen-leicht-bvo',
     name: 'Bauchschmerzen (leicht)',
     requirements: '',
     application: 'BvO',
     category: 'gastro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__blut_im_stuhl', 'abdomen__blutiges_erbrechen', 'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'abdomen__leichte_wiederkehrende_schmerzen', 'stoffwechsel__wiederkehrende_uebelkeit',
+      'abdomen__anhaltender_durchfall',
+    ],
+    diagnoses: ['Appendizitis', 'Darmverschluss', 'Gastrointestinale Blutung'],
+    consequences: ['einer übersehenen Bauchorganentzündung, einem Darmverschluss, inneren Blutungen oder bleibenden Organschäden'],
   },
 
   // Unterszenario zu „Bauchschmerzen (leicht)“: Obstipation ohne Ileuszeichen
@@ -667,10 +1596,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-leicht-bvo',
     name: 'Obstipation ohne Ileuszeichen',
     requirements: 'Bekanntes Problem, milde Beschwerden, Windabgang; kein Erbrechen, gebläht-schmerzhaftes Abdomen, Fieber oder Blut.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__windverhalt_mit_blaehung', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__blut_im_stuhl', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'abdomen__anhaltende_verstopfung', 'abdomen__leichte_wiederkehrende_schmerzen',
+    ],
+    diagnoses: ['Obstipation', 'Kotstau', 'Darmverschluss'],
+    consequences: ['einem übersehenen Darmverschluss, einer Darmschädigung oder einem Darmdurchbruch'],
   },
 
   // Unterszenario zu „Bauchschmerzen (leicht)“: Refluxbeschwerden (bekanntes Muster)
@@ -680,10 +1614,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-leicht-bvo',
     name: 'Refluxbeschwerden (bekanntes Muster)',
     requirements: 'Gesicherter Reflux, typische leichte Beschwerden; keine Blutung, Dysphagie oder plausible kardiale Ursache; nicht allein durch Antazidawirkung begründet.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'abdomen__blutiges_erbrechen', 'abdomen__teerstuhl', 'hno__speichel_nicht_schluckbar',
+    ],
+    minorSignalIds: [
+      'abdomen__wiederkehrendes_sodbrennen', 'hno__anhaltende_schluckbeschwerden',
+      'stoffwechsel__ungewollter_gewichtsverlust',
+    ],
+    diagnoses: ['Refluxösophagitis', 'Akutes Koronarsyndrom', 'Blutendes Magen-/Zwölffingerdarmgeschwür'],
+    consequences: ['einer übersehenen Herzerkrankung, einer Speiseröhrenverengung oder Blutung'],
   },
 
   // Unterszenario zu „Bauchschmerzen (leicht)“: Reizdarmbeschwerden (bekannter leichter Schub)
@@ -693,27 +1633,38 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-leicht-bvo',
     name: 'Reizdarmbeschwerden (bekannter leichter Schub)',
     requirements: 'Gesicherte Diagnose, unverändertes Muster; keine Blutung, nächtlich neue Beschwerden, Fieber oder Gewichtsverlust.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__blut_im_stuhl', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__windverhalt_mit_blaehung', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'abdomen__leichte_wiederkehrende_schmerzen', 'abdomen__anhaltender_durchfall',
+      'abdomen__anhaltende_verstopfung', 'abdomen__naechtliche_beschwerden',
+      'stoffwechsel__ungewollter_gewichtsverlust',
+    ],
+    diagnoses: ['Reizdarmsyndrom', 'Chronisch-entzündliche Darmerkrankung', 'Kolorektales Karzinom'],
+    consequences: ['einer übersehenen entzündlichen Darmerkrankung oder verzögerten Diagnose eines Darmtumors'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Bauchschmerzen (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 82, 83, 84, 85, 86; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 82, 83, 84, 85, 86.
   {
     id: 'bauchschmerzen-schwer-verweigerung',
     name: 'Bauchschmerzen (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'gastro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__blutiges_erbrechen', 'abdomen__blut_im_stuhl', 'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Darmischämie', 'Hohlorganperforation', 'Darmverschluss'],
+    consequences: ['einer unentdeckten Organentzündung/Durchblutungsstörung, einem Darmdurchbruch, inneren Blutungen, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Bauchschmerzen (schwer)“: Akute Pankreatitis (Verdacht)
@@ -723,10 +1674,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-schwer-verweigerung',
     name: 'Akute Pankreatitis (Verdacht)',
     requirements: 'Anhaltender starker Oberbauchschmerz, gegebenenfalls Rückenausstrahlung und Erbrechen; Diagnose präklinisch nicht gesichert.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__anhaltendes_erbrechen',
+      'infekt__fieber_schuettelfrost', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit', 'uro__anhaltende_oligurie_anurie',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Akute Pankreatitis', 'Cholangitis', 'Perforiertes Magengeschwür'],
+    consequences: ['einem Absterben von Bauchspeicheldrüsengewebe, schweren Infektionen, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Bauchschmerzen (schwer)“: Appendizitis (Verdacht)
@@ -736,10 +1691,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-schwer-verweigerung',
     name: 'Appendizitis (Verdacht)',
     requirements: 'Progredienter, häufig rechtsseitiger Unterbauchschmerz mit passender Anamnese; fehlendes Fieber schließt sie nicht aus.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__anhaltendes_erbrechen',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Appendizitis', 'Appendixperforation', 'Peritonitis'],
+    consequences: ['einem Blinddarmdurchbruch, Bauchfellentzündung, Blutvergiftung, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Bauchschmerzen (schwer)“: Cholezystitis/Cholangitis (Verdacht)
@@ -749,10 +1707,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-schwer-verweigerung',
     name: 'Cholezystitis/Cholangitis (Verdacht)',
     requirements: 'Anhaltender rechter Oberbauchschmerz, insbesondere mit Fieber oder Ikterus; keine bloß abgeklungene bekannte Kolik.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'infekt__fieber_schuettelfrost', 'stoffwechsel__gelbfaerbung',
+      'abdomen__anhaltendes_erbrechen', 'abdomen__hart_geblaeht', 'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Akute Cholezystitis', 'Cholangitis', 'Choledocholithiasis'],
+    consequences: ['einem Gallenwegsverschluss, Gallenblasendurchbruch, einer Blutvergiftung, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Bauchschmerzen (schwer)“: Ileus/Darmverschluss (Verdacht)
@@ -762,10 +1724,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-schwer-verweigerung',
     name: 'Ileus/Darmverschluss (Verdacht)',
     requirements: 'Erbrechen, Distension, kolikartige oder anhaltende Schmerzen und ausbleibender Wind-/Stuhlabgang.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__windverhalt_mit_blaehung', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__blut_im_stuhl', 'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Darmverschluss', 'Darmischämie', 'Darmperforation'],
+    consequences: ['einem Absterben von Darmgewebe, Darmdurchbruch, Bauchfellentzündung, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Bauchschmerzen (schwer)“: Inkarzerierte Hernie (Verdacht)
@@ -775,10 +1741,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'bauchschmerzen-schwer-verweigerung',
     name: 'Inkarzerierte Hernie (Verdacht)',
     requirements: 'Neu schmerzhafte, nicht rückläufige Bruchvorwölbung, gegebenenfalls Erbrechen; mögliche Darmischämie.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__schmerzhafte_bruchvorwoelbung', 'abdomen__zunehmende_schmerzen',
+      'abdomen__anhaltendes_erbrechen', 'abdomen__windverhalt_mit_blaehung', 'haut__dunkle_verfaerbung',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Inkarzerierte Hernie', 'Strangulationsileus', 'Darmischämie'],
+    consequences: ['einem Absterben eingeklemmten Darmgewebes, Darmdurchbruch, Bauchfellentzündung, Blutvergiftung oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -792,10 +1762,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Beckenschmerz nach Trauma, eingeschränkte Belastbarkeit oder relevanter Unfallmechanismus; Risiko verdeckter Blutung.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'becken__zunehmende_schmerzen', 'abdomen__zunehmende_schmerzen', 'uro__neue_haematurie',
+      'uro__anhaltende_oligurie_anurie', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+      'extremitaet__sensibilitaetsstoerung',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Beckenfraktur', 'Retroperitoneale Blutung', 'Harnwegsverletzung'],
+    consequences: ['unerkannten inneren Blutungen, Blasen-/Harnröhrenverletzungen, bleibenden Funktionsschäden, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -809,10 +1783,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Passender aktueller Laborbefund, EKG-Veränderung oder klinischer Verdacht, etwa bei Dialyseversäumnis mit Schwäche/Arrhythmie.',
     application: 'Verweigerung',
     category: 'stoffwechsel',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__anhaltendes_herzrasen', 'kreislauf__neue_probleme', 'neuro__zunehmende_muskelschwaeche',
+      'neuro__muskelkraempfe', 'neuro__neue_verwirrtheit', 'neuro__neue_krampfanfaelle',
+      'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hyperkaliämie', 'Hypokaliämie', 'Hyponatriämie'],
+    consequences: ['lebensbedrohlichen Herzrhythmusstörungen, Krampfanfällen, Atem-/Kreislaufstillstand, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -826,10 +1804,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Direkter oder indirekter Blitzkontakt; mögliche kardiale, neurologische, akustische und traumatische Schäden.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'kreislauf__anhaltendes_herzrasen', 'pulmo__neue_luftnot',
+      'neuro__neue_bewusstlosigkeit', 'neuro__neue_verwirrtheit', 'extremitaet__bewegungsstoerung',
+      'extremitaet__sensibilitaetsstoerung', 'hno__ploetzliche_hoerminderung',
+    ],
+    minorSignalIds: [
+      'hno__anhaltendes_ohrgeraeusch',
+    ],
+    diagnoses: ['Herzrhythmusstörung', 'Blitzbedingte Nervenverletzung', 'Trommelfell-/Innenohrschädigung'],
+    consequences: ['unerkannten Herzrhythmusstörungen, Atemstillstand, bleibenden Nerven-/Hörschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -843,10 +1827,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Speisebolus steckt fest, Schlucken beziehungsweise Speichelschlucken nicht möglich; keine gewöhnliche Refluxsymptomatik.',
     application: 'Verweigerung',
     category: 'gastro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__speichel_nicht_schluckbar', 'pulmo__neue_luftnot', 'thorax__schmerzen_druck',
+      'abdomen__blutiges_erbrechen', 'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Speisebolusimpaktion', 'Speiseröhrenverengung', 'Ösophagusperforation'],
+    consequences: ['einem Verschlucken mit Atemwegsverlegung, Speiseröhrendurchbruch, schweren Brustkorbinfektionen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -860,10 +1847,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Atempausen, erhöhte Atemarbeit, Hypoxie oder relevante Trinkschwäche; besonders bei sehr jungen/frühgeborenen Säuglingen.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__atempausen', 'pulmo__zyanose', 'paediatrie__angestrengte_atmung',
+      'paediatrie__schlaff_teilnahmslos', 'paediatrie__trinkschwaeche', 'paediatrie__wenige_nasse_windeln',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Bronchiolitis', 'Pneumonie', 'Respiratorische Insuffizienz'],
+    consequences: ['zunehmendem Sauerstoffmangel, Atemstillstand, Austrocknung, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -877,10 +1867,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Relevanter Säure-/Laugenkontakt oder besonders gefährlicher Stoff; nach Dekontamination weiterhin fachärztlicher Beurteilungsbedarf.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'haut__starke_schmerzen', 'haut__anhaltende_taubheit', 'haut__blasenbildung', 'haut__dunkle_verfaerbung',
+      'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hautverätzung', 'Tiefe Gewebsnekrose', 'Systemische Giftwirkung'],
+    consequences: ['fortschreitender Gewebezerstörung, bleibenden Narben-/Funktionsschäden oder einer lebensbedrohlichen Giftwirkung'],
   },
 
   // -------------------------------------------------------------------------
@@ -894,10 +1887,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Bekannte beidseitige Ödeme auf Ausgangsniveau; keine Dyspnoe, neue Asymmetrie, Rötung, Schmerzen oder akute Gewichtszunahme.',
     application: 'BvO',
     category: 'kreislauf',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'extremitaet__einseitige_schwellung_schmerz',
+      'uro__anhaltende_oligurie_anurie', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'extremitaet__langsame_beidseitige_beinoedeme', 'haut__naessende_offene_stellen',
+    ],
+    diagnoses: ['Chronische venöse Insuffizienz', 'Herzinsuffizienz', 'Tiefe Venenthrombose'],
+    consequences: ['zunehmenden Hautschäden, übersehener Herzschwäche oder einer Thrombose mit Lungenembolie'],
   },
 
   // -------------------------------------------------------------------------
@@ -911,10 +1909,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Gesicherte Diagnose und individueller Therapieplan; typische Attacke beendet, keine neuen Befunde.',
     application: 'BvO',
     category: 'neuro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'sehstoerung__rasche_sehverschlechterung', 'neuro__neue_nackensteifigkeit',
+      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+    ],
+    minorSignalIds: [
+      'neuro__wiederkehrende_typische_kopfschmerzen',
+    ],
+    diagnoses: ['Clusterkopfschmerz', 'Glaukomanfall', 'Subarachnoidalblutung'],
+    consequences: ['zunehmenden Schmerzattacken, Schlafstörungen oder verzögerter Erkennung einer anderen Kopfschmerzursache'],
   },
 
   // -------------------------------------------------------------------------
@@ -928,10 +1932,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach sorgfältiger Exploration keine akute Suizidalität/Psychose; Selbstversorgung, Unterstützung und verbindliche Anschlussversorgung gesichert.',
     application: 'BvO',
     category: 'psych',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'psych__suizidgedanken', 'psych__halluzinationen', 'psych__schwere_erregung',
+      'psych__zunehmende_selbstvernachlaessigung', 'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_niedergeschlagenheit', 'psych__anhaltende_schlafstoerungen',
+      'psych__anhaltende_alltagsbeeintraechtigung',
+    ],
+    diagnoses: ['Depressive Episode', 'Anpassungsstörung', 'Suizidale Krise'],
+    consequences: ['zunehmender Depression, schwerer Selbstvernachlässigung, Selbstverletzungen oder einem Suizid'],
   },
 
   // -------------------------------------------------------------------------
@@ -945,10 +1955,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Anhaltende oder wiederkehrende Blutung aus Fistel/Graft; Risiko erheblichen Blutverlustes.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'shunt__anhaltende_erneute_blutung', 'kreislauf__neue_probleme', 'pulmo__neue_luftnot',
+      'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Dialyseshuntblutung', 'Shuntaneurysma', 'Hämorrhagischer Schock'],
+    consequences: ['erneuter massiver Blutung, lebensbedrohlichem Blutverlust, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -962,10 +1975,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Sonde herausgerutscht oder Lage unklar; zeitkritische Beurteilung des Zugangs, besonders bei frischer Anlage.',
     application: 'Verweigerung',
     category: 'gastro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'peg__fluessigkeitsaustritt',
+      'wunde__starke_anhaltende_blutung', 'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Sondendislokation', 'Peritonitis', 'Verschluss des Gastrostomiekanals'],
+    consequences: ['einem Verschluss des Sondenkanals, Austritt von Sondennahrung in die Bauchhöhle, Bauchfellentzündung, Blutvergiftung oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -979,10 +1995,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Vertraute zyklusbezogene Schmerzen, beherrschbar; Schwangerschaft ausreichend ausgeschlossen, keine ungewöhnliche Blutung, neuen einseitigen Schmerzen oder Infektzeichen.',
     application: 'BvO',
     category: 'gyn',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'gyn__starke_einseitige_unterbauchschmerzen', 'abdomen__zunehmende_schmerzen',
+      'gyn__starke_vaginale_blutung', 'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'gyn__wiederkehrende_regelschmerzen', 'gyn__zwischenblutungen',
+    ],
+    diagnoses: ['Dysmenorrhoe', 'Endometriose', 'Adnexitis'],
+    consequences: ['einer übersehenen Unterleibserkrankung, chronischen Schmerzen oder Einschränkungen der Fruchtbarkeit'],
   },
 
   // -------------------------------------------------------------------------
@@ -996,10 +2017,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Starke Schluckbeschwerden, Speichelfluss, auffällige Stimme, Stridor oder Atemnot; keine gewöhnliche Halsentzündung.',
     application: 'Verweigerung',
     category: 'hno',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__speichel_nicht_schluckbar', 'hno__heiserkeit', 'pulmo__stridor', 'pulmo__neue_luftnot',
+      'pulmo__zyanose', 'neuro__zunehmende_schlaefrigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Epiglottitis', 'Kehlkopfentzündung', 'Tiefer Halsabszess'],
+    consequences: ['einem vollständigen Atemwegsverschluss, Erstickung, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1013,10 +2037,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Anhaltende Gefühllosigkeit, harte/blasse Haut oder Blasen nach Kälteeinwirkung; Tiefe der Schädigung unklar.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung',
+      'extremitaet__kalte_extremitaet', 'haut__blasenbildung', 'haut__dunkle_verfaerbung',
+      'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Erfrierung', 'Gewebsnekrose', 'Unterkühlung'],
+    consequences: ['fortschreitendem Gewebeverlust, bleibenden Nerven-/Durchblutungsschäden, Infektionen oder einer Amputation'],
   },
 
   // -------------------------------------------------------------------------
@@ -1030,10 +2058,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach Untertauchen Husten, Atemnot, Hypoxie oder vorausgegangene Atemstörung; zwischenzeitliche Besserung genügt nicht zur Entwarnung.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'pulmo__anhaltender_husten', 'pulmo__schaumiger_auswurf', 'pulmo__zyanose',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Aspirationsbedingte Lungenschädigung', 'Lungenödem', 'Hypoxische Hirnschädigung'],
+    consequences: ['fortschreitender Lungenschädigung, Sauerstoffmangel, Atemversagen, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1047,10 +2078,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Ausbreitende Rötung mit Fieber, Schüttelfrost, deutlicher Schwäche oder Kreislaufauffälligkeit.',
     application: 'Verweigerung',
     category: 'haut',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'haut__rasch_ausbreitende_roetung', 'haut__starke_schmerzen', 'haut__dunkle_verfaerbung',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+      'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Erysipel/Zellulitis', 'Sepsis', 'Nekrotisierende Weichteilinfektion'],
+    consequences: ['einer fortschreitenden Gewebeinfektion, Gewebeverlust, Blutvergiftung mit Organversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1064,27 +2099,36 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Mögliche Schwangerschaft mit Unterbauchschmerz, insbesondere einseitig, Schulterschmerz, Kollaps oder Blutung; Blutung kann fehlen.',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__starke_einseitige_unterbauchschmerzen', 'abdomen__zunehmende_schmerzen',
+      'gyn__schulterspitzenschmerz', 'gyn__vaginale_blutung', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Extrauteringravidität', 'Rupturierte Ovarialzyste', 'Fehlgeburt'],
+    consequences: ['einem Eileiterriss, inneren Blutungen, Kreislaufversagen, dem Verlust des Eileiters oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Extremitätenverletzung (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 13, 15; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 13, 15.
   {
     id: 'extremitaetenverletzung-schwer-verweigerung',
     name: 'Extremitätenverletzung (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'extremitaet__bewegungsstoerung', 'extremitaet__zunehmende_schmerzen',
+      'extremitaet__gespannte_schwellung', 'extremitaet__sensibilitaetsstoerung',
+      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet', 'wunde__starke_anhaltende_blutung',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Fraktur/Luxation', 'Gefäß-/Nervenverletzung', 'Kompartmentsyndrom'],
+    consequences: ['unerkannten Gefäß-/Nervenverletzungen, Muskelnekrosen, bleibendem Funktionsverlust, einer Amputation oder lebensbedrohlichem Blutverlust'],
   },
 
   // Unterszenario zu „Extremitätenverletzung (schwer)“: Akutes Kompartmentsyndrom (Verdacht)
@@ -1094,10 +2138,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'extremitaetenverletzung-schwer-verweigerung',
     name: 'Akutes Kompartmentsyndrom (Verdacht)',
     requirements: 'Unverhältnismäßiger zunehmender Schmerz, gespannte Schwellung, Dehnungsschmerz oder Sensibilitätsstörung; erhaltene Pulse schließen es nicht aus.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'extremitaet__bewegungsstoerung', 'extremitaet__zunehmende_schmerzen',
+      'extremitaet__starke_dehnungsschmerzen', 'extremitaet__gespannte_schwellung',
+      'extremitaet__sensibilitaetsstoerung', 'extremitaet__blaesse_blaufarbung',
+      'extremitaet__kalte_extremitaet',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Kompartmentsyndrom', 'Muskelnekrose', 'Akute Extremitätenischämie'],
+    consequences: ['bleibenden Nerven-/Muskelschäden, Gewebeverlust, einer Amputation, Nierenversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Extremitätenverletzung (schwer)“: Amputationsverletzung
@@ -1107,10 +2156,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'extremitaetenverletzung-schwer-verweigerung',
     name: 'Amputationsverletzung',
     requirements: 'Vollständige oder teilweise Abtrennung eines Körperteils; Blutungsversorgung und zeitkritische operative Beurteilung erforderlich.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+      'extremitaet__zunehmende_schmerzen', 'extremitaet__blaesse_blaufarbung',
+      'extremitaet__sensibilitaetsstoerung',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Amputationsverletzung', 'Gefäßverletzung', 'Hämorrhagischer Schock'],
+    consequences: ['lebensbedrohlichem Blutverlust, Verlust der Wiederannähbarkeit, dauerhafter Behinderung, schweren Infektionen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1129,27 +2182,35 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Gemessene Temperatur ab 38 °C; auch bei zunächst gutem Eindruck dringend kinderärztlich abklärungsbedürftig.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'infekt__fieber_schuettelfrost', 'paediatrie__trinkschwaeche', 'paediatrie__wenige_nasse_windeln',
+      'paediatrie__schlaff_teilnahmslos', 'paediatrie__angestrengte_atmung', 'pulmo__atempausen',
+      'haut__nicht_wegdrueckbare_flecken', 'neuro__neue_krampfanfaelle',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Schwere bakterielle Infektion', 'Sepsis', 'Meningitis'],
+    consequences: ['einer übersehenen schweren Infektion, Blutvergiftung, Hirnhautentzündung, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Fieber/Infekt/Sepsis [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 112; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 112.
   {
     id: 'fieber-infekt-sepsis-verweigerung',
     name: 'Fieber/Infekt/Sepsis',
     requirements: '',
     application: 'Verweigerung',
     category: 'infekt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'infekt__fieber_schuettelfrost', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'pulmo__neue_luftnot', 'kreislauf__neue_probleme', 'uro__anhaltende_oligurie_anurie',
+      'haut__nicht_wegdrueckbare_flecken',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Sepsis', 'Pneumonie', 'Pyelonephritis'],
+    consequences: ['fortschreitender Infektion, septischem Schock, Organversagen, bleibenden Organschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Fieber/Infekt/Sepsis“: Fieber bei Neutropenie/ausgeprägter Immunsuppression
@@ -1159,27 +2220,37 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'fieber-infekt-sepsis-verweigerung',
     name: 'Fieber bei Neutropenie/ausgeprägter Immunsuppression',
     requirements: 'Fieber oder klinische Verschlechterung unter entsprechender Therapie/Risikokonstellation; diskrete Befunde können schwere Infektion verbergen.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'infekt__fieber_schuettelfrost', 'neuro__zunehmende_muskelschwaeche', 'neuro__neue_verwirrtheit',
+      'neuro__zunehmende_schlaefrigkeit', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'uro__anhaltende_oligurie_anurie',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Neutropenische Sepsis', 'Pneumonie', 'Blutstrominfektion'],
+    consequences: ['rasch fortschreitender Infektion, septischem Schock, Multiorganversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Fieberhafter Infekt (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 26, 66; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 26, 66.
   {
     id: 'fieberhafter-infekt-leicht-bvo',
     name: 'Fieberhafter Infekt (leicht)',
     requirements: '',
     application: 'BvO',
     category: 'infekt',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'neuro__neue_nackensteifigkeit', 'haut__nicht_wegdrueckbare_flecken',
+      'stoffwechsel__fehlende_trinkfaehigkeit', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'infekt__anhaltendes_fieber', 'stoffwechsel__anhaltende_muedigkeit',
+    ],
+    diagnoses: ['Viraler Infekt', 'Pneumonie', 'Harnwegsinfekt'],
+    consequences: ['übersehener bakterieller Infektion, zunehmendem Flüssigkeitsmangel oder einer Ausbreitung der Infektion'],
   },
 
   // Unterszenario zu „Fieberhafter Infekt (leicht)“: Akute Bronchitis ohne Atemnot
@@ -1189,10 +2260,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'fieberhafter-infekt-leicht-bvo',
     name: 'Akute Bronchitis ohne Atemnot',
     requirements: 'Leichter Husten, normale Oxygenierung und Atemarbeit; kein Pneumonieverdacht, keine Hämoptyse oder relevante Risikokonstellation.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__relevante_haemoptyse',
+      'neuro__zunehmende_schlaefrigkeit', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'pulmo__anhaltender_husten', 'infekt__anhaltendes_fieber', 'pulmo__blutspuren_im_auswurf',
+    ],
+    diagnoses: ['Akute Bronchitis', 'Pneumonie'],
+    consequences: ['übersehener Lungenentzündung, zunehmenden Atembeschwerden oder verzögerter Behandlung einer anderen Lungenerkrankung'],
   },
 
   // Unterszenario zu „Fieberhafter Infekt (leicht)“: Halsschmerzen ohne Schluck-/Atemstörung
@@ -1202,10 +2278,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'fieberhafter-infekt-leicht-bvo',
     name: 'Halsschmerzen ohne Schluck-/Atemstörung',
     requirements: 'Trinken möglich; keine kloßige Stimme, Kieferklemme, Speichelfluss, Halsweichteilschwellung oder schwere Allgemeinsymptome.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'pulmo__stridor', 'hno__speichel_nicht_schluckbar', 'hno__zunge_rachenschwellung',
+      'hno__kieferklemme', 'hno__kloessige_stimme',
+    ],
+    minorSignalIds: [
+      'hno__anhaltende_halsschmerzen', 'infekt__anhaltendes_fieber',
+    ],
+    diagnoses: ['Tonsillitis', 'Peritonsillarabszess', 'Epiglottitis'],
+    consequences: ['fortschreitender Halsinfektion, Abszessbildung, Schluckunfähigkeit oder einer Verlegung der Atemwege'],
   },
 
   // -------------------------------------------------------------------------
@@ -1219,10 +2300,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Verschluckereignis mit möglichem verbliebenem Atemwegsfremdkörper; auch bei vorübergehend unauffälliger Untersuchung.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'pulmo__anhaltender_husten', 'pulmo__stridor', 'pulmo__zyanose',
+      'pulmo__atempausen', 'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Atemwegsfremdkörper', 'Atemwegsverlegung', 'Aspirationspneumonie'],
+    consequences: ['verzögerter Atemwegsverlegung, Lungenentzündung, Erstickung, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1236,10 +2320,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Grünes Erbrechen, insbesondere beim Neugeborenen/Säugling; Darmobstruktion bis zum Ausschluss annehmen.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__gruenes_erbrechen', 'abdomen__hart_geblaeht', 'abdomen__zunehmende_schmerzen',
+      'abdomen__blut_im_stuhl', 'paediatrie__schlaff_teilnahmslos', 'paediatrie__wenige_nasse_windeln',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Darmverschluss', 'Volvulus', 'Invagination'],
+    consequences: ['einem Darmverschluss, dem Absterben von Darm, Darmdurchbruch, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1253,10 +2341,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Unbeabsichtigte Exposition, Produkt/Menge/Weg geklärt, nach erforderlichen Maßnahmen symptomfrei; Giftinformationszentrum bestätigt häusliche Beobachtung.',
     application: 'BvO',
     category: 'intox',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'hno__speichel_nicht_schluckbar', 'abdomen__anhaltendes_erbrechen',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_krampfanfaelle', 'augen__starke_augenschmerzen',
+    ],
+    minorSignalIds: [
+      'pulmo__anhaltender_husten', 'haut__zunehmende_lokale_roetung', 'stoffwechsel__wiederkehrende_uebelkeit',
+    ],
+    diagnoses: ['Schleimhautreizung', 'Reizgaswirkung', 'Aspirationspneumonitis'],
+    consequences: ['verzögerten Atemwegsbeschwerden, Schleimhautschäden oder einer übersehenen Aspiration'],
   },
 
   // -------------------------------------------------------------------------
@@ -1270,10 +2363,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Relevante Halskompression, insbesondere mit Heiserkeit, Schluckbeschwerden, Luftnot oder Bewusstseinsverlust; mögliche verzögerte Atemwegs- und Gefäßkomplikationen.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__heiserkeit', 'hno__zunehmende_gesichtsschwellung', 'hno__speichel_nicht_schluckbar',
+      'pulmo__stridor', 'pulmo__neue_luftnot', 'neuro__neue_sprachstoerung',
+      'neuro__neue_einseitige_schwaeche', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Kehlkopf-/Atemwegsverletzung', 'Halsgefäßdissektion', 'Hypoxische Hirnschädigung'],
+    consequences: ['einem verzögerten Atemwegsverschluss, Gefäßverletzungen, Schlaganfall, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1287,10 +2384,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Bluthusten über einzelne Blutspuren hinaus, wiederholte Episoden oder zusätzliche Atemnot/Kreislaufbeschwerden.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__relevante_haemoptyse', 'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__zyanose',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Lungenembolie', 'Pneumonie', 'Bronchialkarzinom'],
+    consequences: ['zunehmender Lungenblutung, Verlegung der Atemwege durch Blut, Atem-/Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1304,10 +2404,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Bekannte leichte lokale Beschwerden; keine ungeklärte rektale Blutung, starken Schmerzen, Fieber oder Kreislaufprobleme.',
     application: 'BvO',
     category: 'gastro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'abdomen__starke_rektalblutung', 'abdomen__teerstuhl', 'abdomen__starke_afterschmerzen',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'abdomen__afterjuckreiz', 'abdomen__geringe_wiederkehrende_blutspuren',
+    ],
+    diagnoses: ['Hämorrhoidalleiden', 'Analfissur', 'Perianalabszess'],
+    consequences: ['einer übersehenen Blutungsquelle, Blutarmut oder einem unentdeckten Abszess'],
   },
 
   // -------------------------------------------------------------------------
@@ -1321,10 +2426,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Umschriebener typischer Ausschlag, guter Allgemeinzustand; kein Augen-/Ohrenbefall, keine Immunsuppression; zeitnaher Arztkontakt gesichert.',
     application: 'BvO',
     category: 'haut',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'haut__blaeschen_auge_nase_ohr', 'augen__starke_augenschmerzen',
+      'sehstoerung__rasche_sehverschlechterung', 'hno__ploetzliche_hoerminderung', 'neuro__gesichtslaehmung',
+      'haut__grossflaechige_blaeschenausbreitung',
+    ],
+    minorSignalIds: [
+      'haut__anhaltende_brennende_schmerzen', 'haut__eitriges_sekret',
+    ],
+    diagnoses: ['Herpes zoster', 'Zoster ophthalmicus/oticus', 'Postzosterneuralgie'],
+    consequences: ['anhaltenden Nervenschmerzen, bleibenden Seh-/Hörschäden oder einer Ausbreitung der Infektion'],
   },
 
   // -------------------------------------------------------------------------
@@ -1338,10 +2449,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Hitzeexposition mit Verwirrtheit, Ataxie, Krampfanfall oder Bewusstseinsstörung; Hitzschlagverdacht.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__neue_verwirrtheit', 'neuro__neue_gangunsicherheit', 'neuro__neue_krampfanfaelle',
+      'neuro__neue_bewusstlosigkeit', 'kreislauf__neue_probleme', 'uro__dunkelbrauner_urin',
+      'uro__anhaltende_oligurie_anurie',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hitzschlag', 'Rhabdomyolyse', 'Akutes Nierenversagen'],
+    consequences: ['bleibenden Hirnschäden, Muskelzerfall, Nieren-/Leberversagen, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1355,10 +2470,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach Kühlung und Trinken anhaltend erholt, Temperatur und Vitalwerte unauffällig; zu keinem Zeitpunkt neurologische Auffälligkeiten.',
     application: 'BvO',
     category: 'umwelt',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__neue_verwirrtheit', 'neuro__neue_gangunsicherheit', 'neuro__neue_krampfanfaelle',
+      'neuro__neue_bewusstlosigkeit', 'kreislauf__neue_probleme', 'abdomen__anhaltendes_erbrechen',
+      'uro__anhaltende_oligurie_anurie',
+    ],
+    minorSignalIds: [
+      'stoffwechsel__anhaltende_muedigkeit', 'stoffwechsel__wiederkehrende_uebelkeit',
+    ],
+    diagnoses: ['Hitzeerschöpfung', 'Hitzschlag', 'Flüssigkeits-/Elektrolytstörung'],
+    consequences: ['erneuter Überwärmung, Austrocknung, Kreislaufkollaps oder einer übersehenen schweren Hitzeerkrankung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1372,27 +2493,38 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach Belastungsende und angemessener Flüssigkeitsaufnahme beschwerdefrei; keine Überwärmung, Schwäche, Verwirrtheit oder dunkler Urin.',
     application: 'BvO',
     category: 'umwelt',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'kreislauf__neue_probleme',
+      'muskeln__starke_schmerzen_schwellung', 'neuro__zunehmende_muskelschwaeche', 'uro__dunkelbrauner_urin',
+      'uro__anhaltende_oligurie_anurie',
+    ],
+    minorSignalIds: [
+      'neuro__muskelkraempfe', 'stoffwechsel__anhaltende_muedigkeit',
+    ],
+    diagnoses: ['Hitzekrämpfe', 'Elektrolytstörung', 'Rhabdomyolyse'],
+    consequences: ['anhaltenden Elektrolytstörungen, Muskelzerfall, Nierenschäden oder Kreislaufkollaps'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Hyperglykämie (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 102; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 102.
   {
     id: 'hyperglykaemie-schwer-verweigerung',
     name: 'Hyperglykämie (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'stoffwechsel',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'stoffwechsel__starker_durst_polyurie', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__zunehmende_schmerzen', 'stoffwechsel__tiefe_schnelle_atmung',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'stoffwechsel__fehlende_trinkfaehigkeit',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Diabetische Ketoazidose', 'Hyperosmolares hyperglykämisches Syndrom', 'Elektrolytstörung'],
+    consequences: ['schwerer Austrocknung, Übersäuerung, Elektrolytstörungen, Bewusstlosigkeit, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Hyperglykämie (schwer)“: Diabetische Ketoazidose (Verdacht)
@@ -1402,10 +2534,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'hyperglykaemie-schwer-verweigerung',
     name: 'Diabetische Ketoazidose (Verdacht)',
     requirements: 'Diabetes mit Übelkeit, Bauchschmerz, Dehydratation oder tiefer Atmung; auch bei wachem Patienten und nicht stark erhöhtem Blutzucker.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'abdomen__anhaltendes_erbrechen', 'abdomen__zunehmende_schmerzen', 'stoffwechsel__tiefe_schnelle_atmung',
+      'stoffwechsel__fruchtiger_atem', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Diabetische Ketoazidose', 'Elektrolytstörung'],
+    consequences: ['fortschreitender Übersäuerung, schweren Elektrolytstörungen, Herzrhythmusstörungen, Bewusstlosigkeit, Organversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1419,27 +2555,34 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Mehrere Schocks, anhaltende Beschwerden, Synkope oder Rhythmusstörung; dringliche kardiale und Gerätebeurteilung erforderlich.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__erneute_icd_schocks', 'kreislauf__anhaltendes_herzrasen', 'thorax__schmerzen_druck',
+      'pulmo__neue_luftnot', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Ventrikuläre Tachykardie', 'ICD-Fehlfunktion', 'Akutes Koronarsyndrom'],
+    consequences: ['erneuten lebensbedrohlichen Herzrhythmusstörungen, wiederholten Schockabgaben, Kreislaufstillstand, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Intoxikation (unklar) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 115, 116, 117, 118, 119, 121; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 115, 116, 117, 118, 119, 121.
   {
     id: 'intoxikation-unklar-verweigerung',
     name: 'Intoxikation (unklar)',
     requirements: '',
     application: 'Verweigerung',
     category: 'intox',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'pulmo__langsame_flache_atmung',
+      'pulmo__atempausen', 'pulmo__neue_luftnot', 'neuro__neue_krampfanfaelle', 'thorax__schmerzen_druck',
+      'kreislauf__anhaltendes_herzrasen', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Vergiftung', 'Atemdepression', 'Toxische Herzrhythmusstörung'],
+    consequences: ['verzögertem Atemstillstand, Herzrhythmusstörungen, Krampfanfällen, bleibenden Organschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Intoxikation (unklar)“: Giftpilzaufnahme (möglich)
@@ -1449,10 +2592,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'intoxikation-unklar-verweigerung',
     name: 'Giftpilzaufnahme (möglich)',
     requirements: 'Nicht sicher bestimmte Pilze oder verdächtiger Verlauf; Giftinformationszentrum einschalten, mögliche lange Symptomlatenz berücksichtigen.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'intox__uebelkeit_erbrechen', 'abdomen__durchfall', 'abdomen__zunehmende_schmerzen',
+      'stoffwechsel__gelbfaerbung', 'uro__anhaltende_oligurie_anurie', 'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Pilzvergiftung', 'Akutes Leberversagen', 'Akutes Nierenversagen'],
+    consequences: ['verzögertem Leber- oder Nierenversagen, Gerinnungsstörungen, Transplantationspflichtigkeit oder dem Tod'],
   },
 
   // Unterszenario zu „Intoxikation (unklar)“: Opioidintoxikation nach Antagonisierung
@@ -1462,10 +2609,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'intoxikation-unklar-verweigerung',
     name: 'Opioidintoxikation nach Antagonisierung',
     requirements: 'Aktuell gebessert, aber erneute Atemdepression oder Mischintoxikation möglich; erforderliche Überwachung wird abgelehnt.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__zunehmende_schlaefrigkeit', 'pulmo__langsame_flache_atmung', 'pulmo__atempausen',
+      'pulmo__zyanose', 'neuro__neue_bewusstlosigkeit', 'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Erneute Opioidintoxikation', 'Atemdepression', 'Aspirationspneumonie'],
+    consequences: ['erneuter Atemlähmung nach Abklingen des Gegenmittels, Sauerstoffmangel, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Intoxikation (unklar)“: Paracetamolüberdosierung (Verdacht)
@@ -1475,10 +2625,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'intoxikation-unklar-verweigerung',
     name: 'Paracetamolüberdosierung (Verdacht)',
     requirements: 'Potenziell toxische Menge, wiederholte Überdosierung oder unklare Menge; anfängliche Beschwerdefreiheit schließt Organschädigung nicht aus.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'intox__uebelkeit_erbrechen', 'abdomen__zunehmende_schmerzen', 'stoffwechsel__gelbfaerbung',
+      'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit', 'blutung__nase_zahnfleisch',
+      'uro__anhaltende_oligurie_anurie',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Paracetamolvergiftung', 'Akutes Leberversagen', 'Akutes Nierenversagen'],
+    consequences: ['verzögertem Leberversagen, Gerinnungsstörungen, Hirnschwellung, Transplantationspflichtigkeit oder dem Tod'],
   },
 
   // Unterszenario zu „Intoxikation (unklar)“: Sedativa-/Mischintoxikation
@@ -1488,10 +2642,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'intoxikation-unklar-verweigerung',
     name: 'Sedativa-/Mischintoxikation',
     requirements: 'Benzodiazepine, Schlafmittel oder Kombination mit Alkohol/anderen Substanzen; Atemdepression und verzögerte Verschlechterung möglich.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__zunehmende_schlaefrigkeit', 'pulmo__langsame_flache_atmung', 'pulmo__atempausen',
+      'pulmo__zyanose', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_krampfanfaelle',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Sedativavergiftung', 'Mischintoxikation', 'Aspirationspneumonie'],
+    consequences: ['verzögerter Atemlähmung, Erstickung an Erbrochenem, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Intoxikation (unklar)“: Stimulanzienintoxikation
@@ -1501,10 +2659,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'intoxikation-unklar-verweigerung',
     name: 'Stimulanzienintoxikation',
     requirements: 'Stimulanzienkonsum mit Thoraxschmerz, ausgeprägter Tachykardie, Überwärmung, Agitation oder neurologischen Symptomen.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'kreislauf__anhaltendes_herzrasen', 'umwelt__sehr_heisse_haut',
+      'psych__schwere_erregung', 'neuro__neue_verwirrtheit', 'neuro__neue_krampfanfaelle',
+      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Sympathomimetisches Toxidrom', 'Akutes Koronarsyndrom', 'Hirnblutung'],
+    consequences: ['Herzinfarkt, Hirnblutung, gefährlicher Überhitzung, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Intoxikation (unklar)“: Verschlucken einer ätzenden Substanz
@@ -1514,10 +2676,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'intoxikation-unklar-verweigerung',
     name: 'Verschlucken einer ätzenden Substanz',
     requirements: 'Säure/Lauge oder entsprechend verdächtiges Produkt; fehlende sichtbare Mundverletzung ist keine sichere Entwarnung.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__speichel_nicht_schluckbar', 'hno__heiserkeit', 'pulmo__stridor', 'pulmo__neue_luftnot',
+      'thorax__schmerzen_druck', 'abdomen__zunehmende_schmerzen', 'abdomen__blutiges_erbrechen',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Speiseröhrenverätzung', 'Magenverätzung', 'Ösophagus-/Magenperforation'],
+    consequences: ['Atemwegsverlegung, Speiseröhren- oder Magendurchbruch, schweren Infektionen, bleibenden Verengungen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1531,10 +2697,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Plötzliches Nichtauftreten, insbesondere mit Schmerzen, Fieber oder Bewegungseinschränkung; okkulte Verletzung oder Gelenkinfektion abklären.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'extremitaet__belastungsunfaehigkeit', 'gelenk__zunehmende_schmerzen', 'gelenk__zunehmende_schwellung',
+      'gelenk__roetung_ueberwaermung', 'infekt__fieber_schuettelfrost', 'extremitaet__sensibilitaetsstoerung',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Fraktur', 'Septische Arthritis', 'Osteomyelitis'],
+    consequences: ['einer übersehenen Fraktur, Knochen-/Gelenkinfektion, bleibenden Gelenkschäden oder einer Blutvergiftung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1548,10 +2717,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Klein und lokal begrenzt, kein Fieber/Progress; nicht an Gesicht, Hand oder Genital-/Perianalregion; ärztliche Behandlung am selben Tag organisiert.',
     application: 'BvO',
     category: 'haut',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'haut__rasch_ausbreitende_roetung', 'haut__starke_schmerzen', 'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'haut__zunehmende_lokale_roetung', 'haut__zunehmende_lokale_schwellung', 'haut__eitriges_sekret',
+    ],
+    diagnoses: ['Hautabszess', 'Zellulitis'],
+    consequences: ['einer Ausbreitung der Infektion, zunehmender Eiteransammlung, Gewebeschäden oder einer Blutvergiftung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1565,10 +2739,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Plausible CO-Exposition ohne ausreichende toxikologische Entwarnung; normale konventionelle Pulsoxymetrie schließt eine Vergiftung nicht aus.',
     application: 'Verweigerung',
     category: 'intox',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_verwirrtheit', 'neuro__neue_gangunsicherheit',
+      'neuro__erneute_gedaechtnisluecken', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'neuro__neue_bewusstlosigkeit', 'neuro__neue_krampfanfaelle',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Kohlenmonoxidvergiftung', 'Myokardschädigung', 'Verzögerte toxische Hirnschädigung'],
+    consequences: ['Sauerstoffmangel, Herzschäden, verzögerten bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1582,27 +2760,36 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Plausibler Hautkontakt, lokale Rötung/Juckreiz; keine Schleimhautbeteiligung, Blasenablösung oder Allgemeinsymptome.',
     application: 'BvO',
     category: 'haut',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'hno__zunge_rachenschwellung', 'pulmo__neue_luftnot', 'haut__schleimhautwunden',
+      'haut__grossflaechige_blaeschenausbreitung',
+    ],
+    minorSignalIds: [
+      'haut__anhaltender_juckreiz', 'haut__zunehmende_lokale_roetung', 'haut__naessende_offene_stellen',
+    ],
+    diagnoses: ['Kontaktdermatitis', 'Allergische Reaktion', 'Hautinfektion'],
+    consequences: ['einer anhaltenden Hautentzündung, Hautschädigung oder zusätzlichen bakteriellen Infektion'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Krampfanfall (neues Muster/erstmalig) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 144; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 144.
   {
     id: 'krampfanfall-neues-muster-erstmalig-verweigerung',
     name: 'Krampfanfall (neues Muster/erstmalig)',
     requirements: '',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__neue_krampfanfaelle', 'neuro__fehlende_erholung_nach_anfall', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'infekt__fieber_schuettelfrost', 'neuro__neue_nackensteifigkeit',
+      'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Epileptischer Anfall', 'Hirnblutung', 'Meningoenzephalitis'],
+    consequences: ['erneuten/anhaltenden Krampfanfällen, Verletzungen, Sauerstoffmangel, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Krampfanfall (neues Muster/erstmalig)“: Fieberkrampf (erstmalig oder atypisch)
@@ -1612,10 +2799,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'krampfanfall-neues-muster-erstmalig-verweigerung',
     name: 'Fieberkrampf (erstmalig oder atypisch)',
     requirements: 'Erster Fieberkrampf, fokaler/prolongierter Anfall, Wiederholung oder unvollständige Erholung; kinderärztliche Akutbeurteilung.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__neue_krampfanfaelle', 'neuro__fehlende_erholung_nach_anfall', 'pulmo__zyanose',
+      'pulmo__neue_luftnot', 'neuro__neue_nackensteifigkeit', 'haut__nicht_wegdrueckbare_flecken',
+      'neuro__neue_einseitige_schwaeche', 'paediatrie__trinkschwaeche',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Fieberkrampf', 'Meningitis', 'Enzephalitis'],
+    consequences: ['übersehener Hirnhaut-/Gehirnentzündung, anhaltenden Krampfanfällen, Sauerstoffmangel oder bleibenden Hirnschäden'],
   },
 
   // -------------------------------------------------------------------------
@@ -1629,10 +2820,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Plausibel geringe Trinkmenge, nach oralem Trinken beschwerdefrei; normale Ausscheidung/Vitalwerte, keine fortdauernden Verluste oder besondere Risiken.',
     application: 'BvO',
     category: 'stoffwechsel',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'stoffwechsel__fehlende_trinkfaehigkeit', 'abdomen__anhaltendes_erbrechen', 'kreislauf__neue_probleme',
+      'uro__anhaltende_oligurie_anurie', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+    ],
+    minorSignalIds: [
+      'stoffwechsel__durst_mundtrockenheit', 'neuro__leichter_lageschwindel',
+      'stoffwechsel__anhaltende_muedigkeit',
+    ],
+    diagnoses: ['Dehydratation', 'Elektrolytstörung'],
+    consequences: ['erneutem Flüssigkeitsmangel, Stürzen, Elektrolytstörungen oder einer Nierenschädigung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1646,10 +2843,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Hydrozephalus-Shunt mit neuen Kopfschmerzen, Erbrechen, Fieber oder Verhaltens-/Vigilanzänderung.',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__ploetzliche_starke_kopfschmerzen', 'abdomen__anhaltendes_erbrechen',
+      'infekt__fieber_schuettelfrost', 'shunt__roetung_schmerzen_verlauf', 'neuro__neue_nackensteifigkeit',
+      'neuro__zunehmende_schlaefrigkeit', 'sehstoerung__neue_doppelbilder', 'neuro__neue_gangunsicherheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Liquorshuntverschluss', 'Shuntinfektion', 'Akuter Hydrozephalus'],
+    consequences: ['Hirndrucksteigerung, übersehener Shuntinfektion, bleibenden Hirnschäden, Bewusstlosigkeit oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1663,10 +2864,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Neue Dyspnoe, pleuritischer Schmerz, Synkope oder Hämoptyse mit passender Risikokonstellation.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__relevante_haemoptyse',
+      'kreislauf__anhaltendes_herzrasen', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+      'extremitaet__einseitige_schwellung_schmerz',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Lungenembolie', 'Akutes Koronarsyndrom', 'Pneumothorax'],
+    consequences: ['zunehmender Lungengefäßverlegung, akutem Rechtsherzversagen, Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1680,10 +2885,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Sichtbares Blut mit Gerinnseln, erschwerter Miktion, Retention oder anhaltend erheblicher Blutung.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'uro__gerinnsel_im_urin', 'uro__anhaltende_oligurie_anurie', 'abdomen__zunehmende_schmerzen',
+      'uro__starke_flankenschmerzen', 'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Blasentamponade', 'Harnabflussstörung', 'Urothelkarzinom'],
+    consequences: ['einem Blasenverschluss durch Blutgerinnsel, Blutverlust, Nierenschäden oder lebensbedrohlichem Kreislaufversagen'],
   },
 
   // -------------------------------------------------------------------------
@@ -1697,10 +2905,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Enthemmung, erheblich vermindertes Schlafbedürfnis, Realitätsverlust oder riskantes Verhalten; dringliche psychiatrische Beurteilung.',
     application: 'Verweigerung',
     category: 'psych',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'psych__schwere_erregung', 'psych__gefaehrliches_enthemmtes_verhalten', 'psych__halluzinationen',
+      'psych__fremdgefaehrdungsimpulse', 'psych__suizidgedanken', 'psych__zunehmende_selbstvernachlaessigung',
+      'psych__schlaflosigkeit_mit_ueberaktivitaet',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Manische Episode', 'Psychose', 'Intoxikation'],
+    consequences: ['zunehmendem Realitätsverlust, Selbst-/Fremdverletzungen, schwerer Selbstvernachlässigung, finanziellen/sozialen Schäden oder einem Suizid'],
   },
 
   // -------------------------------------------------------------------------
@@ -1714,10 +2926,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Wirkstoff, Dosis und Zeitpunkt sicher bekannt; Giftinformationszentrum bestätigt häusliche Beobachtung; keine absichtliche Selbstschädigung.',
     application: 'BvO',
     category: 'intox',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'pulmo__langsame_flache_atmung',
+      'pulmo__neue_luftnot', 'neuro__neue_krampfanfaelle', 'kreislauf__anhaltendes_herzrasen',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Medikamentenüberdosierung', 'Arzneimittelwechselwirkung', 'Unerwünschte Arzneimittelwirkung'],
+    consequences: ['einer verzögerten Medikamentenwirkung, Kreislauf- oder Bewusstseinsstörungen sowie einer übersehenen Wechselwirkung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1731,10 +2947,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Kopfschmerz mit Fieber, Meningismus, Bewusstseinsänderung, Krampfanfall oder verdächtigen Hautblutungen.',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'infekt__fieber_schuettelfrost', 'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__neue_nackensteifigkeit', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'neuro__neue_krampfanfaelle', 'haut__nicht_wegdrueckbare_flecken',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Bakterielle Meningitis', 'Enzephalitis', 'Meningokokkensepsis'],
+    consequences: ['bleibenden Hirn-/Hörschäden, Krampfanfällen, septischem Schock, Organversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1748,10 +2968,17 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Ärztlich bekannte Migräne, vertrauter Verlauf, deutliche Besserung; keine neue/atypische Aura oder sonstigen Warnzeichen.',
     application: 'BvO',
     category: 'neuro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'sehstoerung__ploetzlicher_sehverlust', 'neuro__neue_nackensteifigkeit',
+      'infekt__fieber_schuettelfrost', 'neuro__neue_verwirrtheit', 'neuro__neue_krampfanfaelle',
+      'stoffwechsel__fehlende_trinkfaehigkeit',
+    ],
+    minorSignalIds: [
+      'neuro__wiederkehrende_typische_kopfschmerzen', 'stoffwechsel__wiederkehrende_uebelkeit',
+    ],
+    diagnoses: ['Migräne', 'Subarachnoidalblutung', 'Meningitis'],
+    consequences: ['anhaltenden Schmerzattacken, Austrocknung oder verzögerter Erkennung einer anderen Kopfschmerzursache'],
   },
 
   // -------------------------------------------------------------------------
@@ -1765,10 +2992,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach Blasensprung sicht-/tastbare Nabelschnur oder entsprechender begründeter Verdacht; unmittelbarer geburtshilflicher Notfall.',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__sichtbare_nabelschnur', 'gyn__verminderte_kindsbewegungen', 'gyn__pressdrang',
+      'gyn__starke_vaginale_blutung',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Nabelschnurvorfall', 'Nabelschnurkompression', 'Fetale Hypoxie'],
+    consequences: ['anhaltender Unterbrechung der kindlichen Sauerstoffversorgung, bleibenden Hirnschäden oder dem Tod des Kindes'],
   },
 
   // -------------------------------------------------------------------------
@@ -1782,10 +3012,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Frisches Blut aus Mund/Rachen nach Tonsillenoperation; auch eine aktuell sistierte Blutung ist abklärungsbedürftig.',
     application: 'Verweigerung',
     category: 'hno',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__blut_mund_rachen', 'hno__auffaellig_haeufiges_schlucken', 'abdomen__blutiges_erbrechen',
+      'pulmo__neue_luftnot', 'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Posttonsillektomieblutung', 'Blutaspiration', 'Hämorrhagischer Schock'],
+    consequences: ['erneuten massiven Blutungen, Ersticken an Blut, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1799,10 +3032,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Anhaltende Blutstillung nach lokaler Maßnahme; keine relevante Blutmenge, Kreislaufstörung oder besondere Gerinnungsrisiken; Kontrollplan vorhanden.',
     application: 'BvO',
     category: 'hno',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'kreislauf__neue_probleme', 'hno__zunehmende_gesichtsschwellung',
+      'hno__speichel_nicht_schluckbar', 'pulmo__neue_luftnot',
+    ],
+    minorSignalIds: [
+      'hno__geringe_blutspuren_speichel', 'hno__anhaltende_mundschmerzen',
+    ],
+    diagnoses: ['Nachblutung', 'Wundheilungsstörung', 'Alveolitis'],
+    consequences: ['erneuter stärkerer Blutung, Kreislaufproblemen, Wundinfektion oder verzögerter Wundheilung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1816,10 +3054,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nebenniereninsuffizienz oder relevante Steroidvorgeschichte mit Hypotonie, Erbrechen, schwerer Schwäche oder Bewusstseinsänderung.',
     application: 'Verweigerung',
     category: 'stoffwechsel',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__neue_probleme', 'neuro__zunehmende_muskelschwaeche', 'abdomen__anhaltendes_erbrechen',
+      'abdomen__zunehmende_schmerzen', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'neuro__neue_krampfanfaelle',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Nebennierenkrise', 'Hypoglykämie', 'Schwere Elektrolytstörung'],
+    consequences: ['Kreislaufschock, schwerer Unterzuckerung, lebensbedrohlichen Elektrolytstörungen, Bewusstlosigkeit oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1833,10 +3075,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Unverhältnismäßiger Schmerz, rasche Progression, livide Haut/Blasen oder schweres Krankheitsgefühl.',
     application: 'Verweigerung',
     category: 'haut',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'haut__starke_schmerzen', 'haut__anhaltende_taubheit', 'haut__rasch_ausbreitende_roetung',
+      'haut__blasenbildung', 'haut__dunkle_verfaerbung', 'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit', 'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Nekrotisierende Fasziitis', 'Sepsis', 'Gewebsnekrose'],
+    consequences: ['rascher Gewebezerstörung, einer Amputation, Blutvergiftung, Multiorganversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1850,10 +3096,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Neuer oder deutlich veränderter Kopfschmerz mit neurologischen Zeichen, Fieber, Immunsuppression, Tumoranamnese oder anderen Warnzeichen.',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'sehstoerung__ploetzlicher_sehverlust', 'neuro__neue_nackensteifigkeit',
+      'infekt__fieber_schuettelfrost', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_krampfanfaelle',
+      'abdomen__anhaltendes_erbrechen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hirnblutung', 'Meningoenzephalitis', 'Intrakranielle Raumforderung'],
+    consequences: ['übersehener Hirnblutung/-entzündung, Hirndrucksteigerung, bleibenden neurologischen Schäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -1867,10 +3118,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Vertrautes Hautbild, beherrschbarer Juckreiz; kein Fieber, schmerzhafte Bläschen, großflächige Verschlechterung oder Superinfektionsverdacht.',
     application: 'BvO',
     category: 'haut',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'haut__schmerzhafte_blaeschen', 'haut__grossflaechige_blaeschenausbreitung',
+      'haut__rasch_ausbreitende_roetung', 'infekt__fieber_schuettelfrost', 'augen__starke_augenschmerzen',
+    ],
+    minorSignalIds: [
+      'haut__anhaltender_juckreiz', 'haut__naessende_offene_stellen', 'haut__eitriges_sekret',
+    ],
+    diagnoses: ['Atopische Dermatitis', 'Bakterielle Hautinfektion', 'Eczema herpeticatum'],
+    consequences: ['einer ausgedehnten Hautentzündung, Wundinfektionen oder einer schweren Herpesinfektion der Haut'],
   },
 
   // -------------------------------------------------------------------------
@@ -1884,10 +3140,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach Spülung beschwerdefrei und Visus normal; kein Chemikalienkontakt, Hochgeschwindigkeitsfremdkörper, Trauma oder Kontaktlinsenproblem.',
     application: 'BvO',
     category: 'augen',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung', 'augen__lichtscheu',
+    ],
+    minorSignalIds: [
+      'augen__fremdkoerpergefuehl', 'augen__anhaltende_roetung', 'augen__eitriges_sekret',
+    ],
+    diagnoses: ['Hornhauterosion', 'Verbliebener Fremdkörper', 'Keratitis'],
+    consequences: ['einem übersehenen Fremdkörper, Hornhautschäden, Infektionen oder bleibender Sehverschlechterung'],
   },
 
   // -------------------------------------------------------------------------
@@ -1901,27 +3161,37 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Zahnbezogene zunehmende Schwellung, besonders mit Schluckstörung, Kieferklemme, Fieber oder Atemwegsbeteiligung.',
     application: 'Verweigerung',
     category: 'hno',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__zunehmende_gesichtsschwellung', 'hno__eingeschraenkte_mundoeffnung',
+      'hno__speichel_nicht_schluckbar', 'hno__kloessige_stimme', 'pulmo__neue_luftnot',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Odontogener Abszess', 'Mundbodenphlegmone', 'Sepsis'],
+    consequences: ['einem Atemwegsverschluss, Ausbreitung der Infektion in Hals/Brustkorb, Blutvergiftung oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Offene Wunde (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 5, 6; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 5, 6.
   {
     id: 'offene-wunde-schwer-verweigerung',
     name: 'Offene Wunde (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'extremitaet__sensibilitaetsstoerung',
+      'extremitaet__bewegungsstoerung', 'extremitaet__blaesse_blaufarbung', 'kreislauf__neue_probleme',
+      'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'haut__zunehmende_lokale_roetung', 'haut__eitriges_sekret',
+    ],
+    diagnoses: ['Gefäßverletzung', 'Sehnen-/Nervenverletzung', 'Wundinfektion'],
+    consequences: ['starkem Blutverlust, bleibenden Sehnen-/Nervenschäden, Funktionsverlust oder einer schweren Wundinfektion'],
   },
 
   // Unterszenario zu „Offene Wunde (schwer)“: Bissverletzung mit tiefer Gewebebeteiligung
@@ -1931,10 +3201,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'offene-wunde-schwer-verweigerung',
     name: 'Bissverletzung mit tiefer Gewebebeteiligung',
     requirements: 'Tiefe Verletzung, insbesondere an Hand oder Gelenk; mögliche Sehnen-, Nerven-, Gefäß- oder Gelenkbeteiligung.',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'extremitaet__sensibilitaetsstoerung',
+      'extremitaet__bewegungsstoerung', 'gelenk__zunehmende_schmerzen', 'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'haut__zunehmende_lokale_roetung', 'haut__eitriges_sekret',
+    ],
+    diagnoses: ['Tiefe Wundinfektion', 'Sehnen-/Gelenkverletzung', 'Nerven-/Gefäßverletzung'],
+    consequences: ['tiefer Wundinfektion, Sehnen-/Gelenkschäden, bleibendem Funktionsverlust oder einer Blutvergiftung'],
   },
 
   // Unterszenario zu „Offene Wunde (schwer)“: Hochdruckinjektionsverletzung
@@ -1944,10 +3220,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'offene-wunde-schwer-verweigerung',
     name: 'Hochdruckinjektionsverletzung',
     requirements: 'Farbe, Fett oder andere Stoffe unter Druck ins Gewebe eingebracht; auch bei kleiner Eintrittswunde dringlicher chirurgischer Verdacht.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'extremitaet__zunehmende_schmerzen', 'extremitaet__gespannte_schwellung',
+      'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung',
+      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hochdruckinjektionsverletzung', 'Kompartmentsyndrom', 'Gewebsnekrose'],
+    consequences: ['fortschreitender Gewebezerstörung, Durchblutungsstörungen, bleibendem Funktionsverlust oder einer Amputation'],
   },
 
   // -------------------------------------------------------------------------
@@ -1961,10 +3241,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Leichte Schmerzen; keine Mastoidrötung/-schwellung, Fazialisparese, plötzliche Hörminderung, starke Schwindelsymptomatik oder schwere Allgemeinsymptome.',
     application: 'BvO',
     category: 'hno',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'hno__schwellung_hinter_ohr', 'hno__ploetzliche_hoerminderung', 'neuro__gesichtslaehmung',
+      'neuro__neue_gangunsicherheit', 'neuro__neue_nackensteifigkeit',
+    ],
+    minorSignalIds: [
+      'hno__anhaltende_leichte_ohrenschmerzen', 'hno__ohrsekret',
+    ],
+    diagnoses: ['Otitis externa/media', 'Mastoiditis', 'Innenohrbeteiligung'],
+    consequences: ['einer fortschreitenden Ohrenentzündung, Trommelfellschäden, bleibender Hörminderung oder einer Ausbreitung auf den Knochen'],
   },
 
   // -------------------------------------------------------------------------
@@ -1978,27 +3263,33 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Akuter einseitiger Unterbauchschmerz, häufig mit Übelkeit/Erbrechen; zeitkritische gynäkologische Abklärung.',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__starke_einseitige_unterbauchschmerzen', 'abdomen__anhaltendes_erbrechen',
+      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Ovarialtorsion', 'Rupturierte Ovarialzyste', 'Extrauteringravidität'],
+    consequences: ['einem Absterben des Eierstocks, bleibenden Organschäden oder eingeschränkter Fruchtbarkeit'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Palpitationen/Herzrasen (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 44; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 44.
   {
     id: 'palpitationen-herzrasen-schwer-verweigerung',
     name: 'Palpitationen/Herzrasen (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__anhaltendes_herzrasen', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Tachykarde Herzrhythmusstörung', 'Akutes Koronarsyndrom', 'Elektrolytstörung'],
+    consequences: ['anhaltenden Herzrhythmusstörungen, Herzversagen, Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Palpitationen/Herzrasen (schwer)“: Neu aufgetretenes Vorhofflimmern mit Beschwerden
@@ -2008,10 +3299,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'palpitationen-herzrasen-schwer-verweigerung',
     name: 'Neu aufgetretenes Vorhofflimmern mit Beschwerden',
     requirements: 'Neu dokumentierte absolute Arrhythmie mit anhaltenden Beschwerden; Frequenz, Beginn und Begleiterkrankungen müssen beurteilt werden.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__anhaltendes_herzrasen', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'sehstoerung__ploetzlicher_sehverlust',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Vorhofflimmern', 'Akute Herzinsuffizienz', 'Schlaganfall'],
+    consequences: ['Blutgerinnseln mit Schlaganfall/Organinfarkten, zunehmender Herzschwäche, bleibenden Schäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2025,10 +3320,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Zurückgezogene Vorhaut lässt sich nicht zurückführen, Eichel/Vorhaut schwillt an; Ischämierisiko.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'uro__eingeklemmte_vorhaut', 'uro__starke_penisschmerzen', 'uro__rasche_penisschwellung',
+      'uro__eichelverfaerbung', 'uro__eicheltaubheit', 'uro__anhaltende_oligurie_anurie',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Paraphimose', 'Eichelischämie'],
+    consequences: ['einer Durchblutungsstörung mit Absterben von Eichelgewebe, Harnverhalt oder bleibenden Funktionsschäden'],
   },
 
   // -------------------------------------------------------------------------
@@ -2042,10 +3340,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Spitzer Gegenstand oder Hochgeschwindigkeitsfremdkörper; auch bei unscheinbarer äußerer Verletzung.',
     application: 'Verweigerung',
     category: 'augen',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'sehstoerung__rasche_sehverschlechterung', 'sehstoerung__ploetzlicher_sehverlust',
+      'augen__starke_augenschmerzen', 'augen__neue_pupillendifferenz', 'augen__lichtscheu',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Offene Bulbusverletzung', 'Intraokularer Fremdkörper', 'Endophthalmitis'],
+    consequences: ['einer unentdeckten Augeneröffnung, schweren Augeninfektion, Erblindung oder dem Verlust des Auges'],
   },
 
   // -------------------------------------------------------------------------
@@ -2059,10 +3360,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Stich-, Schuss- oder Pfählungsverletzung; äußere Wundgröße erlaubt keine verlässliche Beurteilung innerer Schäden.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Innere Organ-/Gefäßverletzung', 'Pneumothorax/Hämatothorax', 'Darmperforation'],
+    consequences: ['unerkannten Organ-/Gefäßverletzungen, inneren Blutungen, Atem-/Kreislaufversagen, Bauchfellentzündung oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2076,10 +3381,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Trübes Dialysat und/oder neuer Bauchschmerz, gegebenenfalls Fieber; sofortiger Kontakt zum Dialysezentrum und Akutabklärung.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'uro__truebes_dialysat', 'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht',
+      'infekt__fieber_schuettelfrost', 'abdomen__anhaltendes_erbrechen', 'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Dialyseassoziierte Peritonitis', 'Katheterinfektion', 'Sepsis'],
+    consequences: ['einer fortschreitenden Bauchfellentzündung, Blutvergiftung, dem Verlust der Peritonealdialysefähigkeit oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2093,10 +3402,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Einseitige starke Schmerzen, Kieferklemme, kloßige Stimme oder Schluckbehinderung; mögliche Atemwegsgefährdung.',
     application: 'Verweigerung',
     category: 'hno',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__speichel_nicht_schluckbar', 'hno__kieferklemme', 'hno__kloessige_stimme',
+      'hno__zunehmende_gesichtsschwellung', 'pulmo__stridor', 'pulmo__neue_luftnot',
+      'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Peritonsillarabszess', 'Tiefer Halsabszess', 'Sepsis'],
+    consequences: ['einem Atemwegsverschluss, Ausbreitung der Infektion in den Brustkorb, Blutvergiftung oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2110,10 +3423,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Akuter ungeklärter Hörverlust ohne offensichtliche äußere Ursache; dringliche HNO-Beurteilung, bei neurologischen Zeichen Schlaganfallpfad.',
     application: 'Verweigerung',
     category: 'hno',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__ploetzliche_hoerminderung', 'neuro__gesichtslaehmung', 'neuro__neue_gangunsicherheit',
+      'neuro__neue_sprachstoerung', 'neuro__neue_einseitige_schwaeche', 'sehstoerung__neue_doppelbilder',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Hörsturz', 'Innenohrerkrankung', 'Schlaganfall'],
+    consequences: ['bleibendem Hörverlust, anhaltenden Ohrgeräuschen oder neurologischen Schäden bei übersehenem Schlaganfall'],
   },
 
   // -------------------------------------------------------------------------
@@ -2127,10 +3443,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Frische Operation mit wiederkehrender oder anhaltender Blutung, zunehmendem Hämatom oder Kreislaufbeschwerden.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung', 'wunde__rasch_zunehmender_bluterguss', 'wunde__zunehmende_schmerzen',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit', 'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Postoperative Blutung', 'Hämatom', 'Hämorrhagischer Schock'],
+    consequences: ['fortschreitendem Blutverlust, Druckschäden durch Blutergüsse, erneuter Operationspflichtigkeit, Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2144,10 +3463,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Schmerzhafte anhaltende Erektion, insbesondere seit etwa vier Stunden; bei Risikokonstellation bereits früher dringlich.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'uro__anhaltende_schmerzhafte_erektion', 'uro__anhaltende_oligurie_anurie',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Ischämischer Priapismus'],
+    consequences: ['bleibenden Schwellkörperschäden, dauerhafter Erektionsstörung oder Gewebeverlust'],
   },
 
   // -------------------------------------------------------------------------
@@ -2161,10 +3482,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Typischer bellender Husten; keine Einziehungen, Hypoxie oder Trinkstörung, kein Adrenalinbedarf; zuverlässige Beobachtung und ärztlicher Behandlungsplan.',
     application: 'BvO',
     category: 'paediatrie',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'pulmo__stridor_in_ruhe', 'paediatrie__angestrengte_atmung', 'pulmo__zyanose',
+      'paediatrie__schlaff_teilnahmslos', 'hno__speichel_nicht_schluckbar', 'paediatrie__trinkschwaeche',
+    ],
+    minorSignalIds: [
+      'paediatrie__wiederkehrender_bellender_husten',
+    ],
+    diagnoses: ['Pseudokrupp', 'Epiglottitis', 'Fremdkörperaspiration'],
+    consequences: ['einer zunehmenden Atemwegsverengung, Sauerstoffmangel oder einer übersehenen schweren Atemwegserkrankung'],
   },
 
   // -------------------------------------------------------------------------
@@ -2178,10 +3504,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Stridor in Ruhe, relevante Einziehungen, Erschöpfung oder notwendige Adrenalininhalation mit anschließendem Überwachungsbedarf.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__stridor_in_ruhe', 'paediatrie__angestrengte_atmung', 'pulmo__zyanose',
+      'paediatrie__schlaff_teilnahmslos', 'pulmo__atempausen', 'hno__speichel_nicht_schluckbar',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Schwerer Pseudokrupp', 'Epiglottitis', 'Bakterielle Tracheitis'],
+    consequences: ['zunehmendem Atemwegsverschluss, Sauerstoffmangel, Atemstillstand, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2195,10 +3524,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Flankenschmerz und Fieber mit Erbrechen, fehlender Trinkfähigkeit, Obstruktionsverdacht oder deutlichen Allgemeinsymptomen.',
     application: 'Verweigerung',
     category: 'uro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'uro__starke_flankenschmerzen', 'infekt__fieber_schuettelfrost', 'abdomen__anhaltendes_erbrechen',
+      'stoffwechsel__fehlende_trinkfaehigkeit', 'uro__anhaltende_oligurie_anurie', 'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Pyelonephritis', 'Infizierte Harnabflussstörung', 'Urosepsis'],
+    consequences: ['einer Blutvergiftung, Nierenabszessen, bleibenden Nierenschäden, Organversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2212,10 +3545,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Längere Einklemmung oder erhebliche Muskelquetschung; Gefahr von Rhabdomyolyse, Elektrolytstörung und Nierenschädigung.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'muskeln__starke_schmerzen_schwellung', 'extremitaet__gespannte_schwellung',
+      'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung', 'uro__dunkelbrauner_urin',
+      'uro__anhaltende_oligurie_anurie', 'kreislauf__anhaltendes_herzrasen', 'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Crush-Syndrom/Rhabdomyolyse', 'Kompartmentsyndrom', 'Akutes Nierenversagen'],
+    consequences: ['Muskelzerfall, lebensbedrohlichen Kaliumstörungen, Nierenversagen, einer Amputation oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2229,10 +3566,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Zunehmende, insbesondere symmetrische Schwäche, gegebenenfalls Schluck- oder Atemstörung; neuromuskuläre Krise möglich.',
     application: 'Verweigerung',
     category: 'neuro',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__zunehmende_muskelschwaeche', 'pulmo__neue_luftnot', 'pulmo__langsame_flache_atmung',
+      'hno__wiederholtes_verschlucken', 'neuro__neue_sprachstoerung', 'sehstoerung__neue_doppelbilder',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Guillain-Barré-Syndrom', 'Myasthene Krise', 'Elektrolytstörung'],
+    consequences: ['fortschreitenden Lähmungen, Verschlucken mit Lungenschädigung, Atemstillstand, bleibenden Nervenschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2246,10 +3587,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Klarer Bewegungsreiz, nach dessen Ende beschwerdefrei; keine neurologischen Auffälligkeiten, Bauchschmerzen oder Dehydratation.',
     application: 'BvO',
     category: 'gastro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__neue_gangunsicherheit', 'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung',
+      'sehstoerung__neue_doppelbilder', 'neuro__ploetzliche_starke_kopfschmerzen',
+      'abdomen__anhaltendes_erbrechen', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'stoffwechsel__wiederkehrende_uebelkeit',
+    ],
+    diagnoses: ['Kinetose', 'Vestibuläre Störung', 'Schlaganfall im hinteren Stromgebiet'],
+    consequences: ['einem übersehenen Schlaganfall, Flüssigkeitsmangel oder bleibenden Gleichgewichtsstörungen'],
   },
 
   // -------------------------------------------------------------------------
@@ -2263,10 +3610,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Keine Manie, Psychose, Suizidalität, Intoxikation oder Entzug; Versorgung und zeitnaher Arztkontakt gesichert.',
     application: 'BvO',
     category: 'psych',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'psych__schlaflosigkeit_mit_ueberaktivitaet', 'psych__halluzinationen', 'psych__suizidgedanken',
+      'psych__schwere_erregung', 'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'psych__anhaltende_schlafstoerungen', 'stoffwechsel__anhaltende_muedigkeit',
+      'neuro__leichte_konzentrationsprobleme',
+    ],
+    diagnoses: ['Insomnie', 'Depressive Episode', 'Manische Episode'],
+    consequences: ['anhaltender Erschöpfung, Konzentrationsstörungen, Unfallgefahr oder verzögerter Erkennung einer psychischen Erkrankung'],
   },
 
   // -------------------------------------------------------------------------
@@ -2280,10 +3633,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Augenschmerz mit Rötung, Lichtscheu oder Visusminderung; Glaukom, Keratitis oder Uveitis möglich.',
     application: 'Verweigerung',
     category: 'augen',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung',
+      'sehstoerung__ploetzlicher_sehverlust', 'augen__lichtscheu', 'neuro__ploetzliche_starke_kopfschmerzen',
+      'abdomen__anhaltendes_erbrechen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Glaukomanfall', 'Keratitis', 'Uveitis'],
+    consequences: ['einem übersehenen Glaukomanfall, Hornhaut- oder Sehnervschäden, bleibendem Sehverlust oder Erblindung'],
   },
 
   // -------------------------------------------------------------------------
@@ -2297,10 +3654,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Präsynkope, Synkope oder Bradykardie bei möglicher Gerätefehlfunktion; keine bloße unbestätigte Gerätewarnung.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__langsamer_herzschlag_mit_beschwerden', 'neuro__neue_bewusstlosigkeit',
+      'kreislauf__neue_probleme', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot', 'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Schrittmacherfehlfunktion', 'Hochgradiger AV-Block'],
+    consequences: ['erneuten Ohnmachten, Sturzverletzungen, unzureichender Organversorgung, Herzstillstand oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2314,10 +3674,17 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Leichte Beschwerden, ausreichendes Trinken/Essen; kein Gewichtsverlust, Bauchschmerz, Blutung oder anhaltendes Erbrechen.',
     application: 'BvO',
     category: 'gyn',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'abdomen__anhaltendes_erbrechen', 'stoffwechsel__fehlende_trinkfaehigkeit',
+      'uro__anhaltende_oligurie_anurie', 'gyn__starke_einseitige_unterbauchschmerzen', 'gyn__vaginale_blutung',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'stoffwechsel__wiederkehrende_uebelkeit', 'stoffwechsel__durst_mundtrockenheit',
+      'stoffwechsel__ungewollter_gewichtsverlust',
+    ],
+    diagnoses: ['Hyperemesis gravidarum', 'Extrauteringravidität', 'Gastroenteritis'],
+    consequences: ['zunehmendem Flüssigkeitsmangel, Elektrolytstörungen oder einer übersehenen Schwangerschaftskomplikation'],
   },
 
   // -------------------------------------------------------------------------
@@ -2331,10 +3698,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Ausgeprägte Austrocknung, Kreislaufauffälligkeit, Oligurie oder Unfähigkeit zur ausreichenden Flüssigkeitsaufnahme.',
     application: 'Verweigerung',
     category: 'stoffwechsel',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'stoffwechsel__fehlende_trinkfaehigkeit', 'abdomen__anhaltendes_erbrechen',
+      'uro__anhaltende_oligurie_anurie', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+      'neuro__zunehmende_schlaefrigkeit', 'kreislauf__anhaltendes_herzrasen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Exsikkose', 'Akutes Nierenversagen', 'Elektrolytstörung'],
+    consequences: ['Kreislaufversagen, akutem Nierenversagen, lebensbedrohlichen Elektrolytstörungen, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2348,10 +3719,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Üblicher leichter bis mäßiger Kopfschmerz; keine neue Qualität, neurologischen Symptome, Infektzeichen oder Risikokonstellation.',
     application: 'BvO',
     category: 'neuro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung', 'neuro__neue_nackensteifigkeit', 'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit', 'sehstoerung__ploetzlicher_sehverlust',
+    ],
+    minorSignalIds: [
+      'neuro__anhaltende_leichte_kopfschmerzen', 'neuro__wiederkehrende_typische_kopfschmerzen',
+    ],
+    diagnoses: ['Spannungskopfschmerz', 'Subarachnoidalblutung', 'Meningitis'],
+    consequences: ['anhaltenden Schmerzen, Alltagsbeeinträchtigung oder verzögerter Erkennung einer anderen Kopfschmerzursache'],
   },
 
   // -------------------------------------------------------------------------
@@ -2365,10 +3742,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Plötzlicher einseitiger Thoraxschmerz und/oder Atemnot ohne Trauma; klinisch nicht sicher auszuschließen.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__zyanose', 'kreislauf__neue_probleme',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Pneumothorax', 'Spannungspneumothorax', 'Lungenembolie'],
+    consequences: ['zunehmendem Lungenkollaps, Spannungspneumothorax, Atem-/Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2382,10 +3762,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Begrenzte Beschwerden bei gutem Allgemeinzustand; kein Fieber, Abszessverdacht oder rasche Progression; zeitnahe fachliche Kontrolle.',
     application: 'BvO',
     category: 'gyn',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'gyn__starke_brustdruesenschmerzen', 'haut__rasch_ausbreitende_roetung', 'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'gyn__anhaltende_stillbeschwerden', 'gyn__anhaltende_brustverhaertung',
+    ],
+    diagnoses: ['Milchstau', 'Mastitis', 'Mammaabszess'],
+    consequences: ['einer fortschreitenden Brustentzündung, Abszessbildung oder Ausbreitung der Infektion'],
   },
 
   // -------------------------------------------------------------------------
@@ -2399,10 +3784,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Undichte/gelöste Versorgung behoben; Stoma vital, gewohnte Förderung, kein Bauchschmerz oder relevantes Flüssigkeitsdefizit.',
     application: 'BvO',
     category: 'gastro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'stoma__dunkle_blasse_verfaerbung', 'stoma__foerderstopp', 'stoma__starke_blutung',
+      'abdomen__zunehmende_schmerzen', 'abdomen__anhaltendes_erbrechen', 'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'stoma__hautreizung', 'stoma__verminderte_ausscheidung', 'stoma__vermehrte_duennfluessige_ausscheidung',
+    ],
+    diagnoses: ['Peristomale Dermatitis', 'Stomastenose', 'Darmverschluss'],
+    consequences: ['Hautschäden, Flüssigkeitsmangel oder einem übersehenen Darmverschluss'],
   },
 
   // -------------------------------------------------------------------------
@@ -2416,10 +3806,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Hochspannung, Bewusstseinsverlust, Rhythmusstörung, Thoraxbeschwerden, relevante Verbrennung oder Schwangerschaft.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'kreislauf__anhaltendes_herzrasen', 'neuro__neue_bewusstlosigkeit',
+      'pulmo__neue_luftnot', 'muskeln__starke_schmerzen_schwellung', 'extremitaet__sensibilitaetsstoerung',
+      'uro__dunkelbrauner_urin',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Herzrhythmusstörung', 'Tiefe elektrische Gewebeschädigung', 'Rhabdomyolyse'],
+    consequences: ['lebensbedrohlichen Herzrhythmusstörungen, verborgenen Gewebeschäden, Nierenversagen, bleibenden Nervenschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2433,10 +3827,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Eindeutig mechanisches Stolpern, kein Kopfaufprall, keine Synkope, keine Schmerzen; Mobilität wieder auf Ausgangsniveau.',
     application: 'BvO',
     category: 'trauma',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'extremitaet__belastungsunfaehigkeit', 'extremitaet__zunehmende_schmerzen',
+      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'extremitaet__sensibilitaetsstoerung',
+    ],
+    minorSignalIds: [
+      'trauma__anhaltende_leichte_schmerzen',
+    ],
+    diagnoses: ['Verdeckte Fraktur', 'Weichteilverletzung'],
+    consequences: ['einer übersehenen Verletzung, zunehmenden Schmerzen, Folgestürzen oder bleibender Bewegungseinschränkung'],
   },
 
   // -------------------------------------------------------------------------
@@ -2450,10 +3849,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Scharf begrenzte schmerzlose Einblutung; normales Sehen, kein Trauma, keine weiteren Blutungszeichen oder hypertensiven Notfallzeichen.',
     application: 'BvO',
     category: 'augen',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung', 'augen__lichtscheu',
+    ],
+    minorSignalIds: [
+      'augen__wiederkehrende_einblutung', 'blutung__wiederkehrende_haut_schleimhautblutungen',
+    ],
+    diagnoses: ['Hyposphagma', 'Gerinnungsstörung', 'Arterielle Hypertonie'],
+    consequences: ['einer übersehenen Gerinnungsstörung oder Blutdruckerkrankung mit wiederkehrenden Blutungen'],
   },
 
   // -------------------------------------------------------------------------
@@ -2467,10 +3870,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Langsamer Puls mit Schwäche, Präsynkope, Synkope, Thoraxschmerz oder Hypotonie.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'kreislauf__langsamer_herzschlag_mit_beschwerden', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'neuro__neue_verwirrtheit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Bradykarde Herzrhythmusstörung', 'Akutes Koronarsyndrom', 'Elektrolytstörung'],
+    consequences: ['erneuten Ohnmachten, Sturzverletzungen, unzureichender Hirn-/Herzdurchblutung, Herzstillstand oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2484,26 +3891,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'neuro',
     majorSignalIds: [
-      'neuro-synkope-rezidiv',
-      'neuro-ausfall-neu',
-      'kreislauf-probleme-zunehmend',
-      'neuro-kopfschmerz-zunehmend',
+      'neuro__neue_bewusstlosigkeit', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'kreislauf__anhaltendes_herzrasen', 'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung',
+      'neuro__neue_krampfanfaelle', 'kreislauf__neue_probleme',
     ],
-    minorSignalIds: [
-      'neuro-fallneigung-anhaltend',
-      'kreislauf-belastungsSchwaeche-anhaltend',
-    ],
-    diagnoses: [
-      'Arrhythmie',
-      'vasovagal./orthost. Ursache',
-      'Klappenfehler',
-      'TIA',
-      'Krampfanfall',
-      'metab. Erkrankung',
-    ],
-    consequences: [
-      'erneuten Synkopen mit Stürzen+Verletzungen oder unerkannter pot. lebensbedrohl. Ursachen mit bleibenden Schäden oder Herztod',
-    ],
+    minorSignalIds: [],
+    diagnoses: ['Herzrhythmusstörung', 'Strukturelle Herzerkrankung', 'Lungenembolie'],
+    consequences: ['erneuten Ohnmachten mit Sturzverletzungen, übersehener Herzerkrankung, Kreislaufstillstand, bleibenden Schäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2517,16 +3911,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'neuro',
     majorSignalIds: [
-      'neuro-synkope-rezidiv',
-      'kreislauf-ap-neu',
-      'atmung-luftnot',
-      'kreislauf-herzrhythmus-neu',
-      'neuro-ausfall-neu',
-      'kreislauf-probleme-zunehmend',
+      'neuro__neue_bewusstlosigkeit', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'kreislauf__anhaltendes_herzrasen', 'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung',
+      'neuro__neue_krampfanfaelle', 'kreislauf__neue_probleme',
     ],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    minorSignalIds: [
+      'neuro__leichter_wiederkehrender_schwindel', 'stoffwechsel__anhaltende_muedigkeit',
+    ],
+    diagnoses: ['Reflexsynkope', 'Orthostatische Hypotonie', 'Herzrhythmusstörung'],
+    consequences: ['erneuten Ohnmachten mit Sturzverletzungen oder einer übersehenen behandlungsbedürftigen Herzrhythmusstörung'],
   },
 
   // Unterszenario zu „Synkope (leicht)“: Orthostatische Synkope
@@ -2536,15 +3929,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'synkope-bvo',
     name: 'Orthostatische Synkope',
     requirements: 'orthostatische Ursache',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__neue_bewusstlosigkeit', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'kreislauf__anhaltendes_herzrasen', 'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [
-      'kreislauf-belastungsSchwaeche-anhaltend',
-      'neuro-fallneigung-anhaltend',
+      'neuro__leichter_lageschwindel', 'stoffwechsel__anhaltende_muedigkeit',
     ],
-    diagnoses: [
-      'orthostatische Synkope',
-    ],
-    consequences: [],
+    diagnoses: ['Orthostatische Hypotonie', 'Dehydratation', 'Medikamentös bedingte Hypotonie'],
+    consequences: ['erneuten Blutdruckabfällen, Sturzverletzungen oder übersehenem Flüssigkeitsmangel/Blutverlust'],
   },
 
   // Unterszenario zu „Synkope (leicht)“: Vasovagale Synkope (bekanntes Niedrigrisikomuster)
@@ -2558,14 +3952,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'synkope-bvo',
     name: 'Vasovagale Synkope (bekanntes Niedrigrisikomuster)',
     requirements: 'Typischer Auslöser und Prodromi, rasche vollständige Erholung; unauffällige Untersuchung einschließlich EKG, keine kardialen Risikomerkmale.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__neue_bewusstlosigkeit', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
+      'kreislauf__anhaltendes_herzrasen', 'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung',
+      'kreislauf__neue_probleme',
+    ],
     minorSignalIds: [
-      'kreislauf-belastungsSchwaeche-anhaltend',
+      'neuro__leichter_wiederkehrender_schwindel', 'stoffwechsel__anhaltende_muedigkeit',
     ],
-    diagnoses: [
-      'vasovagale Ursache',
-    ],
-    consequences: [],
+    diagnoses: ['Vasovagale Synkope', 'Herzrhythmusstörung'],
+    consequences: ['erneuten Ohnmachten, Sturzverletzungen oder verzögerter Erkennung einer anderen Kreislaufursache'],
   },
 
   // -------------------------------------------------------------------------
@@ -2579,27 +3975,34 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Neurologische Beschwerden, Atemnot oder ungewöhnliche Schmerzen nach Tauchgang; auch bei verzögertem Beginn.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gelenk__anhaltende_schmerzen', 'extremitaet__sensibilitaetsstoerung',
+      'neuro__zunehmende_muskelschwaeche', 'neuro__neue_gangunsicherheit', 'pulmo__neue_luftnot',
+      'thorax__schmerzen_druck', 'haut__marmorierung', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Dekompressionskrankheit', 'Arterielle Gasembolie', 'Lungenbarotrauma'],
+    consequences: ['bleibenden Nerven-/Rückenmarksschäden, Lähmungen, Atem-/Kreislaufversagen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Thoraxschmerz, nicht-traumatisch (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 38, 39; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 38, 39.
   {
     id: 'thoraxschmerz-nicht-traumatisch-schwer-verweigerung',
     name: 'Thoraxschmerz, nicht-traumatisch (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit', 'kreislauf__anhaltendes_herzrasen', 'neuro__neue_einseitige_schwaeche',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Akutes Koronarsyndrom', 'Akutes Aortensyndrom', 'Lungenembolie'],
+    consequences: ['übersehenem Herzinfarkt/Gefäßeinriss, Herzrhythmusstörungen, Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Thoraxschmerz, nicht-traumatisch (schwer)“: Akutes Aortensyndrom (Verdacht)
@@ -2609,10 +4012,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'thoraxschmerz-nicht-traumatisch-schwer-verweigerung',
     name: 'Akutes Aortensyndrom (Verdacht)',
     requirements: 'Abrupter starker Thorax-/Rückenschmerz, Perfusionsunterschiede oder neurologische Symptome; zeitkritische Gefäßdiagnostik erforderlich.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'ruecken__starke_schmerzen', 'abdomen__zunehmende_schmerzen',
+      'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung', 'extremitaet__kalte_extremitaet',
+      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Aortendissektion', 'Aortenruptur', 'Akutes Koronarsyndrom'],
+    consequences: ['einem Riss der Hauptschlagader, innerem Verbluten, Schlaganfall, Organversagen oder dem Tod'],
   },
 
   // Unterszenario zu „Thoraxschmerz, nicht-traumatisch (schwer)“: Akutes Koronarsyndrom (Verdacht)
@@ -2622,10 +4029,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'thoraxschmerz-nicht-traumatisch-schwer-verweigerung',
     name: 'Akutes Koronarsyndrom (Verdacht)',
     requirements: 'Ischämietypische Beschwerden oder verdächtige EKG-Veränderungen; auch ohne klassischen Brustschmerz oder bei zwischenzeitlicher Besserung.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'thorax__schmerzen_druck', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'kreislauf__anhaltendes_herzrasen', 'neuro__neue_bewusstlosigkeit', 'intox__uebelkeit_erbrechen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Myokardinfarkt', 'Instabile Angina pectoris', 'Herzrhythmusstörung'],
+    consequences: ['fortschreitendem Herzmuskelschaden, lebensbedrohlichen Herzrhythmusstörungen, Herzversagen, Kreislaufstillstand oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2639,10 +4049,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Neue einseitige schmerzhafte Beinschwellung; erforderliche dringliche Diagnostik wird abgelehnt, nicht lediglich eine bestimmte Transportart.',
     application: 'Verweigerung',
     category: 'kreislauf',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__relevante_haemoptyse',
+      'neuro__neue_bewusstlosigkeit', 'extremitaet__einseitige_schwellung_schmerz',
+      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Tiefe Venenthrombose', 'Lungenembolie'],
+    consequences: ['Lungenembolie, bleibender Beinschwellung/Hautschädigung, schwerer Durchblutungsstörung des Beins oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2656,10 +4070,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Dislokation, Verlegung oder relevante Blutung; sichere Atmung beziehungsweise Kanülenfunktion nicht zuverlässig wiederhergestellt.',
     application: 'Verweigerung',
     category: 'atmung',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'trachea__frische_blutung', 'trachea__verminderter_luftstrom', 'pulmo__neue_luftnot', 'pulmo__zyanose',
+      'pulmo__atempausen', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Trachealkanülenverlegung', 'Trachealkanülendislokation', 'Tracheale Blutung'],
+    consequences: ['Atemwegsverschluss, Erstickung, massiver Blutung, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2673,10 +4090,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Bekannte kurze Schmerzattacken, beherrschbar; keine neue Sensibilitätsstörung, Augenbeteiligung, Infektzeichen oder Nahrungsunfähigkeit.',
     application: 'BvO',
     category: 'neuro',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__gesichtstaubheit', 'neuro__gesichtslaehmung', 'neuro__neue_sprachstoerung',
+      'sehstoerung__ploetzlicher_sehverlust', 'augen__starke_augenschmerzen',
+      'stoffwechsel__fehlende_trinkfaehigkeit',
+    ],
+    minorSignalIds: [
+      'neuro__wiederkehrende_gesichtsschmerzen',
+    ],
+    diagnoses: ['Trigeminusneuralgie', 'Herpes zoster', 'Pulpitis'],
+    consequences: ['anhaltenden Schmerzen, Flüssigkeitsmangel oder verzögerter Erkennung einer anderen Ursache der Gesichtsschmerzen'],
   },
 
   // -------------------------------------------------------------------------
@@ -2690,10 +4113,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Neu deutlich verminderte Aufnahme, weniger nasse Windeln, auffällige Müdigkeit oder Temperaturabweichung; nicht pauschal als Infektbagatelle einstufen.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'paediatrie__trinkschwaeche', 'paediatrie__wenige_nasse_windeln', 'paediatrie__schlaff_teilnahmslos',
+      'infekt__fieber_schuettelfrost', 'temperatur__auffaellig_kalte_haut', 'paediatrie__angestrengte_atmung',
+      'pulmo__atempausen', 'abdomen__gruenes_erbrechen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Schwere Infektion/Sepsis', 'Dehydratation', 'Hypoglykämie'],
+    consequences: ['schwerer Austrocknung, Unterzuckerung, einer übersehenen Infektion, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2707,10 +4134,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Plausible ungewohnte Belastung, lokaler leichter Schmerz; keine ausgeprägte Schwellung, Schwäche, dunkler Urin oder Allgemeinsymptome.',
     application: 'BvO',
     category: 'trauma',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'muskeln__starke_schmerzen_schwellung', 'extremitaet__gespannte_schwellung',
+      'neuro__zunehmende_muskelschwaeche', 'extremitaet__sensibilitaetsstoerung', 'uro__dunkelbrauner_urin',
+      'uro__anhaltende_oligurie_anurie',
+    ],
+    minorSignalIds: [
+      'muskeln__anhaltende_leichte_schmerzen',
+    ],
+    diagnoses: ['Muskelüberlastung', 'Muskelverletzung', 'Rhabdomyolyse'],
+    consequences: ['einer übersehenen Muskelverletzung, anhaltender Funktionseinschränkung oder Nierenschäden bei Muskelzerfall'],
   },
 
   // -------------------------------------------------------------------------
@@ -2724,10 +4157,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Berichtete Atempause, Blauverfärbung, deutliche Tonus- oder Bewusstseinsänderung; auch nach vollständiger Erholung akut beurteilen.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'pulmo__atempausen', 'pulmo__zyanose', 'paediatrie__schlaff_teilnahmslos',
+      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_krampfanfaelle', 'paediatrie__trinkschwaeche',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Apnoe unklarer Ursache', 'Schwere Infektion', 'Krampfanfall'],
+    consequences: ['erneuten Atemstillständen, Sauerstoffmangel, bleibenden Hirnschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2741,27 +4177,34 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Körperkerntemperatur unter 35 °C oder begründeter Verdacht; besonders mit Erschöpfung, Verwirrtheit oder Kreislaufauffälligkeiten.',
     application: 'Verweigerung',
     category: 'umwelt',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_gangunsicherheit',
+      'pulmo__langsame_flache_atmung', 'neuro__neue_bewusstlosigkeit',
+      'temperatur__nachlassendes_kaeltezittern',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Unterkühlung', 'Herzrhythmusstörung', 'Hypoglykämie'],
+    consequences: ['weiterer Auskühlung, lebensbedrohlichen Herzrhythmusstörungen, Atem-/Kreislaufstillstand oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
   // Hauptszenario: Vaginale Blutung (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 138; universelle Daten fehlen noch.
+  // Elternknoten für Markdown-Nr. 138.
   {
     id: 'vaginale-blutung-schwer-verweigerung',
     name: 'Vaginale Blutung (schwer)',
     requirements: '',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__starke_vaginale_blutung', 'abdomen__zunehmende_schmerzen', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit', 'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Akute uterine Blutung', 'Fehlgeburt', 'Extrauteringravidität'],
+    consequences: ['starkem Blutverlust, Kreislaufversagen, bleibenden Organschäden oder dem Tod'],
   },
 
   // Unterszenario zu „Vaginale Blutung (schwer)“: Postpartale Blutung
@@ -2771,10 +4214,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     parentId: 'vaginale-blutung-schwer-verweigerung',
     name: 'Postpartale Blutung',
     requirements: 'Starke oder erneut zunehmende Blutung nach Geburt, insbesondere mit Schwäche/Kreislaufzeichen; nicht als gewöhnliche Wochenbettblutung einstufen.',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__starke_vaginale_blutung', 'gyn__grosse_blutklumpen_wochenfluss', 'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit', 'pulmo__neue_luftnot', 'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Uterusatonie', 'Plazentaretention', 'Geburtsverletzung'],
+    consequences: ['massivem Blutverlust, Gerinnungsstörungen, Organversagen, notwendiger Gebärmutterentfernung oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2788,10 +4234,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Nach fachgerechter Verbandkorrektur beschwerdefrei, DMS wiederholt normal; kein Gipsproblem, keine ungeklärte Verletzung oder Kompartmentzeichen.',
     application: 'BvO',
     category: 'trauma',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'extremitaet__zunehmende_schmerzen', 'extremitaet__sensibilitaetsstoerung',
+      'extremitaet__bewegungsstoerung', 'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+      'extremitaet__gespannte_schwellung',
+    ],
+    minorSignalIds: [
+      'verband__wiederkehrendes_druckgefuehl',
+    ],
+    diagnoses: ['Druckbedingte Nervenkompression', 'Durchblutungsstörung', 'Kompartmentsyndrom'],
+    consequences: ['erneuten Druckschäden, Durchblutungsstörungen oder bleibenden Nerven-/Muskelschäden'],
   },
 
   // -------------------------------------------------------------------------
@@ -2805,10 +4257,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Wässriger vaginaler Flüssigkeitsabgang vor Geburtsbeginn; besonders dringlich bei Frühgeburtlichkeit, Fieber oder auffälligem Fruchtwasser.',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__fruchtwasserabgang', 'gyn__auffaelliges_fruchtwasser', 'infekt__fieber_schuettelfrost',
+      'gyn__vaginale_blutung', 'gyn__verminderte_kindsbewegungen', 'gyn__regelmaessige_schmerzhafte_wehen',
+      'gyn__sichtbare_nabelschnur', 'gyn__starke_anhaltende_unterbauchschmerzen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Vorzeitiger Blasensprung', 'Chorioamnionitis', 'Nabelschnurvorfall'],
+    consequences: ['aufsteigenden Infektionen, Nabelschnurkompression, kindlichem Sauerstoffmangel, bleibenden Schäden oder dem Tod des Kindes'],
   },
 
   // -------------------------------------------------------------------------
@@ -2822,10 +4278,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Knopfzelle, mehrere Magnete, Magnet plus Metall oder spitzer Gegenstand; auch ohne Beschwerden zeitkritisch abzuklären.',
     application: 'Verweigerung',
     category: 'paediatrie',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'hno__speichel_nicht_schluckbar', 'thorax__schmerzen_druck', 'abdomen__zunehmende_schmerzen',
+      'abdomen__blutiges_erbrechen', 'abdomen__teerstuhl', 'pulmo__neue_luftnot',
+      'infekt__fieber_schuettelfrost',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Fremdkörperimpaktion', 'Speiseröhren-/Darmverletzung', 'Verätzung durch Knopfzelle'],
+    consequences: ['Speiseröhren-/Darmdurchbruch, lebensbedrohlichen Blutungen, Fistelbildung, schweren Infektionen oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2839,10 +4299,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Regelmäßige schmerzhafte Kontraktionen vor 37 vollendeten Schwangerschaftswochen; geburtshilfliche Akutabklärung.',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'gyn__regelmaessige_schmerzhafte_wehen', 'gyn__fruchtwasserabgang', 'gyn__vaginale_blutung',
+      'gyn__verminderte_kindsbewegungen', 'gyn__pressdrang', 'infekt__fieber_schuettelfrost',
+      'gyn__starke_anhaltende_unterbauchschmerzen',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Vorzeitige Wehentätigkeit', 'Drohende Frühgeburt', 'Chorioamnionitis'],
+    consequences: ['einer Frühgeburt, kindlicher Atemnot, Infektionen, bleibenden Entwicklungsstörungen oder dem Tod des Kindes'],
   },
 
   // -------------------------------------------------------------------------
@@ -2856,10 +4320,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Mittellinienschmerz, neurologische Symptome oder gefährlicher Mechanismus; keine sichere klinische Entwarnung.',
     application: 'Verweigerung',
     category: 'trauma',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'ruecken__starke_schmerzen', 'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung',
+      'neuro__taubheit_schritt', 'neuro__blasen_darmkontrollverlust', 'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Wirbelsäulenfraktur', 'Rückenmarkverletzung', 'Cauda-equina-Syndrom'],
+    consequences: ['instabilen Wirbelsäulenverletzungen, bleibenden Lähmungen, Blasen-/Darmstörungen oder Atemversagen'],
   },
 
   // -------------------------------------------------------------------------
@@ -2873,10 +4340,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Fieber mit Unterbauchschmerz, übel riechendem Wochenfluss oder deutlicher Allgemeinzustandsverschlechterung.',
     application: 'Verweigerung',
     category: 'gyn',
-    majorSignalIds: [],
+    majorSignalIds: [
+      'infekt__fieber_schuettelfrost', 'gyn__uebel_riechender_wochenfluss', 'abdomen__zunehmende_schmerzen',
+      'gyn__starke_vaginale_blutung', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+      'pulmo__neue_luftnot',
+    ],
     minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    diagnoses: ['Endometritis puerperalis', 'Plazentarest', 'Sepsis'],
+    consequences: ['einer Blutvergiftung, schweren Gebärmutterinfektion, bleibenden Organschäden oder dem Tod'],
   },
 
   // -------------------------------------------------------------------------
@@ -2890,10 +4361,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Lokaler beherrschbarer Schmerz; keine Schwellung, Schluckstörung, Kieferklemme oder Allgemeinsymptome; Zahnarztkontakt gesichert.',
     application: 'BvO',
     category: 'hno',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'hno__zunehmende_gesichtsschwellung', 'hno__kieferklemme', 'hno__speichel_nicht_schluckbar',
+      'pulmo__neue_luftnot', 'infekt__fieber_schuettelfrost',
+    ],
+    minorSignalIds: [
+      'hno__anhaltende_mundschmerzen',
+    ],
+    diagnoses: ['Pulpitis', 'Apikale Entzündung', 'Odontogener Abszess'],
+    consequences: ['fortschreitender Zahnentzündung, Abszessbildung, Zahnverlust oder Ausbreitung der Infektion in den Kiefer-/Halsbereich'],
   },
 
   // -------------------------------------------------------------------------
@@ -2907,16 +4383,22 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     requirements: 'Zecke entfernt, allenfalls kleine lokale Reaktion; kein Fieber oder neurologisches Symptom; Verlaufskontrolle besprochen.',
     application: 'BvO',
     category: 'haut',
-    majorSignalIds: [],
-    minorSignalIds: [],
-    diagnoses: [],
-    consequences: [],
+    majorSignalIds: [
+      'neuro__gesichtslaehmung', 'neuro__neue_nackensteifigkeit', 'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__neue_einseitige_schwaeche', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+    ],
+    minorSignalIds: [
+      'haut__sich_vergroessernde_roetung_nach_stich', 'infekt__grippeaehnliche_beschwerden',
+      'gelenk__anhaltende_leichte_schmerzen',
+    ],
+    diagnoses: ['Lyme-Borreliose', 'FSME'],
+    consequences: ['einer unerkannten Borreliose mit Gelenk-/Nervenschäden oder einer Hirnhaut-/Gehirnentzündung durch FSME'],
   },
 
 ]
 
 // ---------------------------------------------------------------------------
-// Unveränderte öffentliche Schnittstelle: flache Listen ohne Datenduplikation.
+// Öffentliche Schnittstelle: flache Listen ohne Datenduplikation.
 // filter erhält die Reihenfolge und die Referenzen auf die Originalobjekte.
 // ---------------------------------------------------------------------------
 
@@ -2934,16 +4416,3 @@ export const DATA_Redflags: RedflagCatalog = {
   scenarios: DATA_Scenarios,
   subscenarios: DATA_Subscenarios,
 }
-
-/**
- * Auswahlvertrag (Implementierung bleibt Aufgabe der Anwendung):
- * - subscenarioMode: 'all' -> universelle Inhalte + alle zugehörigen Unterfälle.
- * - subscenarioMode: 'selected' -> universelle Inhalte + nur die angegebenen
- *   Unterfälle; leere Unter-IDs enthalten ausschließlich das Hauptszenario.
- * - Ohne Modus bleiben leere Unter-IDs eine Auswahl aller Unterfälle;
- *   eine/mehrere Unter-IDs enthalten nur diese Unterfälle.
- * - Direkte Unterfallauswahl wählt das Hauptszenario über parentId mit aus.
- * - Voraussetzungstexte verschiedener Unterfälle können Alternativen sein;
- *   sie sind keine gleichzeitig erhobenen Befunde und keine BvO-Checkliste.
- * - Die neuen leeren Listen liefern noch keine vollständige Risikoaufklärung.
- */

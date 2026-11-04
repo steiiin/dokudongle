@@ -180,7 +180,11 @@ export class TreatmentRedflags {
       block += `Bei ${this.getConcatText(majorTexts)} erneut Notruf/Vorstellung NFA. \n`
     }
     if (!this.disableMinorBlock && minorTexts.length>0) {
-      block += `Bei ${this.getConcatText(minorTexts)} Rücksprache Haus-/Facharzt. \n`
+      const minorSpecialist = [...new Set(content.resolutions
+        .map(entry => entry.resolved?.scenario.minorSpecialist?.trim())
+        .filter(Boolean))].join('/')
+      const physician = minorSpecialist ? `Hausarzt/${minorSpecialist}` : 'Haus-/Facharzt'
+      block += `Bei ${this.getConcatText(minorTexts)} Rücksprache ${physician}. \n`
     }
 
     // create information text

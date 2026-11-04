@@ -94,13 +94,13 @@
         <template v-if="currentModalSections.length > 0">
           <template v-for="section in currentModalSections" :key="section.type">
             <template v-for="category in section.categories" :key="category.name">
-              <IonItemDivider class="category-divider">
+              <IonItemDivider v-if="!isSearching" class="category-divider">
                 <IonLabel>{{ category.name }}</IonLabel>
               </IonItemDivider>
               <IonItem v-for="entry in category.items" :key="entry.key" lines="full" button
                 @click="addEntry(entry)">
                 <IonLabel>
-                  <h3>{{ entry.name }}</h3>
+                  <h3 class="entry-name">{{ entry.name }} <p v-if="isSearching && entry.category" class="search-result-category">{{ entry.category }}</p></h3>
                   <p v-if="entry.subtitle">{{ entry.subtitle }}</p>
                 </IonLabel>
               </IonItem>
@@ -123,6 +123,7 @@ import { closeOutline, addCircle, closeCircle, checkmark } from 'ionicons/icons'
 import { DATA_Redflags, DATA_Scenarios, DATA_Signals, DATA_Subscenarios } from '@/data/redflags'
 import type { RedflagApplication } from '@/types/redflags'
 import { selectRedflagTarget } from '@/utils/redflags'
+import { normalizeRedflagSearch, searchRedflagEntries, type RedflagSearchEntry } from '@/utils/redflagSearch'
 import { TreatmentRedflags, type VisibleRedflag } from '@/types/protocol/treatment/treatmentRedflags'
 
 type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
@@ -156,12 +157,9 @@ const hasMinorSignals = computed(() => visibleMinorSignals.value.length > 0)
 const hasAny = computed(() => hasScenarios.value || hasMajorSignals.value || hasMinorSignals.value)
 
 type RedEntryType = 'scenario' | 'signal'
-type RedEntry = {
+type RedEntry = RedflagSearchEntry & {
   key: string
-  id: string
-  name: string
   subtitle: string
-  groupName: string
   type: 'scenario' | 'subscenario' | 'signal'
   parentId?: string
   application?: RedflagApplication
@@ -169,6 +167,7 @@ type RedEntry = {
 
 const isModalOpen = ref(false)
 const currentSearchQuery = ref('')
+const isSearching = computed(() => normalizeRedflagSearch(currentSearchQuery.value).length > 0)
 const currentFilter = ref<RedEntryType>('scenario')
 const selectionError = ref('')
 const redSearchbar = ref<{ $el?: { setFocus: () => void } } | null>(null)
@@ -179,21 +178,24 @@ const focusRedSearchbar = () => {
 const entries: RedEntry[] = [
   ...DATA_Scenarios.map(entry => ({
     key: `scenario-${entry.id}`, id: entry.id, name: entry.name,
-    subtitle: entry.requirements, groupName: entry.category,
+    name_alt: entry.name_alt, requirements: entry.requirements,
+    subtitle: entry.requirements, category: entry.category,
     type: 'scenario' as const, application: entry.application,
   })),
   ...DATA_Subscenarios.map(entry => {
     const parent = DATA_Scenarios.find(scenario => scenario.id === entry.parentId)!
     return {
       key: `subscenario-${entry.id}`, id: entry.id, name: entry.name,
+      name_alt: entry.name_alt, requirements: entry.requirements,
+      parentName: parent.name, parentNameAlt: parent.name_alt,
       subtitle: `Unterfall von ${parent.name}${entry.requirements ? ' · ' + entry.requirements : ''}`,
-      groupName: parent.category, type: 'subscenario' as const,
+      category: parent.category, type: 'subscenario' as const,
       parentId: parent.id, application: parent.application,
     }
   }),
   ...DATA_Signals.map(entry => ({
     key: `signal-${entry.id}`, id: entry.id, name: entry.text,
-    subtitle: '', groupName: '', type: 'signal' as const,
+    subtitle: '', category: '', type: 'signal' as const,
   })),
 ]
 
@@ -209,14 +211,19 @@ const currentModalSections = computed(() => {
       if (entry.type === 'subscenario' && selected?.aggregationMode === 'selected-subscenarios'
         && selected.includedSubscenarioIds.includes(entry.id)) return false
     }
-    return fuzzyMatch(currentSearchQuery.value, `${entry.name} ${entry.groupName} ${entry.subtitle}`)
+    return true
   })
+  if (isSearching.value) {
+    const results = searchRedflagEntries(visible, currentSearchQuery.value)
+    return results.length ? [{ type: currentFilter.value, categories: [{ name: '', items: results }] }] : []
+  }
   if (!visible.length) return []
   const categories = new Map<string, RedEntry[]>()
   for (const entry of visible) {
-    const items = categories.get(entry.groupName) ?? []
+    const category = entry.category ?? ''
+    const items = categories.get(category) ?? []
     items.push(entry)
-    categories.set(entry.groupName, items)
+    categories.set(category, items)
   }
   return [{
     type: currentFilter.value,
@@ -288,18 +295,6 @@ const setDisableMinorBlock = (checked: boolean) => {
   emit('update:modelValue', updated)
 }
 
-const fuzzyMatch = (search: string, target: string): boolean => {
-  const normalizedSearch = search.trim().toLowerCase()
-  if (!normalizedSearch) return true
-  const normalizedTarget = target.toLowerCase()
-  if (normalizedTarget.includes(normalizedSearch)) return true
-  let searchIndex = 0
-  for (let i = 0; i < normalizedTarget.length; i += 1) {
-    if (normalizedTarget[i] === normalizedSearch[searchIndex]) searchIndex += 1
-    if (searchIndex === normalizedSearch.length) return true
-  }
-  return false
-}
 </script>
 
 <style scoped>
@@ -394,6 +389,27 @@ const fuzzyMatch = (search: string, target: string): boolean => {
     font-size: 0.85rem;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+  }
+
+  .entry-name {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .search-result-category {
+    text-transform: uppercase;
+
+    background-color: var(--ion-background-color);
+    padding: 4px 8px;
+    margin: -4px 0;
+    border-radius: 999px;
+    letter-spacing: 1px;
+    font-size: .9em;
+    flex-shrink: 0;
+    flex-grow: 0;
   }
 
 </style>
