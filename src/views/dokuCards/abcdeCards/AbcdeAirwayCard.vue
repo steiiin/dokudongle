@@ -17,16 +17,6 @@
       :ime-dictionary="{ /* activate IME */ }">
     </DodoInputSelect>
 
-    <DodoExaminationItem id="stridor" label="Stridor"
-      v-model:assessed="store.doku.xAbcde.stridor.assessed"
-      :available="store.doku.xAbcde.isBreathing" show-line="inset"
-      @select="store.doku.xAbcde.stridor.value = true"
-      @remove="store.doku.xAbcde.stridor.value = false">
-      <DodoInputToggle v-model="store.doku.xAbcde.stridor.value">
-        Stridor?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
     <DodoItemModal label="Schleimhaut" modal-label="Mundschleimhaut"
       :state="store.doku.xAbcde.mucosaText" lines="full">
 
@@ -61,9 +51,19 @@
 
     </DodoItemModal>
 
-    <DodoInputToggle lines="none" v-model="store.doku.xAbcde.hasTongueBite">
+    <DodoInputToggle lines="full" v-model="store.doku.xAbcde.hasTongueBite">
       Zungenbiss?
     </DodoInputToggle>
+
+    <DodoExaminationItem id="stridor" label="Stridor"
+      v-model:assessed="store.doku.xAbcde.stridor.assessed"
+      :available="store.doku.xAbcde.isBreathing" show-line="inset"
+      @select="store.doku.xAbcde.stridor.value = true"
+      @remove="store.doku.xAbcde.stridor.value = false">
+      <DodoInputToggle lines="none" v-model="store.doku.xAbcde.stridor.value">
+        Stridor?
+      </DodoInputToggle>
+    </DodoExaminationItem>
 
   </DodoExaminationCard>
 </template>

@@ -1,14 +1,21 @@
 <template>
   <DodoExaminationCard title="B - Breathing">
 
-    <DodoInputSelect label="Luftnot" v-model="store.doku.xaBcde.breathlessness" lines="full"  v-if="store.doku.xAbcde.isBreathing && !ctx.isNonVerbal"
-      :options="[
-        { value: 'keine', label: 'Keine' },
-        { value: 'leichte', label: 'Leichte' },
-        { value: '', label: 'Mittlere' },
-        { value: 'schwere', label: 'Schwere' },
-      ]">
-    </DodoInputSelect>
+    <DodoExaminationItem id="breathlessness" label="Luftnot" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xaBcde.isExamined('breathlessness')"
+      @update:assessed="store.doku.xaBcde.assessment.breathlessness = $event ? 'active' : 'inactive'"
+      @select="store.doku.xaBcde.breathlessness = 'keine'" @remove="store.doku.xaBcde.breathlessness = 'keine'"
+      @activate="breathlessnessSelect?.open()" :available="store.doku.xAbcde.isBreathing">
+      <DodoInputSelect ref="breathlessnessSelect" label="Luftnot" v-model="store.doku.xaBcde.breathlessness" @update:model-value="store.doku.xaBcde.assessment.breathlessness = 'active'" lines="none"
+        :options="[
+          { value: 'keine', label: 'Keine' },
+          { value: 'leichte', label: 'Leichte' },
+          { value: '', label: 'Mittlere' },
+          { value: 'schwere', label: 'Schwere' },
+        ]">
+      </DodoInputSelect>
+    </DodoExaminationItem>
 
     <DodoItemModal label="Atemmechanik" v-if="store.doku.xAbcde.isBreathing"
       :state="store.doku.xaBcde.breathingState" lines="full">
@@ -56,11 +63,51 @@
 
       </template>
 
+      <IonItemDivider>
+        <IonLabel>Atemarbeit</IonLabel>
+      </IonItemDivider>
+      <DodoExaminationItem id="paradoxical" label="Paradoxe Atmung"
+        v-model:assessed="store.doku.xaBcde.paradoxical.assessed"
+        :available="store.doku.xAbcde.isBreathing"
+        show-line="inset"
+        @select="store.doku.xaBcde.paradoxical.value = true"
+        @remove="store.doku.xaBcde.paradoxical.value = false">
+        <DodoInputToggle lines="none" v-model="store.doku.xaBcde.paradoxical.value">
+          Paradoxe Atmung?
+        </DodoInputToggle>
+      </DodoExaminationItem>
+
+      <DodoExaminationItem id="accessoryMuscles" label="Hilfsmuskulatur"
+        v-model:assessed="store.doku.xaBcde.accessoryMuscles.assessed"
+        :available="store.doku.xAbcde.isBreathing"
+        show-line="inset"
+        @select="store.doku.xaBcde.accessoryMuscles.value = true"
+        @remove="store.doku.xaBcde.accessoryMuscles.value = false">
+        <DodoInputToggle lines="none" v-model="store.doku.xaBcde.accessoryMuscles.value">
+          Hilfsmuskulatur?
+        </DodoInputToggle>
+      </DodoExaminationItem>
+
+      <DodoExaminationItem id="retractions" label="Einziehungen"
+        v-model:assessed="store.doku.xaBcde.retractions.assessed"
+        :available="store.doku.xAbcde.isBreathing"
+        show-line="inset"
+        @select="store.doku.xaBcde.retractions.value = true"
+        @remove="store.doku.xaBcde.retractions.value = false">
+        <DodoInputToggle lines="none" v-model="store.doku.xaBcde.retractions.value">
+          Einziehungen?
+        </DodoInputToggle>
+      </DodoExaminationItem>
+
     </DodoItemModal>
 
-    <DodoExaminationItem id="auscultation" label="Auskultation" assessed-presets
+    <DodoInputToggle lines="full" v-model="store.doku.xaBcde.hasHypoxia">
+      Hypoxie (&lt;90%)?
+    </DodoInputToggle>
+
+    <DodoExaminationItem id="auscultation" label="Auskultation"
       v-model:assessed="store.doku.xaBcde.auscultation.assessed"
-      :available="store.doku.xAbcde.isBreathing" show-line="full" picker-separator-after
+      :available="store.doku.xAbcde.isBreathing" show-line="full"
       @activate="auscultationModal?.open()" @remove="resetAuscultation">
       <DodoItemModal ref="auscultationModal" label="Auskultation"
         :state="store.doku.xaBcde.auscultationState" lines="none">
@@ -92,39 +139,6 @@
       </DodoItemModal>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="accessoryMuscles" label="Hilfsmuskulatur"
-      v-model:assessed="store.doku.xaBcde.accessoryMuscles.assessed"
-      :available="store.doku.xAbcde.isBreathing"
-      show-line="inset"
-      @select="store.doku.xaBcde.accessoryMuscles.value = true"
-      @remove="store.doku.xaBcde.accessoryMuscles.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.accessoryMuscles.value">
-        Hilfsmuskulatur?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
-    <DodoExaminationItem id="retractions" label="Einziehungen"
-      v-model:assessed="store.doku.xaBcde.retractions.assessed"
-      :available="store.doku.xAbcde.isBreathing"
-      show-line="inset"
-      @select="store.doku.xaBcde.retractions.value = true"
-      @remove="store.doku.xaBcde.retractions.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.retractions.value">
-        Einziehungen?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
-    <DodoExaminationItem id="paradoxical" label="Paradoxe Atmung"
-      v-model:assessed="store.doku.xaBcde.paradoxical.assessed"
-      :available="store.doku.xAbcde.isBreathing"
-      show-line="inset"
-      @select="store.doku.xaBcde.paradoxical.value = true"
-      @remove="store.doku.xaBcde.paradoxical.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.paradoxical.value">
-        Paradoxe Atmung?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
     <DodoExaminationItem id="jugularVenousDistension" label="Halsvenenstauung"
       v-model:assessed="store.doku.xaBcde.jugularVenousDistension.assessed"
       show-line="inset"
@@ -154,22 +168,19 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
-    <DodoInputToggle lines="none" v-model="store.doku.xaBcde.hasHypoxia">
-      Hypoxie (&lt;90%)?
-    </DodoInputToggle>
-
   </DodoExaminationCard>
 </template>
 
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
+import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import DodoItemModal from '@/components/DodoItemModal.vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
-const ctx = computed(() => store.context)
+const breathlessnessSelect = ref<InstanceType<typeof DodoInputSelect>>()
 
 // ############################################################################
 

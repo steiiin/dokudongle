@@ -88,7 +88,7 @@ describe('Reanimation restoration', () => {
     store.doku.xabcDe.headache = headache
     mountClinicalCards()
     store.setFlavor('reanimation', true)
-    expect(store.doku.xabcDe.headache).toBe(false)
+    expect(store.doku.xabcDe.headache).toBe(headache)
     store.setFlavor('reanimation', false)
     await nextTick()
     expect(store.doku.xabcDe.headache).toBe(headache)
@@ -142,8 +142,8 @@ describe('Reanimation restoration', () => {
     expect(store.doku.xAbcde.mucosa.e).toBe('bläulich')
     expect(store.doku.xabcDe.baseline).toBe(false)
     if (!nonVerbal) {
-      expect(store.doku.xabcDe.headache).toBe(false)
-      expect(store.doku.xabcdE.abdominal.value.pain).toBe('keine')
+      expect(store.doku.xabcDe.headache).toBe(true)
+      expect(store.doku.xabcdE.abdominal.value.pain).toBe('starke')
     }
     await nextTick()
     store.setFlavor('reanimation', false)
@@ -298,7 +298,7 @@ describe('Reanimation restoration', () => {
     expect(store.doku.xaBcde.mechanics.pattern).toBe('')
     expect(store.doku.xaBcde.hasHypoxia).toBe(true)
     expect(store.doku.xabCde.pulse.peripheralStrength).toBe('nicht')
-    expect(store.doku.xabcDe.headache).toBe(false)
-    expect(store.doku.xabcdE.abdominal.value.pain).toBe('keine')
+    expect(store.doku.xabcDe.headache).toBe(true)
+    expect(store.doku.xabcdE.abdominal.value.pain).toBe('starke')
   })
 })

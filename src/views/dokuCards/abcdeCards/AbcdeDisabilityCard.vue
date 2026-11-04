@@ -11,87 +11,101 @@
       ]">
     </DodoInputSelect>
 
-    <DodoItemModal v-if="!ctx.isNonVerbal && ctx.isPediatric" lines="inset"
-      label="Orientierung (pädiatrisch)"
-      :state="store.doku.xabcDe.zops.pediatricState">
+    <DodoExaminationItem id="zops" label="Orientierung (pädiatrisch)" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xabcDe.isExamined('zops')"
+      @update:assessed="store.doku.xabcDe.assessment.zops = $event ? 'active' : 'inactive'"
+      @select="resetOrientation" @remove="resetOrientation"
+      @activate="pediatricOrientationModal?.open()" :available="ctx.isPediatric">
+      <DodoItemModal ref="pediatricOrientationModal" v-if="ctx.isPediatric" lines="none"
+        label="Orientierung (pädiatrisch)"
+        :state="store.doku.xabcDe.zops.pediatricState">
 
-      <DodoInputSelect v-model="store.doku.xabcDe.zops.consciousness"
-        label="Vigilanz" lines="full"
-        :options="[
-          { value: 'aufmerksam', label: 'Aufmerksam' },
-          { value: 'ablenkbar', label: 'Ablenkbar' },
-          { value: 'unaufmerksam', label: 'Unaufmerksam' },
-          { value: 'abwesend', label: 'Abwesend' },
-        ]">
-      </DodoInputSelect>
-      <DodoInputSelect v-model="store.doku.xabcDe.zops.affect"
-        label="Affekt" lines="full"
-        :options="[
-          { value: 'ruhig', label: 'Ruhig' },
-          { value: 'troestbar', label: 'Tröstbar' },
-          { value: 'untroestbar', label: 'Untröstbar' },
-        ]">
-      </DodoInputSelect>
-      <DodoInputSelect v-model="store.doku.xabcDe.zops.response"
-        label="Reaktion" lines="none"
-        :options="[
-          { value: 'adaequat', label: 'Adäquat' },
-          { value: 'inadaequat', label: 'Inadaequat' },
-          { value: 'keine', label: 'Keine' },
-        ]">
-      </DodoInputSelect>
+        <DodoInputSelect v-model="store.doku.xabcDe.zops.consciousness" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'"
+          label="Vigilanz" lines="full"
+          :options="[
+            { value: 'aufmerksam', label: 'Aufmerksam' },
+            { value: 'ablenkbar', label: 'Ablenkbar' },
+            { value: 'unaufmerksam', label: 'Unaufmerksam' },
+            { value: 'abwesend', label: 'Abwesend' },
+          ]">
+        </DodoInputSelect>
+        <DodoInputSelect v-model="store.doku.xabcDe.zops.affect" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'"
+          label="Affekt" lines="full"
+          :options="[
+            { value: 'ruhig', label: 'Ruhig' },
+            { value: 'troestbar', label: 'Tröstbar' },
+            { value: 'untroestbar', label: 'Untröstbar' },
+          ]">
+        </DodoInputSelect>
+        <DodoInputSelect v-model="store.doku.xabcDe.zops.response" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'"
+          label="Reaktion" lines="none"
+          :options="[
+            { value: 'adaequat', label: 'Adäquat' },
+            { value: 'inadaequat', label: 'Inadaequat' },
+            { value: 'keine', label: 'Keine' },
+          ]">
+        </DodoInputSelect>
 
-    </DodoItemModal>
+      </DodoItemModal>
+    </DodoExaminationItem>
 
-    <DodoItemModal v-if="!ctx.isNonVerbal && !ctx.isPediatric"
-      label="Orientierung" lines="inset"
-      :state="store.doku.xabcDe.zops.adultState">
+    <DodoExaminationItem id="zops" label="Orientierung" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xabcDe.isExamined('zops')"
+      @update:assessed="store.doku.xabcDe.assessment.zops = $event ? 'active' : 'inactive'"
+      @select="resetOrientation" @remove="resetOrientation"
+      @activate="orientationModal?.open()" :available="!ctx.isPediatric">
+      <DodoItemModal ref="orientationModal" v-if="!ctx.isPediatric"
+        label="Orientierung" lines="none"
+        :state="store.doku.xabcDe.zops.adultState">
 
-      <IonItem lines="inset">
-        <IonLabel>Zeitlich</IonLabel>
-        <DodoToggleGroup v-model="store.doku.xabcDe.zops.Z">
-          <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
-          <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
-          <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
-        </DodoToggleGroup>
-      </IonItem>
-      <IonItem lines="inset">
-        <IonLabel>Örtlich</IonLabel>
-        <DodoToggleGroup v-model="store.doku.xabcDe.zops.O">
-          <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
-          <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
-          <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
-        </DodoToggleGroup>
-      </IonItem>
-      <IonItem lines="inset">
-        <IonLabel>Zur Person</IonLabel>
-        <DodoToggleGroup v-model="store.doku.xabcDe.zops.P">
-          <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
-          <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
-          <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
-        </DodoToggleGroup>
-      </IonItem>
-      <IonItem lines="full">
-        <IonLabel>Situativ</IonLabel>
-        <DodoToggleGroup v-model="store.doku.xabcDe.zops.S">
-          <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
-          <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
-          <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
-        </DodoToggleGroup>
-      </IonItem>
+        <IonItem lines="inset">
+          <IonLabel>Zeitlich</IonLabel>
+          <DodoToggleGroup v-model="store.doku.xabcDe.zops.Z" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'">
+            <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+            <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+            <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+          </DodoToggleGroup>
+        </IonItem>
+        <IonItem lines="inset">
+          <IonLabel>Örtlich</IonLabel>
+          <DodoToggleGroup v-model="store.doku.xabcDe.zops.O" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'">
+            <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+            <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+            <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+          </DodoToggleGroup>
+        </IonItem>
+        <IonItem lines="inset">
+          <IonLabel>Zur Person</IonLabel>
+          <DodoToggleGroup v-model="store.doku.xabcDe.zops.P" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'">
+            <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+            <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+            <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+          </DodoToggleGroup>
+        </IonItem>
+        <IonItem lines="full">
+          <IonLabel>Situativ</IonLabel>
+          <DodoToggleGroup v-model="store.doku.xabcDe.zops.S" @update:model-value="store.doku.xabcDe.assessment.zops = 'active'">
+            <DodoToggleButton color="success" value="ja">Ja</DodoToggleButton>
+            <DodoToggleButton color="warning" value="teilweise">Teilw.</DodoToggleButton>
+            <DodoToggleButton color="danger" value="nein">Nein</DodoToggleButton>
+          </DodoToggleGroup>
+        </IonItem>
 
-      <div class="quicktoggle">
-        <IonChip color="success" v-if="!store.doku.xabcDe.zops.isOriented"
-          @click="setZopsYes">
-          <IonLabel>Alle Orientiert</IonLabel>
-        </IonChip>
-        <IonChip color="danger" v-if="!store.doku.xabcDe.zops.isUnoriented"
-          @click="setZopsNo">
-          <IonLabel>Alle Desorientiert</IonLabel>
-        </IonChip>
-      </div>
+        <div class="quicktoggle">
+          <IonChip color="success" v-if="!store.doku.xabcDe.zops.isOriented"
+            @click="setZopsYes">
+            <IonLabel>Alle Orientiert</IonLabel>
+          </IonChip>
+          <IonChip color="danger" v-if="!store.doku.xabcDe.zops.isUnoriented"
+            @click="setZopsNo">
+            <IonLabel>Alle Desorientiert</IonLabel>
+          </IonChip>
+        </div>
 
-    </DodoItemModal>
+      </DodoItemModal>
+    </DodoExaminationItem>
 
     <DodoItemModal
       label="GCS"
@@ -131,38 +145,62 @@
 
     </DodoItemModal>
 
-    <DodoInputToggle v-if="!ctx.isNonVerbal" lines="inset" v-model="store.doku.xabcDe.headache">
-      Kopfschmerzen?
+    <DodoExaminationItem id="headache" label="Kopfschmerzen" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xabcDe.isExamined('headache')"
+      @update:assessed="store.doku.xabcDe.assessment.headache = $event ? 'active' : 'inactive'"
+      @select="store.doku.xabcDe.headache = true" @remove="store.doku.xabcDe.headache = false">
+      <DodoInputToggle lines="none" v-model="store.doku.xabcDe.headache" @update:model-value="store.doku.xabcDe.assessment.headache = 'active'">
+        Kopfschmerzen?
+      </DodoInputToggle>
+    </DodoExaminationItem>
+
+    <DodoExaminationItem id="dizziness" label="Schwindel" show-line="inset"
+      :removable="store.context.isNonVerbal"
+      :assessed="store.doku.xabcDe.isExamined('dizziness')"
+      @update:assessed="store.doku.xabcDe.assessment.dizziness = $event ? 'active' : 'inactive'"
+      @select="store.setDizziness('kein')" @remove="store.setDizziness('kein', false)"
+      @activate="dizzinessSelect?.open()">
+      <DodoInputSelect ref="dizzinessSelect" :model-value="store.doku.xabcDe.dizziness"
+        @update:model-value="store.setDizziness($event as typeof store.doku.xabcDe.dizziness)"
+        label="Schwindel" lines="none"
+        :options="[
+          { value: 'kein', label: 'Keiner' },
+          { value: 'ungerichteter', label: 'Ungerichtet/Diffus' },
+          { value: 'gerichteter', label: 'Dreh-/Schwankschwindel' },
+        ]">
+      </DodoInputSelect>
+    </DodoExaminationItem>
+
+    <DodoInputToggle lines="full" v-if="store.doku.xabcDe.couldBeBaseline" v-model="store.doku.xabcDe.baseline">
+      Entspricht Baseline?
     </DodoInputToggle>
 
-    <DodoInputSelect :model-value="store.doku.xabcDe.dizziness"
-      @update:model-value="store.setDizziness($event as typeof store.doku.xabcDe.dizziness)"
-      label="Schwindel" lines="full"
-      :options="[
-        { value: 'kein', label: 'Keiner' },
-        { value: 'ungerichteter', label: 'Ungerichtet/Diffus' },
-        { value: 'gerichteter', label: 'Dreh-/Schwankschwindel' },
-      ]">
-    </DodoInputSelect>
-
-    <DodoExaminationItem id="neuro" label="Neuro-Befund" assessed-presets show-line="inset"
+    <DodoExaminationItem id="neuro" label="Neuro-Befund" show-line="inset"
       v-model:assessed="store.doku.xabcDe.neuro.assessed"
-      @select="resetNeuro" @activate="neuroModal?.open()" @remove="resetNeuro">
+      @select="selectNeuro" @activate="neuroModal?.open()" @remove="resetNeuro">
       <DodoItemModal ref="neuroModal" label="Neuro-Befund" modal-label="Neurologischer Befund"
         :state="store.doku.xabcDe.neuro.value.state" lines="none">
 
-        <IonItemDivider v-if="!ctx.isNonVerbal">
+        <IonItemDivider>
           <IonLabel>Bewusstsein</IonLabel>
         </IonItemDivider>
-        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.followInstructions"
-          label="Anweisungen befolgen" description="Zwinkern + nicht-paretische Hand öffnen/schließen"
-          lines="none"
-          :options="[
-            { value: 'befolgt', label: 'Beide' },
-            { value: 'teilweise befolgt', label: 'Eine' },
-            { value: 'nicht befolgt', label: 'Keine' },
-          ]">
-        </DodoInputSelect>
+        <DodoExaminationItem id="followInstructions" label="Anweisungen befolgen" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('followInstructions')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.followInstructions = $event ? 'active' : 'inactive'"
+          @select="resetNeuroField('followInstructions')" @remove="resetNeuroField('followInstructions')"
+          @activate="followInstructionsSelect?.open()">
+          <DodoInputSelect ref="followInstructionsSelect" v-model="store.doku.xabcDe.neuro.value.followInstructions" @update:model-value="store.doku.xabcDe.neuro.value.assessment.followInstructions = 'active'"
+            label="Anweisungen befolgen" description="Zwinkern + nicht-paretische Hand öffnen/schließen"
+            lines="none"
+            :options="[
+              { value: 'befolgt', label: 'Beide' },
+              { value: 'teilweise befolgt', label: 'Eine' },
+              { value: 'nicht befolgt', label: 'Keine' },
+            ]">
+          </DodoInputSelect>
+        </DodoExaminationItem>
 
         <IonItemDivider>
           <IonLabel>Motorik</IonLabel>
@@ -201,60 +239,93 @@
           ]">
         </DodoInputSelectLR>
 
-        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.msMeningism"
-          label="Nackensteife" lines="full"
-          :options="[
-            { value: '', label: 'Nicht Anwendbar' },
-            { value: 'kein', label: 'Nein' },
-            { value: 'leichter', label: 'Leicht' },
-            { value: 'ausgeprägter', label: 'Ausgeprägt' },
-          ]">
-        </DodoInputSelect>
+        <DodoExaminationItem id="msMeningism" label="Nackensteife" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('msMeningism')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.msMeningism = $event ? 'active' : 'inactive'"
+          @select="resetNeuroField('msMeningism')" @remove="resetNeuroField('msMeningism')"
+          @activate="msMeningismSelect?.open()">
+          <DodoInputSelect ref="msMeningismSelect" v-model="store.doku.xabcDe.neuro.value.msMeningism" @update:model-value="store.doku.xabcDe.neuro.value.assessment.msMeningism = 'active'"
+            label="Nackensteife" lines="none"
+            :options="[
+              { value: '', label: 'Nicht Anwendbar' },
+              { value: 'kein', label: 'Nein' },
+              { value: 'leichter', label: 'Leicht' },
+              { value: 'ausgeprägter', label: 'Ausgeprägt' },
+            ]">
+          </DodoInputSelect>
+        </DodoExaminationItem>
 
         <DodoInputToggle lines="none" v-model="store.doku.xabcDe.neuro.value.msTremor">
           Tremor/Myoklonien?
         </DodoInputToggle>
 
-        <IonItemDivider v-if="!ctx.isNonVerbal">
+        <IonItemDivider>
           <IonLabel>Sensorik</IonLabel>
         </IonItemDivider>
-        <DodoInputTextOptional v-if="!ctx.isNonVerbal" lines="inset"
-          toggle-label="Sensibilität gestört?" v-model:toggle="store.doku.xabcDe.neuro.value.sensitivity.active"
-          text-label="Wie?" text-placeholder="z.B. Taubheit li. Arm" v-model:text="store.doku.xabcDe.neuro.value.sensitivity.value">
-        </DodoInputTextOptional>
-        <DodoInputTextOptional v-if="!ctx.isNonVerbal" lines="none"
-          toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.neuro.value.paraesthesia.active"
-          text-label="Wie?" text-placeholder="z.B. Kribbeln li. Arm" v-model:text="store.doku.xabcDe.neuro.value.paraesthesia.value">
-        </DodoInputTextOptional>
+        <DodoExaminationItem id="sensitivity" label="Sensibilität gestört?" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('sensitivity')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.sensitivity = $event ? 'active' : 'inactive'"
+          @select="store.doku.xabcDe.neuro.value.sensitivity.active = true" @remove="resetNeuroField('sensitivity')" @activate="sensitivityInput?.focus()">
+          <DodoInputTextOptional ref="sensitivityInput" lines="none"
+            toggle-label="Sensibilität gestört?" v-model:toggle="store.doku.xabcDe.neuro.value.sensitivity.active" @update:toggle="store.doku.xabcDe.neuro.value.assessment.sensitivity = 'active'"
+            text-label="Wie?" text-placeholder="z.B. Taubheit li. Arm" v-model:text="store.doku.xabcDe.neuro.value.sensitivity.value" @update:text="store.doku.xabcDe.neuro.value.assessment.sensitivity = 'active'">
+          </DodoInputTextOptional>
+        </DodoExaminationItem>
+        <DodoExaminationItem id="paraesthesia" label="Parästhesien?" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('paraesthesia')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.paraesthesia = $event ? 'active' : 'inactive'"
+          @select="store.doku.xabcDe.neuro.value.paraesthesia.active = true" @remove="resetNeuroField('paraesthesia')" @activate="paraesthesiaInput?.focus()">
+          <DodoInputTextOptional ref="paraesthesiaInput" lines="none"
+            toggle-label="Parästhesien?" v-model:toggle="store.doku.xabcDe.neuro.value.paraesthesia.active" @update:toggle="store.doku.xabcDe.neuro.value.assessment.paraesthesia = 'active'"
+            text-label="Wie?" text-placeholder="z.B. Kribbeln li. Arm" v-model:text="store.doku.xabcDe.neuro.value.paraesthesia.value" @update:text="store.doku.xabcDe.neuro.value.assessment.paraesthesia = 'active'">
+          </DodoInputTextOptional>
+        </DodoExaminationItem>
 
-        <IonItemDivider v-if="!ctx.isNonVerbal">
+        <IonItemDivider>
           <IonLabel>Sprache</IonLabel>
         </IonItemDivider>
-        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.dysarthria"
-          label="Artikulation" lines="inset"
-          :options="[
-            { value: '', label: 'Nicht Anwendbar' },
-            { value: 'normal', label: 'Normal' },
-            { value: 'verwaschen', label: 'Verwaschen' },
-            { value: 'unverständlich', label: 'Unverständlich' },
-            { value: 'stumm', label: 'Stumm' },
-          ]">
-        </DodoInputSelect>
-        <DodoInputSelect v-if="!ctx.isNonVerbal" v-model="store.doku.xabcDe.neuro.value.aphasia"
-          label="Aphasie" :description=" !aphasiaNote ? 'Sprachbildung + Verständnis' : aphasiaNote" lines="none"
-          :options="[
-            { value: '', label: 'Nicht Anwendbar' },
-            { value: 'keine', label: 'Keine' },
-            { value: 'leichte', label: 'Leichte' },
-            { value: 'schwere', label: 'Schwere' },
-            { value: 'globale', label: 'Global' },
-          ]">
-        </DodoInputSelect>
+        <DodoExaminationItem id="dysarthria" label="Artikulation" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('dysarthria')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.dysarthria = $event ? 'active' : 'inactive'"
+          @select="resetNeuroField('dysarthria')" @remove="resetNeuroField('dysarthria')"
+          @activate="dysarthriaSelect?.open()">
+          <DodoInputSelect ref="dysarthriaSelect" v-model="store.doku.xabcDe.neuro.value.dysarthria" @update:model-value="store.doku.xabcDe.neuro.value.assessment.dysarthria = 'active'"
+            label="Artikulation" lines="none"
+            :options="[
+              { value: '', label: 'Nicht Anwendbar' },
+              { value: 'normal', label: 'Normal' },
+              { value: 'verwaschen', label: 'Verwaschen' },
+              { value: 'unverständlich', label: 'Unverständlich' },
+              { value: 'stumm', label: 'Stumm' },
+            ]">
+          </DodoInputSelect>
+        </DodoExaminationItem>
+        <DodoExaminationItem id="aphasia" label="Aphasie" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('aphasia')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.aphasia = $event ? 'active' : 'inactive'"
+          @select="resetNeuroField('aphasia')" @remove="resetNeuroField('aphasia')"
+          @activate="aphasiaSelect?.open()">
+          <DodoInputSelect ref="aphasiaSelect" v-model="store.doku.xabcDe.neuro.value.aphasia" @update:model-value="store.doku.xabcDe.neuro.value.assessment.aphasia = 'active'"
+            label="Aphasie" :description=" !aphasiaNote ? 'Sprachbildung + Verständnis' : aphasiaNote" lines="none"
+            :options="[
+              { value: '', label: 'Nicht Anwendbar' },
+              { value: 'keine', label: 'Keine' },
+              { value: 'leichte', label: 'Leichte' },
+              { value: 'schwere', label: 'Schwere' },
+              { value: 'globale', label: 'Global' },
+            ]">
+          </DodoInputSelect>
+        </DodoExaminationItem>
 
       </DodoItemModal>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="psych" label="Psych-Befund" assessed-presets show-line="inset"
+    <DodoExaminationItem id="psych" label="Psych-Befund" show-line="inset"
       v-model:assessed="store.doku.xabcDe.psych.assessed"
       @select="resetPsych" @activate="psychModal?.open()" @remove="resetPsych">
       <DodoItemModal ref="psychModal" lines="none" label="Psych-Befund"
@@ -326,10 +397,6 @@
       </IonItem>
     </DodoExaminationItem>
 
-    <DodoInputToggle lines="none" v-if="store.doku.xabcDe.couldBeBaseline" v-model="store.doku.xabcDe.baseline">
-      Entspricht Baseline?
-    </DodoInputToggle>
-
   </DodoExaminationCard>
 </template>
 
@@ -339,8 +406,9 @@ import { computed, ref, watch } from 'vue'
 
 import DodoItemModal from '@/components/DodoItemModal.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
+import DodoInputTextOptional from '@/components/DodoInputTextOptional.vue'
 import DodoInputText from '@/components/DodoInputText.vue'
-import { DisabilityNeuro, DisabilityPsych } from '@/types/protocol/abcde'
+import { DisabilityNeuro, DisabilityPsych, DisabilityZops } from '@/types/protocol/abcde'
 
 import { useDokuStore } from '@/store/doku'
 import { isRestoringReanimation } from '@/store/reanimation'
@@ -350,6 +418,31 @@ const bloodGlucoseSelect = ref<InstanceType<typeof DodoInputSelect> | null>(null
 const neuroModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const psychModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const intoxicationInput = ref<InstanceType<typeof DodoInputText> | null>(null)
+const orientationModal = ref<InstanceType<typeof DodoItemModal>>()
+const pediatricOrientationModal = ref<InstanceType<typeof DodoItemModal>>()
+const dizzinessSelect = ref<InstanceType<typeof DodoInputSelect>>()
+const followInstructionsSelect = ref<InstanceType<typeof DodoInputSelect>>()
+const msMeningismSelect = ref<InstanceType<typeof DodoInputSelect>>()
+const dysarthriaSelect = ref<InstanceType<typeof DodoInputSelect>>()
+const sensitivityInput = ref<InstanceType<typeof DodoInputTextOptional>>()
+const paraesthesiaInput = ref<InstanceType<typeof DodoInputTextOptional>>()
+const aphasiaSelect = ref<InstanceType<typeof DodoInputSelect>>()
+
+function resetOrientation() {
+  store.doku.xabcDe.zops = new DisabilityZops()
+}
+
+function resetNeuroField<K extends keyof DisabilityNeuro['assessment']>(field: K) {
+  store.doku.xabcDe.neuro.value[field] = new DisabilityNeuro()[field]
+}
+
+function selectNeuro() {
+  const intent = { ...store.doku.xabcDe.neuro.value.assessment }
+  resetNeuro()
+  const neuro = store.doku.xabcDe.neuro.value
+  neuro.assessment = intent
+}
+
 
 function resetNeuro() {
   store.doku.xabcDe.neuro.value = new DisabilityNeuro()
@@ -388,6 +481,7 @@ const disorderDescription = computed(() => {
 // ############################################################################
 
 const setZopsNo = () => {
+  store.doku.xabcDe.assessment.zops = 'active'
   store.doku.xabcDe.zops.Z = 'nein'
   store.doku.xabcDe.zops.O = 'nein'
   store.doku.xabcDe.zops.P = 'nein'
@@ -395,6 +489,7 @@ const setZopsNo = () => {
 }
 
 const setZopsYes = () => {
+  store.doku.xabcDe.assessment.zops = 'active'
   store.doku.xabcDe.zops.Z = 'ja'
   store.doku.xabcDe.zops.O = 'ja'
   store.doku.xabcDe.zops.P = 'ja'
@@ -417,20 +512,7 @@ const aphasiaNote = computed(() => {
 
 // ############################################################################
 
-watch(() => ctx.value.isNonVerbal, (isNonVerbal) => {
-  if (isRestoringReanimation(store.doku)) return
-  store.doku.xabcDe.headache = false
-  if (isNonVerbal) {
-    const defaults = new DisabilityNeuro()
-    const neuro = store.doku.xabcDe.neuro.value
-    neuro.followInstructions = defaults.followInstructions
-    neuro.msMeningism = defaults.msMeningism
-    neuro.sensitivity = defaults.sensitivity
-    neuro.paraesthesia = defaults.paraesthesia
-    neuro.dysarthria = defaults.dysarthria
-    neuro.aphasia = defaults.aphasia
-  }
-}, { flush: 'sync' })
+
 
 watch(() => store.doku.xabcDe.couldBeBaseline, () => {
   if (isRestoringReanimation(store.doku)) return

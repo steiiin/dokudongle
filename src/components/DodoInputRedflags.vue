@@ -4,10 +4,38 @@
     <IonCardContent class="dodo-redflag-input-content">
       <div class="chip-container" v-if="hasScenarios">
         <div class="chip-container-label">Szenarien</div>
-        <IonChip color="success" v-for="scenario in modelValue.choosenScenarios" :key="scenario.id" @click="removeScenario(scenario)">
+        <IonChip color="success" v-for="scenario in modelValue.choosenScenarios" :key="`legacy-${scenario.id}`" @click="removeLegacyScenario(scenario.id)">
           <IonLabel>{{ scenario.name }}</IonLabel>
           <IonIcon :icon="closeCircle"></IonIcon>
         </IonChip>
+        <div v-for="(group, index) in selectedGroups" :key="index" class="selected-scenario">
+          <IonChip color="success" class="scenario-chip" @click="removeScenario(index)">
+            <IonLabel>{{ group.name }}{{ group.allSubscenarios ? ' (alle Unterfälle)' : '' }}</IonLabel>
+            <IonIcon :icon="closeCircle" />
+          </IonChip>
+          <div v-if="group.children.length" class="subscenario-chips">
+            <DodoToggleChip v-for="child in group.children" :key="child.id" color="success"
+              class="subscenario-chip" :model-value="child.active" :disabled="!!group.error"
+              role="button" :tabindex="group.error ? -1 : 0" :aria-pressed="child.active"
+              :aria-label="child.name"
+              @update:model-value="setSubscenarioActive(index, child.id, $event)"
+              @keydown.enter.prevent="setSubscenarioActive(index, child.id, !child.active)"
+              @keydown.space.prevent="setSubscenarioActive(index, child.id, !child.active)">
+              <IonLabel>{{ child.name }}</IonLabel>
+              <IonIcon v-if="child.active" :icon="checkmark" aria-hidden="true" />
+            </DodoToggleChip>
+          </div>
+          <IonChip v-for="child in group.invalidChildren" :key="child.id" color="danger"
+            class="invalid-subscenario-chip" @click="removeInvalidSubscenario(index, child.id)">
+            <IonLabel>{{ child.name }}</IonLabel>
+            <IonIcon :icon="closeCircle" />
+          </IonChip>
+          <p v-if="group.error" role="alert" class="selection-error">{{ group.error }}</p>
+          <div v-if="group.requirements.length" class="scenario-requirements">
+            <div>Voraussetzungen / Abgrenzung der einbezogenen Szenarien:</div>
+            <p v-for="requirement in group.requirements" :key="requirement">{{ requirement }}</p>
+          </div>
+        </div>
       </div>
       <div class="chip-container" v-if="hasMajorSignals">
         <div class="chip-container-label">Redflags (dringlich)</div>
@@ -54,6 +82,7 @@
       </IonToolbar>
     </IonHeader>
     <IonContent>
+      <p v-if="selectionError" role="alert" class="selection-error">{{ selectionError }}</p>
       <IonList>
         <IonSearchbar v-model="currentSearchQuery"
           ref="redSearchbar" placeholder="z.B. Synkope, ACS, Kopfschmerzen">
@@ -65,13 +94,13 @@
         <template v-if="currentModalSections.length > 0">
           <template v-for="section in currentModalSections" :key="section.type">
             <template v-for="category in section.categories" :key="category.name">
-              <IonItemDivider class="category-divider">
+              <IonItemDivider v-if="!isSearching" class="category-divider">
                 <IonLabel>{{ category.name }}</IonLabel>
               </IonItemDivider>
               <IonItem v-for="entry in category.items" :key="entry.key" lines="full" button
                 @click="addEntry(entry)">
                 <IonLabel>
-                  <h3>{{ entry.name }}</h3>
+                  <h3 class="entry-name">{{ entry.name }} <p v-if="isSearching && entry.category" class="search-result-category">{{ entry.category }}</p></h3>
                   <p v-if="entry.subtitle">{{ entry.subtitle }}</p>
                 </IonLabel>
               </IonItem>
@@ -88,283 +117,183 @@
 </template>
 
 <script setup lang="ts">
-
-
 import { computed, ref } from 'vue'
 import type { UnwrapRef } from 'vue'
-
-import { closeOutline, addCircle, closeCircle } from 'ionicons/icons'
-
-import { RedflagApplication, RedflagScenario, RedflagSignal, DATA_Scenarios, DATA_Signals } from '@/data/redflags'
-import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags'
+import { closeOutline, addCircle, closeCircle, checkmark } from 'ionicons/icons'
+import { DATA_Redflags, DATA_Scenarios, DATA_Signals, DATA_Subscenarios } from '@/data/redflags'
+import type { RedflagApplication } from '@/types/redflags'
+import { selectRedflagTarget } from '@/utils/redflags'
+import { normalizeRedflagSearch, searchRedflagEntries, type RedflagSearchEntry } from '@/utils/redflagSearch'
+import { TreatmentRedflags, type VisibleRedflag } from '@/types/protocol/treatment/treatmentRedflags'
 
 type TreatmentRedflagsModel = TreatmentRedflags | UnwrapRef<TreatmentRedflags>
-
 const props = defineProps<{ modelValue: TreatmentRedflagsModel }>()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: TreatmentRedflagsModel): void
 }>()
 
-const allScenarios = DATA_Scenarios
-const allSignals = DATA_Signals
-
-const cloneModelValue = (): TreatmentRedflagsModel => {
-  const clone = Object.assign(new TreatmentRedflags(), props.modelValue)
-  clone.choosenScenarios = [...props.modelValue.choosenScenarios]
-  clone.choosenSignals = [...props.modelValue.choosenSignals]
-  clone.removedMajorSignals = [...(props.modelValue.removedMajorSignals ?? [])]
-  clone.removedMinorSignals = [...(props.modelValue.removedMinorSignals ?? [])]
-  clone.disableMinorBlock = props.modelValue.disableMinorBlock ?? false
-  return clone
-}
-
-const hasScenarios = computed(() => props.modelValue.choosenScenarios.length > 0)
+const cloneModelValue = (): TreatmentRedflags => Object.assign(new TreatmentRedflags(), props.modelValue)
+const content = computed(() => props.modelValue.getResolvedContent())
+const selectedGroups = computed(() => content.value.resolutions.map(({ selection, resolved, error }) => {
+  const scenario = DATA_Scenarios.find(entry => entry.id === selection?.scenarioId)
+  const subIds = Array.isArray(selection?.subscenarioIds) ? selection.subscenarioIds : []
+  const children = DATA_Subscenarios.filter(entry => entry.parentId === scenario?.id)
+    .map(entry => ({ id: entry.id, name: entry.name, active: resolved?.includedSubscenarioIds.includes(entry.id) ?? false }))
+  return {
+    name: scenario?.name ?? selection?.scenarioId ?? 'Ungültige Auswahl',
+    allSubscenarios: children.length > 0 && children.every(child => child.active),
+    children,
+    invalidChildren: [...new Set(subIds)].filter(id => !children.some(child => child.id === id))
+      .map(id => ({ id, name: DATA_Subscenarios.find(entry => entry.id === id)?.name ?? id })),
+    requirements: resolved?.requirements ?? [],
+    error,
+  }
+}))
+const hasScenarios = computed(() => props.modelValue.choosenScenarios.length > 0 || selectedGroups.value.length > 0)
+const visibleMajorSignals = computed(() => content.value.majorSignals)
+const visibleMinorSignals = computed(() => content.value.minorSignals)
+const hasMajorSignals = computed(() => visibleMajorSignals.value.length > 0)
+const hasMinorSignals = computed(() => visibleMinorSignals.value.length > 0)
 const hasAny = computed(() => hasScenarios.value || hasMajorSignals.value || hasMinorSignals.value)
 
 type RedEntryType = 'scenario' | 'signal'
-
-type RedEntry = {
+type RedEntry = RedflagSearchEntry & {
   key: string
-  id: string
-  name: string
   subtitle: string
-  groupName: string
-  type: RedEntryType
-}
-
-type VisibleRedflag = {
-  key: string
-  text: string
-  source: 'scenario-major' | 'scenario-minor' | 'custom-major'
-  signal?: RedflagSignal
-}
-
-type RedSectionCategory = {
-  name: string
-  items: RedEntry[]
-}
-
-type RedSection = {
-  type: RedEntryType
-  label: string
-  categories: RedSectionCategory[]
+  type: 'scenario' | 'subscenario' | 'signal'
+  parentId?: string
+  application?: RedflagApplication
 }
 
 const isModalOpen = ref(false)
 const currentSearchQuery = ref('')
+const isSearching = computed(() => normalizeRedflagSearch(currentSearchQuery.value).length > 0)
 const currentFilter = ref<RedEntryType>('scenario')
-const redSearchbar = ref<any | null>(null)
-
-const interleaveUnique = (lists: string[][]): string[] => {
-  const result: string[] = []
-  const seen = new Set<string>()
-  const maxLength = Math.max(...lists.map(list => list.length), 0)
-  for (let i = 0; i < maxLength; i += 1) {
-    for (const list of lists) {
-      const value = list[i]
-      if (value && !seen.has(value)) {
-        seen.add(value)
-        result.push(value)
-      }
-    }
-  }
-  return result
-}
-
-const inheritedMajorSignals = computed(() => {
-  const removed = new Set(props.modelValue.removedMajorSignals ?? [])
-  return interleaveUnique(props.modelValue.choosenScenarios.map(scenario => scenario.majorSignals))
-    .filter(text => !removed.has(text))
-})
-
-const inheritedMinorSignals = computed(() => {
-  const removed = new Set(props.modelValue.removedMinorSignals ?? [])
-  return interleaveUnique(props.modelValue.choosenScenarios.map(scenario => scenario.minorSignals))
-    .filter(text => !removed.has(text))
-})
-
-const visibleMajorSignals = computed<VisibleRedflag[]>(() => [
-  ...inheritedMajorSignals.value.map(text => ({
-    key: `scenario-major-${text}`,
-    text,
-    source: 'scenario-major' as const,
-  })),
-  ...props.modelValue.choosenSignals.map(signal => ({
-    key: `custom-major-${signal.id}`,
-    text: signal.text,
-    source: 'custom-major' as const,
-    signal,
-  }))
-])
-
-const visibleMinorSignals = computed<VisibleRedflag[]>(() => (
-  inheritedMinorSignals.value.map(text => ({
-    key: `scenario-minor-${text}`,
-    text,
-    source: 'scenario-minor' as const,
-  }))
-))
-
-const hasMajorSignals = computed(() => visibleMajorSignals.value.length > 0)
-const hasMinorSignals = computed(() => visibleMinorSignals.value.length > 0)
-
-const focusRedSearchbar = async () => {
+const selectionError = ref('')
+const redSearchbar = ref<{ $el?: { setFocus: () => void } } | null>(null)
+const focusRedSearchbar = () => {
   setTimeout(() => { redSearchbar.value?.$el?.setFocus() }, 300)
 }
 
-const typeLabels: Record<RedEntryType, string> = {
-  scenario: 'Szenarien',
-  signal: 'Warnzeichen'
-}
-
-const typeSortOrder: Record<RedEntryType, number> = {
-  scenario: 1,
-  signal: 2
-}
-
-const buildEntries = (): RedEntry[] => [
-  ...allScenarios.map((entry) => ({
-    key: `scenario-${entry.id}`,
-    id: entry.id,
-    name: entry.name,
-    subtitle: entry.requirements,
-    groupName: entry.category,
-    type: 'scenario' as const,
+const entries: RedEntry[] = [
+  ...DATA_Scenarios.map(entry => ({
+    key: `scenario-${entry.id}`, id: entry.id, name: entry.name,
+    name_alt: entry.name_alt, requirements: entry.requirements,
+    subtitle: entry.requirements, category: entry.category,
+    type: 'scenario' as const, application: entry.application,
   })),
-  ...allSignals.map((entry) => ({
-    key: `signal-${entry.id}`,
-    id: entry.id,
-    name: entry.text,
-    subtitle: '',
-    groupName: '',
-    type: 'signal' as const,
-  }))
+  ...DATA_Subscenarios.map(entry => {
+    const parent = DATA_Scenarios.find(scenario => scenario.id === entry.parentId)!
+    return {
+      key: `subscenario-${entry.id}`, id: entry.id, name: entry.name,
+      name_alt: entry.name_alt, requirements: entry.requirements,
+      parentName: parent.name, parentNameAlt: parent.name_alt,
+      subtitle: `Unterfall von ${parent.name}${entry.requirements ? ' · ' + entry.requirements : ''}`,
+      category: parent.category, type: 'subscenario' as const,
+      parentId: parent.id, application: parent.application,
+    }
+  }),
+  ...DATA_Signals.map(entry => ({
+    key: `signal-${entry.id}`, id: entry.id, name: entry.text,
+    subtitle: '', category: '', type: 'signal' as const,
+  })),
 ]
 
-const currentEntries = computed(() => buildEntries())
-const currentModalSections = computed<RedSection[]>(() => {
-
-  const currentApplication: RedflagApplication = props.modelValue.noTransportType === 'BvO' ? 'BvO' : 'Verweigerung'
-  const search = currentSearchQuery.value
-  const visibleEntries = currentEntries.value.filter((entry) => {
-    if (entry.type === 'scenario') {
-      if (currentFilter.value != 'scenario') { return false }
-      const scenario = allScenarios.find((candidate) => candidate.id === entry.id)
-      if (!scenario || scenario.application !== currentApplication) { return false }
-      if (!filterExisting(entry.id, props.modelValue.choosenScenarios)) { return false }
-    }
+const currentModalSections = computed(() => {
+  const application: RedflagApplication = props.modelValue.noTransportType === 'BvO' ? 'BvO' : 'Verweigerung'
+  const visible = entries.filter(entry => {
     if (entry.type === 'signal') {
-      if (currentFilter.value != 'signal') { return false }
-      if (!filterExisting(entry.id, props.modelValue.choosenSignals)) { return false }
+      if (currentFilter.value !== 'signal' || props.modelValue.choosenSignals.some(signal => signal.id === entry.id)) return false
+    } else {
+      if (currentFilter.value !== 'scenario' || entry.application !== application) return false
+      const selected = content.value.resolutions.find(({ selection }) => selection?.scenarioId === (entry.parentId ?? entry.id))?.resolved
+      if (entry.type === 'scenario' && selected?.aggregationMode === 'all-subscenarios') return false
+      if (entry.type === 'subscenario' && selected?.aggregationMode === 'selected-subscenarios'
+        && selected.includedSubscenarioIds.includes(entry.id)) return false
     }
-
-    return fuzzyMatch(search, `${entry.name} ${entry.groupName}`)
+    return true
   })
-
-  const grouped = new Map<RedEntryType, Map<string, RedEntry[]>>()
-  visibleEntries.forEach((entry) => {
-    if (!grouped.has(entry.type)) grouped.set(entry.type, new Map())
-    const typeGroup = grouped.get(entry.type) as Map<string, RedEntry[]>
-    if (!typeGroup.has(entry.groupName)) typeGroup.set(entry.groupName, [])
-    typeGroup.get(entry.groupName)?.push(entry)
-  })
-
-  return Array.from(grouped.entries())
-    .sort((a, b) => typeSortOrder[a[0]] - typeSortOrder[b[0]])
-    .map(([type, categories]) => ({
-      type,
-      label: typeLabels[type],
-      categories: Array.from(categories.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([name, items]) => ({
-          name,
-          items: items.sort((a, b) => a.name.localeCompare(b.name))
-        }))
-    }))
+  if (isSearching.value) {
+    const results = searchRedflagEntries(visible, currentSearchQuery.value)
+    return results.length ? [{ type: currentFilter.value, categories: [{ name: '', items: results }] }] : []
+  }
+  if (!visible.length) return []
+  const categories = new Map<string, RedEntry[]>()
+  for (const entry of visible) {
+    const category = entry.category ?? ''
+    const items = categories.get(category) ?? []
+    items.push(entry)
+    categories.set(category, items)
+  }
+  return [{
+    type: currentFilter.value,
+    categories: [...categories].sort(([a], [b]) => a.localeCompare(b, 'de'))
+      .map(([name, items]) => ({ name, items: items.sort((a, b) => a.name.localeCompare(b.name, 'de')) })),
+  }]
 })
 
 const showModal = () => {
   currentSearchQuery.value = ''
+  selectionError.value = ''
   isModalOpen.value = true
 }
-
-const closeModal = () => {
-  isModalOpen.value = false
-}
-
+const closeModal = () => { isModalOpen.value = false }
 const addEntry = (entry: RedEntry) => {
-  closeModal()
   const updated = cloneModelValue()
-  if (entry.type === 'scenario') {
-    const scenario = allScenarios.find((item) => item.id === entry.id)
-    if (scenario) updated.choosenScenarios = [...updated.choosenScenarios, scenario]
-  }
   if (entry.type === 'signal') {
-    const signal = allSignals.find((item) => item.id === entry.id)
-    if (signal) updated.choosenSignals = [...updated.choosenSignals, signal]
+    const signal = DATA_Signals.find(item => item.id === entry.id)!
+    updated.choosenSignals = [...updated.choosenSignals.filter(item => item.id !== signal.id), signal]
+    updated.removedMajorSignalIds = updated.removedMajorSignalIds.filter(id => id !== signal.id)
+    updated.removedMinorSignalIds = updated.removedMinorSignalIds.filter(id => id !== signal.id)
+    updated.removedMajorSignals = updated.removedMajorSignals.filter(text => text !== signal.text)
+    updated.removedMinorSignals = updated.removedMinorSignals.filter(text => text !== signal.text)
+  } else {
+    try {
+      updated.scenarioSelections = selectRedflagTarget(DATA_Redflags, updated.scenarioSelections, { type: entry.type, id: entry.id })
+    } catch (error) {
+      selectionError.value = error instanceof Error ? error.message : 'Ungültige RedFlags-Auswahl'
+      return
+    }
   }
-  emit('update:modelValue', updated)
-}
-
-const removeSignal = (signal: RedflagSignal) => {
+  selectionError.value = ''
   closeModal()
-  const updated = cloneModelValue()
-  updated.choosenSignals = updated.choosenSignals.filter(e => e.id !== signal.id)
   emit('update:modelValue', updated)
 }
-
 const removeRedflag = (signal: VisibleRedflag) => {
-  if (signal.source === 'custom-major' && signal.signal) {
-    removeSignal(signal.signal)
-    return
-  }
-
-  closeModal()
   const updated = cloneModelValue()
-  if (signal.source === 'scenario-major') {
-    updated.removedMajorSignals = [...new Set([...(updated.removedMajorSignals ?? []), signal.text])]
-  }
-  if (signal.source === 'scenario-minor') {
-    updated.removedMinorSignals = [...new Set([...(updated.removedMinorSignals ?? []), signal.text])]
-  }
+  updated.removeVisibleSignal(signal)
   emit('update:modelValue', updated)
 }
-
-const removeScenario = (scenario: RedflagScenario) => {
-  closeModal()
+const removeLegacyScenario = (id: string) => {
   const updated = cloneModelValue()
-  updated.choosenScenarios = updated.choosenScenarios.filter(e => e.id !== scenario.id)
+  updated.choosenScenarios = updated.choosenScenarios.filter(entry => entry.id !== id)
   emit('update:modelValue', updated)
 }
-
+const removeScenario = (index: number) => {
+  const updated = cloneModelValue()
+  updated.scenarioSelections = updated.scenarioSelections.filter((_, i) => i !== index)
+  emit('update:modelValue', updated)
+}
+const setSubscenarioActive = (index: number, id: string, active: boolean) => {
+  const group = selectedGroups.value[index]
+  if (!group || group.error || !group.children.some(child => child.id === id)) return
+  const updated = cloneModelValue()
+  const subscenarioIds = group.children.filter(child => child.id === id ? active : child.active).map(child => child.id)
+  updated.scenarioSelections = updated.scenarioSelections.map((selection, i) => i !== index ? selection
+    : { ...selection, subscenarioMode: 'selected', subscenarioIds })
+  emit('update:modelValue', updated)
+}
+const removeInvalidSubscenario = (index: number, id: string) => {
+  const updated = cloneModelValue()
+  updated.scenarioSelections = updated.scenarioSelections.map((selection, i) => i !== index ? selection
+    : { ...selection, subscenarioMode: 'selected', subscenarioIds: selection.subscenarioIds.filter(childId => childId !== id) })
+  emit('update:modelValue', updated)
+}
 const setDisableMinorBlock = (checked: boolean) => {
   const updated = cloneModelValue()
   updated.disableMinorBlock = checked
   emit('update:modelValue', updated)
 }
-
-// #region Filters
-
-const filterExisting = (search: string, source: Array<{ id: string }>) => {
-  return !source.some(i => i.id === search)
-}
-
-const fuzzyMatch = (search: string, target: string): boolean => {
-  const normalizedSearch = search.trim().toLowerCase()
-  if (!normalizedSearch) return true
-  const normalizedTarget = target.toLowerCase()
-  if (normalizedTarget.includes(normalizedSearch)) return true
-  let searchIndex = 0
-  for (let i = 0; i < normalizedTarget.length; i += 1) {
-    if (normalizedTarget[i] === normalizedSearch[searchIndex]) {
-      searchIndex += 1
-    }
-    if (searchIndex === normalizedSearch.length) return true
-  }
-  return false
-}
-
-// #endregion
 
 </script>
 
@@ -388,13 +317,58 @@ const fuzzyMatch = (search: string, target: string): boolean => {
     font-size: .75rem;
     font-weight: 600;
     letter-spacing: .04em;
-    margin: 0 0 4px 4px;
+    margin: 0 0 4px 0;
     text-transform: uppercase;
   }
 
   .minor-block-toggle {
     --padding-start: .75rem;
     --inner-padding-end: .75rem;
+  }
+
+  .scenario-requirements {
+    margin: 4px 8px 12px;
+    color: var(--ion-color-medium);
+    font-size: .8rem;
+  }
+
+  .subscenario-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 8px;
+  }
+
+  .subscenario-chip {
+    max-width: 100%;
+    min-width: 0;
+    min-height: 32px;
+    height: auto;
+    margin: 0;
+    white-space: normal;
+  }
+
+  .subscenario-chip ion-label {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .subscenario-chip ion-icon {
+    flex-shrink: 0;
+  }
+
+  .subscenario-chip.DdToggleChip--inactive {
+    color: var(--ion-text-color);
+  }
+
+  .subscenario-chip:focus-visible {
+    outline: 2px solid var(--ion-color-success);
+    outline-offset: 2px;
+  }
+
+  .selection-error {
+    color: var(--ion-color-danger);
   }
 
   .dodo-redflag-input-actions {
@@ -415,6 +389,27 @@ const fuzzyMatch = (search: string, target: string): boolean => {
     font-size: 0.85rem;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+  }
+
+  .entry-name {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .search-result-category {
+    text-transform: uppercase;
+
+    background-color: var(--ion-background-color);
+    padding: 4px 8px;
+    margin: -4px 0;
+    border-radius: 999px;
+    letter-spacing: 1px;
+    font-size: .9em;
+    flex-shrink: 0;
+    flex-grow: 0;
   }
 
 </style>

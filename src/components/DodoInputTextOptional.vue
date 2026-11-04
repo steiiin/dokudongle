@@ -50,6 +50,12 @@ const emit = defineEmits<{
 // ############################################################################
 
 const textInput = ref<any | null>(null)
+defineExpose({
+  async focus() {
+    await nextTick()
+    textInput.value?.setFocus?.()
+  },
+})
 let focusTimeout: ReturnType<typeof setTimeout> | null = null
 const toggleChanging = ref(false)
 

@@ -1,3 +1,6 @@
+import type { UnwrapRef } from 'vue'
+import type { Protocol } from '@/types/protocol'
+import { assessmentActive } from '@/types/protocol/assessment'
 import { TextAreaBlock, type TextAreaBlockField, type TextAreaBlockSourceState } from '@/types/blocks/text-area-block'
 import type { SchwangerschaftBlockSourceState } from '@/types/blocks/schwangerschaft'
 import { createSchwangerschaftBlockState, SchwangerschaftTextAreaBlock } from '@/data/blocks/schwangerschaft'
@@ -19,16 +22,7 @@ export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
   bauchschmerz: BauchschmerzBlockSourceState
 }
 
-interface BlockSourceProtocol {
-  flavors: { verlegung: boolean; einweisung: boolean }
-  xabcDe: { dizziness: 'kein' | 'ungerichteter' | 'gerichteter' }
-  xabcdE: {
-    pregnancy: { isAssessed: boolean; value: boolean }
-    abdominal: { isAssessed: boolean; value: { pain: 'keine' | 'leichte' | '' | 'starke' } }
-    excretions: { isAssessed: boolean; value: { bowelAbnormalities: boolean; urinaryAbnormalities: boolean } }
-  }
-  textAreaBlocks: TextAreaBlockState
-}
+type BlockSourceProtocol = Pick<UnwrapRef<Protocol>, 'flavors' | 'xAbcde' | 'xabcDe' | 'xabcdE' | 'textAreaBlocks'>
 
 export interface TextAreaBlockSource {
   id: string
@@ -63,7 +57,7 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
   },
   {
     id: 'schwindel', fields: [],
-    isAvailable: protocol => protocol.xabcDe.dizziness === 'gerichteter',
+    isAvailable: protocol => assessmentActive(protocol.xabcDe.assessment.dizziness, protocol) && protocol.xabcDe.dizziness === 'gerichteter',
     createState: createSchwindelBlockState,
     outputs: [new SchwindelTextAreaBlock()],
   },
@@ -81,7 +75,7 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
   },
   {
     id: 'bauchschmerz', fields: [],
-    isAvailable: protocol => protocol.xabcdE.abdominal.isAssessed && protocol.xabcdE.abdominal.value.pain !== 'keine',
+    isAvailable: protocol => protocol.xabcdE.abdominal.isAssessed && assessmentActive(protocol.xabcdE.abdominal.value.assessment.pain, protocol) && protocol.xabcdE.abdominal.value.pain !== 'keine',
     createState: createBauchschmerzBlockState,
     outputs: [new BauchschmerzTextAreaBlock()],
   },

@@ -1,11 +1,9 @@
+import { assessmentActive, assessmentDefaults } from '../assessment'
 import { assessedText, onHigh, onNormal, textIf } from "@/utils/filter"
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { ProtocolContext } from "@/types/protocol"
 import { AssessedValue } from "../input"
 
 import { useDokuStore } from "@/store/doku"
-function getCtx(): ProtocolContext { return useDokuStore().context }
-function isNonVerbal(): boolean { return getCtx().isNonVerbal }
 
 // ############################################################################
 
@@ -170,6 +168,12 @@ export class ExposureExcretions {
 
 export class ExposureAbdominal {
 
+  public assessment = assessmentDefaults('pain')
+
+  isExamined(field: keyof typeof this.assessment): boolean {
+    return assessmentActive(this.assessment[field], useDokuStore().doku)
+  }
+
   public guarding: '' | 'leichte' | 'starke'
   public pain: 'keine' | 'leichte' | '' | 'starke'
   public peristalsis: '' | 'spärlich'|'fehlend'|'hochgestellt'
@@ -187,12 +191,12 @@ export class ExposureAbdominal {
 
     // Abdomen iO
     if (this.guarding == ''
-      && this.pain == 'keine'
+      && (!this.isExamined('pain') || this.pain == 'keine')
       && this.peristalsis == '')
-    { return `Abdomen weich${isNonVerbal() ? '' : '/schmerzfrei'}` }
+    { return `Abdomen weich${this.isExamined('pain') ? '/schmerzfrei' : ''}` }
 
     // Schmerzen
-    if (!isNonVerbal())
+    if (this.isExamined('pain'))
     {
       if (this.pain != 'keine') {
         parts.push(`${this.pain} Schmerzen`)
@@ -226,6 +230,12 @@ export class ExposureAbdominal {
 
 export class AbcdeExposure {
 
+  public assessment = assessmentDefaults('nausea')
+
+  isExamined(field: keyof typeof this.assessment): boolean {
+    return assessmentActive(this.assessment[field], useDokuStore().doku)
+  }
+
   public bodyTemperature: number
 
   public nausea: boolean
@@ -256,7 +266,7 @@ export class AbcdeExposure {
     return (this.bodyTemperature <= 35 || this.bodyTemperature >= 37.5)
       || this.emesis.needTreatment
       || (this.excretions.isAssessed && this.excretions.value.needTreatment)
-      || this.nausea
+      || (this.isExamined('nausea') && this.nausea)
       || this.urinaryIncontinence
   }
 
@@ -306,11 +316,11 @@ export class AbcdeExposure {
       [
         textIf(
           this.nausea ? 'Übelkeit' : onNormal('keine Übelkeit'),
-          !isNonVerbal()
+          this.isExamined('nausea')
         ),
         this.emesis.text
       ],
-      textIf(this.excretions.value.text, this.excretions.isAssessed || getCtx().hasAbdominalIssue),
+      textIf(this.excretions.value.text, this.excretions.isAssessed),
       textIf('eingenässt', this.urinaryIncontinence),
       this.abdominalText,
       assessedText(this.pregnancy, 'Schwangerschaft', 'Schwangerschaft ausgeschlossen'),
