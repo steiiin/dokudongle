@@ -17,7 +17,7 @@ export interface CirculationPulse {
 }
 
 export interface CirculationSkin {
-  color: 'rosig' | 'blass' | 'zyanotisch' | 'marmoriert'
+  color: 'rosig' | 'blass' | 'zyanotisch' | 'ikterisch' | 'gerötet' | 'marmoriert' | 'grau-fahl'
   clammy: boolean
   poorSkinTurgor: boolean
   hasUrtikaria: boolean

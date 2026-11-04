@@ -15,12 +15,27 @@
           <IonRadio value="blass">Blass</IonRadio>
         </IonItem>
         <IonItem lines="inset">
-          <IonRadio value="marmoriert">Marmoriert</IonRadio>
-        </IonItem>
-        <IonItem>
           <IonRadio value="zyanotisch">Zyanotisch</IonRadio>
         </IonItem>
       </IonRadioGroup>
+      <IonItem button :detail="true" aria-haspopup="dialog" :aria-expanded="isSkinColorPopoverOpen"
+        @click="openSkinColorPopover($event)">
+        <IonLabel>Weitere{{ selectedAdditionalSkinColor ? ': ' + selectedAdditionalSkinColor.label : '' }}</IonLabel>
+      </IonItem>
+      <IonPopover :is-open="isSkinColorPopoverOpen" :event="skinColorPopoverEvent" reference="trigger"
+        aria-label="Weitere Hautfarben" @didDismiss="closeSkinColorPopover">
+        <IonContent>
+          <IonList lines="none">
+            <IonItem v-for="option in additionalSkinColors" :key="option.value" button :detail="false"
+              :aria-current="store.doku.xabCde.skin.color === option.value ? 'true' : undefined"
+              @click="selectSkinColor(option.value)">
+              <IonLabel>{{ option.label }}</IonLabel>
+              <IonIcon v-if="store.doku.xabCde.skin.color === option.value" slot="end"
+                :icon="checkmark" aria-hidden="true" />
+            </IonItem>
+          </IonList>
+        </IonContent>
+      </IonPopover>
 
       <IonItemDivider>
         <IonLabel>Beschaffenheit</IonLabel>
@@ -242,11 +257,13 @@
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
+import { checkmark } from 'ionicons/icons'
 import DodoItemModal from '@/components/DodoItemModal.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import { isRestoringReanimation } from '@/store/reanimation'
 
 import { AbcdeCirculation } from '@/types/protocol/abcde'
+import type { CirculationSkin } from '@/types/protocol/abcde/abcdeCirculation'
 import { AssessedValue } from '@/types/protocol/input'
 import { insetIf } from '@/utils/filter'
 
@@ -255,6 +272,32 @@ const store = useDokuStore()
 const ctx = computed(() => store.context)
 
 // ############################################################################
+
+const additionalSkinColors = [
+  { value: 'ikterisch', label: 'Ikterisch' },
+  { value: 'gerötet', label: 'Gerötet' },
+  { value: 'marmoriert', label: 'Marmoriert' },
+  { value: 'grau-fahl', label: 'Grau-Fahl' },
+] as const satisfies readonly { value: CirculationSkin['color']; label: string }[]
+const selectedAdditionalSkinColor = computed(() =>
+  additionalSkinColors.find(option => option.value === store.doku.xabCde.skin.color))
+const isSkinColorPopoverOpen = ref(false)
+const skinColorPopoverEvent = ref<Event>()
+
+function openSkinColorPopover(event: Event) {
+  skinColorPopoverEvent.value = event
+  isSkinColorPopoverOpen.value = true
+}
+
+function selectSkinColor(color: CirculationSkin['color']) {
+  store.doku.xabCde.skin.color = color
+  isSkinColorPopoverOpen.value = false
+}
+
+function closeSkinColorPopover() {
+  isSkinColorPopoverOpen.value = false
+  skinColorPopoverEvent.value = undefined
+}
 
 watch(() => store.doku.xabCde.pulse.centralStrength, (v) => {
   if (isRestoringReanimation(store.doku)) return
