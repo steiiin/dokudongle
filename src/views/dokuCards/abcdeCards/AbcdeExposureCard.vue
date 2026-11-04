@@ -7,11 +7,7 @@
       </DodoInputTemperature>
     </IonItem>
 
-    <DodoInputToggle lines="full" v-model="store.doku.xabcdE.urinaryIncontinence">
-      Eingenässt?
-    </DodoInputToggle>
-
-    <DodoExaminationItem id="nausea" label="Übelkeit" show-line="inset"
+    <DodoExaminationItem id="nausea" label="Übelkeit" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabcdE.isExamined('nausea')"
       @update:assessed="store.doku.xabcdE.assessment.nausea = $event ? 'active' : 'inactive'"
@@ -62,7 +58,9 @@
 
     </DodoItemModal>
 
-    <DodoExaminationItem id="excretions" label="Ausscheidung" show-line="inset"
+    <DodoInputToggleOptional id="urinaryIncontinence" label="Eingenässt?" lines="full" v-model="store.doku.xabcdE.urinaryIncontinence" />
+
+    <DodoExaminationItem id="excretions" label="Ausscheidung" show-line="full"
       :assessed="store.doku.xabcdE.excretions.assessed" @update:assessed="store.setExcretionsAssessed"
       @select="store.resetExcretions" @activate="excretionsModal?.open()" @remove="store.resetExcretions">
       <DodoItemModal ref="excretionsModal" label="Ausscheidung"

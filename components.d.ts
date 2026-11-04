@@ -34,6 +34,7 @@ declare module 'vue' {
     DodoInputTextArea: typeof import('./src/components/DodoInputTextArea.vue')['default']
     DodoInputTextOptional: typeof import('./src/components/DodoInputTextOptional.vue')['default']
     DodoInputToggle: typeof import('./src/components/DodoInputToggle.vue')['default']
+    DodoInputToggleOptional: typeof import('./src/components/DodoInputToggleOptional.vue')['default']
     DodoItemModal: typeof import('./src/components/DodoItemModal.vue')['default']
     DodoListArticle: typeof import('./src/components/DodoListArticle.vue')['default']
     DodoListPreview: typeof import('./src/components/DodoListPreview.vue')['default']

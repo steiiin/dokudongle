@@ -45,6 +45,11 @@ let busy = false
 let mounted = true
 onBeforeUnmount(() => { mounted = false })
 
+function focusActivation() {
+  if (mounted) activation.value?.focus()
+}
+defineExpose({ focusActivation })
+
 async function select() {
   if (busy || props.assessed || !props.available) return
   busy = true
@@ -64,7 +69,7 @@ async function remove() {
   emit('update:assessed', false)
   emit('remove')
   await nextTick()
-  if (mounted) activation.value?.focus()
+  focusActivation()
   busy = false
 }
 </script>

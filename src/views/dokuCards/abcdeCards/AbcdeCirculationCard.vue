@@ -43,18 +43,10 @@
       <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.clammy">
         Schweißig?
       </DodoInputToggle>
-      <DodoInputToggle lines="full" v-model="store.doku.xabCde.skin.poorSkinTurgor">
-        Stehende Hautfalten?
-      </DodoInputToggle>
-      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.hasUrtikaria">
-        Quaddeln?
-      </DodoInputToggle>
-      <DodoInputToggle lines="inset" v-model="store.doku.xabCde.skin.hasExanthem">
-        Exanthem (flächiger Ausschlag)?
-      </DodoInputToggle>
-      <DodoInputToggle v-model="store.doku.xabCde.skin.hasFlush">
-        Flush?
-      </DodoInputToggle>
+      <DodoInputToggleOptional id="poorSkinTurgor" label="Stehende Hautfalten?" lines="full" v-model="store.doku.xabCde.skin.poorSkinTurgor" />
+      <DodoInputToggleOptional id="hasUrtikaria" label="Quaddeln?" lines="inset" v-model="store.doku.xabCde.skin.hasUrtikaria" />
+      <DodoInputToggleOptional id="hasExanthem" label="Exanthem (flächiger Ausschlag)?" lines="inset" v-model="store.doku.xabCde.skin.hasExanthem" />
+      <DodoInputToggleOptional id="hasFlush" label="Flush?" v-model="store.doku.xabCde.skin.hasFlush" />
 
       <IonItemDivider>
         <IonLabel>Temperatur (Extremitäten)</IonLabel>
@@ -157,7 +149,7 @@
       ]">
     </DodoInputSelect>
 
-    <DodoExaminationItem id="chest" label="Brustschmerz" show-line="inset"
+    <DodoExaminationItem id="chest" label="Brustschmerz" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabCde.isExamined('chest')"
       @update:assessed="store.doku.xabCde.assessment.chest = $event ? 'active' : 'inactive'"

@@ -145,7 +145,7 @@
 
     </DodoItemModal>
 
-    <DodoExaminationItem id="headache" label="Kopfschmerzen" show-line="inset"
+    <DodoExaminationItem id="headache" label="Kopfschmerzen" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabcDe.isExamined('headache')"
       @update:assessed="store.doku.xabcDe.assessment.headache = $event ? 'active' : 'inactive'"
@@ -155,7 +155,7 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="dizziness" label="Schwindel" show-line="inset"
+    <DodoExaminationItem id="dizziness" label="Schwindel" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabcDe.isExamined('dizziness')"
       @update:assessed="store.doku.xabcDe.assessment.dizziness = $event ? 'active' : 'inactive'"
@@ -176,7 +176,7 @@
       Entspricht Baseline?
     </DodoInputToggle>
 
-    <DodoExaminationItem id="neuro" label="Neuro-Befund" show-line="inset"
+    <DodoExaminationItem id="neuro" label="Neuro-Befund" show-line="full"
       v-model:assessed="store.doku.xabcDe.neuro.assessed"
       @select="selectNeuro" @activate="neuroModal?.open()" @remove="resetNeuro">
       <DodoItemModal ref="neuroModal" label="Neuro-Befund" modal-label="Neurologischer Befund"
@@ -325,7 +325,7 @@
       </DodoItemModal>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="psych" label="Psych-Befund" show-line="inset"
+    <DodoExaminationItem id="psych" label="Psych-Befund" show-line="full"
       v-model:assessed="store.doku.xabcDe.psych.assessed"
       @select="resetPsych" @activate="psychModal?.open()" @remove="resetPsych">
       <DodoItemModal ref="psychModal" lines="none" label="Psych-Befund"
@@ -354,21 +354,11 @@
           ]">
         </DodoInputSelect>
 
-        <DodoInputToggle v-model="store.doku.xabcDe.psych.value.delusions">
-          Wahnhaft?
-        </DodoInputToggle>
-        <DodoInputToggle v-model="store.doku.xabcDe.psych.value.hallucinations">
-          Halluzinationen?
-        </DodoInputToggle>
-        <DodoInputToggle v-model="store.doku.xabcDe.psych.value.behavioralChange">
-          Wesensverändert?
-        </DodoInputToggle>
-        <DodoInputToggle v-model="store.doku.xabcDe.psych.value.perseveration">
-          Verbale Perseveration?
-        </DodoInputToggle>
-        <DodoInputToggle v-model="store.doku.xabcDe.psych.value.dementia">
-          Demenz bekannt?
-        </DodoInputToggle>
+        <DodoInputToggleOptional id="delusions" label="Wahnhaft?" v-model="store.doku.xabcDe.psych.value.delusions" />
+        <DodoInputToggleOptional id="hallucinations" label="Halluzinationen?" v-model="store.doku.xabcDe.psych.value.hallucinations" />
+        <DodoInputToggleOptional id="behavioralChange" label="Wesensverändert?" v-model="store.doku.xabcDe.psych.value.behavioralChange" />
+        <DodoInputToggleOptional id="perseveration" label="Verbale Perseveration?" v-model="store.doku.xabcDe.psych.value.perseveration" />
+        <DodoInputToggleOptional id="dementia" label="Demenz bekannt?" v-model="store.doku.xabcDe.psych.value.dementia" />
 
       </DodoItemModal>
     </DodoExaminationItem>

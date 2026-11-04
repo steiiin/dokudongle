@@ -57,7 +57,7 @@
 
     <DodoExaminationItem id="stridor" label="Stridor"
       v-model:assessed="store.doku.xAbcde.stridor.assessed"
-      :available="store.doku.xAbcde.isBreathing" show-line="inset"
+      :available="store.doku.xAbcde.isBreathing"
       @select="store.doku.xAbcde.stridor.value = true"
       @remove="store.doku.xAbcde.stridor.value = false">
       <DodoInputToggle lines="none" v-model="store.doku.xAbcde.stridor.value">

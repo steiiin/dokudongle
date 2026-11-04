@@ -1,7 +1,7 @@
 <template>
   <DodoExaminationCard title="B - Breathing">
 
-    <DodoExaminationItem id="breathlessness" label="Luftnot" show-line="inset"
+    <DodoExaminationItem id="breathlessness" label="Luftnot" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xaBcde.isExamined('breathlessness')"
       @update:assessed="store.doku.xaBcde.assessment.breathlessness = $event ? 'active' : 'inactive'"
@@ -101,9 +101,7 @@
 
     </DodoItemModal>
 
-    <DodoInputToggle lines="full" v-model="store.doku.xaBcde.hasHypoxia">
-      Hypoxie (&lt;90%)?
-    </DodoInputToggle>
+    <DodoInputToggleOptional id="hasHypoxia" label="Hypoxie (&lt;90%)?" lines="full" v-model="store.doku.xaBcde.hasHypoxia" />
 
     <DodoExaminationItem id="auscultation" label="Auskultation"
       v-model:assessed="store.doku.xaBcde.auscultation.assessed"
@@ -141,7 +139,7 @@
 
     <DodoExaminationItem id="jugularVenousDistension" label="Halsvenenstauung"
       v-model:assessed="store.doku.xaBcde.jugularVenousDistension.assessed"
-      show-line="inset"
+      show-line="full"
       @select="store.doku.xaBcde.jugularVenousDistension.value = true"
       @remove="store.doku.xaBcde.jugularVenousDistension.value = false">
       <DodoInputToggle lines="none" v-model="store.doku.xaBcde.jugularVenousDistension.value">
@@ -151,7 +149,7 @@
 
     <DodoExaminationItem id="emphysema" label="Subkutanes Emphysem"
       v-model:assessed="store.doku.xaBcde.emphysema.assessed"
-      show-line="inset"
+      show-line="full"
       @select="store.doku.xaBcde.emphysema.value = true"
       @remove="store.doku.xaBcde.emphysema.value = false">
       <DodoInputToggle lines="none" v-model="store.doku.xaBcde.emphysema.value">

@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
-import { defineComponent, nextTick, ref } from 'vue'
+import { defineComponent, nextTick, ref, toRef } from 'vue'
 import * as Ionic from '@ionic/vue'
 import { IonModal, IonToggle } from '@ionic/vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -34,6 +34,76 @@ const global = {
 }
 enableAutoUnmount(afterEach)
 beforeEach(() => { setActivePinia(createPinia()); vi.clearAllMocks() })
+
+type DokuStore = ReturnType<typeof useDokuStore>
+const positiveFindings = [
+  ['hasHypoxia', AbcdeBreathingCard, (s: DokuStore) => toRef(s.doku.xaBcde, 'hasHypoxia'), 'Hypoxie'],
+  ['poorSkinTurgor', AbcdeCirculationCard, (s: DokuStore) => toRef(s.doku.xabCde.skin, 'poorSkinTurgor'), 'stehende Hautfalten'],
+  ['hasUrtikaria', AbcdeCirculationCard, (s: DokuStore) => toRef(s.doku.xabCde.skin, 'hasUrtikaria'), 'Urtikaria'],
+  ['hasExanthem', AbcdeCirculationCard, (s: DokuStore) => toRef(s.doku.xabCde.skin, 'hasExanthem'), 'Ausschlag'],
+  ['hasFlush', AbcdeCirculationCard, (s: DokuStore) => toRef(s.doku.xabCde.skin, 'hasFlush'), 'Flush'],
+  ['urinaryIncontinence', AbcdeExposureCard, (s: DokuStore) => toRef(s.doku.xabcdE, 'urinaryIncontinence'), 'eingenässt'],
+  ['delusions', AbcdeDisabilityCard, (s: DokuStore) => toRef(s.doku.xabcDe.psych.value, 'delusions'), 'wahnhaft'],
+  ['hallucinations', AbcdeDisabilityCard, (s: DokuStore) => toRef(s.doku.xabcDe.psych.value, 'hallucinations'), 'halluziniert'],
+  ['behavioralChange', AbcdeDisabilityCard, (s: DokuStore) => toRef(s.doku.xabcDe.psych.value, 'behavioralChange'), 'wesensverändert'],
+  ['perseveration', AbcdeDisabilityCard, (s: DokuStore) => toRef(s.doku.xabcDe.psych.value, 'perseveration'), 'verbale Perseveration'],
+  ['dementia', AbcdeDisabilityCard, (s: DokuStore) => toRef(s.doku.xabcDe.psych.value, 'dementia'), 'bek. Demenz'],
+] as const
+
+describe('optional positive boolean findings', () => {
+  test.each(positiveFindings)('%s activates, clears and reactivates with its report text', async (id, card, binding, text) => {
+    const store = useDokuStore()
+    store.doku.xabcDe.psych.assessed = true
+    const value = binding(store)
+    const wrapper = mount(card, { global, attachTo: document.body })
+    const row = () => wrapper.get(`[data-examination="${id}"]`)
+    const report = () => store.generatedProtocol.toLowerCase()
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      expect(value.value).toBe(false)
+      expect(row().classes()).toContain('examination-inactive')
+      expect(row().findComponent(DodoInputToggle).exists()).toBe(false)
+      expect(report()).not.toContain(text.toLowerCase())
+      await row().get('.activate-examination').trigger('click')
+      await flushPromises()
+      expect(value.value).toBe(true)
+      expect(row().classes()).not.toContain('examination-inactive')
+      expect(row().getComponent(IonToggle).props('modelValue')).toBe(true)
+      expect(row().getComponent(DodoInputToggle).props('lines')).toBe('none')
+      expect(row().find('.remove-examination').exists()).toBe(false)
+      expect(report()).toContain(text.toLowerCase())
+      row().getComponent(IonToggle).vm.$emit('update:modelValue', false)
+      await flushPromises()
+      expect(value.value).toBe(false)
+      expect(row().classes()).toContain('examination-inactive')
+      expect(report()).not.toContain(text.toLowerCase())
+      expect(document.activeElement).toBe(row().get('.activate-examination').element)
+    }
+  })
+
+  test.each(positiveFindings)('%s displays an existing true value and follows external changes', async (id, card, binding) => {
+    const store = useDokuStore()
+    store.doku.xabcDe.psych.assessed = true
+    const value = binding(store)
+    value.value = true
+    const wrapper = mount(card, { global })
+    const row = () => wrapper.get(`[data-examination="${id}"]`)
+    expect(row().getComponent(IonToggle).props('modelValue')).toBe(true)
+    value.value = false
+    await nextTick()
+    expect(row().classes()).toContain('examination-inactive')
+    value.value = true
+    await nextTick()
+    expect(row().getComponent(IonToggle).props('modelValue')).toBe(true)
+  })
+
+  test('places urinary incontinence between vomiting and excretions', () => {
+    const wrapper = mount(AbcdeExposureCard, { global })
+    const row = wrapper.get('[data-examination="urinaryIncontinence"]').element
+    expect(row.previousElementSibling?.textContent).toContain('Erbrechen')
+    expect(row.nextElementSibling?.getAttribute('data-examination')).toBe('excretions')
+  })
+})
 
 function fixture() {
   const activate = vi.fn()

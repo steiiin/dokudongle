@@ -80,6 +80,18 @@ for (const mode of ['md', 'ios']) {
         }
       })
 
+      it('keeps optional positive toggles full-width without duplicate separators', () => {
+        for (const id of ['hasHypoxia', 'urinaryIncontinence']) {
+          row(id).should('have.class', 'examination-inactive').and(expectRowLayout)
+          clickRowControl(id, '.activate-examination')
+          row(id).should('have.attr', 'data-assessed', 'true').and(expectRowLayout)
+          row(id).children('.remove-examination').should('not.exist')
+          clickRowControl(id, 'ion-toggle')
+          row(id).should('have.class', 'examination-inactive').and(expectRowLayout)
+          row(id).find('.activate-examination').should('be.focused')
+        }
+      })
+
       it('keeps inactive labels and removable controls aligned through state changes', () => {
         for (const id of ['stridor', 'auscultation', 'emphysema', 'trachealDeviation', 'intoxication']) {
           row(id).should('have.class', 'examination-inactive').and(expectRowLayout)

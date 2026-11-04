@@ -31,6 +31,88 @@ const closeModal = () => {
   cy.get('ion-modal:visible').should('not.exist')
 }
 
+for (const mode of ['md', 'ios']) {
+  describe(`optional positive booleans in ${mode}`, () => {
+    beforeEach(() => cy.viewport(320, 900))
+
+    it('activates hypoxia with Enter and Space and returns focus when switched off', () => {
+      cy.visit(`/tests/e2e/fixtures/examination.html?mode=${mode}`)
+      for (const key of ['Enter', ' '] as const) {
+        row('hasHypoxia').should('have.class', 'examination-inactive').and(expectInactiveRowLayout)
+        row('hasHypoxia').find('.activate-examination').focus()
+        pressKey(key)
+        row('hasHypoxia').find('ion-toggle').should('have.prop', 'checked', true).focus()
+        row('hasHypoxia').find('.remove-examination').should('not.exist')
+        cy.get('#report').should('contain.text', 'Hypoxie')
+        pressKey(' ')
+        row('hasHypoxia').find('.activate-examination').should('be.focused')
+        row('hasHypoxia').find('ion-toggle').should('not.exist')
+        cy.get('#report').should('not.contain.text', 'Hypoxie')
+      }
+    })
+
+    it('keeps skin findings when reopening the modal and clears each by switching it off', () => {
+      cy.visit(`/tests/e2e/fixtures/examination.html?circulation&mode=${mode}`)
+      const findings = ['poorSkinTurgor', 'hasUrtikaria', 'hasExanthem', 'hasFlush']
+      cy.contains('ion-item', 'Haut').click()
+      for (const id of findings) {
+        row(id).should('have.class', 'examination-inactive').and(expectInactiveRowLayout)
+        row(id).find('.activate-examination').click()
+        row(id).find('ion-toggle').should('have.prop', 'checked', true)
+        row(id).find('.remove-examination').should('not.exist')
+      }
+      closeModal()
+      cy.get('#report').should('contain.text', 'stehende Hautfalten').and('contain.text', 'Urtikaria')
+        .and('contain.text', 'Ausschlag').and('contain.text', 'Flush')
+      cy.contains('ion-item', 'Haut').click()
+      for (const id of findings) {
+        row(id).find('ion-toggle').should('have.prop', 'checked', true).click()
+        row(id).find('.activate-examination').should('be.focused')
+      }
+      closeModal()
+      cy.get('#report').should('not.contain.text', 'stehende Hautfalten').and('not.contain.text', 'Urtikaria')
+        .and('not.contain.text', 'Ausschlag').and('not.contain.text', 'Flush')
+      cy.contains('ion-item', 'Haut').click()
+      for (const id of findings) row(id).should('have.class', 'examination-inactive')
+    })
+
+    it('keeps psych findings when reopening the modal without clearing its assessment', () => {
+      cy.visit(`/tests/e2e/fixtures/examination.html?disability&mode=${mode}`)
+      const findings = ['delusions', 'hallucinations', 'behavioralChange', 'perseveration', 'dementia']
+      row('psych').find('.activate-examination').click()
+      for (const id of findings) {
+        row(id).should('have.class', 'examination-inactive').and(expectInactiveRowLayout)
+        row(id).find('.activate-examination').click()
+        row(id).find('.remove-examination').should('not.exist')
+      }
+      closeModal()
+      row('psych').find('.examination-control > ion-item').click()
+      for (const id of findings) {
+        row(id).find('ion-toggle').should('have.prop', 'checked', true).click()
+        row(id).find('.activate-examination').should('be.focused')
+      }
+      closeModal()
+      row('psych').should('have.attr', 'data-assessed', 'true').and('contain.text', 'normal')
+      row('psych').find('.examination-control > ion-item').click()
+      for (const id of findings) row(id).should('have.class', 'examination-inactive')
+    })
+
+    it('places urinary incontinence with the optional findings and toggles it independently', () => {
+      cy.visit(`/tests/e2e/fixtures/examination.html?exposure&mode=${mode}`)
+      row('urinaryIncontinence').prevAll('ion-item').first().should('contain.text', 'Erbrechen')
+      row('urinaryIncontinence').next().should('have.attr', 'data-examination', 'excretions')
+      row('urinaryIncontinence').should('have.class', 'examination-inactive').and(expectInactiveRowLayout)
+      row('urinaryIncontinence').find('.activate-examination').click()
+      row('urinaryIncontinence').find('ion-toggle').should('have.prop', 'checked', true)
+      cy.get('#report').should('contain.text', 'eingenässt')
+      row('urinaryIncontinence').find('ion-toggle').click()
+      row('urinaryIncontinence').find('.activate-examination').should('be.focused')
+      cy.get('#report').should('not.contain.text', 'eingenässt')
+      row('excretions').should('have.attr', 'data-assessed', 'false')
+    })
+  })
+}
+
 for (const width of [320, 1024]) {
   describe(`inline examinations at ${width}px`, () => {
     beforeEach(() => {
