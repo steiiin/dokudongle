@@ -36,6 +36,18 @@ export class SnippetService {
   getSuggestions(text: string, cursor: number): SnippetSuggestion[] {
     const active = this.getActiveQuery(text, cursor)
     if (!active) return []
+    return this.matchSuggestions(active)
+  }
+
+  getLocationQuery(text: string): string {
+    return text.trim().replace(/^@/u, '').trim()
+  }
+
+  getLocationSuggestions(text: string): SnippetSuggestion[] {
+    return this.matchSuggestions({ trigger: '@', query: this.getLocationQuery(text), start: 0, end: text.length })
+  }
+
+  private matchSuggestions(active: ActiveSnippetQuery): SnippetSuggestion[] {
     const query = normalizeKey(active.query)
 
     return this.snippets

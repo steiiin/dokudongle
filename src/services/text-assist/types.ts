@@ -24,6 +24,7 @@ export interface TextInputChange {
 }
 
 export type ImeAutocorrectFlag = 'capitalize' | 'phone'
+export type ImeMode = 'default' | 'locations'
 
 export interface ImeDictionary {
   words?: readonly string[]

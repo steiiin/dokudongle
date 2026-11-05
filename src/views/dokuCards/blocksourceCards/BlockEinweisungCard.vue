@@ -13,7 +13,7 @@
         <IonItem lines="full">
           <DodoInputText v-model="store.doku.textAreaBlocks.einweisung.values.ZIEL"
             label="Ziel" placeholder="z.B. FKH Coswig"
-            :ime-dictionary="{}" assist-context-id="quickie.einweisung.ziel" />
+            ime-mode="locations" assist-context-id="quickie.einweisung.ziel" />
         </IonItem>
         <IonItem lines="none">
           <DodoInputText v-model="store.doku.textAreaBlocks.einweisung.values.KRANKHEIT"

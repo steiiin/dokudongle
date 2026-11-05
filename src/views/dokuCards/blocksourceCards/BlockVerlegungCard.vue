@@ -8,12 +8,12 @@
         <IonItem lines="full">
           <DodoInputText v-model="store.doku.textAreaBlocks.verlegung.values.START"
             label="Start" placeholder="z.B. FKH Coswig"
-            :ime-dictionary="{}" assist-context-id="quickie.verlegung.start" />
+            ime-mode="locations" assist-context-id="quickie.verlegung.start" />
         </IonItem>
         <IonItem lines="none">
           <DodoInputText v-model="store.doku.textAreaBlocks.verlegung.values.ZIEL"
             label="Ziel" placeholder="z.B. FKH Coswig"
-            :ime-dictionary="{}" assist-context-id="quickie.verlegung.ziel" />
+            ime-mode="locations" assist-context-id="quickie.verlegung.ziel" />
         </IonItem>
       </IonList>
     </IonCardContent>

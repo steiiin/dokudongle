@@ -117,6 +117,11 @@ describe('generated Situation blocks', () => {
     expect(card.find('ion-card-title').exists()).toBe(false)
     const inputs = card.findAllComponents(DodoInputText)
     expect(inputs.map(input => input.props('label'))).toEqual(labels)
+    inputs.forEach(input => {
+      const isLocation = ['Start', 'Ziel'].includes(input.props('label')!)
+      expect(input.props('imeMode')).toBe(isLocation ? 'locations' : undefined)
+      expect(input.props('imeDictionary')).toEqual(isLocation ? undefined : {})
+    })
     inputs.forEach((input, index) => input.vm.$emit('update:modelValue', values[index]))
     await nextTick()
     expect(situation.getComponent(DodoInputTextArea).props('blocks')![0].text)

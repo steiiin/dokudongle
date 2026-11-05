@@ -1,6 +1,6 @@
 import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 import { defineComponent, nextTick, onMounted, ref } from 'vue'
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import DodoInputSelectOptional from '@/components/DodoInputSelectOptional.vue'
@@ -10,7 +10,7 @@ import DodoInputTextOptional from '@/components/DodoInputTextOptional.vue'
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
 import { setInputSuggestionsDisabled } from '@/plugins/input-suggestions'
-import { textAssistService, type ImeDictionary } from '@/services/text-assist'
+import { textAssistService, type ImeDictionary, type ImeMode, type TextSuggestion } from '@/services/text-assist'
 import { provideTextSuggestionScope } from '@/services/text-suggestions'
 
 vi.mock('@/plugins/input-suggestions', () => ({
@@ -71,7 +71,7 @@ const mountInput = (imeDictionary?: ImeDictionary) => shallowMount(DodoInputText
 
 const AssistedInputHarness = defineComponent({
   components: { DodoInputText, DodoTextSuggestionHost },
-  props: { imeDictionary: { type: Object, required: true } },
+  props: { imeDictionary: Object, imeMode: String },
   setup() {
     provideTextSuggestionScope()
     const value = ref('')
@@ -81,19 +81,20 @@ const AssistedInputHarness = defineComponent({
     <DodoInputText
       v-model="value"
       :ime-dictionary="imeDictionary"
+      :ime-mode="imeMode"
       assist-context-id="test.single-line"
     />
     <DodoTextSuggestionHost />
   `,
 })
 
-const mountAssistedInput = () => mount(AssistedInputHarness, {
+const mountAssistedInput = (imeMode?: ImeMode) => mount(AssistedInputHarness, {
   attachTo: document.body,
-  props: { imeDictionary: {} },
+  props: imeMode ? { imeMode } : { imeDictionary: {} },
   global: { stubs: { IonInput: IonInputStub } },
 })
 
-const insertText = (input: HTMLInputElement, before: string, after: string, data: string) => {
+const insertText = (input: HTMLInputElement, before: string, after: string, data: string | null) => {
   input.value = before
   input.setSelectionRange(before.length, before.length)
   input.dispatchEvent(new InputEvent('beforeinput', {
@@ -115,6 +116,136 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.mocked(setInputSuggestionsDisabled).mockClear()
   document.body.innerHTML = ''
+})
+
+describe('DodoInputText location IME', () => {
+  beforeAll(() => textAssistService.initialize())
+
+  test('shows only locations without a dictionary or @ and applies the selected location', async () => {
+    const wrapper = mountAssistedInput('locations')
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    await flushPromises()
+    const panel = wrapper.getComponent(DodoTextSuggestionPanel)
+    expect(panel.props('suggestions')).toHaveLength(5)
+    expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(false)
+    insertText(input, '', 'ukd', 'ukd')
+    await flushPromises()
+    expect(panel.props('suggestions')).toMatchObject([{ replacement: 'Uniklinik Dresden' }])
+    await panel.get('button').trigger('click')
+    await flushPromises()
+    expect(input.value).toBe('Uniklinik Dresden')
+    expect(input.selectionStart).toBe(input.value.length)
+    expect(document.activeElement).toBe(input)
+    expect(wrapper.getComponent(DodoInputText).emitted('update:modelValue')?.at(-1)).toEqual(['Uniklinik Dresden'])
+    expect(panel.props('suggestions')).toEqual([])
+    expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(false)
+    input.blur()
+    input.focus()
+    await flushPromises()
+    expect(panel.props('suggestions')).toEqual([])
+    insertText(input, 'Uniklinik Dresden', 'Uniklinik Dre', null)
+    await flushPromises()
+    expect(panel.props('suggestions')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  test('automatically accepts a unique location on space and preserves free text without matches', async () => {
+    const wrapper = mountAssistedInput('locations')
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    insertText(input, 'ukd', 'ukd ', ' ')
+    await flushPromises()
+    expect(input.value).toBe('Uniklinik Dresden ')
+    expect(input.selectionStart).toBe(input.value.length)
+    expect(wrapper.getComponent(DodoTextSuggestionPanel).props('suggestions')).toEqual([])
+    insertText(input, 'Andere Klinik', 'Andere Klinik ', ' ')
+    await flushPromises()
+    expect(input.value).toBe('Andere Klinik ')
+    wrapper.unmount()
+  })
+
+  test('reactivates a focused field on mode changes and ignores an old pending result', async () => {
+    let finish!: (value: TextSuggestion[]) => void
+    vi.spyOn(textAssistService, 'getSuggestions').mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    const wrapper = mountAssistedInput()
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    await flushPromises()
+    await wrapper.setProps({ imeMode: 'locations' })
+    await flushPromises()
+    const panel = wrapper.getComponent(DodoTextSuggestionPanel)
+    expect(panel.props('suggestions')).toHaveLength(5)
+    expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(false)
+    finish([])
+    await flushPromises()
+    expect(panel.props('suggestions')).toHaveLength(5)
+    await wrapper.setProps({ imeMode: 'default' })
+    await flushPromises()
+    expect(wrapper.find('[aria-label="Textbaustein einfügen"]').exists()).toBe(true)
+    await wrapper.setProps({ imeDictionary: undefined })
+    await flushPromises()
+    expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+    expect(wrapper.getComponent(IonInputStub).props('autocomplete')).toBeUndefined()
+    wrapper.unmount()
+  })
+
+  test.each([
+    ['ukd', 'Uniklinik Dresden'],
+    ['@uni', 'Uniklinik Dresden'],
+    ['  Uniklinik Dre  ', 'Uniklinik Dresden'],
+    ['rad', 'rad'],
+    ['Andere Klinik', 'Andere Klinik'],
+    ['', ''],
+    ['@', '@'],
+  ])('commits only a unique nonempty location on blur: %j', async (query, expected) => {
+    const wrapper = mountAssistedInput('locations')
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    insertText(input, '', query, query)
+    input.blur()
+    // The model must already be final when a subsequent save click is handled.
+    expect(wrapper.getComponent(DodoInputText).emitted('update:modelValue')?.at(-1)).toEqual([expected])
+    await flushPromises()
+    expect(input.value).toBe(expected)
+    expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('does not complete a location while composition is active on blur', async () => {
+    const wrapper = mountAssistedInput('locations')
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))
+    insertText(input, '', 'ukd', 'ukd')
+    input.blur()
+    await flushPromises()
+    expect(input.value).toBe('ukd')
+    wrapper.unmount()
+  })
+
+  test('does not revive locations from an input request after blur', async () => {
+    let finish!: (value: { suggestions: TextSuggestion[] }) => void
+    vi.spyOn(textAssistService, 'processInput').mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    const wrapper = mountAssistedInput('locations')
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    await flushPromises()
+    const candidates = wrapper.getComponent(DodoTextSuggestionPanel).props('suggestions')
+    insertText(input, '', 'u', 'u')
+    await flushPromises()
+    input.blur()
+    finish({ suggestions: candidates })
+    await flushPromises()
+    expect(wrapper.find('.dd-suggestion-panel').exists()).toBe(false)
+    wrapper.unmount()
+  })
 })
 
 describe('DodoInputText single-line IME', () => {

@@ -669,6 +669,125 @@ describe('suggestions after location selection', () => {
   })
 })
 
+describe('location-only IME', () => {
+  const setup = () => {
+    const repository = new MemoryRepository()
+    const service = new TextAssistService(repository)
+    // Location lookup must work without consulting the spelling engine.
+    vi.spyOn(service.autocorrect, 'initialize').mockResolvedValue(undefined)
+    return { repository, service }
+  }
+  const suggestions = (service: TextAssistService, text: string, session = 'location') =>
+    service.getSuggestions(session, 'ziel', snapshot(text), 'locations')
+
+  test.each(['uni', '@uni', 'UKD', 'Uniklinik Dre', '  @uni  '])('finds locations for %j', async query => {
+    const { service } = setup()
+    expect(await suggestions(service, query)).toMatchObject([
+      { type: 'snippet', replacement: 'Uniklinik Dresden', start: 0, end: query.length },
+    ])
+  })
+
+  test('uses the live @ collection, including custom non-hospital locations, and limits the empty query', async () => {
+    const { repository, service } = setup()
+    expect(await suggestions(service, '')).toHaveLength(5)
+    repository.state.locationSnippets.push(
+      { id: 'custom', trigger: '@', label: 'Wache West', replacement: 'RW West', keywords: ['ww'], category: 'station' },
+      { id: 'other', trigger: '#', label: 'Wache Ost', replacement: 'RW Ost' },
+    )
+    expect(await suggestions(service, 'ww')).toMatchObject([{ replacement: 'RW West' }])
+    expect(await suggestions(service, 'Wache Ost')).toEqual([])
+    repository.state.locationSnippets = []
+    expect(await suggestions(service, '')).toEqual([])
+  })
+
+  test('never falls back to word suggestions or automatic corrections', async () => {
+    const { service } = setup()
+    const general = vi.spyOn(service.suggestions, 'getSuggestions')
+    const correction = vi.spyOn(service.autocorrect, 'correctAfterDelimiter')
+    const shortcut = vi.spyOn(service.shortcutReplacements, 'replaceAfterDelimiter')
+    const flags = vi.spyOn(service.imeAutocorrect, 'correctAfterDelimiter')
+    const update = await service.processInput(change('location', 'zzzz', 'zzzz '), {
+      shortcuts: { zzzz: 'DokuDongle' }, autocorrect: ['capitalize'],
+    }, 'locations')
+    expect(update).toEqual({ mutation: undefined, suggestions: [] })
+    for (const spy of [general, correction, shortcut, flags]) expect(spy).not.toHaveBeenCalled()
+  })
+
+  test.each([' ', ',', '𐄀'])('automatically completes a unique location with delimiter %j', async delimiter => {
+    const { service } = setup()
+    const update = await service.processInput(change('location', 'ukd', `ukd${delimiter}`), {}, 'locations')
+    expect(applyMutation(`ukd${delimiter}`, update.mutation!)).toBe(`Uniklinik Dresden${delimiter}`)
+    expect(update.mutation?.cursor).toBe(`Uniklinik Dresden${delimiter}`.length)
+    expect(update.suggestions).toEqual([])
+    expect(await suggestions(service, `Uniklinik Dresden${delimiter}`)).toEqual([])
+  })
+
+  test.each(['', '@', 'rad', 'zzzz', 'KH'])('preserves empty, ambiguous or unmatched input %j', async query => {
+    const { service } = setup()
+    expect((await service.processInput(change('location', query, `${query} `), {}, 'locations')).mutation).toBeUndefined()
+  })
+
+  test('filters a multiword query after an ambiguous space', async () => {
+    const { service } = setup()
+    const update = await service.processInput(change('location', 'KH ', 'KH Radeb'), {}, 'locations')
+    expect(update.mutation).toBeUndefined()
+    expect(update.suggestions).toMatchObject([{ replacement: 'KH Radebeul' }])
+  })
+
+  test('does not complete composition, selection replacement, middle edits or pasted words', async () => {
+    const { service } = setup()
+    const base = change('location', 'ukd', 'ukd ')
+    for (const input of [
+      { ...base, before: snapshot('ukd', 3, true) },
+      { ...base, after: snapshot('ukd ', 4, true) },
+      { ...base, before: { ...base.before, selectionStart: 0 } },
+      { ...base, after: { ...base.after, selectionStart: 0 } },
+      { ...base, before: snapshot('ukd suffix', 3), after: snapshot('ukd  suffix', 4) },
+      change('location', '', 'ukd '),
+    ]) {
+      expect((await service.processInput(input, {}, 'locations')).mutation).toBeUndefined()
+    }
+  })
+
+  test('revalidates clicked locations and replaces the whole field even with a moved caret', async () => {
+    const { repository, service } = setup()
+    const candidate = (await suggestions(service, 'uni'))[0]
+    expect(service.applySuggestion('location', 'ziel', snapshot('zzzz'), candidate, 'locations')).toBeNull()
+    expect(service.applySuggestion('location', 'ziel', snapshot('uni', 3, true), candidate, 'locations')).toBeNull()
+    expect(service.applySuggestion('location', 'ziel', { ...snapshot('uni'), selectionStart: 0 }, candidate, 'locations')).toBeNull()
+    const live = '  @Uniklinik Dre '
+    expect(service.applySuggestion('location', 'ziel', snapshot(live, 4), candidate, 'locations')).toEqual({
+      start: 0, end: live.length, replacement: 'Uniklinik Dresden', cursor: 17,
+    })
+    repository.state.locationSnippets = []
+    expect(service.applySuggestion('location', 'ziel', snapshot('uni'), candidate, 'locations')).toBeNull()
+  })
+
+  test('keeps accepted suggestions hidden through selection and focus changes until text changes', async () => {
+    const { service } = setup()
+    const candidate = (await suggestions(service, 'uni'))[0]
+    service.applySuggestion('location', 'ziel', snapshot('uni'), candidate, 'locations')
+    service.invalidateSession('location', snapshot('Uniklinik Dresden', 2))
+    expect(await suggestions(service, 'Uniklinik Dresden')).toEqual([])
+    expect((await service.processInput(change('location', 'Uniklinik Dresden', 'Uniklinik Dresden'), {}, 'locations')).suggestions).toEqual([])
+    expect(await suggestions(service, 'Uniklinik Dre')).toHaveLength(1)
+    service.applySuggestion('location', 'ziel', snapshot('uni'), candidate, 'locations')
+    service.releaseSession('location', snapshot('Uniklinik Dresden'))
+    expect(await suggestions(service, 'Uniklinik Dresden')).toHaveLength(1)
+  })
+
+  test('preserves further spaces after an accepted location and resumes suggestions on text changes', async () => {
+    const { service } = setup()
+    const candidate = (await suggestions(service, 'uni'))[0]
+    service.applySuggestion('location', 'ziel', snapshot('uni'), candidate, 'locations')
+    for (const spaces of [' ', '  ']) {
+      const update = await service.processInput(change('location', `Uniklinik Dresden${spaces.slice(1)}`, `Uniklinik Dresden${spaces}`), {}, 'locations')
+      expect(update.mutation).toBeUndefined()
+      expect(update.suggestions).toHaveLength(1)
+    }
+  })
+})
+
 describe('snippets and usage learning', () => {
   test('filters @ locations and replaces the complete trigger expression', () => {
     const snippets = new SnippetService()

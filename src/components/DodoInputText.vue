@@ -24,7 +24,7 @@ import { useTextSuggestionScope } from '@/services/text-suggestions'
 
 import { textAssistService } from '@/services/text-assist'
 import { sameInputSnapshot, snapshotBeforeInput, snippetStartMutation, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
-import type { ImeDictionary } from '@/services/text-assist'
+import type { ImeDictionary, ImeMode } from '@/services/text-assist'
 import type { TextInputSnapshot } from '@/services/text-assist'
 import type { TextMutation } from '@/services/text-assist'
 import type { TextSuggestion } from '@/services/text-assist'
@@ -38,6 +38,7 @@ const props = defineProps<{
   labelColor?: string,
   inputmode?: 'text' | 'numeric' | 'decimal' | 'tel' | 'search' | 'email' | 'url',
   imeDictionary?: ImeDictionary,
+  imeMode?: ImeMode,
   assistContextId?: string,
 }>()
 
@@ -50,7 +51,7 @@ const emit = defineEmits<{
 
 const inputRef = ref<any | null>(null)
 const nativeInput = ref<HTMLInputElement | null>(null)
-const isTextAssistReady = ref(props.imeDictionary === undefined)
+const isTextAssistReady = ref(props.imeDictionary === undefined && props.imeMode !== 'locations')
 const isTextAssistAvailable = ref(true)
 const isComposing = ref(false)
 const isApplyingAssistMutation = ref(false)
@@ -66,13 +67,13 @@ let suggestionsSuppressed = false
 let componentUnmounted = false
 let textAssistInitialization: Promise<void> | null = null
 
-const imeEnabled = computed(() => props.imeDictionary !== undefined)
+const imeEnabled = computed(() => props.imeDictionary !== undefined || props.imeMode === 'locations')
 const imeOperational = computed(() => imeEnabled.value && isTextAssistAvailable.value)
 const canStartSnippet = computed(() => imeOperational.value && isTextAssistReady.value
-  && !isComposing.value && !isApplyingAssistMutation.value)
-const imeDictionarySignature = computed(() => props.imeDictionary === undefined
+  && props.imeMode !== 'locations' && !isComposing.value && !isApplyingAssistMutation.value)
+const imeConfigurationSignature = computed(() => !imeEnabled.value
   ? null
-  : JSON.stringify(props.imeDictionary))
+  : JSON.stringify([props.imeMode ?? 'default', props.imeDictionary]))
 
 const inputValue = computed({
   get: () => props.modelValue,
@@ -190,7 +191,7 @@ const processAssistInput = async (before: TextInputSnapshot, event: InputEvent, 
       after,
       inputType: event.inputType || 'insertText',
       data: event.data,
-    }, props.imeDictionary)
+    }, props.imeDictionary, props.imeMode)
     if (revision !== assistRevision) return
     if (update.mutation) await applyAssistMutation(update.mutation, after.text)
     if (revision === assistRevision) updateTextSuggestions(update.suggestions)
@@ -213,6 +214,7 @@ const refreshTextSuggestions = async () => {
     assistSessionId,
     props.assistContextId ?? 'single-line',
     snapshotInput(),
+    props.imeMode,
   )
   if (revision === assistRevision) updateTextSuggestions(suggestions)
 }
@@ -224,6 +226,7 @@ const applyTextSuggestion = async (suggestion: TextSuggestion) => {
     props.assistContextId ?? 'single-line',
     snapshot,
     suggestion,
+    props.imeMode,
   )
   assistRevision += 1
   if (mutation) await applyAssistMutation(mutation, snapshot.text)
@@ -283,7 +286,7 @@ const handleFocus = () => {
   if (!imeOperational.value) return
   lastInputSnapshot = snapshotInput()
   setSuggestionSuppression(true)
-  suggestionScope?.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) }, {
+  suggestionScope?.activate(suggestionOwner, (suggestion) => { void applyTextSuggestion(suggestion) }, props.imeMode === 'locations' ? undefined : {
     enabled: canStartSnippet,
     start: () => { void startSnippet() },
   })
@@ -291,6 +294,14 @@ const handleFocus = () => {
 }
 
 const handleNativeBlur = () => {
+  if (props.imeMode === 'locations' && imeOperational.value && isTextAssistReady.value) {
+    const snapshot = snapshotInput()
+    const mutation = textAssistService.completeLocationOnBlur(
+      assistSessionId, props.assistContextId ?? 'single-line', snapshot,
+    )
+    // Commit synchronously before a following button click can save the form.
+    if (mutation) void applyAssistMutation(mutation, snapshot.text)
+  }
   lastInputSnapshot = null
   assistRevision += 1
   pendingBeforeInput.value = null
@@ -362,12 +373,16 @@ const removeNativeInputListeners = (input: HTMLInputElement) => {
 }
 
 watch(
-  imeDictionarySignature,
+  imeConfigurationSignature,
   (signature) => {
-    assistRevision += 1
-    textAssistService.invalidateSession(assistSessionId, snapshotInput())
+    const revision = ++assistRevision
+    textAssistService.releaseSession(assistSessionId, snapshotInput())
+    pendingBeforeInput.value = null
+    suggestionScope?.clear(suggestionOwner)
     if (signature !== null) {
-      void initializeTextAssist()
+      void initializeTextAssist().then(() => {
+        if (!componentUnmounted && revision === assistRevision && nativeInput.value === document.activeElement) handleFocus()
+      })
       return
     }
     isTextAssistReady.value = true
@@ -390,7 +405,7 @@ onBeforeUnmount(() => {
   componentUnmounted = true
   assistRevision += 1
   if (nativeInput.value) removeNativeInputListeners(nativeInput.value)
-  textAssistService.invalidateSession(assistSessionId, snapshotInput())
+  textAssistService.releaseSession(assistSessionId, snapshotInput())
   suggestionScope?.clear(suggestionOwner)
   setSuggestionSuppression(false)
 })

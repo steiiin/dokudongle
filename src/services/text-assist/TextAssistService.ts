@@ -12,6 +12,7 @@ import type {
   ImeAutocorrectFlag,
   AddUserWordResult,
   ImeDictionary,
+  ImeMode,
   NewLocationSnippet,
   TextSnippet,
   TextAssistUpdate,
@@ -49,6 +50,7 @@ export class TextAssistService {
   readonly suggestions: SuggestionService
   private initialization?: Promise<void>
   private readonly suggestionsAwaitingDelimiter = new Set<string>()
+  private readonly acceptedLocationText = new Map<string, string>()
 
   constructor(repository: TextAssistStateRepositoryLike = new TextAssistStateRepository()) {
     this.repository = repository
@@ -77,9 +79,17 @@ export class TextAssistService {
     return this.autocorrect.initialize()
   }
 
-  async processInput(change: TextInputChange, dictionary: ImeDictionary = {}): Promise<TextAssistUpdate> {
+  async processInput(change: TextInputChange, dictionary: ImeDictionary = {}, mode: ImeMode = 'default'): Promise<TextAssistUpdate> {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return { suggestions: [] }
+
+    if (mode === 'locations') {
+      this.invalidateAutomaticSession(change.sessionId)
+      const mutation = this.completeLocationAfterDelimiter(change)
+      const snapshot = mutation ? this.snapshotAfterMutation(change.after, mutation) : change.after
+      if (mutation) this.acceptedLocationText.set(change.sessionId, snapshot.text)
+      return { mutation, suggestions: await this.getSuggestions(change.sessionId, change.contextId, snapshot, mode) }
+    }
 
     if (this.suggestionsAwaitingDelimiter.has(change.sessionId) && this.insertsCompletionDelimiter(change)) {
       this.suggestionsAwaitingDelimiter.delete(change.sessionId)
@@ -162,8 +172,13 @@ export class TextAssistService {
     this.autocorrect.invalidate(sessionId)
   }
 
-  async getSuggestions(sessionId: string, contextId: string, snapshot: TextInputSnapshot): Promise<TextSuggestion[]> {
+  async getSuggestions(sessionId: string, contextId: string, snapshot: TextInputSnapshot, mode: ImeMode = 'default'): Promise<TextSuggestion[]> {
     await this.initialize()
+    if (mode === 'locations') {
+      if (this.isLocationSuppressed(sessionId, snapshot.text) || snapshot.isComposing
+        || snapshot.selectionStart !== snapshot.selectionEnd) return []
+      return this.snippets.getLocationSuggestions(snapshot.text).slice(0, 5)
+    }
     if (snapshot.isComposing || snapshot.selectionStart !== snapshot.selectionEnd
       || this.suggestionsAwaitingDelimiter.has(sessionId)) return []
     const cursor = snapshot.selectionStart
@@ -186,7 +201,16 @@ export class TextAssistService {
     contextId: string,
     snapshot: TextInputSnapshot,
     suggestion: TextSuggestion,
+    mode: ImeMode = 'default',
   ): TextMutation | null {
+    if (mode === 'locations') {
+      if (snapshot.isComposing || snapshot.selectionStart !== snapshot.selectionEnd || suggestion.type !== 'snippet') return null
+      const current = this.snippets.getLocationSuggestions(snapshot.text).find(candidate => candidate.id === suggestion.id)
+      if (!current) return null
+      this.invalidateAutomaticSession(sessionId)
+      this.acceptedLocationText.set(sessionId, current.replacement)
+      return { start: 0, end: snapshot.text.length, replacement: current.replacement, cursor: current.replacement.length }
+    }
     this.acceptPendingAutomaticChange(sessionId, snapshot)
 
     let currentSuggestion = suggestion
@@ -219,12 +243,26 @@ export class TextAssistService {
     }
   }
 
+  completeLocationOnBlur(sessionId: string, contextId: string, snapshot: TextInputSnapshot): TextMutation | null {
+    if (!this.snippets.getLocationQuery(snapshot.text)) return null
+    const matches = this.snippets.getLocationSuggestions(snapshot.text)
+    if (matches.length !== 1 || matches[0].replacement === snapshot.text) return null
+    return this.applySuggestion(sessionId, contextId, snapshot, matches[0], 'locations')
+  }
+
   invalidateSession(sessionId: string, snapshot?: TextInputSnapshot, preserveSuggestionSuppression = false): void {
+    if (snapshot) this.isLocationSuppressed(sessionId, snapshot.text)
+    else this.acceptedLocationText.delete(sessionId)
     if (!preserveSuggestionSuppression) this.suggestionsAwaitingDelimiter.delete(sessionId)
     this.imeAutocorrect.invalidate(sessionId)
     this.shortcutReplacements.invalidate(sessionId)
     const correction = this.autocorrect.invalidate(sessionId)
     if (correction && snapshot) this.learnAcceptedCorrection(correction, snapshot.text)
+  }
+
+  releaseSession(sessionId: string, snapshot: TextInputSnapshot): void {
+    this.invalidateSession(sessionId, snapshot)
+    this.acceptedLocationText.delete(sessionId)
   }
 
   getShortcutReplacements(): Promise<Record<string, string>> { return this.settings.getShortcuts() }
@@ -317,6 +355,26 @@ export class TextAssistService {
       afterEnd -= 1
     }
     return Array.from(after.slice(start, afterEnd)).some(isCompletionDelimiter)
+  }
+
+  private isLocationSuppressed(sessionId: string, text: string): boolean {
+    if (this.acceptedLocationText.get(sessionId) === text) return true
+    this.acceptedLocationText.delete(sessionId)
+    return false
+  }
+
+  private completeLocationAfterDelimiter(change: TextInputChange): TextMutation | undefined {
+    const { before, after } = change
+    if (!change.inputType.startsWith('insert') || before.selectionStart !== before.text.length
+      || before.selectionEnd !== before.text.length || after.selectionStart !== after.text.length
+      || after.selectionEnd !== after.text.length || !after.text.startsWith(before.text)) return
+    const inserted = after.text.slice(before.text.length)
+    if (!isCompletionDelimiter(inserted) || !this.snippets.getLocationQuery(before.text)) return
+    const matches = this.snippets.getLocationSuggestions(before.text)
+    if (matches.length !== 1) return
+    const replacement = matches[0].replacement
+    if (before.text.trim() === replacement) return
+    return { start: 0, end: before.text.length, replacement, cursor: replacement.length + inserted.length }
   }
 
   private completeSnippetAfterDelimiter(change: TextInputChange): { active: boolean; mutation?: TextMutation } {
