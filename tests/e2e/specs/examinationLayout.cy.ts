@@ -70,6 +70,29 @@ for (const mode of ['md', 'ios']) {
         cy.get('ion-card-content.card-in-card').should('exist')
       })
 
+      it('moves inactive card rows to the end while preserving source order and focus', () => {
+        const expectOrder = (ids: string[]) => row('breathlessness').parent().should(list => {
+          const rows = Array.from(list[0].children).filter(el => el.matches('.examination-item'))
+          expect(rows.map(el => el.getAttribute('data-examination'))).to.deep.equal(ids)
+          const tops = rows.map(el => el.getBoundingClientRect().top)
+          expect(tops).to.deep.equal([...tops].sort((a, b) => a - b))
+        })
+        expectOrder(['breathlessness', 'hasHypoxia', 'auscultation', 'jugularVenousDistension', 'emphysema', 'trachealDeviation'])
+        clickRowControl('trachealDeviation', '.activate-examination')
+        expectOrder(['breathlessness', 'trachealDeviation', 'hasHypoxia', 'auscultation', 'jugularVenousDistension', 'emphysema'])
+        row('trachealDeviation').should('be.focused').and(expectRowLayout)
+        row('trachealDeviation').children('.examination-separator').should('be.visible')
+        row('emphysema').children('.examination-separator').should('not.exist')
+        clickRowControl('jugularVenousDistension', '.activate-examination')
+        expectOrder(['breathlessness', 'jugularVenousDistension', 'trachealDeviation', 'hasHypoxia', 'auscultation', 'emphysema'])
+        clickRowControl('trachealDeviation', 'ion-toggle')
+        row('trachealDeviation').should('have.attr', 'data-assessed', 'true')
+        expectOrder(['breathlessness', 'jugularVenousDistension', 'trachealDeviation', 'hasHypoxia', 'auscultation', 'emphysema'])
+        clickRowControl('trachealDeviation', '.remove-examination')
+        expectOrder(['breathlessness', 'jugularVenousDistension', 'hasHypoxia', 'auscultation', 'emphysema', 'trachealDeviation'])
+        row('trachealDeviation').find('.activate-examination').should('be.focused')
+      })
+
       it('fills non-removable rows with visible, compact controls', () => {
         for (const id of ['breathlessness', 'chest', 'zops', 'headache', 'dizziness', 'nausea']) {
           row(id).should('have.attr', 'data-assessed', 'true')

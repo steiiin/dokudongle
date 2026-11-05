@@ -8,6 +8,7 @@ import DodoExaminationItem from '@/components/DodoExaminationItem.vue'
 import DodoExaminationCard from '@/components/DodoExaminationCard.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import DodoInputToggle from '@/components/DodoInputToggle.vue'
+import DodoInputToggleOptional from '@/components/DodoInputToggleOptional.vue'
 import DodoItemModal from '@/components/DodoItemModal.vue'
 import AbcdeAirwayCard from '@/views/dokuCards/abcdeCards/AbcdeAirwayCard.vue'
 import AbcdeBreathingCard from '@/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue'
@@ -122,10 +123,108 @@ function fixture() {
   return { wrapper, activate, selected, removed }
 }
 
+describe('examination card grouping', () => {
+  function groupingFixture() {
+    const wrapper = mount(defineComponent({
+      components: { DodoExaminationCard, DodoExaminationItem, DodoInputToggleOptional, DodoItemModal },
+      setup: () => ({ first: ref(false), second: ref(true), positive: ref(false), available: ref(true), nested: ref(false) }),
+      template: `<DodoExaminationCard title="Grouping">
+        <span data-row="regular">Regular</span>
+        <DodoExaminationItem id="first" v-model:assessed="first"><input value="preserved" /></DodoExaminationItem>
+        <span v-if="available" data-row="conditional">Conditional</span>
+        <DodoInputToggleOptional id="positive" label="Positive" v-model="positive" />
+        <DodoExaminationItem id="second" v-model:assessed="second" :available="available"><input value="negative finding" /></DodoExaminationItem>
+        <DodoItemModal label="Nested">
+          <DodoExaminationItem id="nested-first" v-model:assessed="nested"><span>Nested</span></DodoExaminationItem>
+          <DodoExaminationItem id="nested-second" :assessed="true"><span>Nested active</span></DodoExaminationItem>
+        </DodoItemModal>
+      </DodoExaminationCard>`,
+    }), { global, attachTo: document.body })
+    const order = () => Array.from(wrapper.get('ion-list-stub').element.children)
+      .map(el => el.getAttribute('data-examination') ?? el.getAttribute('data-row'))
+      .filter(Boolean)
+    return { wrapper, order }
+  }
+
+  test('stably groups direct rows and preserves instances, values and focus on activation/removal', async () => {
+    const { wrapper, order } = groupingFixture()
+    expect(order()).toEqual(['regular', 'conditional', 'second', 'first', 'positive'])
+    const first = wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'first')!
+    const second = wrapper.get('[data-examination="second"] input').element
+    await wrapper.get('[data-examination="first"] .activate-examination').trigger('click')
+    await flushPromises()
+    expect(order()).toEqual(['regular', 'first', 'conditional', 'second', 'positive'])
+    expect(wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'first')!.vm.$).toBe(first.vm.$)
+    expect(wrapper.get('[data-examination="second"] input').element).toBe(second)
+    expect(document.activeElement).toBe(wrapper.get('[data-examination="first"]').element)
+
+    await wrapper.get('[data-examination="first"] input').setValue('edited')
+    wrapper.vm.positive = true
+    await nextTick()
+    expect(order()).toEqual(['regular', 'first', 'conditional', 'positive', 'second'])
+    expect((wrapper.get('[data-examination="first"] input').element as HTMLInputElement).value).toBe('edited')
+    await wrapper.get('[data-examination="first"] .remove-examination').trigger('click')
+    await flushPromises()
+    expect(order()).toEqual(['regular', 'conditional', 'positive', 'second', 'first'])
+    expect(document.activeElement).toBe(wrapper.get('[data-examination="first"] .activate-examination').element)
+    await wrapper.get('[data-examination="first"] .activate-examination').trigger('click')
+    expect(order()).toEqual(['regular', 'first', 'conditional', 'positive', 'second'])
+  })
+
+  test('updates external state and availability without reordering modal contents', async () => {
+    const { wrapper, order } = groupingFixture()
+    const nestedOrder = () => wrapper.findAll('[data-examination^="nested-"]').map(item => item.attributes('data-examination'))
+    expect(nestedOrder()).toEqual(['nested-first', 'nested-second'])
+    wrapper.vm.nested = true
+    wrapper.vm.available = false
+    wrapper.vm.positive = true
+    await nextTick()
+    expect(order()).toEqual(['regular', 'positive', 'first'])
+    expect(nestedOrder()).toEqual(['nested-first', 'nested-second'])
+    wrapper.vm.available = true
+    wrapper.vm.positive = false
+    await nextTick()
+    expect(order()).toEqual(['regular', 'conditional', 'second', 'first', 'positive'])
+  })
+
+  test('moves a formerly last row up with a separator and omits the last visible separator', async () => {
+    const store = useDokuStore()
+    const wrapper = mount(AbcdeBreathingCard, { global })
+    const tracheal = () => wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'trachealDeviation')!
+    expect(tracheal().props('showLine')).toBe(false)
+    store.doku.xaBcde.trachealDeviation.assessed = true
+    await nextTick()
+    expect(tracheal().props('showLine')).toBe('full')
+    expect(wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'emphysema')!.props('showLine')).toBe(false)
+    // A negative finding is still assessed and stays in the upper group.
+    expect(store.doku.xaBcde.trachealDeviation.value).toBe(false)
+    const list = wrapper.get('ion-list-stub').element
+    const ids = Array.from(list.children).map(el => el.getAttribute('data-examination')).filter(Boolean)
+    expect(ids).toEqual(['breathlessness', 'trachealDeviation', 'hasHypoxia', 'auscultation', 'jugularVenousDistension', 'emphysema'])
+  })
+
+  test('keeps adult and pediatric orientation instances distinct through context and order changes', async () => {
+    const store = useDokuStore()
+    store.doku.ident.age.timespan = 35
+    const wrapper = mount(AbcdeDisabilityCard, { global })
+    const orientations = () => wrapper.findAllComponents(DodoExaminationItem).filter(item => item.props('id') === 'zops')
+    const original = orientations().map(item => item.vm.$)
+    store.setFlavor('non_verbal', true)
+    await nextTick()
+    orientations().forEach((item, index) => expect(item.vm.$).toBe(original[index]))
+    expect(wrapper.findAll('[data-examination="zops"]')).toHaveLength(1)
+    store.doku.ident.age.timespan = 2
+    await nextTick()
+    orientations().forEach((item, index) => expect(item.vm.$).toBe(original[index]))
+    expect(wrapper.findAll('[data-examination="zops"]')).toHaveLength(1)
+    expect(wrapper.get('[data-examination="zops"]').text()).toContain('pädiatrisch')
+  })
+})
+
 describe('inline examination controls', () => {
   test('shows a gray unassessed row with one activation button and no picker', () => {
     const { wrapper } = fixture()
-    expect(wrapper.get('.examination-inactive').text()).toContain('Firstnicht untersucht')
+    expect(wrapper.get('.examination-inactive').text()).toBe('First')
     expect(wrapper.find('.positive-examination').exists()).toBe(false)
     expect(wrapper.find('.finding').exists()).toBe(false)
     expect(wrapper.find('.add-examination').exists()).toBe(false)

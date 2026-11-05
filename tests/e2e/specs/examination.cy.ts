@@ -55,11 +55,14 @@ for (const mode of ['md', 'ios']) {
       cy.visit(`/tests/e2e/fixtures/examination.html?circulation&mode=${mode}`)
       const findings = ['poorSkinTurgor', 'hasUrtikaria', 'hasExanthem', 'hasFlush']
       cy.contains('ion-item', 'Haut').click()
-      for (const id of findings) {
+      for (const id of [...findings].reverse()) {
         row(id).should('have.class', 'examination-inactive').and(expectInactiveRowLayout)
         row(id).find('.activate-examination').click()
         row(id).find('ion-toggle').should('have.prop', 'checked', true)
         row(id).find('.remove-examination').should('not.exist')
+        cy.get('ion-modal:visible .examination-item').should(items => {
+          expect(Array.from(items, item => item.getAttribute('data-examination'))).to.deep.equal(findings)
+        })
       }
       closeModal()
       cy.get('#report').should('contain.text', 'stehende Hautfalten').and('contain.text', 'Urtikaria')
