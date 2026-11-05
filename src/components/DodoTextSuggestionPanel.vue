@@ -5,27 +5,37 @@
       v-if="!suggestions.length && hasSnippetStart"
       type="button"
       class="dd-suggestion"
+      :class="{ 'dd-ripple-surface': rippleEnabled, 'ion-activatable': rippleEnabled && canStartSnippet }"
       aria-label="Textbaustein einfügen"
       :disabled="!canStartSnippet"
       @pointerdown.prevent
       @click="emit('start-snippet')"
-    >@</button>
+    >
+      @
+      <IonRippleEffect v-if="rippleEnabled && canStartSnippet" aria-hidden="true" />
+    </button>
     <button
       v-for="suggestion in suggestions"
       :key="suggestion.id"
       type="button"
       class="dd-suggestion"
+      :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
       role="option"
       @pointerdown.prevent
       @click="selectSuggestion(suggestion)"
     >
       {{ suggestion.label }}
+      <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { IonRippleEffect } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
 import type { TextSuggestion } from '@/services/text-assist'
+
+const rippleEnabled = isMaterialMode()
 
 defineProps<{
   suggestions: TextSuggestion[]

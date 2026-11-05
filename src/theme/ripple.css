@@ -1,0 +1,11 @@
+.dd-ripple-surface {
+  position: relative;
+  overflow: hidden;
+}
+
+.dd-ripple-surface > ion-ripple-effect {
+  color: inherit;
+  /* Keep the ripple above child Ionic surfaces without intercepting input. */
+  z-index: 2;
+  pointer-events: none;
+}

@@ -1,6 +1,7 @@
 <template>
   <IonItem :lines="isCustomMode ? 'none' : lines">
     <button ref="trigger" type="button" class="dd-input-select-chips" aria-haspopup="dialog"
+      :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
       :aria-expanded="isDialogOpen" @click="openDialog">
       <span class="dd-input-select-chips__label">
         <span :style="{ color: resolvedLabelColor }">{{ label }}</span>
@@ -8,6 +9,7 @@
       </span>
       <span class="dd-input-select-chips__summary" aria-live="polite">{{ summary }}</span>
       <IonIcon :icon="caretDown" aria-hidden="true" />
+      <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
     </button>
   </IonItem>
 
@@ -29,17 +31,21 @@
         <div v-for="(row, index) in visibleRows" :key="index" class="dd-input-select-chips__row">
           <button v-for="option in row" :key="`${typeof option.value}:${option.value}`"
             type="button" class="dd-input-select-chips__chip"
+            :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
             :aria-pressed="!isCustomMode && selectedValues.includes(option.value)" @click="toggleValue(option.value)">
             <IonIcon v-if="!isCustomMode && selectedValues.includes(option.value)" :icon="checkmark" aria-hidden="true" />
             {{ option.label }}
+            <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
           </button>
         </div>
         <div class="dd-input-select-chips__row" v-if="allowCustom && !isCustomMode">
           <button
             type="button" class="dd-input-select-chips__chip dd-input-select-chips__custom"
+            :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
             aria-label="Eigenen Wert eingeben" @click="enterCustom">
             <IonIcon :icon="pencil" aria-hidden="true" />
             Andere
+            <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -54,10 +60,14 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { IonRippleEffect } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
 import { caretDown, checkmark, pencil } from 'ionicons/icons'
 import DodoInputText from './DodoInputText.vue'
 import type { OptionInput, SelectOption, SelectValue } from './DodoInputSelect.vue'
 import type { ImeDictionary } from '@/services/text-assist'
+
+const rippleEnabled = isMaterialMode()
 
 const props = withDefaults(defineProps<{
   modelValue: SelectValue[]

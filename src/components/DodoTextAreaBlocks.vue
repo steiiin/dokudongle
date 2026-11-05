@@ -1,20 +1,25 @@
 <template>
   <div class="dd-textarea-blocks">
     <button v-for="block in blocks" :key="block.id" type="button" class="dd-textarea-block"
-      :class="{ 'is-inactive': !block.active }" :style="{ '--block-color': resolveColor(block.color) }"
+      :class="{ 'is-inactive': !block.active, 'dd-ripple-surface ion-activatable': rippleEnabled }"
+      :style="{ '--block-color': resolveColor(block.color) }"
       :aria-pressed="block.active"
       :aria-label="`${block.active ? 'Deaktivieren' : 'Aktivieren'}: ${block.text}`"
       @click="$emit('activation-change', block.id, !block.active)">
       <span class="dd-textarea-block-text">{{ block.text }}</span>
       <IonIcon class="dd-textarea-block-toggle" :icon="block.active ? eyeOutline : eyeOffOutline" aria-hidden="true" />
+      <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { IonIcon } from '@ionic/vue'
+import { IonIcon, IonRippleEffect } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons'
 import type { RenderedTextAreaBlock } from '@/types/blocks/text-area-block'
+
+const rippleEnabled = isMaterialMode()
 
 defineProps<{ blocks: readonly RenderedTextAreaBlock[] }>()
 defineEmits<{ (e: 'activation-change', id: string, active: boolean): void }>()

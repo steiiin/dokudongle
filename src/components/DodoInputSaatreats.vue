@@ -40,9 +40,11 @@
           <div class="dodo-saatreats-chips">
             <button v-for="chip in group.chips" :key="chip.id"
               type="button" class="dodo-saatreats-chip"
+              :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
               :aria-pressed="draftIds.has(chip.id)" @click="toggleChip(chip.id)">
               <IonIcon v-if="draftIds.has(chip.id)" :icon="checkmark" aria-hidden="true" />
               {{ chip.label }}
+              <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
             </button>
           </div>
         </template>
@@ -53,10 +55,14 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { IonRippleEffect } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
 import type { ItemReorderEventDetail } from '@ionic/core'
 import { addCircle, checkmark, closeOutline } from 'ionicons/icons'
 import { DATA_Saatreats, selectedSaatreatChips } from '@/data/lists/saatreats'
 import { gainFocus } from '@/utils/input'
+
+const rippleEnabled = isMaterialMode()
 
 const props = defineProps<{ modelValue: string[] }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: string[]): void }>()

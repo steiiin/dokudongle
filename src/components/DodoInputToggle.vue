@@ -1,22 +1,29 @@
 <template>
-  <IonItem :lines="lines">
-    <IonToggle
-      class="dd-input-toggle"
-      :model-value="modelValue"
-      :disabled="disabled"
-      :style="toggleStyle"
-      label-placement="end"
-      @update:model-value="onChange"
-      @pointerdown="emit('pointerdown', $event)"
-    >
-      <slot />
-    </IonToggle>
-  </IonItem>
+  <div :class="{ 'dd-ripple-surface': rippleEnabled, 'ion-activatable': rippleEnabled && !disabled }">
+    <IonItem v-bind="$attrs" :lines="lines">
+      <IonToggle
+        class="dd-input-toggle"
+        :model-value="modelValue"
+        :disabled="disabled"
+        :style="toggleStyle"
+        label-placement="end"
+        @update:model-value="onChange"
+        @pointerdown="emit('pointerdown', $event)"
+      >
+        <slot />
+      </IonToggle>
+    </IonItem>
+    <IonRippleEffect v-if="rippleEnabled && !disabled" aria-hidden="true" />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { IonItem, IonToggle } from '@ionic/vue'
+import { IonItem, IonRippleEffect, IonToggle } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
+
+defineOptions({ inheritAttrs: false })
+const rippleEnabled = isMaterialMode()
 
 export type ToggleColor = 'green' | 'yellow' | 'orange' | 'red'
 

@@ -7,7 +7,10 @@
     <main v-else-if="startup.state.status === 'error'" class="startup-screen startup-error" role="alert">
       <h1>Start fehlgeschlagen</h1>
       <p>{{ startup.state.errorMessage }}</p>
-      <button type="button" @click="startup.reload">App neu laden</button>
+      <button type="button" :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }" @click="startup.reload">
+        App neu laden
+        <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
+      </button>
     </main>
 
     <IonRouterOutlet v-else />
@@ -18,12 +21,14 @@
 import { nextTick, onMounted } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { SplashScreen } from '@capacitor/splash-screen'
-import { IonApp, IonIcon, IonRouterOutlet } from '@ionic/vue'
+import { IonApp, IonIcon, IonRippleEffect, IonRouterOutlet } from '@ionic/vue'
 import { hourglassOutline } from 'ionicons/icons'
 
 import { appStartup } from '@/services/app-startup'
+import { isMaterialMode } from '@/utils/ripple'
 
 const startup = appStartup
+const rippleEnabled = isMaterialMode()
 
 const waitForFrame = () => new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
 

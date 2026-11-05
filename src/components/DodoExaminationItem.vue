@@ -1,6 +1,7 @@
 <template>
   <div v-if="available" ref="row" tabindex="-1" class="examination-item"
-    :class="{ 'examination-inactive': !assessed }" :data-examination="id" :data-assessed="assessed">
+    :class="{ 'examination-inactive': !assessed, 'dd-ripple-surface': rippleEnabled,
+      'ion-activatable': rippleEnabled && !assessed }" :data-examination="id" :data-assessed="assessed">
     <template v-if="assessed">
       <div class="examination-control"><slot /></div>
       <IonButton v-if="removable" fill="clear" color="medium" class="remove-examination"
@@ -18,12 +19,18 @@
     </template>
     <IonItem v-if="showLine" class="examination-separator"
       :lines="showLine === true ? 'full' : showLine" aria-hidden="true" />
+    <!-- Keep the activation ripple alive when the input replaces the button. -->
+    <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref } from 'vue'
 import { closeOutline } from 'ionicons/icons'
+import { IonRippleEffect } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
+
+const rippleEnabled = isMaterialMode()
 
 const props = withDefaults(defineProps<{
   id: string

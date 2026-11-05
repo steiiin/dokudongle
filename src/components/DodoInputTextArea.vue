@@ -50,10 +50,12 @@
             <slot />
           </div>
           <button v-if="isHelpExpanded" type="button" class="dd-modal-help-toggle dd-modal-help-collapse"
+            :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
             aria-label="Hinweise einklappen" title="Hinweise einklappen"
             :aria-expanded="true" :aria-controls="helpId"
             @pointerdown.prevent @click="toggleHelp">
             <IonIcon :src="caretUpCircleOutline" aria-hidden="true" />
+            <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
           </button>
         </DodoHint>
         <div class="dd-modal-data" :class="{ 'has-blocks': blocks?.length }">
@@ -161,7 +163,8 @@ import { composeTextAreaText, type RenderedTextAreaBlock } from '@/types/blocks/
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useSlots, watch } from 'vue'
 import { chevronBackOutline, add, alertCircle, arrowRedo, arrowUndo, bookOutline, caretUpCircleOutline, helpCircleOutline, trashBin } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
-import { toastController } from '@ionic/vue'
+import { IonRippleEffect, toastController } from '@ionic/vue'
+import { isMaterialMode } from '@/utils/ripple'
 
 import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
 import { DATA_Quickies, type Quickie } from '@/data/quickies'
@@ -171,6 +174,8 @@ import { EnhanceableText } from '@/types/protocol/input'
 import { textAssistService, type TextInputSnapshot, type TextMutation, type TextSuggestion, type UserDictionaryEntry } from '@/services/text-assist'
 import { isCompletionDelimiter, isDictionaryEntry, wordAroundCursor } from '@/services/text-assist/text'
 import { sameInputSnapshot, snapshotBeforeInput, snippetStartMutation, undoAfterBackwardDeletion } from '@/services/text-assist/input-events'
+
+const rippleEnabled = isMaterialMode()
 
 // ############################################################################
 
