@@ -146,11 +146,11 @@ export class TreatmentRedflags {
   {
 
     if (this.consent == 'Fähig') {
-      return 'Pat. über erforderliche invasive Maßnahmen verständlich aufgeklärt; verstanden; ausdrücklich eingewilligt.'
+      return 'Pat. über erforderliche invasive Maßnahmen aufgeklärt; Pat. eingewilligt.'
     } else if (this.consent == 'Unfähig') {
-      return 'Pat. nicht einwilligungsfähig; Maßnahme im Rahmen der mutmaßlichen Einwilligung durchgeführt; \nkeine Hinweise auf entgegenstehenden Patientenwillen.'
+      return 'Pat. nicht einwilligungsfähig; Behandlung im Rahmen mutmaßlicher Einwilligung; \nkeine Hinweise auf entgegenstehenden Patientenwillen.'
     } else if (this.consent == 'Zeitkritisch') {
-      return 'Aufgrund zeitkritischer Situation verkürzte Aufklärung; \nPat. verständnisfähig; Einwilligung erteilt.'
+      return 'Aufgrund zeitkritischer Situation verkürzte Aufklärung; \nPat. verständnisfähig und eingewilligt.'
     } else {
       return ''
     }
