@@ -21,6 +21,37 @@ const save = (wrapper: Wrapper) => modal(wrapper).findAllComponents(IonButton)
 const lastUpdate = (wrapper: Wrapper) => wrapper.emitted('update:modelValue')!.at(-1)![0]
 
 describe('invasive procedure selection', () => {
+  test('removes a saved entry immediately without opening the modal or mutating props', async () => {
+    const original = ['sga', 'pvk', 'io']
+    const wrapper = mountInput(original)
+    await wrapper.get('[aria-label="i.v.-Zugang: Maßnahme entfernen"]').trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toEqual([[['sga', 'io']]])
+    expect(original).toEqual(['sga', 'pvk', 'io'])
+    expect(modal(wrapper).props('isOpen')).toBe(false)
+
+    await wrapper.setProps({ modelValue: ['sga', 'io'] })
+    expect(wrapper.getComponent(IonReorderGroup).findAllComponents(IonItem).map(item => item.text()))
+      .toEqual(['SGA (iGel/LT/LaMa)', 'i.o.-Zugang'])
+    await open(wrapper)
+    expect(chip(wrapper, 'i.v.-Zugang').attributes('aria-pressed')).toBe('false')
+    expect(labels(wrapper)).toContain('i.v.-Zugang+Infusion')
+    expect(chip(wrapper, 'i.o.-Zugang').attributes('aria-pressed')).toBe('true')
+    await save(wrapper)
+    expect(lastUpdate(wrapper)).toEqual(['sga', 'io'])
+  })
+
+  test('removes the last saved entry and keeps adding available', async () => {
+    const wrapper = mountInput(['pvk'])
+    await wrapper.get('.remove-saatreat').trigger('click')
+    expect(lastUpdate(wrapper)).toEqual([])
+    expect(modal(wrapper).props('isOpen')).toBe(false)
+    await wrapper.setProps({ modelValue: [] })
+    expect(wrapper.findComponent(IonReorderGroup).exists()).toBe(false)
+    await open(wrapper)
+    expect(modal(wrapper).props('isOpen')).toBe(true)
+    expect(chip(wrapper, 'i.v.-Zugang').attributes('aria-pressed')).toBe('false')
+  })
+
   test('selects across groups, keeps selected chips visible and saves once in selection order', async () => {
     const wrapper = mountInput()
     await open(wrapper)

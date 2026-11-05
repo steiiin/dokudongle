@@ -6,6 +6,10 @@
           <IonLabel>
             <h3>{{ chip.label }}</h3>
           </IonLabel>
+          <IonButton slot="end" fill="clear" color="medium" class="remove-saatreat"
+            :aria-label="`${chip.label}: Maßnahme entfernen`" @click.stop="removeChip(chip.id)">
+            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          </IonButton>
           <IonReorder slot="end" />
         </IonItem>
       </IonReorderGroup>
@@ -73,6 +77,10 @@ const searchbar = ref(null)
 const draftIds = ref(new Set<string>())
 const selectedChips = computed(() => selectedSaatreatChips(props.modelValue))
 
+const removeChip = (id: string) => {
+  emit('update:modelValue', props.modelValue.filter(selectedId => selectedId !== id))
+}
+
 const handleReorder = (event: CustomEvent<ItemReorderEventDetail>) => {
   const updated = event.detail.complete(selectedChips.value.map(chip => chip.id)) as string[]
   if (updated) emit('update:modelValue', updated)
@@ -126,6 +134,16 @@ const save = () => {
 <style scoped>
 .dodo-saatreats-input {
   margin: 4px;
+}
+.remove-saatreat {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+}
+.remove-saatreat + ion-reorder {
+  margin-inline-start: 0;
 }
 .dodo-saatreats-chips {
   display: flex;

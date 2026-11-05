@@ -9,6 +9,70 @@ const saved = (ids: string[]) => cy.get('[data-testid="saved"]').should('have.te
 
 describe('Invasive procedure selection', () => {
   for (const dark of [false, true]) {
+    it(`removes saved treatments directly on mobile in ${dark ? 'dark' : 'light'} mode`, () => {
+      cy.viewport(390, 844)
+      cy.visit(`/tests/e2e/fixtures/dodoInputSaatreats.html${dark ? '?dark' : ''}`)
+      open()
+      chip('SGA (iGel/LT/LaMa)').click()
+      chip('i.v.-Zugang').click()
+      chip('i.o.-Zugang').click()
+      save()
+      cy.get('ion-modal:visible').should('not.exist')
+      saved(['sga', 'pvk', 'io'])
+
+      cy.get('.remove-saatreat').each(button => {
+        const box = button[0].getBoundingClientRect()
+        expect(box.width).to.be.at.least(44)
+        expect(box.height).to.be.at.least(44)
+        expect(box.left).to.be.at.least(0)
+        const handle = button[0].parentElement!.querySelector('ion-reorder')!.getBoundingClientRect()
+        expect(box.right).to.be.at.most(handle.left)
+        expect(handle.right).to.be.at.most(390)
+      })
+      cy.contains('.dodo-saatreats-input ion-item', 'i.v.-Zugang').find('.remove-saatreat')
+        .shadow().find('button').should('have.attr', 'aria-label', 'i.v.-Zugang: Maßnahme entfernen').click()
+      saved(['sga', 'io'])
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('.dodo-saatreats-input ion-item').should('have.length', 2)
+
+      // Reordering remains usable beside the removal controls.
+      cy.get('.dodo-saatreats-input ion-reorder').last().then(handle => {
+        const start = handle[0].getBoundingClientRect()
+        cy.get('.dodo-saatreats-input ion-item').first().then(item => {
+          const target = item[0].getBoundingClientRect()
+          const mouseEvent = {
+            eventConstructor: 'MouseEvent', composed: true, button: 0,
+            clientX: start.left + start.width / 2,
+          }
+          cy.wrap(handle).trigger('mousedown', { ...mouseEvent, buttons: 1, clientY: start.top + start.height / 2 })
+          cy.wrap(handle).closest('ion-item').should('have.class', 'reorder-selected')
+          cy.document().trigger('mousemove', { ...mouseEvent, buttons: 1, clientY: target.top + target.height / 2 })
+          cy.wrap(handle).closest('ion-item').should('have.attr', 'style').and('contain', 'translateY')
+          cy.document().trigger('mouseup', { ...mouseEvent, clientY: target.top + target.height / 2 })
+        })
+      })
+      saved(['io', 'sga'])
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.contains('.dodo-saatreats-input ion-item', 'i.o.-Zugang').click()
+      chip('i.v.-Zugang').should('have.attr', 'aria-pressed', 'false')
+      chip('i.v.-Zugang+Infusion').should('be.visible')
+      chip('i.o.-Zugang').should('have.attr', 'aria-pressed', 'true')
+      save()
+      cy.get('ion-modal:visible').should('not.exist')
+      saved(['io', 'sga'])
+
+      cy.contains('.dodo-saatreats-input ion-item', 'i.o.-Zugang').find('.remove-saatreat')
+        .shadow().find('button').focus().type('{enter}')
+      saved(['sga'])
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('.remove-saatreat').shadow().find('button').focus().type('{enter}')
+      saved([])
+      cy.get('ion-modal:visible').should('not.exist')
+      cy.get('.dodo-saatreats-input ion-item').should('not.exist')
+      open()
+      chip('SGA (iGel/LT/LaMa)').should('have.attr', 'aria-pressed', 'false')
+    })
+
     it(`supports grouped selection, keyboard, search and clearing on mobile in ${dark ? 'dark' : 'light'} mode`, () => {
       cy.viewport(390, 844)
       cy.visit(`/tests/e2e/fixtures/dodoInputSaatreats.html${dark ? '?dark' : ''}`)
