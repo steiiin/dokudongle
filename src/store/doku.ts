@@ -10,6 +10,8 @@ import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
 import { createSchwindelBlockState } from '@/data/blocks/schwindel'
+import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intoxicationBasisOptions, renderIntoxicationSummary } from '@/data/blocks/intoxikation'
+import type { IntoxicationSubstance } from '@/types/blocks/intoxikation'
 import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
 import { createBauchschmerzBlockState } from '@/data/blocks/bauchschmerz'
 import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/blocks/excretions'
@@ -805,6 +807,26 @@ export const useDokuStore = defineStore('doku', {
       const source = TEXT_AREA_BLOCK_SOURCES.find(source => source.outputs.some(output => output.id === id))
       if (source?.isAvailable(this.doku)) this.doku.textAreaBlocks[source.id].active[id] = active
     },
+    setIntoxicationAssessed(value: boolean) {
+      this.doku.xabcDe.intoxication.assessed = value
+      if (!value) {
+        this.doku.xabcDe.intoxication.value = ''
+        this.doku.textAreaBlocks.intoxikation = createIntoxicationBlockState()
+      }
+    },
+    setIntoxicationSubstance(key: IntoxicationSubstance, enabled: boolean) {
+      const details = this.doku.textAreaBlocks.intoxikation.details
+      details.substances[key] = { ...createIntoxicationSubstanceDetails(), enabled }
+      if (key === 'other' && !enabled) details.otherName = ''
+    },
+    setIntoxicationBasis(key: IntoxicationSubstance, value: string | number) {
+      const option = intoxicationBasisOptions.find(option => option.value === value)
+      if (!option || (key === 'alcohol' && option.value === 'positive')) return
+      const substance = this.doku.textAreaBlocks.intoxikation.details.substances[key]
+      substance.basis = option.value
+      if (option.value !== 'suspected') substance.reasons = []
+      if (option.value !== 'confirmed') substance.amount = ''
+    },
     setDizziness(value: Protocol['xabcDe']['dizziness'], assess = true) {
       if (assess) this.doku.xabcDe.assessment.dizziness = 'active'
       this.doku.xabcDe.dizziness = value
@@ -904,6 +926,7 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xaBcde = emptyProtocol.xaBcde
       this.doku.xabCde = emptyProtocol.xabCde
       this.doku.xabcDe = emptyProtocol.xabcDe
+      this.doku.textAreaBlocks.intoxikation = emptyProtocol.textAreaBlocks.intoxikation
       this.doku.xabcdE = emptyProtocol.xabcdE
       this.doku.textAreaBlocks.schwangerschaft = emptyProtocol.textAreaBlocks.schwangerschaft
       this.doku.textAreaBlocks.excretions_bowel = emptyProtocol.textAreaBlocks.excretions_bowel
@@ -1127,6 +1150,7 @@ export const useDokuStore = defineStore('doku', {
         && !state.doku.xaBcde.needTreatment
         && !state.doku.xabCde.needTreatment
         && !state.doku.xabcDe.needTreatment
+        && !this.intoxicationSummary
         && !state.doku.xabcdE.needTreatment
         // TODO: STU
       )
@@ -1210,6 +1234,10 @@ export const useDokuStore = defineStore('doku', {
     },
 
     // Protokoll
+    intoxicationSummary(state): string {
+      return state.doku.xabcDe.intoxication.assessed
+        ? renderIntoxicationSummary(state.doku.textAreaBlocks.intoxikation.details) : ''
+    },
     textAreaBlocks(state) {
       return resolveTextAreaBlocks(state.doku)
     },
@@ -1244,7 +1272,7 @@ export const useDokuStore = defineStore('doku', {
           state.doku.xAbcde.generateText(),
           state.doku.xaBcde.generateText(),
           state.doku.xabCde.generateText(),
-          state.doku.xabcDe.generateText(),
+          state.doku.xabcDe.generateText(this.intoxicationSummary),
           state.doku.xabcdE.generateText(),
         ], true)
 

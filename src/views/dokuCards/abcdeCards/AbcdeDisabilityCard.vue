@@ -377,14 +377,11 @@
       </DodoInputSelect>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="intoxication" label="Intoxikation möglich" show-line="full"
-      v-model:assessed="store.doku.xabcDe.intoxication.assessed"
-      @select="store.doku.xabcDe.intoxication.value = ''"
-      @activate="intoxicationInput?.setFocus()" @remove="store.doku.xabcDe.intoxication.value = ''">
-      <IonItem lines="none">
-        <DodoInputText ref="intoxicationInput" label="Intoxikation" placeholder="z.B. C2-Geruch"
-          v-model="store.doku.xabcDe.intoxication.value" />
-      </IonItem>
+    <DodoExaminationItem id="intoxication" label="Intoxikation möglich?" show-line="full"
+      :assessed="store.doku.xabcDe.intoxication.assessed"
+      @update:assessed="store.setIntoxicationAssessed"
+      @activate="intoxicationModal?.open()">
+      <BlockIntoxikationCard ref="intoxicationModal" />
     </DodoExaminationItem>
 
   </DodoExaminationCard>
@@ -397,7 +394,7 @@ import { computed, ref, watch } from 'vue'
 import DodoItemModal from '@/components/DodoItemModal.vue'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
 import DodoInputTextOptional from '@/components/DodoInputTextOptional.vue'
-import DodoInputText from '@/components/DodoInputText.vue'
+import BlockIntoxikationCard from '../blocksourceCards/BlockIntoxikationCard.vue'
 import { DisabilityNeuro, DisabilityPsych, DisabilityZops } from '@/types/protocol/abcde'
 
 import { useDokuStore } from '@/store/doku'
@@ -407,7 +404,7 @@ const ctx = computed(() => store.context)
 const bloodGlucoseSelect = ref<InstanceType<typeof DodoInputSelect> | null>(null)
 const neuroModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const psychModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
-const intoxicationInput = ref<InstanceType<typeof DodoInputText> | null>(null)
+const intoxicationModal = ref<InstanceType<typeof BlockIntoxikationCard>>()
 const orientationModal = ref<InstanceType<typeof DodoItemModal>>()
 const pediatricOrientationModal = ref<InstanceType<typeof DodoItemModal>>()
 const dizzinessSelect = ref<InstanceType<typeof DodoInputSelect>>()

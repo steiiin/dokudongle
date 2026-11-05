@@ -493,7 +493,7 @@ export class AbcdeDisability {
 
   // ##########################################################################
 
-  public generateText(): string
+  public generateText(intoxicationSummary = ''): string
   {
 
       const isPediatric = getCtx().isPediatric
@@ -516,7 +516,7 @@ export class AbcdeDisability {
           this.baseline
         ),
         textIf(`BZ ${this.bloodGlucose.value}`, this.bloodGlucose.isAssessed),
-        textIf(prefixIntox(this.intoxication.value), this.intoxication.isAssessed),
+        textIf(prefixIntox([intoxicationSummary, this.intoxication.value].filter(Boolean).join('; ')), this.intoxication.assessed),
       ]))))
 
       return assessedLine

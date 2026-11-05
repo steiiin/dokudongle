@@ -1,4 +1,6 @@
 import type { UnwrapRef } from 'vue'
+import type { IntoxicationBlockSourceState } from '@/types/blocks/intoxikation'
+import { createIntoxicationBlockState, IntoxicationTextAreaBlock } from '@/data/blocks/intoxikation'
 import type { Protocol } from '@/types/protocol'
 import { assessmentActive } from '@/types/protocol/assessment'
 import { TextAreaBlock, type TextAreaBlockField, type TextAreaBlockSourceState } from '@/types/blocks/text-area-block'
@@ -15,6 +17,7 @@ import {
 } from '@/data/blocks/excretions'
 
 export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
+  intoxikation: IntoxicationBlockSourceState
   schwangerschaft: SchwangerschaftBlockSourceState
   schwindel: SchwindelBlockSourceState
   excretions_bowel: ExcretionsBowelsBlockSourceState
@@ -84,6 +87,12 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
     isAvailable: protocol => protocol.xabcdE.pregnancy.isAssessed && protocol.xabcdE.pregnancy.value,
     createState: createSchwangerschaftBlockState,
     outputs: [new SchwangerschaftTextAreaBlock()],
+  },
+  {
+    id: 'intoxikation', fields: [],
+    isAvailable: protocol => protocol.xabcDe.intoxication.assessed,
+    createState: createIntoxicationBlockState,
+    outputs: [new IntoxicationTextAreaBlock()],
   },
 ]
 

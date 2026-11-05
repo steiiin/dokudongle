@@ -32,8 +32,8 @@
           <button v-for="option in row" :key="`${typeof option.value}:${option.value}`"
             type="button" class="dd-input-select-chips__chip"
             :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
-            :aria-pressed="!isCustomMode && selectedValues.includes(option.value)" @click="toggleValue(option.value)">
-            <IonIcon v-if="!isCustomMode && selectedValues.includes(option.value)" :icon="checkmark" aria-hidden="true" />
+            :aria-pressed="(!isCustomMode || customMode === 'append') && selectedValues.includes(option.value)" @click="toggleValue(option.value)">
+            <IonIcon v-if="(!isCustomMode || customMode === 'append') && selectedValues.includes(option.value)" :icon="checkmark" aria-hidden="true" />
             {{ option.label }}
             <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
           </button>
@@ -44,7 +44,7 @@
             :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
             aria-label="Eigenen Wert eingeben" @click="enterCustom">
             <IonIcon :icon="pencil" aria-hidden="true" />
-            Andere
+            {{ customOptionLabel }}
             <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
           </button>
         </div>
@@ -77,6 +77,8 @@ const props = withDefaults(defineProps<{
   options: readonly (OptionInput | readonly OptionInput[])[]
   emptyLabel?: string
   allowCustom?: boolean
+  customMode?: 'replace' | 'append'
+  customOptionLabel?: string
   customLabel?: string
   customPlaceholder?: string
   imeDictionary?: ImeDictionary
@@ -84,6 +86,8 @@ const props = withDefaults(defineProps<{
   lines?: 'full' | 'inset' | 'none'
 }>(), {
   emptyLabel: 'Keine',
+  customMode: 'replace',
+  customOptionLabel: 'Andere',
 })
 
 const emit = defineEmits<{
@@ -131,10 +135,10 @@ const visibleRows = computed(() => {
 const summary = computed(() => {
   const labels = selectedValues.value.map(value =>
     isCustomMode.value && value === customEntry.value
-      ? 'Andere'
+      ? props.customOptionLabel
       : normalizedOptions.value.find(option => option.value === value)?.label ?? String(value))
   if (isCustomMode.value && (customEntry.value === undefined || !selectedValues.value.includes(customEntry.value))) {
-    labels.push('Andere')
+    labels.push(props.customOptionLabel)
   }
   return labels.length > 0 ? labels.join(', ') : props.emptyLabel
 })
@@ -206,19 +210,20 @@ const resetCustom = () => {
 }
 
 const toggleValue = (value: SelectValue) => {
-  if (isCustomMode.value) {
+  if (isCustomMode.value && props.customMode === 'replace') {
     resetCustom()
     updateModel([value])
     return
   }
   const selected = selectedValues.value.includes(value)
+  if (selected && value === customEntry.value) resetCustom()
   updateModel(selected ? selectedValues.value.filter(entry => entry !== value) : [...selectedValues.value, value])
 }
 
 const enterCustom = () => {
   resetCustom()
   isCustomMode.value = true
-  updateModel([])
+  if (props.customMode === 'replace') updateModel([])
   focusCustomAfterDismiss = true
   isDialogOpen.value = false
 }

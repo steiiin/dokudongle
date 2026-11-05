@@ -18,6 +18,8 @@ const mountSelect = (props: {
   modelValue?: SelectValue[]
   options?: readonly (OptionInput | readonly OptionInput[])[]
   allowCustom?: boolean
+  customMode?: 'replace' | 'append'
+  customOptionLabel?: string
   emptyLabel?: string
 } = {}) => {
   const wrapper = shallowMount(DodoInputSelectChips, {
@@ -47,6 +49,49 @@ const edit = async (wrapper: Wrapper, value: string) => {
 }
 
 describe('DodoInputSelectChips', () => {
+  test('appends, edits and removes custom text while retaining toggleable presets after reopening', async () => {
+    const wrapper = mountSelect({ modelValue: ['a'], allowCustom: true, customMode: 'append', customOptionLabel: 'Sonstige' })
+    await wrapper.get('.dd-input-select-chips').trigger('click')
+    await chip(wrapper, 'Sonstige').trigger('click')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    expect(wrapper.get('[aria-live="polite"]').text()).toBe('Alpha, Sonstige')
+    await edit(wrapper, 'custom')
+    expect(model(wrapper)).toEqual(['a', 'custom'])
+    await edit(wrapper, 'edited')
+    expect(model(wrapper)).toEqual(['a', 'edited'])
+    await wrapper.get('.dd-input-select-chips').trigger('click')
+    expect(chip(wrapper, 'Alpha').attributes('aria-pressed')).toBe('true')
+    await chip(wrapper, 'Beta').trigger('click')
+    await acceptUpdate(wrapper)
+    expect(model(wrapper)).toEqual(['a', 'edited', 'b'])
+    expect(wrapper.getComponent(DodoInputText).props('modelValue')).toBe('edited')
+    await chip(wrapper, 'Alpha').trigger('click')
+    await acceptUpdate(wrapper)
+    expect(model(wrapper)).toEqual(['edited', 'b'])
+    await edit(wrapper, '')
+    wrapper.getComponent(DodoInputText).vm.$emit('leaved-empty')
+    await nextTick()
+    expect(model(wrapper)).toEqual(['b'])
+    expect(wrapper.findComponent(DodoInputText).exists()).toBe(false)
+    expect(wrapper.get('[aria-live="polite"]').text()).toBe('Beta')
+  })
+
+  test('restores append selections on remount and preserves presets when custom text collides', async () => {
+    const wrapper = mountSelect({ modelValue: ['a', 'custom'], allowCustom: true, customMode: 'append' })
+    expect(chip(wrapper, 'Alpha').attributes('aria-pressed')).toBe('true')
+    expect(wrapper.getComponent(DodoInputText).props('modelValue')).toBe('custom')
+    await edit(wrapper, 'a')
+    expect(model(wrapper)).toEqual(['a'])
+    await edit(wrapper, 'new')
+    expect(model(wrapper)).toEqual(['a', 'new'])
+    await edit(wrapper, 'b')
+    expect(model(wrapper)).toEqual(['a', 'b'])
+    await chip(wrapper, 'Beta').trigger('click')
+    await acceptUpdate(wrapper)
+    expect(model(wrapper)).toEqual(['a'])
+    expect(wrapper.findComponent(DodoInputText).exists()).toBe(false)
+  })
+
   test.each([
     { options: ['a', 'b'], rows: [['a', 'b']] },
     { options: ['a', ['b', 'c']], rows: [['a'], ['b', 'c']] },
