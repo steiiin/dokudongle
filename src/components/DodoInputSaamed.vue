@@ -8,7 +8,7 @@
           @click="editItem(index)" lines="none" button>
           <IonLabel>
             <h3>{{ getMedName(item) }}</h3>
-            <p>{{ getIndicationName(item) }}</p>
+            <p>{{ getIndicationName(item) }}<template v-if="item.dosageText.trim()"> • {{ item.dosageText }}</template></p>
           </IonLabel>
           <IonReorder slot="end" />
         </IonItem>
