@@ -1,6 +1,6 @@
 import { assessmentActive, assessmentDefaults } from '../assessment'
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
-import { prefixIntox, prefixParaesthesis } from "@/utils/prefix/disability"
+import { prefixParaesthesis } from "@/utils/prefix/disability"
 import { onNormal, textIf } from "@/utils/filter"
 import { AssessedValue, OptionalValue } from "../input"
 
@@ -516,7 +516,7 @@ export class AbcdeDisability {
           this.baseline
         ),
         textIf(`BZ ${this.bloodGlucose.value}`, this.bloodGlucose.isAssessed),
-        textIf(prefixIntox([intoxicationSummary, this.intoxication.value].filter(Boolean).join('; ')), this.intoxication.assessed),
+        textIf([intoxicationSummary, this.intoxication.value].filter(value => value.trim()).join('; '), this.intoxication.assessed),
       ]))))
 
       return assessedLine

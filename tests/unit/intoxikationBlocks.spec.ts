@@ -2,7 +2,8 @@ import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { createIntoxicationBlockState, intoxicationReasonRows, renderIntoxicationText } from '@/data/blocks/intoxikation'
+import { createIntoxicationBlockState, intoxicationReasonRows, renderIntoxicationSummary, renderIntoxicationText } from '@/data/blocks/intoxikation'
+import type { IntoxicationSubstance, IntoxicationSubstanceDetails } from '@/types/blocks/intoxikation'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
 import DodoInputSelect from '@/components/DodoInputSelect.vue'
@@ -51,19 +52,19 @@ function setup() {
 describe('intoxication blocks', () => {
   test('separates D summary from PLER details and keeps manual text unchanged', () => {
     const store = setup()
-    expect(store.intoxicationSummary).toBe('Alkohol / Vd. Cannabis / Kokain')
+    expect(store.intoxicationSummary).toBe('Alkohol+Kokain / Vd. Cannabis')
     expect(store.context.isNormal).toBe(true)
     const dLine = store.generatedProtocol.split('\n').find(line => line.startsWith('D:'))!
-    expect(dLine).toContain('Intox: Alkohol / Vd. Cannabis / Kokain')
-    expect(dLine).not.toMatch(/3 Bier|Gerötete Augen|Test positiv/)
-    const detailText = 'Alkohol: Konsum bestätigt; Menge: 3 Bier.\n'
-      + 'Cannabis: Verdacht; Hinweise: Gerötete Augen, Fremdanamnestischer Hinweis.\nKokain: Test positiv.'
+    expect(dLine).toContain('Alkohol+Kokain / Vd. Cannabis')
+    expect(dLine).not.toMatch(/Intox:|3 Bier|Gerötete Augen|Test positiv/)
+    const detailText = 'Alkohol+Kokain / Vd. Cannabis; 3 Bier (Alk.), Test positiv (Kok.), '
+      + 'Gerötete Augen, Fremdanamnestischer Hinweis (Cann.).'
     expect(store.textAreaBlocks[0]).toMatchObject({ id: blockId, active: true, text: detailText })
     expect(store.freeformText['sampler.pler.PLER']).toBe(`${detailText}\nEigener Text`)
     expect(store.generatedProtocol.split(detailText)).toHaveLength(2)
     expect(store.doku.sampler.pler.PLER.value).toBe('Eigener Text')
     store.setTextAreaBlockActive(blockId, false)
-    expect(store.generatedProtocol).toContain('Intox: Alkohol / Vd. Cannabis / Kokain')
+    expect(store.generatedProtocol).toContain('Alkohol+Kokain / Vd. Cannabis')
     expect(store.generatedProtocol).not.toContain(detailText)
     expect(store.freeformText['sampler.pler.PLER']).toBe('Eigener Text')
   })
@@ -79,12 +80,12 @@ describe('intoxication blocks', () => {
     expect(store.textAreaBlocks).toEqual([])
     store.doku.textAreaBlocks.intoxikation.details.otherName = '  GHB  '
     store.setIntoxicationSubstance('alcohol', true)
-    expect(store.intoxicationSummary).toBe('Vd. Alkohol / Vd. GHB')
-    expect(store.textAreaBlocks[0].text).toBe('Alkohol: Verdacht.\nGHB: Verdacht.')
+    expect(store.intoxicationSummary).toBe('Vd. Alkohol+GHB')
+    expect(store.textAreaBlocks[0].text).toBe('Vd. Alkohol+GHB.')
     store.setIntoxicationBasis('alcohol', 'positive')
     expect(store.doku.textAreaBlocks.intoxikation.details.substances.alcohol.basis).toBe('suspected')
     store.setIntoxicationBasis('alcohol', 'confirmed')
-    expect(store.textAreaBlocks[0].text).toContain('Alkohol: Konsum bestätigt.')
+    expect(store.textAreaBlocks[0].text).toBe('Alkohol / Vd. GHB.')
   })
 
   test('clears incompatible details on basis changes and all details when deselected', () => {
@@ -152,16 +153,18 @@ describe('intoxication blocks', () => {
     } })
     const store = useDokuStore()
     await store.hydrateFromStorage()
-    expect(store.generatedProtocol).toContain('Intox: C2-Geruch')
+    expect(store.generatedProtocol).toContain('C2-Geruch')
+    expect(store.generatedProtocol).not.toContain('Intox:')
     expect(store.doku.textAreaBlocks.intoxikation).toEqual(createIntoxicationBlockState())
     expect(store.textAreaBlocks).toEqual([])
     const modal = shallowMount(BlockIntoxikationCard, { global: { renderStubDefaultSlot: true } })
     const legacy = modal.findAllComponents(DodoInputText).find(input => input.props('label') === 'Bisherige Angabe')!
     expect(legacy.props('modelValue')).toBe('C2-Geruch')
     legacy.vm.$emit('update:modelValue', 'Alte Beobachtung')
-    expect(store.generatedProtocol).toContain('Intox: Alte Beobachtung')
+    expect(store.generatedProtocol).toContain('Alte Beobachtung')
     store.setIntoxicationSubstance('cannabis', true)
-    expect(store.generatedProtocol).toContain('Intox: Vd. Cannabis; Alte Beobachtung')
+    expect(store.generatedProtocol).toContain('Vd. Cannabis; Alte Beobachtung')
+    expect(store.generatedProtocol).not.toContain('Intox:')
   })
 
   test('clears unavailable saved block details on hydration', async () => {
@@ -206,14 +209,92 @@ describe('intoxication blocks', () => {
     const inputs = modal.findAllComponents(DodoInputText)
     inputs.find(input => input.props('label') === 'Menge')!.vm.$emit('update:modelValue', '3 Bier')
     inputs.find(input => input.props('label') === 'Sonstige Substanz')!.vm.$emit('update:modelValue', 'GHB')
-    expect(store.intoxicationSummary).toBe('Alkohol / Cannabis / Vd. GHB')
-    expect(store.textAreaBlocks[0].text).toContain('Menge: 3 Bier')
+    expect(store.intoxicationSummary).toBe('Alkohol+Cannabis / Vd. GHB')
+    expect(store.textAreaBlocks[0].text).toContain('3 Bier (Alk.)')
     await nextTick()
-    expect(pler.getComponent(DodoInputTextArea).props('blocks')![0].text).toContain('Menge: 3 Bier')
+    expect(pler.getComponent(DodoInputTextArea).props('blocks')![0].text).toContain('3 Bier (Alk.)')
     disability.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'intoxication')!
       .vm.$emit('update:assessed', false)
     await nextTick()
     expect(pler.findComponent(BlockIntoxikationCard).exists()).toBe(false)
     expect(store.doku.textAreaBlocks.intoxikation).toEqual(createIntoxicationBlockState())
+  })
+})
+
+describe('compact intoxication rendering', () => {
+  const render = (entries: Partial<Record<IntoxicationSubstance, Partial<IntoxicationSubstanceDetails>>>, otherName = '') => {
+    const details = createIntoxicationBlockState().details
+    for (const [key, value] of Object.entries(entries)) {
+      Object.assign(details.substances[key as IntoxicationSubstance], { enabled: true }, value)
+    }
+    details.otherName = otherName
+    return { summary: renderIntoxicationSummary(details), text: renderIntoxicationText(details) }
+  }
+
+  test.each<{ entries: Parameters<typeof render>[0]; summary: string; text: string }>([
+    {
+      entries: { alcohol: { reasons: ['Alkoholgeruch'] } },
+      summary: 'Vd. Alkohol', text: 'Vd. Alkohol; Alkoholgeruch.',
+    },
+    {
+      entries: { alcohol: { reasons: ['Alkoholgeruch', 'Gangunsicherheit'] }, cannabis: { reasons: ['gerötete Augen'] } },
+      summary: 'Vd. Alkohol+Cannabis',
+      text: 'Vd. Alkohol+Cannabis; Alkoholgeruch, Gangunsicherheit (Alk.), gerötete Augen (Cann.).',
+    },
+    {
+      entries: { alcohol: { basis: 'confirmed', amount: '3 Bier' }, cannabis: { reasons: ['gerötete Augen'] } },
+      summary: 'Alkohol / Vd. Cannabis', text: 'Alkohol / Vd. Cannabis; 3 Bier (Alk.), gerötete Augen (Cann.).',
+    },
+    {
+      entries: { alcohol: { basis: 'confirmed', amount: '3 Bier' }, cocaine: { basis: 'positive' } },
+      summary: 'Alkohol+Kokain', text: 'Alkohol+Kokain; 3 Bier (Alk.), Test positiv (Kok.).',
+    },
+    {
+      entries: { alcohol: { basis: 'confirmed' }, cannabis: {}, opioids: { basis: 'confirmed' }, amphetamine: {} },
+      summary: 'Alkohol+Opioide / Vd. Cannabis+Amphetamin', text: 'Alkohol+Opioide / Vd. Cannabis+Amphetamin.',
+    },
+    {
+      entries: { alcohol: { reasons: ['Alkoholgeruch'] }, cocaine: { basis: 'positive', amount: 'stale', reasons: ['stale'] } },
+      summary: 'Kokain / Vd. Alkohol', text: 'Kokain / Vd. Alkohol; Test positiv (Kok.), Alkoholgeruch (Alk.).',
+    },
+    {
+      entries: { cocaine: { basis: 'positive' } },
+      summary: 'Kokain', text: 'Kokain; Test positiv.',
+    },
+    {
+      entries: { alcohol: { basis: 'confirmed', amount: '  ', reasons: ['stale'] }, cannabis: { reasons: ['', '  '] } },
+      summary: 'Alkohol / Vd. Cannabis', text: 'Alkohol / Vd. Cannabis.',
+    },
+  ])('renders $summary with only applicable details', ({ entries, summary, text }) => {
+    expect(render(entries)).toEqual({ summary, text })
+  })
+
+  test('uses distinct abbreviations for every preset and the entered name for other substances', () => {
+    expect(render({
+      alcohol: { reasons: ['A'] }, cannabis: { reasons: ['C'] }, opioids: { reasons: ['O'] },
+      amphetamine: { reasons: ['Am'] }, methamphetamine: { reasons: ['M'] }, ecstasy: { reasons: ['E'] },
+      cocaine: { reasons: ['K'] }, other: { reasons: ['Freitext unverändert'] },
+    }, ' GHB ').text).toBe('Vd. Alkohol+Cannabis+Opioide+Amphetamin+Methamphetamin+Ecstasy+Kokain+GHB; '
+      + 'A (Alk.), C (Cann.), O (Op.), Am (Amph.), M (Methamph.), E (Ecst.), K (Kok.), Freitext unverändert (GHB).')
+  })
+
+  test.each(['.', '!', '?'])('preserves existing terminal punctuation %s and free text', punctuation => {
+    const text = `3 Bier, laut Patient${punctuation}`
+    expect(render({ alcohol: { basis: 'confirmed', amount: text } }).text).toBe(`Alkohol; ${text}`)
+    expect(render({ other: { reasons: [text] } }, 'GHB').text).toBe(`Vd. GHB; ${text}`)
+  })
+
+  test('omits disabled and unnamed entries without adding separators or labels', () => {
+    expect(render({ alcohol: { enabled: false, reasons: ['Altwert'] }, other: {} }, '  '))
+      .toEqual({ summary: '', text: '' })
+    expect(render({ alcohol: { reasons: ['Alkoholgeruch'] }, other: {} }).text).toBe('Vd. Alkohol; Alkoholgeruch.')
+  })
+
+  test('preserves a prefix already present in legacy free text', () => {
+    const store = useDokuStore()
+    store.setIntoxicationAssessed(true)
+    store.doku.xabcDe.intoxication.value = 'Intox: C2-Geruch'
+    expect(store.generatedProtocol).toContain('Intox: C2-Geruch')
+    expect(store.generatedProtocol.match(/Intox:/g)).toHaveLength(1)
   })
 })

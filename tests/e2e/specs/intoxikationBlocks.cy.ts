@@ -38,7 +38,7 @@ describe('Intoxication documentation on mobile', () => {
     cy.contains('.dd-input-select-chips-modal:visible ion-button', 'Übernehmen').click()
     cy.viewport(375, 812)
     cy.get('ion-modal:visible ion-button[title="Zurück"]').click()
-    cy.get('[data-examination="intoxication"]').should('contain.text', 'Vd. Alkohol / Vd. Cannabis')
+    cy.get('[data-examination="intoxication"]').should('contain.text', 'Vd. Alkohol+Cannabis')
     clickVisible('[data-examination="intoxication"] ion-item', 'Intoxikation möglich?')
     cy.get('ion-modal:visible .dd-input-select-chips').first().should('contain.text', 'Alkoholgeruch')
     cy.get('ion-modal:visible ion-button[title="Zurück"]').click()
@@ -47,10 +47,10 @@ describe('Intoxication documentation on mobile', () => {
     cy.get('textarea:visible').invoke('val').should(value => {
       const text = String(value)
       const dLine = text.split('\n').find(line => line.startsWith('D:'))!
-      expect(dLine).to.contain('Intox: Vd. Alkohol / Vd. Cannabis')
+      expect(dLine).to.contain('Vd. Alkohol+Cannabis')
+      expect(dLine).not.to.contain('Intox:')
       expect(dLine).not.to.contain('Leere Flaschen')
-      expect(text).to.contain('Alkohol: Verdacht; Hinweise: Alkoholgeruch, Leere Flaschen, Gangunsicherheit.')
-      expect(text).to.contain('Cannabis: Verdacht.')
+      expect(text).to.contain('Vd. Alkohol+Cannabis; Alkoholgeruch, Leere Flaschen, Gangunsicherheit (Alk.).')
     })
   })
 })

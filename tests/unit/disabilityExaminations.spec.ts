@@ -35,7 +35,7 @@ const findings: [typeof keys[number], (d: Pick<AbcdeDisability, typeof keys[numb
   ['psych', d => { d.psych.value.disorder = 'Delir' }, 'deliranter Zustand', true, true],
   ['psych', d => { d.psych.value.dementia = true }, 'bek. Demenz', false, true],
   ['bloodGlucose', d => { d.bloodGlucose.value = 'niedrig' }, 'BZ niedrig', true, false],
-  ['intoxication', d => { d.intoxication.value = 'C2-Geruch' }, 'Intox: C2-Geruch', true, false],
+  ['intoxication', d => { d.intoxication.value = 'C2-Geruch' }, 'C2-Geruch', true, false],
 ]
 
 describe('Neuro protocol placement', () => {
