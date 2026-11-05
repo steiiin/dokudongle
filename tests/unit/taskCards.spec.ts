@@ -35,7 +35,7 @@ describe('task cards', () => {
     [true, true, 'Invasiv+Medikamente'],
   ] as const)('renders the saved selection title (procedures: %s, medications: %s)', (procedures, medications, title) => {
     const store = useDokuStore()
-    if (procedures) store.doku.saatreats.selectedIds = ['pvk-20g']
+    if (procedures) store.doku.saatreats.selectedIds = ['pvk']
     if (medications) store.doku.saamed.medTasks.push(new ConsentMedTask('adrenalin', 'rea', '', true, '', ''))
     const wrapper = shallowMount(TaskInterventionsCard, { global })
     expect(wrapper.findComponent(IonCardHeader).exists()).toBe(Boolean(title))
@@ -48,7 +48,7 @@ describe('task cards', () => {
     const wrapper = shallowMount(TaskInterventionsCard, { global })
     const procedures = wrapper.getComponent(DodoInputSaatreats)
     const medications = wrapper.getComponent(DodoInputSaamed)
-    procedures.vm.$emit('update:modelValue', ['pvk-20g'])
+    procedures.vm.$emit('update:modelValue', ['pvk'])
     await nextTick()
     expect(wrapper.getComponent(IonCardTitle).text()).toBe('Invasive')
     medications.vm.$emit('update:modelValue', [new ConsentMedTask('adrenalin', 'rea', '', true, '', '')])
@@ -68,7 +68,7 @@ describe('task cards', () => {
     wrapper.unmount()
   })
 
-  test('shares one card with ordered lists and buttons, and keeps draft selections out of the title', async () => {
+  test('shares one card with ordered lists and buttons, and updates the title and consent as procedure chips are selected', async () => {
     const store = useDokuStore()
     const wrapper = shallowMount(TaskInterventionsCard, {
       global: { ...global, stubs: { DodoInputSaatreats: false, DodoInputSaamed: false } },
@@ -85,19 +85,26 @@ describe('task cards', () => {
     const procedures = wrapper.getComponent(DodoInputSaatreats)
     expect(procedures.getComponent(IonModal).props('isOpen')).toBe(true)
     await procedures.findAll('.dodo-saatreats-chip')[0].trigger('click')
+    expect(store.doku.saatreats.selectedIds).toEqual(['pvk'])
+    expect(wrapper.getComponent(IonCardTitle).text()).toBe('Invasive')
+    expect(store.doku.redflags.consent).toBe('Fähig')
+    expect(procedures.getComponent(IonModal).props('isOpen')).toBe(true)
+    await procedures.findAll('.dodo-saatreats-chip')[0].trigger('click')
     expect(store.doku.saatreats.selectedIds).toEqual([])
     expect(wrapper.findComponent(IonCardHeader).exists()).toBe(false)
+    expect(store.doku.redflags.consent).toBe('Fähig')
+    await procedures.findAll('.dodo-saatreats-chip')[0].trigger('click')
     procedures.getComponent(IonModal).vm.$emit('willDismiss')
     await nextTick()
     await content.findAll(buttonSelector)[1].trigger('click')
     expect(wrapper.getComponent(DodoInputSaamed).findAllComponents(IonModal)[0].props('isOpen')).toBe(true)
-    expect(wrapper.findComponent(IonCardHeader).exists()).toBe(false)
-    store.doku.saatreats.selectedIds = ['pvk-20g']
+    expect(wrapper.getComponent(IonCardTitle).text()).toBe('Invasive')
+    expect(store.doku.saatreats.selectedIds).toEqual(['pvk'])
     store.doku.saamed.medTasks.push(new ConsentMedTask('adrenalin', 'rea', '', true, '', ''))
     await nextTick()
     expect(content.findAll(`${listSelector}, ${buttonSelector}`).map(element => element.element.tagName.toLowerCase()))
       .toEqual(['ion-list-stub', 'ion-button-stub', 'ion-list-stub', 'ion-button-stub'])
-    expect(content.findAll(listSelector)[0].text()).toContain('PVK 20 G')
+    expect(content.findAll(listSelector)[0].text()).toContain('i.v.-Zugang')
     expect(content.findAll(listSelector)[1].text()).toContain('Adrenalin')
     wrapper.unmount()
   })
@@ -132,14 +139,14 @@ describe('task cards', () => {
     expect(store.doku.redflags.consent).toBe('')
     input.vm.$emit('update:modelValue', [])
     expect(store.doku.redflags.consent).toBe('')
-    input.vm.$emit('update:modelValue', ['pvk-20g'])
+    input.vm.$emit('update:modelValue', ['pvk'])
     await nextTick()
-    expect(store.doku.saatreats.selectedIds).toEqual(['pvk-20g'])
-    expect(input.props('modelValue')).toEqual(['pvk-20g'])
+    expect(store.doku.saatreats.selectedIds).toEqual(['pvk'])
+    expect(input.props('modelValue')).toEqual(['pvk'])
     expect(store.doku.redflags.consent).toBe('Fähig')
     for (const consent of ['Unfähig', 'Zeitkritisch', 'Fähig'] as const) {
       store.doku.redflags.consent = consent
-      input.vm.$emit('update:modelValue', ['intraossaer'])
+      input.vm.$emit('update:modelValue', ['io'])
       expect(store.doku.redflags.consent).toBe(consent)
       input.vm.$emit('update:modelValue', [])
       expect(store.doku.redflags.consent).toBe(consent)

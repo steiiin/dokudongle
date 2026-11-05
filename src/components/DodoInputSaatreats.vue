@@ -24,14 +24,11 @@
     <IonHeader>
       <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
-          <IonButton @click="closeModal" aria-label="Abbrechen" title="Abbrechen">
-            <IonIcon slot="icon-only" :icon="closeOutline" aria-hidden="true" />
+          <IonButton @click="closeModal" aria-label="Zurück" title="Zurück">
+            <IonIcon slot="icon-only" :icon="chevronBackOutline" aria-hidden="true" />
           </IonButton>
         </IonButtons>
         <IonTitle type="ios">Invasive Maßnahmen</IonTitle>
-        <IonButtons slot="end">
-          <IonButton @click="save" color="success">Speichern</IonButton>
-        </IonButtons>
       </IonToolbar>
     </IonHeader>
     <IonContent>
@@ -45,8 +42,8 @@
             <button v-for="chip in group.chips" :key="chip.id"
               type="button" class="dodo-saatreats-chip"
               :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
-              :aria-pressed="draftIds.has(chip.id)" @click="toggleChip(chip.id)">
-              <IonIcon v-if="draftIds.has(chip.id)" :icon="checkmark" aria-hidden="true" />
+              :aria-pressed="selectedIds.has(chip.id)" @click="toggleChip(chip.id)">
+              <IonIcon v-if="selectedIds.has(chip.id)" :icon="checkmark" aria-hidden="true" />
               {{ chip.label }}
               <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
             </button>
@@ -62,7 +59,7 @@ import { computed, ref } from 'vue'
 import { IonRippleEffect } from '@ionic/vue'
 import { isMaterialMode } from '@/utils/ripple'
 import type { ItemReorderEventDetail } from '@ionic/core'
-import { addCircle, checkmark, closeOutline } from 'ionicons/icons'
+import { addCircle, checkmark, chevronBackOutline, closeOutline } from 'ionicons/icons'
 import { DATA_Saatreats, selectedSaatreatChips } from '@/data/lists/saatreats'
 import { gainFocus } from '@/utils/input'
 
@@ -74,7 +71,7 @@ const emit = defineEmits<{ (e: 'update:modelValue', value: string[]): void }>()
 const isOpen = ref(false)
 const searchQuery = ref('')
 const searchbar = ref(null)
-const draftIds = ref(new Set<string>())
+const selectedIds = computed(() => new Set(props.modelValue))
 const selectedChips = computed(() => selectedSaatreatChips(props.modelValue))
 
 const removeChip = (id: string) => {
@@ -100,34 +97,29 @@ const visibleGroups = computed(() => DATA_Saatreats.map(group => ({
   ...group,
   chips: group.chips.filter(chip => {
     const excluded = chip.exclusiveGroupId && group.chips.some(other => (
-      other.id !== chip.id && other.exclusiveGroupId === chip.exclusiveGroupId && draftIds.value.has(other.id)
+      other.id !== chip.id && other.exclusiveGroupId === chip.exclusiveGroupId && selectedIds.value.has(other.id)
     ))
-    return (!excluded || draftIds.value.has(chip.id))
+    return (!excluded || selectedIds.value.has(chip.id))
       && fuzzyMatch(searchQuery.value, `${group.name} ${chip.label}`)
   }),
 })).filter(group => group.chips.length))
 
 const openModal = () => {
-  draftIds.value = new Set(props.modelValue)
   searchQuery.value = ''
   isOpen.value = true
 }
 
 const closeModal = () => {
   isOpen.value = false
-  draftIds.value = new Set()
   searchQuery.value = ''
 }
 
 const toggleChip = (id: string) => {
   if (!visibleGroups.value.some(group => group.chips.some(chip => chip.id === id))) return
-  if (draftIds.value.has(id)) draftIds.value.delete(id)
-  else draftIds.value.add(id)
-}
-
-const save = () => {
-  emit('update:modelValue', selectedSaatreatChips([...draftIds.value]).map(chip => chip.id))
-  closeModal()
+  const updated = new Set(selectedIds.value)
+  if (updated.has(id)) updated.delete(id)
+  else updated.add(id)
+  emit('update:modelValue', selectedSaatreatChips([...updated]).map(chip => chip.id))
 }
 </script>
 
