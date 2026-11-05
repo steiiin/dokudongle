@@ -20,7 +20,7 @@
         <IonLabel>{{ substance.value === 'other' ? details.otherName.trim() || 'Sonstige' : substance.label }}</IonLabel>
       </IonItemDivider>
       <DodoInputSelect :model-value="details.substances[substance.value].basis" label="Grundlage"
-        :options="intoxicationBasisOptions.filter(option => substance.value !== 'alcohol' || option.value !== 'positive')"
+        :options="intoxicationBasisOptions"
         @update:model-value="store.setIntoxicationBasis(substance.value, $event)" />
       <DodoInputSelectChips v-if="details.substances[substance.value].basis === 'suspected'"
         :model-value="details.substances[substance.value].reasons"

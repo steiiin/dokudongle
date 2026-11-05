@@ -58,11 +58,6 @@ export function createIntoxicationBlockState(): IntoxicationBlockSourceState {
   }
 }
 
-const substanceAbbreviations: Record<Exclude<IntoxicationSubstance, 'other'>, string> = {
-  alcohol: 'Alk.', cannabis: 'Cann.', opioids: 'Op.', amphetamine: 'Amph.',
-  methamphetamine: 'Methamph.', ecstasy: 'Ecst.', cocaine: 'Kok.',
-}
-
 function groupedSubstances(details: IntoxicationDetails) {
   const selected = intoxicationSubstances.flatMap(({ value, label }) => {
     const substance = details.substances[value]
@@ -84,19 +79,36 @@ export function renderIntoxicationSummary(details: IntoxicationDetails): string 
   return groupedSubstances(details).summary
 }
 
+const substanceAbbreviations: Record<Exclude<IntoxicationSubstance, 'other'>, string> = {
+  alcohol: 'Alk.', cannabis: 'Cann.', opioids: 'Op.', amphetamine: 'Amph.',
+  methamphetamine: 'Methamph.', ecstasy: 'Ecst.', cocaine: 'Kok.',
+}
+
 export function renderIntoxicationText(details: IntoxicationDetails): string {
-  const { substances, summary } = groupedSubstances(details)
-  if (!summary) return ''
-  const extras = substances.flatMap(substance => {
+  const { substances } = groupedSubstances(details)
+  const groups: { basis: IntoxicationBasis; extra: string; names: string[]; abbreviations: string[] }[] = []
+  for (const substance of substances) {
     const extra = substance.basis === 'suspected'
       ? substance.reasons.map(reason => reason.trim()).filter(Boolean).join(', ')
-      : substance.basis === 'positive' ? 'Test positiv' : substance.amount.trim()
-    if (!extra) return []
+      : substance.basis === 'positive' ? 'Test positiv' : substance.amount.trim() || 'Konsum bestätigt'
+    if (!extra) continue
     const abbreviation = substance.key === 'other' ? substance.name : substanceAbbreviations[substance.key]
-    return [substances.length > 1 ? `${extra} (${abbreviation})` : extra]
-  }).join(', ')
-  const text = `${summary}${extras ? `; ${extras}` : ''}`
-  return /[.!?]$/.test(text) ? text : `${text}.`
+    const group = groups.find(group => group.basis === substance.basis && group.extra === extra)
+    if (group) {
+      group.names.push(substance.name)
+      group.abbreviations.push(abbreviation)
+    } else {
+      groups.push({ basis: substance.basis, extra, names: [substance.name], abbreviations: [abbreviation] })
+    }
+  }
+  if (groups.length > 1) {
+    const compact = `Intox: ${groups.map(group => `${group.extra} (${group.abbreviations.join('+')})`).join('; ')}.`
+    if (compact.length <= 80 && !/[\r\n\u2028\u2029]/.test(compact)) return compact
+  }
+  return groups.map(group => {
+    const text = `${group.names.join('+')}: ${group.extra}`
+    return /[.!?]$/.test(text) ? text : `${text}.`
+  }).join('\n')
 }
 
 export class IntoxicationTextAreaBlock extends TextAreaBlock {

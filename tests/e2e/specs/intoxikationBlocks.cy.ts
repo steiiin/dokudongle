@@ -5,6 +5,33 @@ const clickVisible = (selector: string, text: string) => cy.contains(selector, t
   .click({ scrollBehavior: false })
 
 describe('Intoxication documentation on mobile', () => {
+  for (const [basis, expected] of [
+    ['Konsum bestätigt', 'Intox: Test positiv (Alk.); Konsum bestätigt (Cann.).'],
+    ['Test positiv', 'Alkohol+Cannabis: Test positiv.'],
+  ]) {
+    it(`renders positive alcohol tests with cannabis basis ${basis} in one line`, () => {
+      cy.viewport(375, 812)
+      cy.visit('/tabs/doku')
+      clickVisible('[data-examination="intoxication"] .activate-examination', 'Intoxikation möglich?')
+      clickVisible('ion-modal:visible ion-chip', 'Alkohol')
+      clickVisible('ion-modal:visible ion-chip', 'Cannabis')
+      cy.get('ion-modal:visible ion-select').first().click()
+      clickVisible('ion-popover:visible ion-item', 'Test positiv')
+      cy.get('ion-modal:visible ion-select').last().scrollIntoView().click()
+      clickVisible('ion-popover:visible ion-item', basis)
+      cy.get('ion-modal:visible ion-button[title="Zurück"]').click()
+      clickVisible('ion-tab-button', 'Vorschau')
+      cy.get('textarea:visible').invoke('val').should(value => {
+        const text = String(value)
+        const dLine = text.split('\n').find(line => line.startsWith('D:'))!
+        expect(dLine).to.contain('Alkohol+Cannabis')
+        expect(dLine).not.to.contain('Test positiv')
+        expect(dLine).not.to.contain('Konsum bestätigt')
+        expect(text).to.contain(expected)
+      })
+    })
+  }
+
   it('opens nested reason chips, retains additive free text and renders D and PLER separately', () => {
     cy.viewport(375, 812)
     cy.visit('/tabs/doku')
@@ -50,7 +77,8 @@ describe('Intoxication documentation on mobile', () => {
       expect(dLine).to.contain('Vd. Alkohol+Cannabis')
       expect(dLine).not.to.contain('Intox:')
       expect(dLine).not.to.contain('Leere Flaschen')
-      expect(text).to.contain('Vd. Alkohol+Cannabis; Alkoholgeruch, Leere Flaschen, Gangunsicherheit (Alk.).')
+      expect(text).to.contain('Alkohol: Alkoholgeruch, Leere Flaschen, Gangunsicherheit.')
+      expect(text).not.to.contain('Cannabis:')
     })
   })
 })

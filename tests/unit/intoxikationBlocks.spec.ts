@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { createIntoxicationBlockState, intoxicationReasonRows, renderIntoxicationSummary, renderIntoxicationText } from '@/data/blocks/intoxikation'
+import { createIntoxicationBlockState, intoxicationReasonRows, intoxicationSubstances, renderIntoxicationSummary, renderIntoxicationText } from '@/data/blocks/intoxikation'
 import type { IntoxicationSubstance, IntoxicationSubstanceDetails } from '@/types/blocks/intoxikation'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
@@ -57,8 +57,8 @@ describe('intoxication blocks', () => {
     const dLine = store.generatedProtocol.split('\n').find(line => line.startsWith('D:'))!
     expect(dLine).toContain('Alkohol+Kokain / Vd. Cannabis')
     expect(dLine).not.toMatch(/Intox:|3 Bier|Gerötete Augen|Test positiv/)
-    const detailText = 'Alkohol+Kokain / Vd. Cannabis; 3 Bier (Alk.), Test positiv (Kok.), '
-      + 'Gerötete Augen, Fremdanamnestischer Hinweis (Cann.).'
+    const detailText = 'Alkohol: 3 Bier.\nKokain: Test positiv.\n'
+      + 'Cannabis: Gerötete Augen, Fremdanamnestischer Hinweis.'
     expect(store.textAreaBlocks[0]).toMatchObject({ id: blockId, active: true, text: detailText })
     expect(store.freeformText['sampler.pler.PLER']).toBe(`${detailText}\nEigener Text`)
     expect(store.generatedProtocol.split(detailText)).toHaveLength(2)
@@ -80,12 +80,29 @@ describe('intoxication blocks', () => {
     expect(store.textAreaBlocks).toEqual([])
     store.doku.textAreaBlocks.intoxikation.details.otherName = '  GHB  '
     store.setIntoxicationSubstance('alcohol', true)
+    store.doku.textAreaBlocks.intoxikation.details.substances.alcohol.reasons = ['', '  ']
     expect(store.intoxicationSummary).toBe('Vd. Alkohol+GHB')
-    expect(store.textAreaBlocks[0].text).toBe('Vd. Alkohol+GHB.')
+    expect(store.textAreaBlocks).toEqual([])
     store.setIntoxicationBasis('alcohol', 'positive')
-    expect(store.doku.textAreaBlocks.intoxikation.details.substances.alcohol.basis).toBe('suspected')
+    expect(store.doku.textAreaBlocks.intoxikation.details.substances.alcohol.basis).toBe('positive')
+    expect(store.textAreaBlocks[0].text).toBe('Alkohol: Test positiv.')
+    expect(store.intoxicationSummary).toBe('Alkohol / Vd. GHB')
     store.setIntoxicationBasis('alcohol', 'confirmed')
-    expect(store.textAreaBlocks[0].text).toBe('Alkohol / Vd. GHB.')
+    expect(store.textAreaBlocks[0].text).toBe('Alkohol: Konsum bestätigt.')
+  })
+
+  test.each(intoxicationSubstances)('allows positive tests and confirmed consumption separately for $label', ({ value, label }) => {
+    const store = useDokuStore()
+    store.setIntoxicationAssessed(true)
+    store.setIntoxicationSubstance(value, true)
+    const name = value === 'other' ? 'GHB' : label
+    if (value === 'other') store.doku.textAreaBlocks.intoxikation.details.otherName = name
+    store.setIntoxicationBasis(value, 'positive')
+    expect(store.textAreaBlocks[0].text).toBe(`${name}: Test positiv.`)
+    expect(store.intoxicationSummary).toBe(name)
+    store.setIntoxicationBasis(value, 'confirmed')
+    expect(store.textAreaBlocks[0].text).toBe(`${name}: Konsum bestätigt.`)
+    expect(store.intoxicationSummary).toBe(name)
   })
 
   test('clears incompatible details on basis changes and all details when deselected', () => {
@@ -195,7 +212,7 @@ describe('intoxication blocks', () => {
     await nextTick()
     const bases = modal.findAllComponents(DodoInputSelect)
     expect(bases.map(input => input.props('modelValue'))).toEqual(['suspected', 'suspected', 'suspected'])
-    expect(bases[0].props('options')).not.toContainEqual({ value: 'positive', label: 'Test positiv' })
+    expect(bases[0].props('options')).toContainEqual({ value: 'positive', label: 'Test positiv' })
     expect(bases[1].props('options')).toContainEqual({ value: 'positive', label: 'Test positiv' })
     const reasons = modal.findAllComponents(DodoInputSelectChips)
     expect(reasons.map(input => input.props('options'))).toEqual([intoxicationReasonRows.alcohol, intoxicationReasonRows.cannabis, intoxicationReasonRows.other])
@@ -210,9 +227,9 @@ describe('intoxication blocks', () => {
     inputs.find(input => input.props('label') === 'Menge')!.vm.$emit('update:modelValue', '3 Bier')
     inputs.find(input => input.props('label') === 'Sonstige Substanz')!.vm.$emit('update:modelValue', 'GHB')
     expect(store.intoxicationSummary).toBe('Alkohol+Cannabis / Vd. GHB')
-    expect(store.textAreaBlocks[0].text).toContain('3 Bier (Alk.)')
+    expect(store.textAreaBlocks[0].text).toBe('Intox: 3 Bier (Alk.); Test positiv (Cann.).')
     await nextTick()
-    expect(pler.getComponent(DodoInputTextArea).props('blocks')![0].text).toContain('3 Bier (Alk.)')
+    expect(pler.getComponent(DodoInputTextArea).props('blocks')![0].text).toBe('Intox: 3 Bier (Alk.); Test positiv (Cann.).')
     disability.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'intoxication')!
       .vm.$emit('update:assessed', false)
     await nextTick()
@@ -221,7 +238,7 @@ describe('intoxication blocks', () => {
   })
 })
 
-describe('compact intoxication rendering', () => {
+describe('grouped and compact intoxication rendering', () => {
   const render = (entries: Partial<Record<IntoxicationSubstance, Partial<IntoxicationSubstanceDetails>>>, otherName = '') => {
     const details = createIntoxicationBlockState().details
     for (const [key, value] of Object.entries(entries)) {
@@ -234,60 +251,134 @@ describe('compact intoxication rendering', () => {
   test.each<{ entries: Parameters<typeof render>[0]; summary: string; text: string }>([
     {
       entries: { alcohol: { reasons: ['Alkoholgeruch'] } },
-      summary: 'Vd. Alkohol', text: 'Vd. Alkohol; Alkoholgeruch.',
+      summary: 'Vd. Alkohol', text: 'Alkohol: Alkoholgeruch.',
     },
     {
-      entries: { alcohol: { reasons: ['Alkoholgeruch', 'Gangunsicherheit'] }, cannabis: { reasons: ['gerötete Augen'] } },
+      entries: { alcohol: { reasons: ['Alkoholgeruch', 'Gangunsicherheit'] }, cannabis: { reasons: ['Gerötete Augen', 'Tachykardie'] } },
       summary: 'Vd. Alkohol+Cannabis',
-      text: 'Vd. Alkohol+Cannabis; Alkoholgeruch, Gangunsicherheit (Alk.), gerötete Augen (Cann.).',
+      text: 'Alkohol: Alkoholgeruch, Gangunsicherheit.\nCannabis: Gerötete Augen, Tachykardie.',
     },
     {
       entries: { alcohol: { basis: 'confirmed', amount: '3 Bier' }, cannabis: { reasons: ['gerötete Augen'] } },
-      summary: 'Alkohol / Vd. Cannabis', text: 'Alkohol / Vd. Cannabis; 3 Bier (Alk.), gerötete Augen (Cann.).',
+      summary: 'Alkohol / Vd. Cannabis', text: 'Intox: 3 Bier (Alk.); gerötete Augen (Cann.).',
     },
     {
       entries: { alcohol: { basis: 'confirmed', amount: '3 Bier' }, cocaine: { basis: 'positive' } },
-      summary: 'Alkohol+Kokain', text: 'Alkohol+Kokain; 3 Bier (Alk.), Test positiv (Kok.).',
+      summary: 'Alkohol+Kokain', text: 'Intox: 3 Bier (Alk.); Test positiv (Kok.).',
     },
     {
       entries: { alcohol: { basis: 'confirmed' }, cannabis: {}, opioids: { basis: 'confirmed' }, amphetamine: {} },
-      summary: 'Alkohol+Opioide / Vd. Cannabis+Amphetamin', text: 'Alkohol+Opioide / Vd. Cannabis+Amphetamin.',
+      summary: 'Alkohol+Opioide / Vd. Cannabis+Amphetamin', text: 'Alkohol+Opioide: Konsum bestätigt.',
     },
     {
       entries: { alcohol: { reasons: ['Alkoholgeruch'] }, cocaine: { basis: 'positive', amount: 'stale', reasons: ['stale'] } },
-      summary: 'Kokain / Vd. Alkohol', text: 'Kokain / Vd. Alkohol; Test positiv (Kok.), Alkoholgeruch (Alk.).',
+      summary: 'Kokain / Vd. Alkohol', text: 'Intox: Test positiv (Kok.); Alkoholgeruch (Alk.).',
     },
     {
       entries: { cocaine: { basis: 'positive' } },
-      summary: 'Kokain', text: 'Kokain; Test positiv.',
+      summary: 'Kokain', text: 'Kokain: Test positiv.',
     },
     {
       entries: { alcohol: { basis: 'confirmed', amount: '  ', reasons: ['stale'] }, cannabis: { reasons: ['', '  '] } },
-      summary: 'Alkohol / Vd. Cannabis', text: 'Alkohol / Vd. Cannabis.',
+      summary: 'Alkohol / Vd. Cannabis', text: 'Alkohol: Konsum bestätigt.',
     },
   ])('renders $summary with only applicable details', ({ entries, summary, text }) => {
     expect(render(entries)).toEqual({ summary, text })
   })
 
-  test('uses distinct abbreviations for every preset and the entered name for other substances', () => {
+  test('groups positive alcohol and cannabis tests without changing D', () => {
+    expect(render({ alcohol: { basis: 'positive' }, cannabis: { basis: 'positive' } })).toEqual({
+      summary: 'Alkohol+Cannabis', text: 'Alkohol+Cannabis: Test positiv.',
+    })
+  })
+
+  test('compacts confirmed cannabis consumption followed by suspected alcohol consumption', () => {
+    expect(render({
+      alcohol: { reasons: ['Alkoholgeruch', 'Enthemmung'] },
+      cannabis: { basis: 'confirmed', amount: '1 Joint' },
+    })).toEqual({
+      summary: 'Cannabis / Vd. Alkohol',
+      text: 'Intox: 1 Joint (Cann.); Alkoholgeruch, Enthemmung (Alk.).',
+    })
+  })
+
+  test('groups matching amounts after trimming and matching reasons in their original order', () => {
+    expect(render({
+      cannabis: { basis: 'confirmed', amount: '  1 g  ' }, cocaine: { basis: 'confirmed', amount: '1 g' },
+    }).text).toBe('Cannabis+Kokain: 1 g.')
+    expect(render({
+      cannabis: { reasons: [' Tachykardie ', 'Unruhe'] }, cocaine: { reasons: ['Tachykardie', 'Unruhe'] },
+    }).text).toBe('Cannabis+Kokain: Tachykardie, Unruhe.')
+    expect(render({
+      cannabis: { reasons: ['Tachykardie', 'Unruhe'] }, cocaine: { reasons: ['Unruhe', 'Tachykardie'] },
+    }).text).toBe('Intox: Tachykardie, Unruhe (Cann.); Unruhe, Tachykardie (Kok.).')
+  })
+
+  test('keeps identical text separate when its basis differs', () => {
+    expect(render({ alcohol: { basis: 'confirmed', amount: 'Hinweis' }, cannabis: { reasons: ['Hinweis'] } }).text)
+      .toBe('Intox: Hinweis (Alk.); Hinweis (Cann.).')
+  })
+
+  test('places a group at its first member and joins its abbreviations', () => {
+    expect(render({
+      alcohol: { basis: 'positive' }, cannabis: { basis: 'confirmed', amount: '1 Joint' },
+      cocaine: { basis: 'positive' }, other: { basis: 'positive' },
+    }, ' GHB ').text).toBe('Intox: Test positiv (Alk.+Kok.+GHB); 1 Joint (Cann.).')
+  })
+
+  test('retains grouped names in the multiline fallback', () => {
+    const amount = '1 Joint, laut Patient gestern Abend gemeinsam mit Bekannten konsumiert'
+    expect(render({
+      alcohol: { basis: 'positive' }, cannabis: { basis: 'confirmed', amount }, cocaine: { basis: 'positive' },
+    }).text).toBe(`Alkohol+Kokain: Test positiv.\nCannabis: ${amount}.`)
+  })
+
+  test('uses the compact form at 80 characters and separate lines at 81', () => {
+    const reason = 'A'.repeat(54)
+    const compact = `Intox: ${reason} (Alk.); B (Cann.).`
+    expect(compact).toHaveLength(80)
+    expect(render({ alcohol: { reasons: [reason] }, cannabis: { reasons: ['B'] } }).text).toBe(compact)
+    expect(render({ alcohol: { reasons: [reason + 'A'] }, cannabis: { reasons: ['B'] } }).text)
+      .toBe(`Alkohol: ${reason}A.\nCannabis: B.`)
+  })
+
+  test.each(['\n', '\r\n', '\r', '\u2028', '\u2029'])('preserves embedded line breaks %j without compacting', newline => {
+    const amount = `1 Joint${newline}laut Patient`
+    expect(render({ cannabis: { basis: 'confirmed', amount }, alcohol: { reasons: ['Alkoholgeruch'] } }).text)
+      .toBe(`Cannabis: ${amount}.\nAlkohol: Alkoholgeruch.`)
+    expect(render({ alcohol: { reasons: ['A'] }, other: { reasons: ['B'] } }, `GHB${newline}Zusatz`).text)
+      .toBe(`Alkohol: A.\nGHB${newline}Zusatz: B.`)
+  })
+
+  test.each<[IntoxicationSubstance, string]>([
+    ['alcohol', 'Alk.'], ['cannabis', 'Cann.'], ['opioids', 'Op.'], ['amphetamine', 'Amph.'],
+    ['methamphetamine', 'Methamph.'], ['ecstasy', 'Ecst.'], ['cocaine', 'Kok.'],
+  ])('uses the compact abbreviation for %s and the entered name for other substances', (substance, abbreviation) => {
+    expect(render({ [substance]: { reasons: ['A'] }, other: { reasons: ['B'] } }, ' GHB ').text)
+      .toBe(`Intox: A (${abbreviation}); B (GHB).`)
+  })
+
+  test('uses one line for every preset and the entered name for other substances', () => {
     expect(render({
       alcohol: { reasons: ['A'] }, cannabis: { reasons: ['C'] }, opioids: { reasons: ['O'] },
       amphetamine: { reasons: ['Am'] }, methamphetamine: { reasons: ['M'] }, ecstasy: { reasons: ['E'] },
       cocaine: { reasons: ['K'] }, other: { reasons: ['Freitext unverändert'] },
-    }, ' GHB ').text).toBe('Vd. Alkohol+Cannabis+Opioide+Amphetamin+Methamphetamin+Ecstasy+Kokain+GHB; '
-      + 'A (Alk.), C (Cann.), O (Op.), Am (Amph.), M (Methamph.), E (Ecst.), K (Kok.), Freitext unverändert (GHB).')
+    }, ' GHB ').text).toBe('Alkohol: A.\nCannabis: C.\nOpioide: O.\nAmphetamin: Am.\n'
+      + 'Methamphetamin: M.\nEcstasy: E.\nKokain: K.\nGHB: Freitext unverändert.')
   })
 
   test.each(['.', '!', '?'])('preserves existing terminal punctuation %s and free text', punctuation => {
     const text = `3 Bier, laut Patient${punctuation}`
-    expect(render({ alcohol: { basis: 'confirmed', amount: text } }).text).toBe(`Alkohol; ${text}`)
-    expect(render({ other: { reasons: [text] } }, 'GHB').text).toBe(`Vd. GHB; ${text}`)
+    expect(render({ alcohol: { basis: 'confirmed', amount: text } }).text).toBe(`Alkohol: ${text}`)
+    expect(render({ other: { reasons: [text] } }, 'GHB').text).toBe(`GHB: ${text}`)
+    expect(render({ alcohol: { basis: 'confirmed', amount: text }, cannabis: { reasons: ['Unruhe'] } }).text)
+      .toBe(`Intox: ${text} (Alk.); Unruhe (Cann.).`)
   })
 
   test('omits disabled and unnamed entries without adding separators or labels', () => {
     expect(render({ alcohol: { enabled: false, reasons: ['Altwert'] }, other: {} }, '  '))
       .toEqual({ summary: '', text: '' })
-    expect(render({ alcohol: { reasons: ['Alkoholgeruch'] }, other: {} }).text).toBe('Vd. Alkohol; Alkoholgeruch.')
+    expect(render({ alcohol: { reasons: ['Alkoholgeruch'] }, other: {} }).text).toBe('Alkohol: Alkoholgeruch.')
   })
 
   test('preserves a prefix already present in legacy free text', () => {

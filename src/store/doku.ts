@@ -821,7 +821,7 @@ export const useDokuStore = defineStore('doku', {
     },
     setIntoxicationBasis(key: IntoxicationSubstance, value: string | number) {
       const option = intoxicationBasisOptions.find(option => option.value === value)
-      if (!option || (key === 'alcohol' && option.value === 'positive')) return
+      if (!option) return
       const substance = this.doku.textAreaBlocks.intoxikation.details.substances[key]
       substance.basis = option.value
       if (option.value !== 'suspected') substance.reasons = []
