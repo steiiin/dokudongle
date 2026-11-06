@@ -17,15 +17,6 @@
         :ime-dictionary="{ autocorrect:['capitalize'] }">
       </DodoInputSelect>
 
-      <DodoInputToggleOptional id="isAlone" label="Lebt allein?" lines="full"
-        v-model="store.doku.setting.isAlone" />
-
-      <DodoInputToggleOptional id="isForcedEntry" label="Türöffnung?" lines="full"
-        v-model="store.doku.setting.isForcedEntry" />
-
-      <DodoInputToggleOptional id="isBgCase" label="BG-Fall" lines="full"
-        v-model="store.doku.setting.isBgCase" />
-
       <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
         empty-label="Normal / k.A."
         :options="[
@@ -47,6 +38,15 @@
         allow-custom custom-label="Wer?" custom-placeholder="z.B. Tochter & Nachbarin"
         :ime-dictionary="{ autocorrect:['capitalize'] }" empty-label="Keiner">
       </DodoInputSelectChips>
+
+      <DodoInputToggleOptional id="isAlone" label="Lebt allein?" lines="full"
+        v-model="store.doku.setting.isAlone" />
+
+      <DodoInputToggleOptional id="isForcedEntry" label="Türöffnung?" lines="full"
+        v-model="store.doku.setting.isForcedEntry" />
+
+      <DodoInputToggleOptional id="isBgCase" label="BG-Fall" lines="full"
+        v-model="store.doku.setting.isBgCase" />
 
     </DodoExaminationList>
   </DodoContainerCard>
