@@ -1,6 +1,6 @@
 <template>
   <DodoContainerCard title="Umgebung" card-in-card v-show="ctx.requireSceneDetails">
-    <IonList>
+    <DodoExaminationList>
 
       <DodoInputSelect label="Einsatzort" v-model="store.doku.setting.location" lines="inset"
         empty-label="Keine Angabe"
@@ -17,17 +17,14 @@
         :ime-dictionary="{ autocorrect:['capitalize'] }">
       </DodoInputSelect>
 
-      <DodoInputToggle v-model="store.doku.setting.isAlone">
-        Lebt allein?
-      </DodoInputToggle>
+      <DodoInputToggleOptional id="isAlone" label="Lebt allein?" lines="full"
+        v-model="store.doku.setting.isAlone" />
 
-      <DodoInputToggle lines="full" v-model="store.doku.setting.isForcedEntry">
-        Türöffnung?
-      </DodoInputToggle>
+      <DodoInputToggleOptional id="isForcedEntry" label="Türöffnung?" lines="full"
+        v-model="store.doku.setting.isForcedEntry" />
 
-      <DodoInputToggle lines="full" v-model="store.doku.setting.isBgCase">
-        BG-Fall
-      </DodoInputToggle>
+      <DodoInputToggleOptional id="isBgCase" label="BG-Fall" lines="full"
+        v-model="store.doku.setting.isBgCase" />
 
       <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
         empty-label="Normal / k.A."
@@ -51,7 +48,7 @@
         :ime-dictionary="{ autocorrect:['capitalize'] }" empty-label="Keiner">
       </DodoInputSelectChips>
 
-    </IonList>
+    </DodoExaminationList>
   </DodoContainerCard>
 </template>
 

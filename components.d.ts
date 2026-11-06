@@ -14,6 +14,7 @@ declare module 'vue' {
     DodoContainerCard: typeof import('./src/components/DodoContainerCard.vue')['default']
     DodoExaminationCard: typeof import('./src/components/DodoExaminationCard.vue')['default']
     DodoExaminationItem: typeof import('./src/components/DodoExaminationItem.vue')['default']
+    DodoExaminationList: typeof import('./src/components/DodoExaminationList.vue')['default']
     DodoHint: typeof import('./src/components/DodoHint.vue')['default']
     DodoInputAge: typeof import('./src/components/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/DodoInputChip.vue')['default']
