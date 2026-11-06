@@ -120,7 +120,7 @@ describe('generated Situation blocks', () => {
     inputs.forEach(input => {
       const isLocation = ['Start', 'Ziel'].includes(input.props('label')!)
       expect(input.props('imeMode')).toBe(isLocation ? 'locations' : undefined)
-      expect(input.props('imeDictionary')).toEqual(isLocation ? undefined : {})
+      expect(input.props('imeDictionary')).toEqual(isLocation ? undefined : { autocorrect: ['capitalize'] })
     })
     inputs.forEach((input, index) => input.vm.$emit('update:modelValue', values[index]))
     await nextTick()

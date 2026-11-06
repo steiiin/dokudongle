@@ -408,6 +408,95 @@ describe('DodoInputText single-line IME', () => {
     wrapper.unmount()
   })
 
+  test('publishes live corrections and v-model before delayed suggestions, ignoring stale results', async () => {
+    const wrapper = mountAssistedInput()
+    await wrapper.setProps({ imeDictionary: { autocorrect: ['capitalize'] } })
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.focus()
+    await flushPromises()
+    const latest: TextSuggestion[] = [{
+      id: 'latest', label: 'Hallo', replacement: 'Hallo', type: 'word', source: 'learned',
+      score: 1, start: 0, end: 2,
+    }]
+    let finish!: (suggestions: TextSuggestion[]) => void
+    const suggestions = vi.spyOn(textAssistService, 'getSuggestions')
+      .mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+      .mockResolvedValue(latest)
+
+    insertText(input, '', 'h', 'h')
+    await flushPromises()
+    expect(input.value).toBe('H')
+    expect(input.selectionStart).toBe(1)
+    expect(wrapper.getComponent(DodoInputText).props('modelValue')).toBe('H')
+    expect(suggestions.mock.calls[0][2].text).toBe('H')
+
+    insertText(input, 'H', 'Ha', 'a')
+    await flushPromises()
+    expect(wrapper.getComponent(DodoInputText).props('modelValue')).toBe('Ha')
+    expect(suggestions.mock.calls[1][2].text).toBe('Ha')
+    expect(wrapper.getComponent(DodoTextSuggestionPanel).props('suggestions')).toEqual(latest)
+    finish([])
+    await flushPromises()
+    expect(input.value).toBe('Ha')
+    expect(input.selectionStart).toBe(2)
+    expect(wrapper.getComponent(DodoTextSuggestionPanel).props('suggestions')).toEqual(latest)
+    wrapper.unmount()
+  })
+
+  test.each(['cancelable', 'non-cancelable', 'input-only'])(
+    'undoes live capitalization once using %s Backspace and preserves the lowercase word', async mode => {
+      const wrapper = mountInput({ autocorrect: ['capitalize'] })
+      await flushPromises()
+      const input = wrapper.get<HTMLInputElement>('input').element
+      insertText(input, '', 'w', 'w')
+      await flushPromises()
+      expect(input.value).toBe('W')
+
+      const backspace = async () => {
+        const before = new InputEvent('beforeinput', {
+          bubbles: true, cancelable: mode === 'cancelable', inputType: 'deleteContentBackward',
+        })
+        if (mode !== 'input-only') input.dispatchEvent(before)
+        if (!before.defaultPrevented) {
+          const cursor = input.selectionStart!
+          input.value = input.value.slice(0, cursor - 1) + input.value.slice(cursor)
+          input.setSelectionRange(cursor - 1, cursor - 1)
+          input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' }))
+        }
+        await flushPromises()
+      }
+      await backspace()
+      expect(input.value).toBe('w')
+      expect(input.selectionStart).toBe(1)
+      expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toBe('w')
+      insertText(input, 'w', 'wo', 'o')
+      await flushPromises()
+      expect(input.value).toBe('wo')
+      await backspace()
+      expect(input.value).toBe('w')
+      await backspace()
+      expect(input.value).toBe('')
+      wrapper.unmount()
+    },
+  )
+
+  test('capitalizes completed composition while leaving the active composition untouched', async () => {
+    const wrapper = mountInput({ autocorrect: ['capitalize'] })
+    await flushPromises()
+    const input = wrapper.get<HTMLInputElement>('input').element
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))
+    insertText(input, '', 'ä', 'ä')
+    await flushPromises()
+    expect(input.value).toBe('ä')
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: 'ä' }))
+    await flushPromises()
+    expect(input.value).toBe('Ä')
+    expect(input.selectionStart).toBe(1)
+    expect(wrapper.emitted('update:modelValue')?.at(-1)?.[0]).toBe('Ä')
+    wrapper.unmount()
+  })
+
   test('does not run field autocorrection on blur without a delimiter', async () => {
     const wrapper = mountInput({ autocorrect: ['capitalize'] })
     await flushPromises()

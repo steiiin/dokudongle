@@ -14,7 +14,7 @@
           { value: 'Auf Fußweg', label: 'Fußweg' },
         ]"
         allow-custom custom-label="Wo?" custom-placeholder="z.B. Fußweg"
-        :ime-dictionary="{ /* IME aktivieren */ }">
+        :ime-dictionary="{ autocorrect:['capitalize'] }">
       </DodoInputSelect>
 
       <DodoInputToggle v-model="store.doku.setting.isAlone">
@@ -48,7 +48,7 @@
           [ 'Nachbar', 'Kollege', 'Betreuuer' ]
         ]"
         allow-custom custom-label="Wer?" custom-placeholder="z.B. Tochter & Nachbarin"
-        :ime-dictionary="{ /* IME aktivieren */ }" empty-label="Keiner">
+        :ime-dictionary="{ autocorrect:['capitalize'] }" empty-label="Keiner">
       </DodoInputSelectChips>
 
     </IonList>

@@ -14,7 +14,7 @@
         'Blut',
       ]"
       allow-custom custom-label="Durch?" custom-placeholder="z.B. Blut"
-      :ime-dictionary="{ /* IME aktivieren */ }">
+      :ime-dictionary="{ autocorrect:['capitalize'] }">
     </DodoInputSelect>
 
     <DodoItemModal label="Schleimhaut" modal-label="Mundschleimhaut"

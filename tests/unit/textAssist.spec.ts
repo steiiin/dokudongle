@@ -109,6 +109,20 @@ describe('autocorrect suggestion lookup', () => {
     expect(spell.suggest.mock.calls).toEqual([[word]])
   })
 
+  test('discards obsolete spelling results without registering an undo correction', async () => {
+    const { service, spell } = setup()
+    let finish!: (value: string[]) => void
+    const pending = new Promise<string[]>(resolve => { finish = resolve })
+    spell.suggest.mockImplementation(() => pending)
+    let current = true
+    const result = service.correctAfterDelimiter(change('obsolete', 'patinet', 'patinet '), [], () => current)
+    await vi.waitFor(() => expect(spell.suggest).toHaveBeenCalled())
+    current = false
+    finish(['Patient'])
+    expect(await result).toBeNull()
+    expect(service.tryUndo('obsolete', snapshot('Patient '))).toBeNull()
+  })
+
   test('capitalizes an umlaut while preserving the rest of the input', async () => {
     const { service, spell } = setup()
     await service.getSpellingCandidates('äRztin')
@@ -182,9 +196,13 @@ describe('shortcut replacements', () => {
     expect(applyMutation('Ziel lt, danach', afterPunctuation!)).toBe('Ziel laut, danach')
   })
 
-  test('matches complete shortcuts with exact casing only', () => {
+  test('matches complete shortcuts regardless of casing', () => {
     const shortcuts = new ShortcutReplacementService()
-    for (const typed of ['Lt', 'LT', 'halt', 'unbekannt']) {
+    for (const typed of ['lt', 'Lt', 'LT']) {
+      expect(shortcuts.replaceAfterDelimiter(change(`case-${typed}`, typed, `${typed} `)))
+        .toMatchObject({ replacement: 'laut' })
+    }
+    for (const typed of ['halt', 'unbekannt']) {
       expect(shortcuts.replaceAfterDelimiter(change(`exact-${typed}`, typed, `${typed} `))).toBeNull()
     }
   })
@@ -251,6 +269,58 @@ describe('automatic-only text assist', () => {
 })
 
 describe('IME autocorrect flags', () => {
+  test.each(['interactive', 'automatic'])('capitalizes live and expands case-insensitive shortcuts in the %s entry point', async mode => {
+    const service = new TextAssistService(new MemoryRepository())
+    const dictionary: ImeDictionary = { autocorrect: ['capitalize'] }
+    let text = ''
+    for (const [inserted, expected] of [
+      ['h', 'H'], ['a', 'Ha'], [' ', 'HA '], ['w', 'HA W'], ['o', 'HA Wo'],
+      [' ', 'HA Wo '], ['p', 'HA Wo P'], ['a', 'HA Wo Pa'], ['t', 'HA Wo Pat'],
+      ['.', 'HA Wo Patient.'],
+    ]) {
+      const input = change('live-sequence', text, text + inserted)
+      const mutation = mode === 'interactive'
+        ? (await service.processInput(input, dictionary)).mutation
+        : await service.processAutomaticInput(input, dictionary)
+      text = mutation ? applyMutation(input.after.text, mutation) : input.after.text
+      expect(text).toBe(expected)
+    }
+  })
+
+  test('uses the last normalized local shortcut ahead of the stored shortcuts', async () => {
+    const repository = new MemoryRepository()
+    repository.state.shortcutReplacements = { pat: 'First', PAT: 'Stored' }
+    const service = new TextAssistService(repository)
+    expect(await service.processAutomaticInput(change('stored', 'Pat', 'Pat ')))
+      .toMatchObject({ replacement: 'Stored' })
+    const mutation = await service.processAutomaticInput(change('local', 'PAT', 'PAT,'), {
+      shortcuts: { Pat: 'First local', pat: 'Second local', ' Pat ': 'Last local' },
+    })
+    expect(mutation).toMatchObject({ replacement: 'Last local' })
+    expect(applyMutation('PAT,', mutation!)).toBe('Last local,')
+  })
+
+  test.each(['interactive', 'automatic'])('keeps a live capitalization undone while continuing the same word (%s)', async mode => {
+    const service = new TextAssistService(new MemoryRepository())
+    const dictionary: ImeDictionary = { autocorrect: ['capitalize'] }
+    const process = async (before: string, after: string) => {
+      const input = change('live-undo', before, after)
+      const mutation = mode === 'interactive'
+        ? (await service.processInput(input, dictionary)).mutation
+        : await service.processAutomaticInput(input, dictionary)
+      return mutation ? applyMutation(after, mutation) : after
+    }
+    const undo = (text: string) => mode === 'interactive'
+      ? service.handleBackspace('live-undo', snapshot(text))
+      : service.handleAutomaticBackspace('live-undo', snapshot(text))
+    expect(await process('', 'w')).toBe('W')
+    expect(applyMutation('W', undo('W')!)).toBe('w')
+    expect(undo('w')).toBeNull()
+    expect(await process('w', 'wo')).toBe('wo')
+    expect(await process('wo', 'wo ')).toBe('wo ')
+    expect(await process('wo ', 'wo m')).toBe('wo M')
+  })
+
   test('capitalizes the completed field prefix and preserves delimiters, suffixes, and carets', async () => {
     const service = new TextAssistService(new MemoryRepository())
     const dictionary = {
@@ -324,11 +394,12 @@ describe('IME autocorrect flags', () => {
     expect(service.handleAutomaticBackspace('profile-invalidated', snapshot(invalidatedText))).toBeNull()
   })
 
-  test('does not apply flags without a delimiter or during composition and selection replacement', async () => {
+  test('applies flags without a delimiter but not during composition or selection replacement', async () => {
     const service = new TextAssistService(new MemoryRepository())
     const dictionary = { autocorrect: ['capitalize'] as const }
 
-    expect(await service.processAutomaticInput(change('no-delimiter', 'ma', 'max'), dictionary)).toBeNull()
+    expect(await service.processAutomaticInput(change('no-delimiter', 'ma', 'max'), dictionary))
+      .toMatchObject({ replacement: 'Max', cursor: 3 })
     expect(await service.processAutomaticInput(change('composing', 'max', 'max ', 4, true), dictionary)).toBeNull()
     expect(await service.processAutomaticInput({
       ...change('selection', 'max', 'max '),
@@ -739,7 +810,7 @@ describe('location-only IME', () => {
     const general = vi.spyOn(service.suggestions, 'getSuggestions')
     const correction = vi.spyOn(service.autocorrect, 'correctAfterDelimiter')
     const shortcut = vi.spyOn(service.shortcutReplacements, 'replaceAfterDelimiter')
-    const flags = vi.spyOn(service.imeAutocorrect, 'correctAfterDelimiter')
+    const flags = vi.spyOn(service.imeAutocorrect, 'correctInput')
     const update = await service.processInput(change('location', 'zzzz', 'zzzz '), {
       shortcuts: { zzzz: 'DokuDongle' }, autocorrect: ['capitalize'],
     }, 'locations')

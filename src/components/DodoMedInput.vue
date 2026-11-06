@@ -49,7 +49,7 @@
           <DodoInputText ref="inputName"
             v-model="currentItem.Name"
             label="" placeholder="z.B. ASS"
-            :ime-dictionary="{ /* IME aktivieren TODO Medikamente */ }">
+            :ime-dictionary="{ autocorrect:['capitalize'] }">
           </DodoInputText>
 
         </IonItem>

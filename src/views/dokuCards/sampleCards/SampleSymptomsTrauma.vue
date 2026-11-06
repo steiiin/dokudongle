@@ -125,7 +125,7 @@
                 { value: 'Komfortlagerung', label: 'Komfortlagerung' },
               ]"
               allow-custom custom-label="Womit?" custom-placeholder="z.B. Unterpolsterung"
-              :ime-dictionary="{ /* IME aktivieren */ }">
+              :ime-dictionary="{ autocorrect:['capitalize'] }">
             </DodoInputSelect>
 
             <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.spine.usedExtrication"

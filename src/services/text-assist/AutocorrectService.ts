@@ -84,6 +84,7 @@ export class AutocorrectService {
   async correctAfterDelimiter(
     change: TextInputChange,
     additionalWords: readonly string[] = [],
+    isCurrent: () => boolean = () => true,
   ): Promise<{ mutation: TextMutation; correction: AppliedCorrection } | null> {
     await this.initialize()
     if (change.before.isComposing || change.after.isComposing) return null
@@ -109,7 +110,7 @@ export class AutocorrectService {
       ...additionalWords.map(normalizeKey),
     ])
     const candidate = this.policy.choose(range.word, suggestions, preferredWords)
-    if (!candidate) return null
+    if (!candidate || !isCurrent()) return null
 
     const replacement = preserveInitialCapitalization(range.word, candidate.replacement)
     const correctedEnd = range.start + replacement.length

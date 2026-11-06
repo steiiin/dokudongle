@@ -24,6 +24,11 @@ export interface WordRange {
   end: number
 }
 
+export const wordRanges = (text: string): WordRange[] =>
+  Array.from(text.matchAll(new RegExp(WORD_PATTERN)), match => ({
+    word: match[0], start: match.index, end: match.index + match[0].length,
+  }))
+
 export const wordImmediatelyBefore = (text: string, end: number): WordRange | null => {
   const prefix = text.slice(0, end)
   let match: RegExpExecArray | null

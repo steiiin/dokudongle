@@ -191,10 +191,14 @@ const processAssistInput = async (before: TextInputSnapshot, event: InputEvent, 
       after,
       inputType: event.inputType || 'insertText',
       data: event.data,
-    }, props.imeDictionary, props.imeMode)
+    }, props.imeDictionary, props.imeMode, {
+      isCurrent: () => revision === assistRevision && imeOperational.value,
+      onMutation: (mutation) => {
+        if (revision === assistRevision) void applyAssistMutation(mutation, after.text)
+      },
+    })
     if (revision !== assistRevision) return
-    if (update.mutation) await applyAssistMutation(update.mutation, after.text)
-    if (revision === assistRevision) updateTextSuggestions(update.suggestions)
+    updateTextSuggestions(update.suggestions)
   }
   finally {
     assistInputsInFlight -= 1

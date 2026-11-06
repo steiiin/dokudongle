@@ -1,6 +1,6 @@
 import shortcutReplacements from '@/assets/text-assist/default-shortcuts.json'
 import type { TextInputChange, TextInputSnapshot, TextMutation } from './types'
-import { isCompletionDelimiter, wordImmediatelyBefore } from './text'
+import { isCompletionDelimiter, normalizeKey, wordImmediatelyBefore } from './text'
 
 interface AppliedShortcutReplacement {
   original: string
@@ -36,10 +36,13 @@ export class ShortcutReplacementService {
 
     const range = wordImmediatelyBefore(change.after.text, cursor - delimiter.length)
     if (!range) return null
-    const hasAdditionalReplacement = Object.prototype.hasOwnProperty.call(additionalReplacements, range.word)
-    const replacements = hasAdditionalReplacement ? additionalReplacements : this.replacements
-    if (!Object.prototype.hasOwnProperty.call(replacements, range.word)) return null
-    const replacement = replacements[range.word]
+    // Normalize each source before merging so local entries retain precedence,
+    // including when their spelling differs from the stored shortcut.
+    const replacements = new Map([
+      ...Object.entries(this.replacements),
+      ...Object.entries(additionalReplacements),
+    ].map(([key, value]) => [normalizeKey(key), value]))
+    const replacement = replacements.get(normalizeKey(range.word))
     if (!replacement || replacement === range.word) return null
 
     const cursorAfterReplacement = range.start + replacement.length + delimiter.length

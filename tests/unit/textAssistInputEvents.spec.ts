@@ -67,6 +67,8 @@ beforeEach(async () => {
   vi.spyOn(DefaultGermanSpellChecker.prototype, 'suggest')
     .mockImplementation(async word => word === 'ha' ? ['HA'] : word === 'Krankehaus' ? ['Krankenhaus'] : [])
   await textAssistService.initialize()
+  // Exercise spelling rejection here; HA is also a built-in shortcut now.
+  delete textAssistService.repository.getState().shortcutReplacements.ha
   textAssistService.repository.getState().rejectedCorrections = []
 })
 

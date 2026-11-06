@@ -8,7 +8,7 @@
         <IonItem lines="full">
           <DodoInputText v-model="store.doku.textAreaBlocks.einweisung.values.ARZT"
             label="Arzt" placeholder="z.B. HA Wegner"
-            :ime-dictionary="{}" assist-context-id="quickie.einweisung.arzt" />
+            :ime-dictionary="{ autocorrect:['capitalize'] }" assist-context-id="quickie.einweisung.arzt" />
         </IonItem>
         <IonItem lines="full">
           <DodoInputText v-model="store.doku.textAreaBlocks.einweisung.values.ZIEL"
@@ -18,7 +18,7 @@
         <IonItem lines="none">
           <DodoInputText v-model="store.doku.textAreaBlocks.einweisung.values.KRANKHEIT"
             label="Grund" placeholder="z.B. Thrombose"
-            :ime-dictionary="{}" assist-context-id="quickie.einweisung.krankheit" />
+            :ime-dictionary="{ autocorrect:['capitalize'] }" assist-context-id="quickie.einweisung.krankheit" />
         </IonItem>
       </IonList>
     </IonCardContent>
