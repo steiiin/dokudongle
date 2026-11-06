@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest'
 import dictionary from 'virtual:dictionary-de'
 import medicalWords from 'virtual:medical-de'
 import baseDictionary from '@/assets/dictionaries/de.dic?raw'
+import medicalDictionary from '@/assets/dictionaries/medical.de.dic?raw'
 import { InProcessGermanSpellChecker } from '@/services/text-assist/InProcessGermanSpellChecker'
 import { SpellCheckerWorkerRuntime } from '@/services/text-assist/SpellCheckerWorkerRuntime'
 import { WorkerGermanSpellChecker } from '@/services/text-assist/WorkerGermanSpellChecker'
@@ -11,14 +12,15 @@ import type {
   SpellCheckerWorkerResponse,
 } from '@/services/text-assist/spell-checker-worker-protocol'
 
-const medicalVocabulary = ['DemenzWG', 'Demenz-WG', 'Epistaxis', 'HA', 'Patient', 'PD', 'RD', 'KH', 'KoPlaWu']
+const medicalEntries = medicalDictionary.trimEnd().split(/\r?\n/).slice(1)
+const medicalVocabulary = [...new Set(medicalEntries.map(entry => entry.split('/')[0]))]
 
 test('bundles both dictionaries with an accurate count and preserves base entries and flags', () => {
   const [header, ...lines] = dictionary.dic.trimEnd().split('\n')
   const baseEntries = baseDictionary.split(/\r?\n/).slice(1).filter(line => line && !/^\s/.test(line))
   expect(Number(header)).toBe(lines.length)
-  expect(lines).toHaveLength(baseEntries.length + 9)
-  expect(lines.slice(0, baseEntries.length)).toEqual(baseEntries)
+  expect(Number(medicalDictionary.split('\n')[0])).toBe(medicalEntries.length)
+  expect(lines).toEqual([...baseEntries, ...medicalEntries])
   expect(lines).toContain('KoPlaWu/S')
   expect(lines).toContain('Demenz-WG/S')
   expect(lines).toContain('DemenzWG')
@@ -44,7 +46,7 @@ describe('Hunspell German engine', () => {
   })
 
   test('recognizes bundled medical words and suffixes before and after rebuilding user words', async () => {
-    const words = [...medicalVocabulary, 'KoPlaWus', 'Demenz-WGs', 'Patienten']
+    const words = [...medicalVocabulary, 'KoPlaWus', 'Demenz-WGs', 'Patienten', 'Schienung', 'Schienungen']
     for (const word of words) await expect(spellChecker.correct(word), word).resolves.toBe(true)
     await spellChecker.rebuild([])
     for (const word of words) await expect(spellChecker.correct(word), word).resolves.toBe(true)

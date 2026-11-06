@@ -7,6 +7,7 @@ import { TextAssistService } from '@/services/text-assist/TextAssistService'
 import { TextLearningService } from '@/services/text-assist/TextLearningService'
 import { emptyTextAssistState, type TextAssistStateRepositoryLike } from '@/services/text-assist/persistence'
 import { isCompletionDelimiter, wordAroundCursor } from '@/services/text-assist/text'
+import medicalAutocorrectAudit from './fixtures/medical-autocorrect.json'
 import type {
   ImeDictionary,
   TextAssistPersistedState,
@@ -342,6 +343,39 @@ describe('text assist integration', () => {
 
   beforeAll(async () => {
     await service.initialize()
+  })
+
+  test.each(medicalAutocorrectAudit.fixes)(
+    'preserves medical term $word instead of $previousReplacement',
+    async ({ word }) => {
+      for (const delimiter of [' ', '.', ',']) {
+        const sessionId = `medical-regression-${word}-${delimiter}`
+        const before = `Befund: ${word}`
+        const input = change(sessionId, before, before + delimiter)
+        const update = await service.processInput(input)
+        expect(update.mutation, `${word}${delimiter}`).toBeUndefined()
+        expect(await service.processAutomaticInput(input), `${word}${delimiter}`).toBeNull()
+      }
+    },
+  )
+
+  test('preserves Schienung and its plural after rebuilding user words', async () => {
+    await service.autocorrect.rebuildUserWords()
+    for (const word of ['Schienung', 'Schienungen']) {
+      for (const delimiter of [' ', '.', ',']) {
+        const input = change(`schienung-rebuilt-${word}-${delimiter}`, word, word + delimiter)
+        expect((await service.processInput(input)).mutation).toBeUndefined()
+        expect(await service.processAutomaticInput(input)).toBeNull()
+      }
+    }
+  })
+
+  test.each([' ', '.', ','])('only capitalizes schienung before delimiter %j', async delimiter => {
+    const input = change(`schienung-case-${delimiter}`, 'schienung', `schienung${delimiter}`)
+    const update = await service.processInput(input)
+    expect(update.mutation).toMatchObject({ replacement: 'Schienung' })
+    expect(applyMutation(input.after.text, update.mutation!)).toBe(`Schienung${delimiter}`)
+    expect(await service.processAutomaticInput(input)).toMatchObject({ replacement: 'Schienung' })
   })
 
   test.each([

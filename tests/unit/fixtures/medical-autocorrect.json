@@ -1,0 +1,625 @@
+{
+  "description": "Mit Hunspell und der bestehenden Autokorrektur reproduzierte Fehlkorrekturen. Nur bestätigte, korrekt geschriebene Begriffe aus Anwendungstexten werden ergänzt; technische Werte, reine Ortsnamen und Textfragmente sind ausgeschlossen.",
+  "scannedTokens": 3548,
+  "fixes": [
+    {
+      "word": "Schienung",
+      "previousReplacement": "Schiebung",
+      "entry": "Schienung/P",
+      "source": "Nutzermeldung",
+      "context": "Schienung Schienungen"
+    },
+    {
+      "word": "marmoriert",
+      "previousReplacement": "Marmorwert",
+      "entry": "marmoriert",
+      "source": "src/types/protocol/abcde/abcdeCirculation.ts:20",
+      "context": "marmoriert"
+    },
+    {
+      "word": "druckdolent",
+      "previousReplacement": "Druckdozent",
+      "entry": "druckdolent",
+      "source": "src/types/protocol/abcde/abcdeCirculation.ts:203",
+      "context": "druckdolent"
+    },
+    {
+      "word": "Tremor",
+      "previousReplacement": "Tresor",
+      "entry": "Tremor",
+      "source": "src/types/protocol/abcde/abcdeDisability.ts:323",
+      "context": "Tremor/Myoklonien"
+    },
+    {
+      "word": "baseline",
+      "previousReplacement": "Vaseline",
+      "entry": "baseline",
+      "source": "src/types/protocol/abcde/abcdeDisability.ts:515",
+      "context": "baseline: nichts akutes"
+    },
+    {
+      "word": "Temp",
+      "previousReplacement": "Tempo",
+      "entry": "Temp",
+      "source": "src/types/protocol/abcde/abcdeExposure.ts:280",
+      "context": "Temp. erhöht"
+    },
+    {
+      "word": "Blutverdünner",
+      "previousReplacement": "Blutverdünnen",
+      "entry": "Blutverdünner",
+      "source": "src/types/protocol/sample/sampleMedication.ts:59",
+      "context": "Keine Blutverdünner."
+    },
+    {
+      "word": "Headblock",
+      "previousReplacement": "Hemdblock",
+      "entry": "Headblock",
+      "source": "src/types/protocol/sample/sampleSymptomsTrauma.ts:172",
+      "context": "Vakuummatratze/Headblock"
+    },
+    {
+      "word": "rollstuhlmobil",
+      "previousReplacement": "Rollstuhlmobil-",
+      "entry": "rollstuhlmobil",
+      "source": "src/views/dokuCards/SettingCard.vue:33",
+      "context": "rollstuhlmobil"
+    },
+    {
+      "word": "Rasselgeräusche",
+      "previousReplacement": "Rassengeräusche",
+      "entry": "Rasselgeräusche",
+      "source": "src/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue:120",
+      "context": "Rasselgeräusche"
+    },
+    {
+      "word": "Marmoriert",
+      "previousReplacement": "Marmorwert",
+      "entry": "marmoriert",
+      "source": "src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue:271",
+      "context": "Marmoriert"
+    },
+    {
+      "word": "Druckdolent",
+      "previousReplacement": "Druckdozent",
+      "entry": "druckdolent",
+      "source": "src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue:177",
+      "context": "Druckdolent?"
+    },
+    {
+      "word": "Baseline",
+      "previousReplacement": "Vaseline",
+      "entry": "baseline",
+      "source": "src/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue:175",
+      "context": "Entspricht Baseline?"
+    },
+    {
+      "word": "Psych-Befund",
+      "previousReplacement": "Psyche-Befund",
+      "entry": "Psych-Befund",
+      "source": "src/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue:328",
+      "context": "Psych-Befund"
+    },
+    {
+      "word": "Kindslage",
+      "previousReplacement": "Kindeslage",
+      "entry": "Kindslage",
+      "source": "src/views/dokuCards/blocksourceCards/BlockSchwangerschaftCard.vue:42",
+      "context": "Kindslage"
+    },
+    {
+      "word": "Medis",
+      "previousReplacement": "Media",
+      "entry": "Medis",
+      "source": "src/views/dokuCards/taskCards/TaskCourseCard.vue:15",
+      "context": "(außer Medis)"
+    },
+    {
+      "word": "Erstmalig",
+      "previousReplacement": "Erstmalige",
+      "entry": "erstmalig",
+      "source": "src/data/blocks/bauchschmerz.ts:61",
+      "context": "Erstmalig"
+    },
+    {
+      "word": "Krampfanfälle",
+      "previousReplacement": "Kampfanfälle",
+      "entry": "Krampfanfälle",
+      "source": "src/data/blocks/intoxikation.ts:27",
+      "context": "Krampfanfälle"
+    },
+    {
+      "word": "Enthemmung",
+      "previousReplacement": "Endhemmung",
+      "entry": "Enthemmung",
+      "source": "src/data/blocks/intoxikation.ts:35",
+      "context": "Enthemmung"
+    },
+    {
+      "word": "Krampfanfall",
+      "previousReplacement": "Kampfanfall",
+      "entry": "Krampfanfall",
+      "source": "src/data/lists/saamed.ts:17",
+      "context": "Krampfanfall"
+    },
+    {
+      "word": "Glucose",
+      "previousReplacement": "Gluckse",
+      "entry": "Glucose",
+      "source": "src/data/lists/saamed.ts:166",
+      "context": "Glucose"
+    },
+    {
+      "word": "Nasale",
+      "previousReplacement": "Basale",
+      "entry": "nasale",
+      "source": "src/data/lists/saatreats.ts:48",
+      "context": "Nasale Ballontamponade"
+    },
+    {
+      "word": "Juckreiz",
+      "previousReplacement": "Guckreiz",
+      "entry": "Juckreiz",
+      "source": "src/data/redflags.ts:33",
+      "context": "anhaltendem Juckreiz am After"
+    },
+    {
+      "word": "kaffeesatzartigem",
+      "previousReplacement": "Kaffeesatzartigel",
+      "entry": "kaffeesatzartigem",
+      "source": "src/data/redflags.ts:53",
+      "context": "blutigem/kaffeesatzartigem Erbrechen"
+    },
+    {
+      "word": "Kindsbewegungen",
+      "previousReplacement": "Kindesbewegungen",
+      "entry": "Kindsbewegungen",
+      "source": "src/data/redflags.ts:289",
+      "context": "verminderten/ausbleibenden Kindsbewegungen"
+    },
+    {
+      "word": "Dialyseshunt",
+      "previousReplacement": "Dialysestunt",
+      "entry": "Dialyseshunt",
+      "source": "src/data/redflags.ts:745",
+      "context": "anhaltender/erneuter Blutung am Dialyseshunt"
+    },
+    {
+      "word": "Gelbfärbung",
+      "previousReplacement": "Geldfärbung",
+      "entry": "Gelbfärbung",
+      "source": "src/data/redflags.ts:769",
+      "context": "Gelbfärbung von Haut/Augen"
+    },
+    {
+      "word": "Gelenksentzündung",
+      "previousReplacement": "Gelenkentzündung",
+      "entry": "Gelenksentzündung",
+      "source": "src/data/redflags.ts:970",
+      "context": "Akute Gelenksentzündung"
+    },
+    {
+      "word": "Sepsis",
+      "previousReplacement": "Skepsis",
+      "entry": "Sepsis",
+      "source": "src/data/redflags.ts:980",
+      "context": "Sepsis"
+    },
+    {
+      "word": "Urinausscheidung",
+      "previousReplacement": "Uranausscheidung",
+      "entry": "Urinausscheidung",
+      "source": "src/data/redflags.ts:1059",
+      "context": "Akut deutlich verminderte/fehlende Urinausscheidung gegenüber dem Ausgangszustand; mögliche Nierenschädigung, nicht bloß Blasenentleerungsstörung."
+    },
+    {
+      "word": "Elektrolytstörung",
+      "previousReplacement": "Elektrolötstörung",
+      "entry": "Elektrolytstörung",
+      "source": "src/data/redflags.ts:1071",
+      "context": "Elektrolytstörung"
+    },
+    {
+      "word": "Krampfanfällen",
+      "previousReplacement": "Kampfanfällen",
+      "entry": "Krampfanfällen",
+      "source": "src/data/redflags.ts:1219",
+      "context": "übersehenen Schlaganfällen, schweren Infektionen, Stoffwechselentgleisungen, Krampfanfällen, bleibenden Hirnschäden oder dem Tod"
+    },
+    {
+      "word": "transiente",
+      "previousReplacement": "Transitente",
+      "entry": "transiente",
+      "source": "src/data/redflags.ts:1226",
+      "context": "Neue Unfähigkeit, Informationen zu behalten, oder ungeklärte Erinnerungslücke; nicht vorschnell als harmlose transiente Amnesie einstufen."
+    },
+    {
+      "word": "Transiente",
+      "previousReplacement": "Transitente",
+      "entry": "transiente",
+      "source": "src/data/redflags.ts:1236",
+      "context": "Transiente globale Amnesie"
+    },
+    {
+      "word": "Dissektion",
+      "previousReplacement": "Eissektion",
+      "entry": "Dissektion",
+      "source": "src/data/redflags.ts:1277",
+      "context": "Arterielle Dissektion"
+    },
+    {
+      "word": "Refluxbeschwerden",
+      "previousReplacement": "Reflexbeschwerden",
+      "entry": "Refluxbeschwerden",
+      "source": "src/data/redflags.ts:1615",
+      "context": "Refluxbeschwerden (bekanntes Muster)"
+    },
+    {
+      "word": "Reflux",
+      "previousReplacement": "Reflex",
+      "entry": "Reflux",
+      "source": "src/data/redflags.ts:1616",
+      "context": "Gesicherter Reflux, typische leichte Beschwerden; keine Blutung, Dysphagie oder plausible kardiale Ursache; nicht allein durch Antazidawirkung begründet."
+    },
+    {
+      "word": "Gallenwegsverschluss",
+      "previousReplacement": "Gallenwegverschluss",
+      "entry": "Gallenwegsverschluss",
+      "source": "src/data/redflags.ts:1717",
+      "context": "einem Gallenwegsverschluss, Gallenblasendurchbruch, einer Blutvergiftung, Organversagen oder dem Tod"
+    },
+    {
+      "word": "Harnwegsverletzung",
+      "previousReplacement": "Harnwegverletzung",
+      "entry": "Harnwegsverletzung",
+      "source": "src/data/redflags.ts:1771",
+      "context": "Harnwegsverletzung"
+    },
+    {
+      "word": "Refluxsymptomatik",
+      "previousReplacement": "Reflexsymptomatik",
+      "entry": "Refluxsymptomatik",
+      "source": "src/data/redflags.ts:1827",
+      "context": "Speisebolus steckt fest, Schlucken beziehungsweise Speichelschlucken nicht möglich; keine gewöhnliche Refluxsymptomatik."
+    },
+    {
+      "word": "venöse",
+      "previousReplacement": "Genöse",
+      "entry": "venöse",
+      "source": "src/data/redflags.ts:1897",
+      "context": "Chronische venöse Insuffizienz"
+    },
+    {
+      "word": "Muskelnekrosen",
+      "previousReplacement": "Muskelneurosen",
+      "entry": "Muskelnekrosen",
+      "source": "src/data/redflags.ts:2131",
+      "context": "unerkannten Gefäß-/Nervenverletzungen, Muskelnekrosen, bleibendem Funktionsverlust, einer Amputation oder lebensbedrohlichem Blutverlust"
+    },
+    {
+      "word": "Muskelnekrose",
+      "previousReplacement": "Muskelneurose",
+      "entry": "Muskelnekrose",
+      "source": "src/data/redflags.ts:2148",
+      "context": "Muskelnekrose"
+    },
+    {
+      "word": "Immunsuppression",
+      "previousReplacement": "Immunsuperession",
+      "entry": "Immunsuppression",
+      "source": "src/data/redflags.ts:2221",
+      "context": "Fieber bei Neutropenie/ausgeprägter Immunsuppression"
+    },
+    {
+      "word": "Viraler",
+      "previousReplacement": "Vitaler",
+      "entry": "viraler",
+      "source": "src/data/redflags.ts:2252",
+      "context": "Viraler Infekt"
+    },
+    {
+      "word": "Harnwegsinfekt",
+      "previousReplacement": "Harnweginfekt",
+      "entry": "Harnwegsinfekt",
+      "source": "src/data/redflags.ts:2252",
+      "context": "Harnwegsinfekt"
+    },
+    {
+      "word": "Halsgefäßdissektion",
+      "previousReplacement": "Halsgefäßeissektion",
+      "entry": "Halsgefäßdissektion",
+      "source": "src/data/redflags.ts:2372",
+      "context": "Halsgefäßdissektion"
+    },
+    {
+      "word": "Elektrolytstörungen",
+      "previousReplacement": "Elektrolötstörungen",
+      "entry": "Elektrolytstörungen",
+      "source": "src/data/redflags.ts:2505",
+      "context": "anhaltenden Elektrolytstörungen, Muskelzerfall, Nierenschäden oder Kreislaufkollaps"
+    },
+    {
+      "word": "Akutbeurteilung",
+      "previousReplacement": "Aktbeurteilung",
+      "entry": "Akutbeurteilung",
+      "source": "src/data/redflags.ts:2801",
+      "context": "Erster Fieberkrampf, fokaler/prolongierter Anfall, Wiederholung oder unvollständige Erholung; kinderärztliche Akutbeurteilung."
+    },
+    {
+      "word": "Tonsillenoperation",
+      "previousReplacement": "Tonvillenoperation",
+      "entry": "Tonsillenoperation",
+      "source": "src/data/redflags.ts:3011",
+      "context": "Nachblutung nach Tonsillenoperation"
+    },
+    {
+      "word": "livide",
+      "previousReplacement": "Lipide",
+      "entry": "livide",
+      "source": "src/data/redflags.ts:3075",
+      "context": "Unverhältnismäßiger Schmerz, rasche Progression, livide Haut/Blasen oder schweres Krankheitsgefühl."
+    },
+    {
+      "word": "Atopische",
+      "previousReplacement": "Atypische",
+      "entry": "atopische",
+      "source": "src/data/redflags.ts:3128",
+      "context": "Atopische Dermatitis"
+    },
+    {
+      "word": "Hochdruckinjektionsverletzung",
+      "previousReplacement": "Hochdruckinfektionsverletzung",
+      "entry": "Hochdruckinjektionsverletzung",
+      "source": "src/data/redflags.ts:3221",
+      "context": "Hochdruckinjektionsverletzung"
+    },
+    {
+      "word": "Akutabklärung",
+      "previousReplacement": "Aktabklärung",
+      "entry": "Akutabklärung",
+      "source": "src/data/redflags.ts:3381",
+      "context": "Trübes Dialysat und/oder neuer Bauchschmerz, gegebenenfalls Fieber; sofortiger Kontakt zum Dialysezentrum und Akutabklärung."
+    },
+    {
+      "word": "Schwellkörperschäden",
+      "previousReplacement": "Schnellkörperschäden",
+      "entry": "Schwellkörperschäden",
+      "source": "src/data/redflags.ts:3471",
+      "context": "bleibenden Schwellkörperschäden, dauerhafter Erektionsstörung oder Gewebeverlust"
+    },
+    {
+      "word": "Obstruktionsverdacht",
+      "previousReplacement": "Obstauktionsverdacht",
+      "entry": "Obstruktionsverdacht",
+      "source": "src/data/redflags.ts:3524",
+      "context": "Flankenschmerz und Fieber mit Erbrechen, fehlender Trinkfähigkeit, Obstruktionsverdacht oder deutlichen Allgemeinsymptomen."
+    },
+    {
+      "word": "Crush-Risiko",
+      "previousReplacement": "Crash-Risiko",
+      "entry": "Crush-Risiko",
+      "source": "src/data/redflags.ts:3544",
+      "context": "Quetschtrauma mit Crush-Risiko"
+    },
+    {
+      "word": "Crush-Syndrom",
+      "previousReplacement": "Crash-Syndrom",
+      "entry": "Crush-Syndrom",
+      "source": "src/data/redflags.ts:3554",
+      "context": "Crush-Syndrom/Rhabdomyolyse"
+    },
+    {
+      "word": "Visusminderung",
+      "previousReplacement": "Virusminderung",
+      "entry": "Visusminderung",
+      "source": "src/data/redflags.ts:3633",
+      "context": "Augenschmerz mit Rötung, Lichtscheu oder Visusminderung; Glaukom, Keratitis oder Uveitis möglich."
+    },
+    {
+      "word": "Rückenmarksschäden",
+      "previousReplacement": "Rückenmarktschäden",
+      "entry": "Rückenmarksschäden",
+      "source": "src/data/redflags.ts:3985",
+      "context": "bleibenden Nerven-/Rückenmarksschäden, Lähmungen, Atem-/Kreislaufversagen oder dem Tod"
+    },
+    {
+      "word": "Aortendissektion",
+      "previousReplacement": "Aorteneissektion",
+      "entry": "Aortendissektion",
+      "source": "src/data/redflags.ts:4021",
+      "context": "Aortendissektion"
+    },
+    {
+      "word": "Atemstillständen",
+      "previousReplacement": "Atemstellständen",
+      "entry": "Atemstillständen",
+      "source": "src/data/redflags.ts:4166",
+      "context": "erneuten Atemstillständen, Sauerstoffmangel, bleibenden Hirnschäden oder dem Tod"
+    },
+    {
+      "word": "Postpartale",
+      "previousReplacement": "Postportale",
+      "entry": "postpartale",
+      "source": "src/data/redflags.ts:4215",
+      "context": "Postpartale Blutung"
+    },
+    {
+      "word": "Fremdkörperimpaktion",
+      "previousReplacement": "Fremdkörperimpfaktion",
+      "entry": "Fremdkörperimpaktion",
+      "source": "src/data/redflags.ts:4287",
+      "context": "Fremdkörperimpaktion"
+    },
+    {
+      "word": "Verlaufskontrolle",
+      "previousReplacement": "Verkaufskontrolle",
+      "entry": "Verlaufskontrolle",
+      "source": "src/data/redflags.ts:4383",
+      "context": "Zecke entfernt, allenfalls kleine lokale Reaktion; kein Fieber oder neurologisches Symptom; Verlaufskontrolle besprochen."
+    },
+    {
+      "word": "Uniklinik",
+      "previousReplacement": "Juniklinik",
+      "entry": "Uniklinik",
+      "source": "src/assets/text-assist/default-snippets.json:1",
+      "context": "Uniklinik Dresden"
+    }
+  ],
+  "excluded": [
+    {
+      "word": "retro",
+      "previousReplacement": "Metro",
+      "source": "src/types/protocol/sample/sampleSymptomsTrauma.ts:103",
+      "reason": "Wortfragment aus „retro-/anterograde“; der Bindestrich beendet hier keine Autokorrektur."
+    },
+    {
+      "word": "alcohol",
+      "previousReplacement": "Alkohol",
+      "source": "src/types/blocks/intoxikation.ts:3",
+      "reason": "Technischer Enum-Wert; sichtbare Bezeichnung ist Alkohol."
+    },
+    {
+      "word": "krampfanfall",
+      "previousReplacement": "Kampfanfall",
+      "source": "src/types/lists/saamed.ts:14",
+      "reason": "Technischer Enum-Wert; der sichtbare Begriff Krampfanfall wird separat geprüft."
+    },
+    {
+      "word": "color",
+      "previousReplacement": "Chlor",
+      "source": "src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue:273",
+      "reason": "Technischer Bezeichner."
+    },
+    {
+      "word": "provocation",
+      "previousReplacement": "Provokation",
+      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:128",
+      "reason": "Technischer Bezeichner."
+    },
+    {
+      "word": "rovokation",
+      "previousReplacement": "Provokation",
+      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:47",
+      "reason": "HTML-Textfragment: Der Anfangsbuchstabe steht in einem eigenen Element."
+    },
+    {
+      "word": "ualität",
+      "previousReplacement": "Qualität",
+      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:71",
+      "reason": "HTML-Textfragment: Der Anfangsbuchstabe steht in einem eigenen Element."
+    },
+    {
+      "word": "adiation",
+      "previousReplacement": "Radiation",
+      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:83",
+      "reason": "HTML-Textfragment: Der Anfangsbuchstabe steht in einem eigenen Element."
+    },
+    {
+      "word": "card-in-card",
+      "previousReplacement": "ward-in-card",
+      "source": "src/components/DodoContainerCard.vue:6",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "phone",
+      "previousReplacement": "Phon",
+      "source": "src/components/DodoInputContacts.vue:57",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "number",
+      "previousReplacement": "Nummer",
+      "source": "src/components/DodoInputNumber.vue:66",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "scenario",
+      "previousReplacement": "Szenario",
+      "source": "src/components/DodoInputRedflags.vue:159",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "indication",
+      "previousReplacement": "Indikation",
+      "source": "src/components/DodoInputSaamed.vue:161",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "object",
+      "previousReplacement": "Objekt",
+      "source": "src/components/DodoInputSelectChips.vue:100",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "focus",
+      "previousReplacement": "Fokus",
+      "source": "src/components/DodoInputText.vue:354",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "is-enhancing",
+      "previousReplacement": "iss-enhancing",
+      "source": "src/components/DodoInputTextArea.vue:24",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "is-inactive",
+      "previousReplacement": "iss-inactive",
+      "source": "src/components/DodoTextAreaBlocks.vue:4",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "quot",
+      "previousReplacement": "Quote",
+      "source": "src/components/quickie-components/DodoQuickieTemplate.vue:108",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "style",
+      "previousReplacement": "Stile",
+      "source": "src/components/quickie-components/DodoQuickieTemplate.vue:127",
+      "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
+    },
+    {
+      "word": "Riesa",
+      "previousReplacement": "Riese",
+      "source": "src/assets/text-assist/default-snippets.json:1",
+      "reason": "Reiner Ortsname; außerhalb des vereinbarten Umfangs."
+    }
+  ],
+  "scope": [
+    "Protokolltexte und Eingabeoptionen",
+    "Dokumentationsansichten und Komponenten",
+    "Maßnahmen- und Medikamentendaten",
+    "Redflag-Daten",
+    "Standardkürzel und Textbausteine"
+  ],
+  "deferredFindings": [
+    {
+      "word": "inital",
+      "source": "src/types/protocol/sample/sampleSymptomsTrauma.ts:95",
+      "reason": "Quelltext-Tippfehler für initial; keine Wörterbuchergänzung und keine Textänderung in diesem Auftrag."
+    },
+    {
+      "word": "ufgeklärt",
+      "source": "src/types/protocol/treatment/treatmentRedflags.ts:207",
+      "reason": "Quelltext-Tippfehler für aufgeklärt; keine Wörterbuchergänzung und keine Textänderung in diesem Auftrag."
+    },
+    {
+      "word": "hartlaibig",
+      "source": "src/data/blocks/excretions.ts:25",
+      "reason": "Schreibweise als Befund offen; derzeit keine automatische Ersetzung und daher keine Wörterbuchergänzung."
+    }
+  ],
+  "validation": {
+    "baseline": "Alle 66 Regressionstests reproduzierten vor der Ergänzung eine tatsächliche TextAssist-Ersetzung.",
+    "after": "Alle 66 Fälle bleiben nach Leerzeichen, Punkt und Komma in processInput und processAutomaticInput unverändert.",
+    "rescan": {
+      "scannedTokens": 3548,
+      "remainingReviewedFalseCorrections": 0,
+      "newCorrections": 0,
+      "remainingExcludedCandidates": 19
+    },
+    "checks": "224 betroffene Unit-Tests, Typecheck und ESLint erfolgreich."
+  }
+}
