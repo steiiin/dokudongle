@@ -29,908 +29,988 @@ export type {
 
 export const DATA_Signals: readonly RedflagSignal[] = [
   {
-    id:   'abdomen__afterjuckreiz',
+    id: 'abdomen__afterjuckreiz',
     text: 'anhaltendem Juckreiz am After'
   },
   {
-    id:   'abdomen__anhaltende_verstopfung',
+    id: 'abdomen__anhaltende_verstopfung',
     text: 'anhaltender Verstopfung'
   },
   {
-    id:   'abdomen__anhaltender_durchfall',
+    id: 'abdomen__anhaltender_durchfall',
     text: 'anhaltendem Durchfall'
   },
   {
-    id:   'abdomen__anhaltendes_erbrechen',
+    id: 'abdomen__anhaltendes_erbrechen',
     text: 'anhaltendem Erbrechen'
   },
   {
-    id:   'abdomen__blut_im_stuhl',
+    id: 'abdomen__blut_im_stuhl',
     text: 'Blut im Stuhl'
   },
   {
-    id:   'abdomen__blutiges_erbrechen',
+    id: 'abdomen__blutiges_erbrechen',
     text: 'blutigem/kaffeesatzartigem Erbrechen'
   },
   {
-    id:   'abdomen__durchfall',
+    id: 'abdomen__durchfall',
     text: 'Durchfall'
   },
   {
-    id:   'abdomen__geringe_wiederkehrende_blutspuren',
+    id: 'abdomen__geringe_wiederkehrende_blutspuren',
     text: 'geringen wiederkehrenden Blutspuren am Stuhl'
   },
   {
-    id:   'abdomen__gruenes_erbrechen',
+    id: 'abdomen__gruenes_erbrechen',
     text: 'grünem Erbrechen'
   },
   {
-    id:   'abdomen__hart_geblaeht',
+    id: 'abdomen__hart_geblaeht',
     text: 'hartem/aufgeblähtem Bauch'
   },
   {
-    id:   'abdomen__leichte_wiederkehrende_schmerzen',
+    id: 'abdomen__leichte_wiederkehrende_schmerzen',
     text: 'wiederkehrenden leichten Bauchschmerzen'
   },
   {
-    id:   'abdomen__naechtliche_beschwerden',
+    id: 'abdomen__naechtliche_beschwerden',
     text: 'nächtlichen Bauchbeschwerden'
   },
   {
-    id:   'abdomen__schmerzhafte_bruchvorwoelbung',
+    id: 'abdomen__schmerzhafte_bruchvorwoelbung',
     text: 'schmerzhafter/fester Bruchvorwölbung'
   },
   {
-    id:   'abdomen__starke_afterschmerzen',
+    id: 'abdomen__starke_afterschmerzen',
     text: 'starken Schmerzen am After'
   },
   {
-    id:   'abdomen__starke_rektalblutung',
+    id: 'abdomen__starke_rektalblutung',
     text: 'starker/nicht stillbarer Blutung aus dem After'
   },
   {
-    id:   'abdomen__teerstuhl',
+    id: 'abdomen__teerstuhl',
     text: 'schwarzem/teerartigem Stuhl'
   },
   {
-    id:   'abdomen__wiederkehrendes_sodbrennen',
+    id: 'abdomen__wiederkehrendes_sodbrennen',
     text: 'wiederkehrendem Sodbrennen'
   },
   {
-    id:   'abdomen__windverhalt_mit_blaehung',
+    id: 'abdomen__windverhalt_mit_blaehung',
     text: 'fehlendem Windabgang mit zunehmender Bauchblähung'
   },
   {
-    id:   'abdomen__zunehmende_schmerzen',
+    id: 'abdomen__zunehmende_schmerzen',
     text: 'zunehmenden Bauchschmerzen'
   },
   {
-    id:   'augen__anhaltende_roetung',
+    id: 'augen__anhaltende_roetung',
     text: 'anhaltender Augenrötung'
   },
   {
-    id:   'augen__eitriges_sekret',
+    id: 'augen__eitriges_sekret',
     text: 'verklebten Augenlidern/eitrigem Augensekret'
   },
   {
-    id:   'augen__fremdkoerpergefuehl',
+    id: 'augen__fremdkoerpergefuehl',
     text: 'anhaltendem Fremdkörpergefühl im Auge'
   },
   {
-    id:   'augen__juckreiz_traenenfluss',
+    id: 'augen__juckreiz_traenenfluss',
     text: 'anhaltendem Augenjucken/Tränenfluss'
   },
   {
-    id:   'augen__lichtscheu',
+    id: 'augen__lichtscheu',
     text: 'ausgeprägter Lichtscheu'
   },
   {
-    id:   'augen__neue_ptosis',
+    id: 'augen__neue_ptosis',
     text: 'einseitig hängendem Augenlid'
   },
   {
-    id:   'augen__neue_pupillendifferenz',
+    id: 'augen__neue_pupillendifferenz',
     text: 'deutlicher Pupillendifferenz'
   },
   {
-    id:   'augen__starke_augenschmerzen',
+    id: 'augen__starke_augenschmerzen',
     text: 'starken Augenschmerzen'
   },
   {
-    id:   'augen__wiederkehrende_einblutung',
+    id: 'augen__wiederkehrende_einblutung',
     text: 'wiederkehrenden Einblutungen ins Augenweiß'
   },
   {
-    id:   'becken__zunehmende_schmerzen',
+    id: 'becken__zunehmende_schmerzen',
     text: 'zunehmenden Beckenschmerzen'
   },
   {
-    id:   'blutung__nase_zahnfleisch',
+    id: 'blutung__nase_zahnfleisch',
     text: 'Blutungen aus Nase/Zahnfleisch'
   },
   {
-    id:   'blutung__wiederkehrende_haut_schleimhautblutungen',
+    id: 'blutung__wiederkehrende_haut_schleimhautblutungen',
     text: 'wiederkehrenden Haut-/Schleimhautblutungen'
   },
   {
-    id:   'extremitaet__belastungsunfaehigkeit',
+    id: 'drainage__unerwarteter_foerderstopp',
+    text: 'ausbleibendem Sekretabfluss',
+  },
+  {
+    id: 'drainage__sogverlust',
+    text: 'Sogverlust am Drainagebehälter',
+  },
+  {
+    id: 'drainage__dislokation',
+    text: 'herausgerutschtem Drainageschlauch',
+  },
+  {
+    id: 'drainage__leckage',
+    text: 'Flüssigkeitsaustritt neben dem Drainageschlauch',
+  },
+  {
+    id: 'drainage__geringe_erneute_blutbeimengungen',
+    text: 'geringen Blutbeimengungen im Sekret',
+  },
+  {
+    id: 'extremitaet__belastungsunfaehigkeit',
     text: 'fehlender Belastbarkeit'
   },
   {
-    id:   'extremitaet__bewegungsstoerung',
+    id: 'extremitaet__bewegungsstoerung',
     text: 'Bewegungsstörungen'
   },
   {
-    id:   'extremitaet__blaesse_blaufarbung',
+    id: 'extremitaet__blaesse_blaufarbung',
     text: 'auffälliger Blässe/Blaufärbung'
   },
   {
-    id:   'extremitaet__einseitige_schwellung_schmerz',
+    id: 'extremitaet__einseitige_schwellung_schmerz',
     text: 'einseitiger schmerzhafter Beinschwellung'
   },
   {
-    id:   'extremitaet__gespannte_schwellung',
+    id: 'extremitaet__gespannte_schwellung',
     text: 'praller/gespannter Schwellung'
   },
   {
-    id:   'extremitaet__kalte_extremitaet',
+    id: 'extremitaet__kalte_extremitaet',
     text: 'auffällig kalter Hand/kaltem Fuß'
   },
   {
-    id:   'extremitaet__langsame_beidseitige_beinoedeme',
+    id: 'extremitaet__langsame_beidseitige_beinoedeme',
     text: 'langsam zunehmenden beidseitigen Beinschwellungen'
   },
   {
-    id:   'extremitaet__pulsverlust',
+    id: 'extremitaet__pulsverlust',
     text: 'fehlendem Puls an der Extremität'
   },
   {
-    id:   'extremitaet__sensibilitaetsstoerung',
+    id: 'extremitaet__sensibilitaetsstoerung',
     text: 'Gefühlsstörungen'
   },
   {
-    id:   'extremitaet__starke_dehnungsschmerzen',
+    id: 'extremitaet__starke_dehnungsschmerzen',
     text: 'starken Schmerzen beim Strecken von Fingern/Zehen'
   },
   {
-    id:   'extremitaet__zunehmende_schmerzen',
+    id: 'extremitaet__zunehmende_schmerzen',
     text: 'zunehmenden Schmerzen'
   },
   {
-    id:   'gelenk__anhaltende_leichte_schmerzen',
+    id: 'gelenk__anhaltende_leichte_schmerzen',
     text: 'anhaltenden leichten Gelenkschmerzen'
   },
   {
-    id:   'gelenk__anhaltende_schmerzen',
+    id: 'gelenk__anhaltende_schmerzen',
     text: 'anhaltenden Gelenkschmerzen'
   },
   {
-    id:   'gelenk__bewegungsverlust',
+    id: 'gelenk__bewegungsverlust',
     text: 'eingeschränkter Beweglichkeit'
   },
   {
-    id:   'gelenk__roetung_ueberwaermung',
+    id: 'gelenk__roetung_ueberwaermung',
     text: 'gerötetem/überwärmtem Gelenk'
   },
   {
-    id:   'gelenk__wiederkehrende_steifigkeit',
+    id: 'gelenk__wiederkehrende_steifigkeit',
     text: 'wiederkehrender Gelenksteifigkeit'
   },
   {
-    id:   'gelenk__zunehmende_schmerzen',
+    id: 'gelenk__zunehmende_schmerzen',
     text: 'zunehmenden Gelenkschmerzen'
   },
   {
-    id:   'gelenk__zunehmende_schwellung',
+    id: 'gelenk__zunehmende_schwellung',
     text: 'zunehmender Gelenkschwellung'
   },
   {
-    id:   'gyn__anhaltende_brustverhaertung',
+    id: 'gyn__anhaltende_brustverhaertung',
     text: 'anhaltender Verhärtung der Brust'
   },
   {
-    id:   'gyn__anhaltende_stillbeschwerden',
+    id: 'gyn__anhaltende_stillbeschwerden',
     text: 'anhaltenden Schmerzen beim Stillen'
   },
   {
-    id:   'gyn__auffaelliges_fruchtwasser',
+    id: 'gyn__auffaelliges_fruchtwasser',
     text: 'grünem/braunem/übel riechendem Fruchtwasser'
   },
   {
-    id:   'gyn__fruchtwasserabgang',
+    id: 'gyn__fruchtwasserabgang',
     text: 'wässrigem Flüssigkeitsabgang aus der Scheide'
   },
   {
-    id:   'gyn__grosse_blutklumpen_wochenfluss',
+    id: 'gyn__grosse_blutklumpen_wochenfluss',
     text: 'großen Blutklumpen im Wochenfluss'
   },
   {
-    id:   'gyn__pressdrang',
+    id: 'gyn__pressdrang',
     text: 'Pressdrang'
   },
   {
-    id:   'gyn__regelmaessige_schmerzhafte_wehen',
+    id: 'gyn__regelmaessige_schmerzhafte_wehen',
     text: 'regelmäßigen schmerzhaften Wehen'
   },
   {
-    id:   'gyn__schulterspitzenschmerz',
+    id: 'gyn__schulterspitzenschmerz',
     text: 'Schmerzen an der Schulterspitze'
   },
   {
-    id:   'gyn__sichtbare_nabelschnur',
+    id: 'gyn__sichtbare_nabelschnur',
     text: 'sichtbarer/tastbarer Nabelschnur an der Scheide'
   },
   {
-    id:   'gyn__starke_anhaltende_unterbauchschmerzen',
+    id: 'gyn__starke_anhaltende_unterbauchschmerzen',
     text: 'anhaltenden starken Unterbauchschmerzen'
   },
   {
-    id:   'gyn__starke_brustdruesenschmerzen',
+    id: 'gyn__starke_brustdruesenschmerzen',
     text: 'starken Schmerzen in der Brustdrüse'
   },
   {
-    id:   'gyn__starke_einseitige_unterbauchschmerzen',
+    id: 'gyn__starke_einseitige_unterbauchschmerzen',
     text: 'starken einseitigen Unterbauchschmerzen'
   },
   {
-    id:   'gyn__starke_vaginale_blutung',
+    id: 'gyn__starke_vaginale_blutung',
     text: 'starker/zunehmender vaginaler Blutung'
   },
   {
-    id:   'gyn__uebel_riechender_wochenfluss',
+    id: 'gyn__uebel_riechender_wochenfluss',
     text: 'übel riechendem Wochenfluss'
   },
   {
-    id:   'gyn__vaginale_blutung',
+    id: 'gyn__vaginale_blutung',
     text: 'vaginaler Blutung'
   },
   {
-    id:   'gyn__verminderte_kindsbewegungen',
+    id: 'gyn__verminderte_kindsbewegungen',
     text: 'verminderten/ausbleibenden Kindsbewegungen'
   },
   {
-    id:   'gyn__wiederkehrende_regelschmerzen',
+    id: 'gyn__wiederkehrende_regelschmerzen',
     text: 'wiederkehrenden Regelschmerzen'
   },
   {
-    id:   'gyn__zwischenblutungen',
+    id: 'gyn__zwischenblutungen',
     text: 'wiederkehrenden Zwischenblutungen'
   },
   {
-    id:   'haut__anhaltende_brennende_schmerzen',
+    id: 'haut__anhaltende_brennende_schmerzen',
     text: 'anhaltenden brennenden Hautschmerzen'
   },
   {
-    id:   'haut__anhaltende_taubheit',
+    id: 'haut__anhaltende_taubheit',
     text: 'anhaltender Taubheit der Haut'
   },
   {
-    id:   'haut__anhaltender_juckreiz',
+    id: 'haut__anhaltender_juckreiz',
     text: 'anhaltendem Juckreiz'
   },
   {
-    id:   'haut__blaeschen_auge_nase_ohr',
+    id: 'haut__blaeschen_auge_nase_ohr',
     text: 'Bläschen an Auge/Nasenspitze/Ohr'
   },
   {
-    id:   'haut__blasenbildung',
+    id: 'haut__blasenbildung',
     text: 'Hautblasen'
   },
   {
-    id:   'haut__dunkle_verfaerbung',
+    id: 'haut__dunkle_verfaerbung',
     text: 'dunkler/schwarzer Hautverfärbung'
   },
   {
-    id:   'haut__eitriges_sekret',
+    id: 'haut__eitriges_sekret',
     text: 'eitrigem Sekret'
   },
   {
-    id:   'haut__grossflaechige_blaeschenausbreitung',
+    id: 'haut__grossflaechige_blaeschenausbreitung',
     text: 'großflächiger Ausbreitung von Hautbläschen'
   },
   {
-    id:   'haut__marmorierung',
+    id: 'haut__marmorierung',
     text: 'fleckiger/marmorierter Hautverfärbung'
   },
   {
-    id:   'haut__naessende_offene_stellen',
+    id: 'haut__naessende_offene_stellen',
     text: 'nässenden/offenen Hautstellen'
   },
   {
-    id:   'haut__nicht_wegdrueckbare_flecken',
+    id: 'haut__nicht_wegdrueckbare_flecken',
     text: 'nicht wegdrückbaren roten/violetten Hautflecken'
   },
   {
-    id:   'haut__rasch_ausbreitende_roetung',
+    id: 'haut__rasch_ausbreitende_roetung',
     text: 'rasch ausbreitender Rötung'
   },
   {
-    id:   'haut__schleimhautwunden',
+    id: 'haut__schleimhautwunden',
     text: 'wunden Stellen an Mund/Augen/Genitalien'
   },
   {
-    id:   'haut__schmerzhafte_blaeschen',
+    id: 'haut__schmerzhafte_blaeschen',
     text: 'schmerzhaften Hautbläschen'
   },
   {
-    id:   'haut__sich_vergroessernde_roetung_nach_stich',
+    id: 'haut__sich_vergroessernde_roetung_nach_stich',
     text: 'sich vergrößernder Rötung um die Stichstelle'
   },
   {
-    id:   'haut__starke_schmerzen',
+    id: 'haut__starke_schmerzen',
     text: 'starken Hautschmerzen'
   },
   {
-    id:   'haut__wiederkehrender_ausschlag',
+    id: 'haut__wiederkehrender_ausschlag',
     text: 'wiederkehrendem Hautausschlag'
   },
   {
-    id:   'haut__zunehmende_lokale_roetung',
+    id: 'haut__zunehmende_lokale_roetung',
     text: 'zunehmender örtlicher Rötung'
   },
   {
-    id:   'haut__zunehmende_lokale_schwellung',
+    id: 'haut__zunehmende_lokale_schwellung',
     text: 'zunehmender örtlicher Schwellung'
   },
   {
-    id:   'hno__anhaltende_halsschmerzen',
+    id: 'hno__anhaltende_halsschmerzen',
     text: 'anhaltenden Halsschmerzen'
   },
   {
-    id:   'hno__anhaltende_leichte_ohrenschmerzen',
+    id: 'hno__anhaltende_leichte_ohrenschmerzen',
     text: 'anhaltenden leichten Ohrenschmerzen'
   },
   {
-    id:   'hno__anhaltende_mundschmerzen',
+    id: 'hno__anhaltende_mundschmerzen',
     text: 'anhaltenden Zahn-/Wundschmerzen im Mund'
   },
   {
-    id:   'hno__anhaltende_schluckbeschwerden',
+    id: 'hno__anhaltende_schluckbeschwerden',
     text: 'anhaltenden Schluckbeschwerden'
   },
   {
-    id:   'hno__anhaltendes_ohrgeraeusch',
+    id: 'hno__anhaltendes_ohrgeraeusch',
     text: 'anhaltenden Ohrgeräuschen'
   },
   {
-    id:   'hno__auffaellig_haeufiges_schlucken',
+    id: 'hno__auffaellig_haeufiges_schlucken',
     text: 'auffällig häufigem Schlucken'
   },
   {
-    id:   'hno__blut_mund_rachen',
+    id: 'hno__blut_mund_rachen',
     text: 'frischem Blut aus Mund/Rachen'
   },
   {
-    id:   'hno__eingeschraenkte_mundoeffnung',
+    id: 'hno__eingeschraenkte_mundoeffnung',
     text: 'erschwerter Mundöffnung'
   },
   {
-    id:   'hno__geringe_blutspuren_speichel',
+    id: 'hno__geringe_blutspuren_speichel',
     text: 'wiederkehrenden geringen Blutspuren im Speichel'
   },
   {
-    id:   'hno__heiserkeit',
+    id: 'hno__heiserkeit',
     text: 'Heiserkeit'
   },
   {
-    id:   'hno__kieferklemme',
+    id: 'hno__kieferklemme',
     text: 'stark eingeschränkter Mundöffnung'
   },
   {
-    id:   'hno__kloessige_stimme',
+    id: 'hno__kloessige_stimme',
     text: 'kloßiger/veränderter Stimme'
   },
   {
-    id:   'hno__ohrsekret',
+    id: 'hno__ohrsekret',
     text: 'Flüssigkeits-/Eiteraustritt aus dem Ohr'
   },
   {
-    id:   'hno__ploetzliche_hoerminderung',
+    id: 'hno__ploetzliche_hoerminderung',
     text: 'Hörminderung/Hörverlust'
   },
   {
-    id:   'hno__schwellung_hinter_ohr',
+    id: 'hno__schwellung_hinter_ohr',
     text: 'schmerzhafter Rötung/Schwellung hinter dem Ohr'
   },
   {
-    id:   'hno__speichel_nicht_schluckbar',
+    id: 'hno__speichel_nicht_schluckbar',
     text: 'Unfähigkeit zum Schlucken von Speichel'
   },
   {
-    id:   'hno__wiederholtes_verschlucken',
+    id: 'hno__wiederholtes_verschlucken',
     text: 'wiederholtem Verschlucken beim Trinken/Essen'
   },
   {
-    id:   'hno__zunehmende_gesichtsschwellung',
+    id: 'hno__zunehmende_gesichtsschwellung',
     text: 'zunehmender Gesichts-/Halsschwellung'
   },
   {
-    id:   'hno__zunge_rachenschwellung',
+    id: 'hno__zunge_rachenschwellung',
     text: 'Zungen-/Rachenschwellung'
   },
   {
-    id:   'infekt__anhaltendes_fieber',
+    id: 'infekt__anhaltendes_fieber',
     text: 'anhaltendem/wiederkehrendem Fieber'
   },
   {
-    id:   'infekt__fieber_schuettelfrost',
+    id: 'infekt__fieber_schuettelfrost',
     text: 'Fieber/Schüttelfrost'
   },
   {
-    id:   'infekt__grippeaehnliche_beschwerden',
+    id: 'infekt__grippeaehnliche_beschwerden',
     text: 'grippeähnlichen Beschwerden mit Kopf-/Gliederschmerzen'
   },
   {
-    id:   'intox__starkes_zittern_schwitzen',
+    id: 'intox__starkes_zittern_schwitzen',
     text: 'starkem Zittern/Schwitzen'
   },
   {
-    id:   'intox__uebelkeit_erbrechen',
+    id: 'intox__uebelkeit_erbrechen',
     text: 'Übelkeit/Erbrechen'
   },
   {
-    id:   'kreislauf__anhaltendes_herzrasen',
+    id: 'katheter__verminderter_fehlender_urinabfluss',
+    text: 'anhaltend stark vermindertem/fehlendem Urinabfluss',
+  },
+  {
+    id: 'katheter__herausgerutscht',
+    text: '(teilw.) herausgerutschtem Katheter',
+  },
+  {
+    id: 'katheter__geringe_leckage_bei_normalem_abfluss',
+    text: 'Urinverlust neben dem Katheter bei sonst normalem Abfluss',
+  },
+  {
+    id: 'kreislauf__anhaltendes_herzrasen',
     text: 'anhaltendem Herzrasen/Herzstolpern'
   },
   {
-    id:   'kreislauf__erneute_icd_schocks',
+    id: 'kreislauf__erneute_icd_schocks',
     text: 'erneuten ICD-Schocks'
   },
   {
-    id:   'kreislauf__langsamer_herzschlag_mit_beschwerden',
+    id: 'kreislauf__langsamer_herzschlag_mit_beschwerden',
     text: 'langsamem Herzschlag mit Schwäche/Schwindel'
   },
   {
-    id:   'kreislauf__neue_probleme',
+    id: 'kreislauf__neue_probleme',
     text: 'Kreislaufproblemen (starker Schwindel/auffällige Blässe/kalter Schweiß)'
   },
   {
-    id:   'muskeln__anhaltende_leichte_schmerzen',
+    id: 'muskeln__anhaltende_leichte_schmerzen',
     text: 'anhaltenden leichten Muskelschmerzen'
   },
   {
-    id:   'muskeln__starke_schmerzen_schwellung',
+    id: 'muskeln__starke_schmerzen_schwellung',
     text: 'starken Muskelschmerzen/-schwellungen'
   },
   {
-    id:   'neuro__anhaltende_leichte_kopfschmerzen',
+    id: 'neuro__anhaltende_leichte_kopfschmerzen',
     text: 'anhaltenden leichten Kopfschmerzen'
   },
   {
-    id:   'neuro__anhaltende_neugedaechtnisstoerung',
+    id: 'neuro__anhaltende_neugedaechtnisstoerung',
     text: 'anhaltender Unfähigkeit zum Merken neuer Informationen'
   },
   {
-    id:   'neuro__blasen_darmkontrollverlust',
+    id: 'neuro__blasen_darmkontrollverlust',
     text: 'Verlust der Blasen-/Darmkontrolle'
   },
   {
-    id:   'neuro__blitzartiger_maximalkopfschmerz',
+    id: 'neuro__blitzartiger_maximalkopfschmerz',
     text: 'schlagartig maximalen Kopfschmerzen'
   },
   {
-    id:   'neuro__erneute_gedaechtnisluecken',
+    id: 'neuro__erneute_gedaechtnisluecken',
     text: 'erneuten Erinnerungslücken'
   },
   {
-    id:   'neuro__fehlende_erholung_nach_anfall',
+    id: 'neuro__fehlende_erholung_nach_anfall',
     text: 'fehlender Rückkehr zu normaler Ansprechbarkeit nach einem Krampfanfall'
   },
   {
-    id:   'neuro__gesichtslaehmung',
+    id: 'neuro__gesichtslaehmung',
     text: 'einseitiger Gesichtslähmung'
   },
   {
-    id:   'neuro__gesichtstaubheit',
+    id: 'neuro__gesichtstaubheit',
     text: 'Taubheit im Gesicht'
   },
   {
-    id:   'neuro__leichte_konzentrationsprobleme',
+    id: 'neuro__leichte_konzentrationsprobleme',
     text: 'anhaltenden Konzentrationsproblemen'
   },
   {
-    id:   'neuro__leichter_lageschwindel',
+    id: 'neuro__leichter_lageschwindel',
     text: 'kurzzeitigem Schwindel beim Aufstehen'
   },
   {
-    id:   'neuro__leichter_wiederkehrender_schwindel',
+    id: 'neuro__leichter_wiederkehrender_schwindel',
     text: 'wiederkehrendem leichtem Schwindel'
   },
   {
-    id:   'neuro__muskelkraempfe',
+    id: 'neuro__muskelkraempfe',
     text: 'Muskelkrämpfen'
   },
   {
-    id:   'neuro__neue_bewusstlosigkeit',
+    id: 'neuro__neue_bewusstlosigkeit',
     text: 'Bewusstlosigkeit'
   },
   {
-    id:   'neuro__neue_einseitige_schwaeche',
+    id: 'neuro__neue_einseitige_schwaeche',
     text: 'einseitiger Schwäche/Lähmung'
   },
   {
-    id:   'neuro__neue_gangunsicherheit',
+    id: 'neuro__neue_gangunsicherheit',
     text: 'ausgeprägter Gangunsicherheit'
   },
   {
-    id:   'neuro__neue_krampfanfaelle',
+    id: 'neuro__neue_krampfanfaelle',
     text: 'einem Krampfanfall'
   },
   {
-    id:   'neuro__neue_nackensteifigkeit',
+    id: 'neuro__neue_nackensteifigkeit',
     text: 'Nackensteifigkeit'
   },
   {
-    id:   'neuro__neue_sprachstoerung',
+    id: 'neuro__neue_sprachstoerung',
     text: 'Sprachstörungen'
   },
   {
-    id:   'neuro__neue_verwirrtheit',
+    id: 'neuro__neue_verwirrtheit',
     text: 'Verwirrtheit'
   },
   {
-    id:   'neuro__ploetzliche_starke_kopfschmerzen',
+    id: 'neuro__ploetzliche_starke_kopfschmerzen',
     text: 'starken Kopfschmerzen'
   },
   {
-    id:   'neuro__taubheit_schritt',
+    id: 'neuro__taubheit_schritt',
     text: 'Taubheit im Schritt/Gesäßbereich'
   },
   {
-    id:   'neuro__wiederkehrende_gesichtsschmerzen',
+    id: 'neuro__wiederkehrende_gesichtsschmerzen',
     text: 'wiederkehrenden Gesichtsschmerzattacken'
   },
   {
-    id:   'neuro__wiederkehrende_typische_kopfschmerzen',
+    id: 'neuro__wiederkehrende_typische_kopfschmerzen',
     text: 'wiederkehrenden Kopfschmerzen im bekannten Muster'
   },
   {
-    id:   'neuro__zunehmende_muskelschwaeche',
+    id: 'neuro__zunehmende_muskelschwaeche',
     text: 'zunehmender Muskelschwäche'
   },
   {
-    id:   'neuro__zunehmende_schlaefrigkeit',
+    id: 'neuro__zunehmende_schlaefrigkeit',
     text: 'zunehmender Schläfrigkeit/erschwerter Weckbarkeit'
   },
   {
-    id:   'paediatrie__anfallsartiges_schreien_blaesse',
+    id: 'paediatrie__anfallsartiges_schreien_blaesse',
     text: 'anfallsartigem Schreien mit Blässe'
   },
   {
-    id:   'paediatrie__angestrengte_atmung',
+    id: 'paediatrie__angestrengte_atmung',
     text: 'angestrengter Atmung mit Einziehungen/Stöhnen'
   },
   {
-    id:   'paediatrie__schlaff_teilnahmslos',
+    id: 'paediatrie__schlaff_teilnahmslos',
     text: 'auffälliger Schlaffheit/Teilnahmslosigkeit'
   },
   {
-    id:   'paediatrie__trinkschwaeche',
+    id: 'paediatrie__trinkschwaeche',
     text: 'deutlich vermindertem Trinken'
   },
   {
-    id:   'paediatrie__wenige_nasse_windeln',
+    id: 'paediatrie__wenige_nasse_windeln',
     text: 'deutlich weniger nassen Windeln'
   },
   {
-    id:   'paediatrie__wiederkehrender_bellender_husten',
+    id: 'paediatrie__wiederkehrender_bellender_husten',
     text: 'wiederkehrendem bellendem Husten'
   },
   {
-    id:   'peg__fluessigkeitsaustritt',
+    id: 'peg__fluessigkeitsaustritt',
     text: 'Austritt von Nahrung/Mageninhalt an der Sondenöffnung'
   },
   {
-    id:   'psych__anhaltende_alltagsbeeintraechtigung',
+    id: 'psych__anhaltende_alltagsbeeintraechtigung',
     text: 'anhaltenden Schwierigkeiten bei Bewältigung des Alltags'
   },
   {
-    id:   'psych__anhaltende_niedergeschlagenheit',
+    id: 'psych__anhaltende_niedergeschlagenheit',
     text: 'anhaltender Niedergeschlagenheit/Interesselosigkeit'
   },
   {
-    id:   'psych__anhaltende_schlafstoerungen',
+    id: 'psych__anhaltende_schlafstoerungen',
     text: 'anhaltenden Schlafstörungen'
   },
   {
-    id:   'psych__belastende_wiedererinnerungen',
+    id: 'psych__belastende_wiedererinnerungen',
     text: 'wiederkehrenden belastenden Erinnerungen/Albträumen'
   },
   {
-    id:   'psych__fremdgefaehrdungsimpulse',
+    id: 'psych__fremdgefaehrdungsimpulse',
     text: 'Fremdgefährdungsimpulsen'
   },
   {
-    id:   'psych__gefaehrliches_enthemmtes_verhalten',
+    id: 'psych__gefaehrliches_enthemmtes_verhalten',
     text: 'unkontrollierbarem riskantem Verhalten'
   },
   {
-    id:   'psych__halluzinationen',
+    id: 'psych__halluzinationen',
     text: 'Stimmenhören/Halluzinationen'
   },
   {
-    id:   'psych__konkrete_suizidabsicht',
+    id: 'psych__konkrete_suizidabsicht',
     text: 'konkreten Absichten zur Selbsttötung'
   },
   {
-    id:   'psych__schlaflosigkeit_mit_ueberaktivitaet',
+    id: 'psych__schlaflosigkeit_mit_ueberaktivitaet',
     text: 'ausbleibendem Schlaf mit ausgeprägter Überaktivität'
   },
   {
-    id:   'psych__schwere_erregung',
+    id: 'psych__schwere_erregung',
     text: 'extremen Erregungszuständen mit Kontrollverlust'
   },
   {
-    id:   'psych__suizidgedanken',
+    id: 'psych__suizidgedanken',
     text: 'Gedanken an Suizid/Selbstverletzung'
   },
   {
-    id:   'psych__wiederkehrende_angstzustaende',
+    id: 'psych__wiederkehrende_angstzustaende',
     text: 'wiederkehrenden Angstzuständen'
   },
   {
-    id:   'psych__zunehmende_selbstvernachlaessigung',
+    id: 'psych__zunehmende_selbstvernachlaessigung',
     text: 'Selbstvernachlässigung'
   },
   {
-    id:   'pulmo__anhaltender_husten',
+    id: 'pulmo__anhaltender_husten',
     text: 'anhaltendem Husten'
   },
   {
-    id:   'pulmo__atempausen',
+    id: 'pulmo__atempausen',
     text: 'Atempausen'
   },
   {
-    id:   'pulmo__blutspuren_im_auswurf',
+    id: 'pulmo__blutspuren_im_auswurf',
     text: 'einzelnen Blutspuren im Auswurf'
   },
   {
-    id:   'pulmo__langsame_flache_atmung',
+    id: 'pulmo__langsame_flache_atmung',
     text: 'auffällig langsamer/flacher Atmung'
   },
   {
-    id:   'pulmo__neue_luftnot',
+    id: 'pulmo__neue_luftnot',
     text: 'Atemnot'
   },
   {
-    id:   'pulmo__relevante_haemoptyse',
+    id: 'pulmo__relevante_haemoptyse',
     text: 'stärkerem/wiederholtem Bluthusten'
   },
   {
-    id:   'pulmo__schaumiger_auswurf',
+    id: 'pulmo__schaumiger_auswurf',
     text: 'schaumigem/rosafarbenem Auswurf'
   },
   {
-    id:   'pulmo__stridor',
+    id: 'pulmo__stridor',
     text: 'pfeifendem/ziehendem Geräusch beim Einatmen'
   },
   {
-    id:   'pulmo__stridor_in_ruhe',
+    id: 'pulmo__stridor_in_ruhe',
     text: 'pfeifendem/ziehendem Einatemgeräusch in Ruhe'
   },
   {
-    id:   'pulmo__zyanose',
+    id: 'pulmo__zyanose',
     text: 'bläulichen Lippen'
   },
   {
-    id:   'ruecken__starke_schmerzen',
+    id: 'ruecken__starke_schmerzen',
     text: 'starken Nacken-/Rückenschmerzen'
   },
   {
-    id:   'sehstoerung__neue_doppelbilder',
+    id: 'sehstoerung__neue_doppelbilder',
     text: 'Doppelbildern'
   },
   {
-    id:   'sehstoerung__neue_lichtblitze',
+    id: 'sehstoerung__neue_lichtblitze',
     text: 'Lichtblitzen'
   },
   {
-    id:   'sehstoerung__neuer_gesichtsfeldschatten',
+    id: 'sehstoerung__neuer_gesichtsfeldschatten',
     text: 'dunklem Schatten/Vorhang im Gesichtsfeld'
   },
   {
-    id:   'sehstoerung__neuer_russregen',
+    id: 'sehstoerung__neuer_russregen',
     text: 'zahlreichen schwarzen Punkten vorm Auge'
   },
   {
-    id:   'sehstoerung__ploetzlicher_sehverlust',
+    id: 'sehstoerung__ploetzlicher_sehverlust',
     text: 'Sehverlust'
   },
   {
-    id:   'sehstoerung__rasche_sehverschlechterung',
+    id: 'sehstoerung__rasche_sehverschlechterung',
     text: 'rascher Sehverschlechterung'
   },
   {
-    id:   'shunt__anhaltende_erneute_blutung',
+    id: 'shunt__anhaltende_erneute_blutung',
     text: 'anhaltender/erneuter Blutung am Dialyseshunt'
   },
   {
-    id:   'shunt__roetung_schmerzen_verlauf',
+    id: 'shunt__roetung_schmerzen_verlauf',
     text: 'Rötung/Schmerzen entlang des Shuntschlauchs'
   },
   {
-    id:   'stoffwechsel__anhaltende_muedigkeit',
+    id: 'stoffwechsel__anhaltende_muedigkeit',
     text: 'anhaltender Müdigkeit'
   },
   {
-    id:   'stoffwechsel__durst_mundtrockenheit',
+    id: 'stoffwechsel__durst_mundtrockenheit',
     text: 'anhaltendem Durst/trockenem Mund'
   },
   {
-    id:   'stoffwechsel__fehlende_trinkfaehigkeit',
+    id: 'stoffwechsel__fehlende_trinkfaehigkeit',
     text: 'fehlender Trinkfähigkeit'
   },
   {
-    id:   'stoffwechsel__fruchtiger_atem',
+    id: 'stoffwechsel__fruchtiger_atem',
     text: 'fruchtig/azetonartig riechendem Atem'
   },
   {
-    id:   'stoffwechsel__gelbfaerbung',
+    id: 'stoffwechsel__gelbfaerbung',
     text: 'Gelbfärbung von Haut/Augen'
   },
   {
-    id:   'stoffwechsel__starker_durst_polyurie',
+    id: 'stoffwechsel__starker_durst_polyurie',
     text: 'starkem Durst mit häufigem Wasserlassen'
   },
   {
-    id:   'stoffwechsel__tiefe_schnelle_atmung',
+    id: 'stoffwechsel__tiefe_schnelle_atmung',
     text: 'auffällig tiefer/schneller Atmung'
   },
   {
-    id:   'stoffwechsel__ungewollter_gewichtsverlust',
+    id: 'stoffwechsel__ungewollter_gewichtsverlust',
     text: 'ungewolltem Gewichtsverlust'
   },
   {
-    id:   'stoffwechsel__wiederkehrende_uebelkeit',
+    id: 'stoffwechsel__wiederkehrende_uebelkeit',
     text: 'wiederkehrender Übelkeit'
   },
   {
-    id:   'stoma__dunkle_blasse_verfaerbung',
+    id: 'stoma__dunkle_blasse_verfaerbung',
     text: 'dunkler/auffällig blasser Verfärbung des Stomas'
   },
   {
-    id:   'stoma__foerderstopp',
+    id: 'stoma__foerderstopp',
     text: 'plötzlich ausbleibender Ausscheidung'
   },
   {
-    id:   'stoma__hautreizung',
+    id: 'stoma__hautreizung',
     text: 'zunehmenden Hautreizungen im Stomabereich'
   },
   {
-    id:   'stoma__nicht_ruecklaeufiger_prolaps',
+    id: 'stoma__nicht_ruecklaeufiger_prolaps',
     text: 'nicht rückläufigem Hervortreten'
   },
   {
-    id:   'stoma__starke_blutung',
+    id: 'stoma__starke_blutung',
     text: 'starker Blutung aus dem Stoma'
   },
   {
-    id:   'stoma__vermehrte_duennfluessige_ausscheidung',
+    id: 'stoma__vermehrte_duennfluessige_ausscheidung',
     text: 'anhaltend vermehrter dünnflüssiger Ausscheidung'
   },
   {
-    id:   'stoma__verminderte_ausscheidung',
+    id: 'stoma__verminderte_ausscheidung',
     text: 'anhaltend verminderter Ausscheidung'
   },
   {
-    id:   'temperatur__auffaellig_kalte_haut',
+    id: 'temperatur__auffaellig_kalte_haut',
     text: 'auffällig kalter Haut'
   },
   {
-    id:   'temperatur__nachlassendes_kaeltezittern',
+    id: 'temperatur__nachlassendes_kaeltezittern',
     text: 'nachlassendem Zittern trotz anhaltender Kälte'
   },
   {
-    id:   'thorax__schmerzen_druck',
+    id: 'thorax__schmerzen_druck',
     text: 'Brustschmerzen/Druckgefühl'
   },
   {
-    id:   'trachea__frische_blutung',
+    id: 'trachea__frische_blutung',
     text: 'frischer Blutung aus/an der Trachealkanüle'
   },
   {
-    id:   'trachea__verminderter_luftstrom',
+    id: 'trachea__verminderter_luftstrom',
     text: 'vermindertem/fehlendem Luftstrom an der Kanüle'
   },
   {
-    id:   'trauma__anhaltende_leichte_schmerzen',
+    id: 'trauma__anhaltende_leichte_schmerzen',
     text: 'anhaltenden leichten Schmerzen'
   },
   {
-    id:   'umwelt__sehr_heisse_haut',
+    id: 'umwelt__sehr_heisse_haut',
     text: 'sehr heißer Haut'
   },
   {
-    id:   'uro__anhaltende_oligurie_anurie',
+    id: 'unterdruck__anhaltender_wiederkehrender_alarm',
+    text: 'anhaltendem Pumpenalarm',
+  },
+  {
+    id: 'unterdruck__therapieausfall',
+    text: 'Pumpenausfall',
+  },
+  {
+    id: 'unterdruck__undichter_verband',
+    text: 'undichtem/abgelöstem Unterdruckverband',
+  },
+  {
+    id: 'uro__anhaltende_oligurie_anurie',
     text: 'anhaltend stark vermindertem/ausbleibendem Wasserlassen'
   },
   {
-    id:   'uro__anhaltende_schmerzhafte_erektion',
+    id: 'uro__anhaltende_schmerzhafte_erektion',
     text: 'anhaltender schmerzhafter Erektion'
   },
   {
-    id:   'uro__dunkelbrauner_urin',
+    id: 'uro__dunkelbrauner_urin',
     text: 'dunkelbraunem Urin'
   },
   {
-    id:   'uro__eichelreizung',
+    id: 'uro__eichelreizung',
     text: 'Rötung/Juckreiz an Eichel/Vorhaut'
   },
   {
-    id:   'uro__eichelsekret',
+    id: 'uro__eichelsekret',
     text: 'Sekret an Eichel/Vorhaut'
   },
   {
-    id:   'uro__eicheltaubheit',
+    id: 'uro__eicheltaubheit',
     text: 'Taubheit der Eichel'
   },
   {
-    id:   'uro__eichelverfaerbung',
+    id: 'uro__eichelverfaerbung',
     text: 'dunkler/bläulicher Verfärbung der Eichel'
   },
   {
-    id:   'uro__eingeklemmte_vorhaut',
+    id: 'uro__eingeklemmte_vorhaut',
     text: 'schmerzhaft hinter der Eichel festsitzender Vorhaut'
   },
   {
-    id:   'uro__flankenschmerzen',
+    id: 'uro__flankenschmerzen',
     text: 'starken Schmerzen in der Nierengegend/Flanke'
   },
   {
-    id:   'uro__gerinnsel_im_urin',
+    id: 'uro__gerinnsel_im_urin',
     text: 'Blutgerinnseln im Urin'
   },
   {
-    id:   'uro__neue_haematurie',
+    id: 'uro__neue_haematurie',
     text: 'Blut im Urin'
   },
   {
-    id:   'uro__rasch_zunehmende_oedeme',
+    id: 'uro__rasch_zunehmende_oedeme',
     text: 'rasch zunehmenden Bein-/Gesichtsschwellungen'
   },
   {
-    id:   'uro__rasche_penisschwellung',
+    id: 'uro__rasche_penisschwellung',
     text: 'rasch zunehmender Penisschwellung'
   },
   {
-    id:   'uro__starke_flankenschmerzen',
+    id: 'uro__starke_flankenschmerzen',
     text: 'starken Schmerzen in der Nierengegend/Flanke'
   },
   {
-    id:   'uro__starke_penisschmerzen',
+    id: 'uro__starke_penisschmerzen',
     text: 'starken Schmerzen an Eichel/Vorhaut'
   },
   {
-    id:   'uro__truebes_dialysat',
+    id: 'uro__truebes_dialysat',
     text: 'trüber Flüssigkeit im Dialysebeutel'
   },
   {
-    id:   'uro__verfaerbung_hodensack',
+    id: 'uro__verfaerbung_hodensack',
     text: 'dunkler/bläulicher Verfärbung'
   },
   {
-    id:   'uro__zunehmende_hodenschmerzen',
+    id: 'uro__zunehmende_hodenschmerzen',
     text: 'erneuten/zunehmenden Hodenschmerzen'
   },
   {
-    id:   'uro__zunehmende_hodenschwellung',
+    id: 'uro__zunehmende_hodenschwellung',
     text: 'rasch zunehmender Schwellung'
   },
   {
-    id:   'verband__wiederkehrendes_druckgefuehl',
+    id: 'uro__starke_blasenschmerzen',
+    text: 'starken Schmerzen im Blasenbereich',
+  },
+  {
+    id: 'uro__geringe_blutspuren_urin',
+    text: 'geringen wiederkehrenden Blutspuren im Urin',
+  },
+  {
+    id: 'verband__wiederkehrendes_druckgefuehl',
     text: 'wiederkehrendem Druckgefühl unterm Verband'
   },
   {
-    id:   'wunde__rasch_zunehmender_bluterguss',
+    id: 'wunde__rasch_zunehmender_bluterguss',
     text: 'rasch zunehmendem Bluterguss'
   },
   {
-    id:   'wunde__starke_anhaltende_blutung',
+    id: 'wunde__starke_anhaltende_blutung',
     text: 'starker/nicht stillbarer Blutung'
   },
   {
-    id:   'wunde__zunehmende_schmerzen',
+    id: 'wunde__zunehmende_schmerzen',
     text: 'zunehmenden Wundschmerzen'
+  },
+  {
+    id: 'wunde__anhaltende_zunehmende_sekretion',
+    text: 'anhaltendem/zunehmendem Wundnässen',
+  },
+  {
+    id: 'wunde__erneute_sekretion',
+    text: 'erneutem Wundnässen nach trockener Phase',
+  },
+  {
+    id: 'wunde__oberflaechliche_wundoeffnung',
+    text: 'kleiner oberflächlicher Wundöffnung',
+  },
+  {
+    id: 'wunde__tiefe_wundoeffnung',
+    text: 'tiefer/weit klaffender Wundöffnung',
+  },
+  {
+    id: 'wunde__uebelriechendes_sekret',
+    text: 'übelriechendem Wundsekret',
+  },
+  {
+    id: 'wunde__zunehmende_wundgroesse',
+    text: 'zunehmender Wundgröße',
+  },
+  {
+    id: 'wunde__starke_schmerzen',
+    text: 'starken Wundschmerzen',
   }
 ]
 
@@ -2339,6 +2419,103 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einer übersehenen Blutungsquelle, Blutarmut oder einem unentdeckten Abszess'],
   },
 
+
+  // -------------------------------------------------------------------------
+  // Hauptszenario: Harnkatheter (äußeres Versorgungsproblem) [BvO]
+  // -------------------------------------------------------------------------
+
+  {
+    id: 'harnkatheter-aeusseres-versorgungsproblem-behoben-bvo',
+    name: 'Harnkatheter: äußeres Versorgungsproblem behoben',
+    requirements: 'Ausschließlich äußeres Versorgungsproblem, etwa Schlauchknick, ungünstige Beutellage oder gelöste Fixierung, vollständig behoben; freier Urinabfluss nachvollziehbar wiederhergestellt und Beschwerdefreiheit geklärt. Keine fortbestehende Abflussstörung, Dislokation, Blutung, Verletzung oder Infektzeichen. Kein Katheterwechsel, keine Reposition, Spülung oder Ballonmanipulation als Grundlage dieser BvO. Sichere weitere Katheterversorgung und erneuter Kontakt bei Beschwerden gewährleistet.',
+    application: 'BvO',
+    category: 'uro',
+    majorSignalIds: [
+      'katheter__verminderter_fehlender_urinabfluss',
+      'katheter__herausgerutscht',
+      'uro__starke_blasenschmerzen',
+      'uro__gerinnsel_im_urin',
+      'wunde__starke_anhaltende_blutung',
+      'uro__starke_flankenschmerzen',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'katheter__geringe_leckage_bei_normalem_abfluss',
+      'uro__geringe_blutspuren_urin',
+      'haut__zunehmende_lokale_roetung',
+    ],
+    minorSpecialist: 'Urologen',
+    diagnoses: [
+      'Mechanische Störung der Katheterableitung',
+      'Harnverhalt',
+      'Katheterassoziierte Harnwegsinfektion',
+    ],
+    consequences: [
+      'erneutem Harnverhalt, schmerzhafter Blasenüberdehnung oder einer aufsteigenden Harnwegsinfektion',
+    ],
+  },
+
+  {
+    id: 'harnkatheterkomplikation-verweigerung',
+    name: 'Harnkatheterkomplikation (fortbestehend)',
+    requirements: 'Fortbestehende Abflussstörung, Katheterfehllage/Dislokation, schmerzhafte Leckage, relevante Blutung oder Verletzungsverdacht; durch äußere Korrektur nicht sicher behoben. Dringliche ärztliche/urologische Versorgung empfohlen. Nur bei geprüfter Einwilligungsfähigkeit und tatsächlicher Ablehnung dieser Versorgung; gesicherte zeitgerechte Versorgung auf anderem Weg ist keine Verweigerung. Fehlende weitere Warnzeichen erlauben keinen Aufschub.',
+    application: 'Verweigerung',
+    category: 'uro',
+    majorSignalIds: [
+      'katheter__verminderter_fehlender_urinabfluss',
+      'katheter__herausgerutscht',
+      'uro__starke_blasenschmerzen',
+      'abdomen__hart_geblaeht',
+      'uro__gerinnsel_im_urin',
+      'wunde__starke_anhaltende_blutung',
+      'uro__starke_flankenschmerzen',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [],
+    diagnoses: [
+      'Katheterobstruktion mit Harnverhalt',
+      'Katheterbedingte Harnwegsverletzung',
+      'Katheterassoziierte Harnwegsinfektion',
+    ],
+    consequences: [
+      'einem Harnstau, Blasen-/Nierenschäden, anhaltenden Blutungen oder einer Blutvergiftung',
+    ],
+  },
+
+  {
+    id: 'suprapubischer-katheter-disloziert-verweigerung',
+    parentId: 'harnkatheterkomplikation-verweigerung',
+    name: 'Dislozierter suprapubischer Katheter',
+    name_alt: 'SPK herausgerutscht',
+    requirements: 'Suprapubischer Katheter vollständig/teilweise herausgerutscht oder Lage nach Zugereignis unklar. Wegen möglichen raschen Kanalverschlusses sofortige fachkundige/urologische Versorgung empfohlen, auch ohne Beschwerden. Nur bei geprüfter Einwilligungsfähigkeit und tatsächlicher Ablehnung dieser Versorgung; gesicherte sofortige Versorgung auf anderem Weg ist keine Verweigerung. Fehlende weitere Warnzeichen erlauben keinen Aufschub.',
+    majorSignalIds: [
+      'katheter__herausgerutscht',
+      'katheter__verminderter_fehlender_urinabfluss',
+      'uro__starke_blasenschmerzen',
+      'abdomen__zunehmende_schmerzen',
+      'abdomen__hart_geblaeht',
+      'uro__gerinnsel_im_urin',
+      'wunde__starke_anhaltende_blutung',
+      'uro__starke_flankenschmerzen',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [],
+    diagnoses: [
+      'Dislokation des suprapubischen Katheters',
+      'Verschluss des suprapubischen Katheterkanals',
+      'Harnverhalt',
+    ],
+    consequences: [
+      'einem Verschluss des Katheterkanals, notwendiger Neuanlage oder einem Harnstau mit Blasen-/Nierenschäden',
+    ],
+  },
+
   // -------------------------------------------------------------------------
   // Hauptszenario: Herpes zoster ohne Risikobeteiligung [BvO]
   // -------------------------------------------------------------------------
@@ -3102,6 +3279,227 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     minorSignalIds: [],
     diagnoses: ['Hochdruckinjektionsverletzung', 'Kompartmentsyndrom', 'Gewebsnekrose'],
     consequences: ['fortschreitender Gewebezerstörung, Durchblutungsstörungen, bleibendem Funktionsverlust oder einer Amputation'],
+  },
+
+  // -------------------------------------------------------------------------
+  // Hauptszenario: Offene Wunde (klein/oberflächlich) [BvO]
+  // -------------------------------------------------------------------------
+
+  {
+    id: 'offene-wunde-oberflaechlich-bvo',
+    name: 'Offene Wunde (klein/oberflächlich)',
+    requirements: 'Kleine oberflächliche Wunde mit gestillter Blutung und unauffälliger Durchblutung, Motorik und Sensibilität. Keine aktuellen Infektionszeichen/systemischen Beschwerden. Keine Biss-, tiefe Stich- oder Hochdruckverletzung, kein Fremdkörperverdacht oder Hinweis auf tiefe Strukturverletzung. Keine grobe Verunreinigung und kein erforderlicher Wundverschluss. Tetanusschutz geklärt bzw. zeitgerechte Ergänzung gesichert. Keine neue/verschlechterte diabetische Fußläsion ohne gesicherte zeitgerechte spezialisierte Versorgung. Wundkontrolle gesichert; bei Fieber/Schüttelfrost dringlicher ärztlicher Kontakt am selben Tag.',
+    application: 'BvO',
+    category: 'trauma',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__starke_schmerzen',
+      'extremitaet__sensibilitaetsstoerung',
+      'extremitaet__bewegungsstoerung',
+      'haut__rasch_ausbreitende_roetung',
+      'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+      'infekt__fieber_schuettelfrost',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Wundinfektion',
+      'Übersehene Fremdkörperverletzung',
+      'Übersehene Sehnen-/Nervenverletzung',
+    ],
+    consequences: [
+      'einer Wundinfektion, verzögerter Heilung oder bleibenden Sehnen-/Nervenschäden',
+    ],
+  },
+
+  {
+    id: 'postoperative-wundversorgung-nach-plan-bvo',
+    name: 'Postoperative Wundversorgung (abgestimmter Verlauf)',
+    requirements: 'Ärztlich beurteilter, unveränderter Wundverlauf mit konkretem Versorgungs- und Kontrollplan. Keine ungeklärte Sekretion, Wundöffnung, relevante Blutung oder Infektionszeichen. Verbandwechsel fachgerecht möglich; Versorgung und Rücksprachemöglichkeit gesichert. Wiederholtes Durchnässen oder Sekretion nach Gelenkersatz nur bei ausdrücklich abgestimmtem Vorgehen für den aktuellen Verlauf; andernfalls erneute chirurgische Beurteilung.',
+    application: 'BvO',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__rasch_zunehmender_bluterguss',
+      'wunde__tiefe_wundoeffnung',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'wunde__anhaltende_zunehmende_sekretion',
+      'wunde__erneute_sekretion',
+      'wunde__oberflaechliche_wundoeffnung',
+      'haut__eitriges_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Postoperative Wundinfektion',
+      'Serom/Hämatom',
+      'Wunddehiszenz',
+    ],
+    consequences: [
+      'einer Wundinfektion, verzögerter Heilung, einem Wundaufbruch oder einer erneuten Operation',
+    ],
+  },
+
+  {
+    id: 'postoperative-wundheilungsstoerung-verweigerung',
+    name: 'Postoperative Wundsekretion/Wundheilungsstörung',
+    requirements: 'Ungeklärte anhaltende, zunehmende oder erneut auftretende Wundsekretion, Wundöffnung oder andere Hinweise auf eine postoperative Wundheilungsstörung. Die aktuell empfohlene chirurgische Beurteilung/Behandlung wird nach Aufklärung bei gegebener Einwilligungsfähigkeit abgelehnt; eine gleichwertige zeitgerechte Versorgung ist nicht gesichert. Fehlende Entzündungszeichen ersetzen die notwendige Abklärung nicht.',
+    application: 'Verweigerung',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__rasch_zunehmender_bluterguss',
+      'wunde__tiefe_wundoeffnung',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'wunde__anhaltende_zunehmende_sekretion',
+      'wunde__erneute_sekretion',
+      'wunde__oberflaechliche_wundoeffnung',
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+      'wunde__uebelriechendes_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Postoperative Wundinfektion',
+      'Serom/Hämatom',
+      'Wunddehiszenz',
+    ],
+    consequences: [
+      'einer tiefen Wundinfektion, einem Wundaufbruch, einer Sepsis oder einer erneuten Operation',
+    ],
+  },
+
+  {
+    id: 'wundsekretion-nach-gelenkersatz-verweigerung',
+    name: 'Wundsekretion nach Gelenkersatz',
+    requirements: 'Anhaltende, zunehmende oder nach trockener Phase erneut auftretende Sekretion nach Gelenkersatz. Noch am selben Tag Rücksprache mit dem operierenden Team und Festlegung der erforderlichen Untersuchung; auch seröses Sekret ohne Rötung/Fieber ist abklärungsbedürftig. Die empfohlene zeitgerechte Abklärung/Behandlung wird nach Aufklärung bei gegebener Einwilligungsfähigkeit abgelehnt; keine gleichwertige Versorgung gesichert.',
+    application: 'Verweigerung',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__tiefe_wundoeffnung',
+      'wunde__starke_schmerzen',
+      'extremitaet__belastungsunfaehigkeit',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
+    ],
+    minorSignalIds: [
+      'wunde__anhaltende_zunehmende_sekretion',
+      'wunde__erneute_sekretion',
+      'wunde__oberflaechliche_wundoeffnung',
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+      'wunde__uebelriechendes_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Periprothetische Infektion',
+      'Serom/Hämatom',
+      'Wunddehiszenz',
+    ],
+    consequences: [
+      'einer Protheseninfektion, einer Sepsis, bleibenden Gelenkschäden oder einer Operation bis zum Prothesenwechsel',
+    ],
+  },
+
+  {
+    id: 'chronische-wunde-stabil-bvo',
+    name: 'Chronische Wunde (stabiler Verlauf)',
+    requirements: 'Bekannte chronische Wunde mit ärztlich festgelegtem Versorgungsplan und unverändertem Befund. Keine neue Rötung, Sekretzunahme, Nekrose, relevante Blutung oder Durchblutungsstörung. Keine neue/verschlechterte diabetische Fußläsion oder ungeklärte Überwärmung/Schwellung des Fußes. Fachgerechter Verbandwechsel sowie weitere Wundkontrollen und Versorgung gesichert.',
+    application: 'BvO',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'haut__dunkle_verfaerbung',
+      'extremitaet__kalte_extremitaet',
+      'extremitaet__blaesse_blaufarbung',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'wunde__zunehmende_schmerzen',
+      'wunde__zunehmende_wundgroesse',
+      'wunde__anhaltende_zunehmende_sekretion',
+      'wunde__uebelriechendes_sekret',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Wundinfektion',
+      'Ischämische Wundverschlechterung',
+      'Osteomyelitis',
+    ],
+    consequences: [
+      'einer Wundvergrößerung, einer tiefen Infektion oder bleibenden Gewebeschäden',
+    ],
+  },
+
+  {
+    id: 'chronische-wundverschlechterung-verweigerung',
+    name: 'Chronische Wunde (Verschlechterung)',
+    requirements: 'Zunehmende Wundgröße, Sekretion, Schmerzen oder andere Veränderungen einer chronischen Wunde. Aktuell erforderliche ärztliche Beurteilung/Behandlung wird nach Aufklärung bei gegebener Einwilligungsfähigkeit abgelehnt; keine gleichwertige zeitgerechte Versorgung gesichert. Bei diabetischem Fuß besonders zeitnahe spezialisierte Beurteilung; bei Ischämie, tiefer Infektion, Gangrän oder systemischen Zeichen sofortige Akutversorgung.',
+    application: 'Verweigerung',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'haut__dunkle_verfaerbung',
+      'extremitaet__kalte_extremitaet',
+      'extremitaet__blaesse_blaufarbung',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'wunde__zunehmende_schmerzen',
+      'wunde__zunehmende_wundgroesse',
+      'wunde__anhaltende_zunehmende_sekretion',
+      'wunde__uebelriechendes_sekret',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Infizierte chronische Wunde',
+      'Ischämische Gewebsnekrose',
+      'Osteomyelitis',
+    ],
+    consequences: [
+      'einer tiefen Gewebe-/Knocheninfektion, einer Sepsis, bleibenden Gewebeschäden oder einer Amputation',
+    ],
   },
 
   // -------------------------------------------------------------------------
@@ -4160,6 +4558,152 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     minorSignalIds: [],
     diagnoses: ['Endometritis puerperalis', 'Plazentarest', 'Sepsis'],
     consequences: ['einer Blutvergiftung, schweren Gebärmutterinfektion, bleibenden Organschäden oder dem Tod'],
+  },
+
+  // -------------------------------------------------------------------------
+  // Hauptszenario: Wund-/Redon-Drainage [BvO]
+  // -------------------------------------------------------------------------
+
+  {
+    id: 'wunddrainage-aeusseres-problem-vollstaendig-behoben-bvo',
+    name: 'Postoperative Wund-/Redon-Drainage: äußeres Problem vollständig behoben',
+    requirements: 'Nur postoperative Wund-/Redon-Drainage; keine Thorax-, Liquor-, Gallen- oder Nephrostomiedrainage. Äußeres Problem nach Operations-/Systemvorgaben fachgerecht vollständig behoben; Lage/Fixierung unverändert und erforderliche Funktion wiederhergestellt. Keine Dislokation oder Kontamination, keine relevante Blutung und keine zunehmenden Schmerzen/Schwellungen oder Infektzeichen. Weiteres Vorgehen mit chirurgischem Team abgestimmt; Kontrolle und unmittelbare Rücksprache bei erneuter Funktionsstörung oder unerwarteter Sekretveränderung gesichert.',
+    application: 'BvO',
+    category: 'trauma',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__rasch_zunehmender_bluterguss',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'drainage__unerwarteter_foerderstopp',
+      'drainage__sogverlust',
+      'drainage__dislokation',
+      'drainage__leckage',
+      'drainage__geringe_erneute_blutbeimengungen',
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+      'wunde__uebelriechendes_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Drainagefunktionsstörung',
+      'Postoperatives Serom',
+      'Wundinfektion',
+    ],
+    consequences: [
+      'erneuten Flüssigkeitsansammlungen, Wundinfektionen oder verzögerter Wundheilung',
+    ],
+  },
+
+  {
+    id: 'wunddrainage-komplikation-verweigerung',
+    name: 'Postoperative Wund-/Redon-Drainagekomplikation',
+    requirements: 'Nur postoperative Wund-/Redon-Drainage; keine Thorax-, Liquor-, Gallen- oder Nephrostomiedrainage. Persistierende Funktionsstörung, Dislokation, Leckage, Kontaminationsverdacht oder Blutungs-/Infektverdacht mit nach individueller Beurteilung erforderlicher zeitkritischer chirurgischer Versorgung. Diese Beurteilung/Behandlung wird nach Aufklärung bei geprüfter Einwilligungsfähigkeit abgelehnt; keine gleichwertige zeitgerechte Versorgung gesichert. Die erforderliche unmittelbare chirurgische Rücksprache/Versorgung bleibt auch ohne weitere Warnzeichen angezeigt.',
+    application: 'Verweigerung',
+    category: 'trauma',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__rasch_zunehmender_bluterguss',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'drainage__unerwarteter_foerderstopp',
+      'drainage__sogverlust',
+      'drainage__dislokation',
+      'drainage__leckage',
+      'drainage__geringe_erneute_blutbeimengungen',
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__zunehmende_lokale_schwellung',
+      'haut__eitriges_sekret',
+      'wunde__uebelriechendes_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Postoperatives Serom',
+      'Postoperative Nachblutung',
+      'Wundinfektion',
+    ],
+    consequences: [
+      'Flüssigkeitsansammlungen, Abszessen, fortschreitendem Blutverlust oder erneuter Operationsbedürftigkeit',
+    ],
+  },
+
+  {
+    id: 'unterdruck-wundtherapie-technisches-problem-vollstaendig-behoben-bvo',
+    name: 'Unterdruck-Wundtherapie (VAC/NPWT): technisches Problem vollständig behoben',
+    requirements: 'Ambulante Unterdrucktherapie einer äußeren Wunde, keine Spezialversorgung offener Körperhöhlen. Technisches Problem nach geräte-/therapiespezifischen Vorgaben fachgerecht vollständig behoben; Verbanddichtigkeit und verordnete Funktion wiederhergestellt. Dauer der Unterbrechung und etwaiger Verbandwechselbedarf nach konkreter Hersteller-/Behandlungsanordnung mit dem behandelnden Team geklärt. Keine relevante Blutung, keine Schmerzzunahme oder Infektzeichen. Kontrolle und unmittelbare Rücksprache bei erneuter Störung/Sekretveränderung gesichert.',
+    application: 'BvO',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'unterdruck__anhaltender_wiederkehrender_alarm',
+      'unterdruck__therapieausfall',
+      'unterdruck__undichter_verband',
+      'drainage__geringe_erneute_blutbeimengungen',
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__eitriges_sekret',
+      'wunde__uebelriechendes_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Technische Störung der Unterdruck-Wundtherapie',
+      'Wundheilungsstörung',
+      'Wundinfektion',
+    ],
+    consequences: [
+      'verzögerter Wundheilung, Hautschäden, Wundinfektionen oder zusätzlichen Eingriffen',
+    ],
+  },
+
+  {
+    id: 'unterdruck-wundtherapie-komplikation-verweigerung',
+    name: 'Unterdruck-Wundtherapie (VAC/NPWT): persistierende Funktionsstörung/Komplikation',
+    requirements: 'Ambulante Unterdrucktherapie einer äußeren Wunde, keine Spezialversorgung offener Körperhöhlen. Persistierende Therapieunterbrechung/Funktionsstörung oder Blutungs-/Infektverdacht; erforderliche unverzügliche Fachbeurteilung oder sichere Verband-/Therapieversorgung wird nach Aufklärung bei geprüfter Einwilligungsfähigkeit abgelehnt. Fachlich abgestimmte Alternativversorgung nach Verzicht auf NPWT zählt nicht als dieser Verweigerungsfall. Hersteller-/Behandlungsanordnung bestimmt das Vorgehen; notwendige Rücksprache/Versorgung bleibt auch ohne weitere Warnzeichen angezeigt.',
+    application: 'Verweigerung',
+    category: 'haut',
+    majorSignalIds: [
+      'wunde__starke_anhaltende_blutung',
+      'wunde__starke_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+    ],
+    minorSignalIds: [
+      'unterdruck__anhaltender_wiederkehrender_alarm',
+      'unterdruck__therapieausfall',
+      'unterdruck__undichter_verband',
+      'drainage__geringe_erneute_blutbeimengungen',
+      'wunde__zunehmende_schmerzen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__eitriges_sekret',
+      'wunde__uebelriechendes_sekret',
+    ],
+    minorSpecialist: 'Chirurgen',
+    diagnoses: [
+      'Wundinfektion',
+      'Wundblutung',
+      'Wundheilungsstörung',
+    ],
+    consequences: [
+      'fortschreitenden Wundinfektionen, Blutverlust, Gewebeschäden oder erneuter Operationsbedürftigkeit',
+    ],
   },
 
   // -------------------------------------------------------------------------
