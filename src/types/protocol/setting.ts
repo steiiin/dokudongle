@@ -7,6 +7,7 @@ export class Setting {
   public location: string
   public helpers: string[]
   public isForcedEntry: boolean
+  public isBgCase: boolean
   public isAlone: boolean
 
   // #####################################################################
@@ -17,6 +18,7 @@ export class Setting {
     this.location = ''
     this.helpers = []
     this.isForcedEntry = false
+    this.isBgCase = false
     this.isAlone = false
   }
 
@@ -27,6 +29,7 @@ export class Setting {
       && this.location == ''
       && this.helpers.length == 0
       && !this.isForcedEntry
+      && !this.isBgCase
       && !this.isAlone
   }
 
@@ -44,6 +47,7 @@ export class Setting {
         textIf('alleinlebend', this.isAlone),
         this.mobility,
         textIf('Notfalltüröffnung', this.isForcedEntry),
+        textIf('BG-Fall', this.isBgCase),
         suffix(helpers, 'vor Ort'),
       ])
     )

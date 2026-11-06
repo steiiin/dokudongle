@@ -25,6 +25,10 @@
         Türöffnung?
       </DodoInputToggle>
 
+      <DodoInputToggle lines="full" v-model="store.doku.setting.isBgCase">
+        BG-Fall
+      </DodoInputToggle>
+
       <DodoInputSelect label="Mobilität" v-model="store.doku.setting.mobility" lines="full"
         empty-label="Normal / k.A."
         :options="[
