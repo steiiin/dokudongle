@@ -9,7 +9,7 @@ import re
 import subprocess
 import tempfile
 
-sketch = (Path(__file__).resolve().parents[2] / 'keyboard-sender/xiao_sketch/xiao_sketch.ino').read_text()
+sketch = (Path(__file__).resolve().parents[2] / 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino').read_text()
 
 
 def function(name):

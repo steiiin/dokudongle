@@ -1175,7 +1175,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Akute Suizidalität/Suizidversuch [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 126.
   {
     id: 'suizidalitaet-suizidversuch-verweigerung',
     name: 'Akute Suizidalität/Suizidversuch',
@@ -1282,7 +1281,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Akutes Lungenödem (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 31.
   {
     id: 'lungenoedem-verdacht-verweigerung',
     name: 'Akutes Lungenödem (Verdacht)',
@@ -1302,7 +1300,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Alkoholentzug mit Warnzeichen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 122.
   {
     id: 'alkoholentzug-warnzeichen-verweigerung',
     name: 'Alkoholentzug mit Warnzeichen',
@@ -1323,7 +1320,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Allergische Konjunktivitis (bekanntes Muster) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 58.
   {
     id: 'allergische-konjunktivitis-bekannt-bvo',
     name: 'Allergische Konjunktivitis (bekanntes Muster)',
@@ -1344,7 +1340,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Allergische Reaktion (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 103.
   {
     id: 'allergische-reaktion-leicht-bvo',
     name: 'Allergische Reaktion (leicht)',
@@ -1362,8 +1357,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einer fortschreitenden allergischen Reaktion mit Atemwegsverengung oder Kreislaufversagen'],
   },
 
-  // Unterszenario zu „Allergische Reaktion (leicht)“: Insektenstich mit ausschließlich lokaler Reaktion
-  // Quelle: redflags_150_szenarien.md, Nr. 103.
   {
     id: 'insektenstich-lokal-bvo',
     parentId: 'allergische-reaktion-leicht-bvo',
@@ -1384,7 +1377,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Anfallsartige Schmerzen/Invaginationsverdacht [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 145.
   {
     id: 'invaginationsverdacht-verweigerung',
     name: 'Anfallsartige Schmerzen/Invaginationsverdacht',
@@ -1405,7 +1397,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Angioödem an Zunge/Rachen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 33.
   {
     id: 'angiooedem-zunge-rachen-verweigerung',
     name: 'Angioödem an Zunge/Rachen',
@@ -1425,7 +1416,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Arthroseschmerz (bekanntes, leichtes Muster) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 2.
   {
     id: 'arthroseschmerz-leicht-bvo',
     name: 'Arthroseschmerz (bekanntes, leichtes Muster)',
@@ -1447,7 +1437,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Aspiration von Erbrochenem/Nahrung mit Atembeschwerden [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 29.
   {
     id: 'aspiration-erbrochenes-nahrung-atembeschwerden-verweigerung',
     name: 'Aspiration von Erbrochenem/Nahrung mit Atembeschwerden',
@@ -1467,7 +1456,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Atemnot unklarer Ursache [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 27.
   {
     id: 'atemnot-unklare-ursache-verweigerung',
     name: 'Atemnot unklarer Ursache',
@@ -1487,7 +1475,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Augenverätzung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 61.
   {
     id: 'augenveraetzung-verweigerung',
     name: 'Augenverätzung',
@@ -1507,7 +1494,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Ausfall der Heimbeatmung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 35.
   {
     id: 'heimbeatmung-ausfall-verweigerung',
     name: 'Ausfall der Heimbeatmung',
@@ -1527,7 +1513,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Avulsion eines bleibenden Zahns [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 74.
   {
     id: 'avulsion-bleibender-zahn-verweigerung',
     name: 'Avulsion eines bleibenden Zahns',
@@ -1547,7 +1532,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Balanitis (lokal begrenzt) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 90.
   {
     id: 'balanitis-lokal-bvo',
     name: 'Balanitis (lokal begrenzt)',
@@ -1569,7 +1553,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Bauchschmerzen (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 76, 77, 78.
   {
     id: 'bauchschmerzen-leicht-bvo',
     name: 'Bauchschmerzen (leicht)',
@@ -1589,8 +1572,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einer übersehenen Bauchorganentzündung, einem Darmverschluss, inneren Blutungen oder bleibenden Organschäden'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (leicht)“: Obstipation ohne Ileuszeichen
-  // Quelle: redflags_150_szenarien.md, Nr. 77.
   {
     id: 'obstipation-ohne-ileuszeichen-bvo',
     parentId: 'bauchschmerzen-leicht-bvo',
@@ -1607,8 +1588,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einem übersehenen Darmverschluss, einer Darmschädigung oder einem Darmdurchbruch'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (leicht)“: Refluxbeschwerden (bekanntes Muster)
-  // Quelle: redflags_150_szenarien.md, Nr. 76.
   {
     id: 'refluxbeschwerden-bekannt-bvo',
     parentId: 'bauchschmerzen-leicht-bvo',
@@ -1626,8 +1605,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einer übersehenen Herzerkrankung, einer Speiseröhrenverengung oder Blutung'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (leicht)“: Reizdarmbeschwerden (bekannter leichter Schub)
-  // Quelle: redflags_150_szenarien.md, Nr. 78.
   {
     id: 'reizdarmbeschwerden-leicht-bvo',
     parentId: 'bauchschmerzen-leicht-bvo',
@@ -1650,7 +1627,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Bauchschmerzen (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 82, 83, 84, 85, 86.
   {
     id: 'bauchschmerzen-schwer-verweigerung',
     name: 'Bauchschmerzen (schwer)',
@@ -1667,8 +1643,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einer unentdeckten Organentzündung/Durchblutungsstörung, einem Darmdurchbruch, inneren Blutungen, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (schwer)“: Akute Pankreatitis (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 83.
   {
     id: 'pankreatitis-verdacht-verweigerung',
     parentId: 'bauchschmerzen-schwer-verweigerung',
@@ -1684,8 +1658,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einem Absterben von Bauchspeicheldrüsengewebe, schweren Infektionen, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (schwer)“: Appendizitis (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 84.
   {
     id: 'appendizitis-verdacht-verweigerung',
     parentId: 'bauchschmerzen-schwer-verweigerung',
@@ -1700,8 +1672,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einem Blinddarmdurchbruch, Bauchfellentzündung, Blutvergiftung, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (schwer)“: Cholezystitis/Cholangitis (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 82.
   {
     id: 'cholezystitis-cholangitis-verdacht-verweigerung',
     parentId: 'bauchschmerzen-schwer-verweigerung',
@@ -1717,8 +1687,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einem Gallenwegsverschluss, Gallenblasendurchbruch, einer Blutvergiftung, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (schwer)“: Ileus/Darmverschluss (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 85.
   {
     id: 'ileus-darmverschluss-verdacht-verweigerung',
     parentId: 'bauchschmerzen-schwer-verweigerung',
@@ -1734,8 +1702,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einem Absterben von Darmgewebe, Darmdurchbruch, Bauchfellentzündung, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Bauchschmerzen (schwer)“: Inkarzerierte Hernie (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 86.
   {
     id: 'inkarzerierte-hernie-verdacht-verweigerung',
     parentId: 'bauchschmerzen-schwer-verweigerung',
@@ -1755,7 +1721,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Beckentrauma mit Frakturverdacht [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 9.
   {
     id: 'beckentrauma-frakturverdacht-verweigerung',
     name: 'Beckentrauma mit Frakturverdacht',
@@ -1776,7 +1741,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Bedrohliche Elektrolytstörung (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 100.
   {
     id: 'elektrolytstoerung-bedrohlich-verdacht-verweigerung',
     name: 'Bedrohliche Elektrolytstörung (Verdacht)',
@@ -1797,7 +1761,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Blitzunfall [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 22.
   {
     id: 'blitzunfall-verweigerung',
     name: 'Blitzunfall',
@@ -1820,7 +1783,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Bolusobstruktion der Speiseröhre [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 87.
   {
     id: 'bolusobstruktion-speiseroehre-verweigerung',
     name: 'Bolusobstruktion der Speiseröhre',
@@ -1840,7 +1802,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Bronchiolitis mit Warnzeichen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 143.
   {
     id: 'bronchiolitis-warnzeichen-verweigerung',
     name: 'Bronchiolitis mit Warnzeichen',
@@ -1860,7 +1821,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Chemische Hautverätzung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 25.
   {
     id: 'chemische-hautveraetzung-verweigerung',
     name: 'Chemische Hautverätzung',
@@ -1880,7 +1840,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Chronische Beinödeme (unverändert) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 37.
   {
     id: 'chronische-beinoedeme-unveraendert-bvo',
     name: 'Chronische Beinödeme (unverändert)',
@@ -1902,7 +1861,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Clusterkopfschmerz (bekannte, beendete Attacke) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 50.
   {
     id: 'clusterkopfschmerz-attacke-beendet-bvo',
     name: 'Clusterkopfschmerz (bekannte, beendete Attacke)',
@@ -1925,7 +1883,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Depressive Beschwerden ohne akuten Gefährdungsbefund [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 125.
   {
     id: 'depressive-beschwerden-ohne-akute-gefaehrdung-bvo',
     name: 'Depressive Beschwerden ohne akuten Gefährdungsbefund',
@@ -1948,7 +1905,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Dialyseshuntblutung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 46.
   {
     id: 'dialyseshuntblutung-verweigerung',
     name: 'Dialyseshuntblutung',
@@ -1968,7 +1924,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Dislozierte Gastrostomie-/PEG-Sonde [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 88.
   {
     id: 'gastrostomie-peg-sonde-disloziert-verweigerung',
     name: 'Dislozierte Gastrostomie-/PEG-Sonde',
@@ -1988,7 +1943,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Dysmenorrhoe (bekanntes, übliches Muster) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 130.
   {
     id: 'dysmenorrhoe-bekannt-bvo',
     name: 'Dysmenorrhoe (bekanntes, übliches Muster)',
@@ -2010,7 +1964,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Epiglottitis (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 72.
   {
     id: 'epiglottitis-verdacht-verweigerung',
     name: 'Epiglottitis (Verdacht)',
@@ -2030,7 +1983,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Erfrierung mit Gewebeschädigungsverdacht [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 20.
   {
     id: 'erfrierung-gewebeschaedigungsverdacht-verweigerung',
     name: 'Erfrierung mit Gewebeschädigungsverdacht',
@@ -2051,7 +2003,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Ertrinkungsunfall mit Atembeeinträchtigung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 24.
   {
     id: 'ertrinkungsunfall-atembeeintraechtigung-verweigerung',
     name: 'Ertrinkungsunfall mit Atembeeinträchtigung',
@@ -2071,7 +2022,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Erysipel/Zellulitis mit systemischen Zeichen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 109.
   {
     id: 'erysipel-zellulitis-systemisch-verweigerung',
     name: 'Erysipel/Zellulitis mit systemischen Zeichen',
@@ -2092,7 +2042,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Extrauteringravidität (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 133.
   {
     id: 'extrauteringraviditaet-verdacht-verweigerung',
     name: 'Extrauteringravidität (Verdacht)',
@@ -2113,7 +2062,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Extremitätenverletzung (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 13, 15.
   {
     id: 'extremitaetenverletzung-schwer-verweigerung',
     name: 'Extremitätenverletzung (schwer)',
@@ -2131,8 +2079,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['unerkannten Gefäß-/Nervenverletzungen, Muskelnekrosen, bleibendem Funktionsverlust, einer Amputation oder lebensbedrohlichem Blutverlust'],
   },
 
-  // Unterszenario zu „Extremitätenverletzung (schwer)“: Akutes Kompartmentsyndrom (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 13.
   {
     id: 'kompartmentsyndrom-verdacht-verweigerung',
     parentId: 'extremitaetenverletzung-schwer-verweigerung',
@@ -2149,8 +2095,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['bleibenden Nerven-/Muskelschäden, Gewebeverlust, einer Amputation, Nierenversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Extremitätenverletzung (schwer)“: Amputationsverletzung
-  // Quelle: redflags_150_szenarien.md, Nr. 15.
   {
     id: 'amputationsverletzung-verweigerung',
     parentId: 'extremitaetenverletzung-schwer-verweigerung',
@@ -2170,12 +2114,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Fieber beim Säugling unter drei Monaten [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 142.
-  // Die Unterfalltabelle nennt „Kindlicher Infekt (leicht)“, die Szenariotabelle
-  // aber ausdrücklich Verweigerung. Dieser Elternknoten fehlt im Beispielset;
-  // seine Anwendung und universellen Voraussetzungen sind nicht mitgeliefert.
-  // Bis zur Klärung eigenständig, statt eine ungesicherte Elternzuordnung
-  // oder eine abweichende Anwendung zu erfinden.
   {
     id: 'fieber-saeugling-unter-drei-monaten-verweigerung',
     name: 'Fieber beim Säugling unter drei Monaten',
@@ -2196,7 +2134,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Fieber/Infekt/Sepsis [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 112.
   {
     id: 'fieber-infekt-sepsis-verweigerung',
     name: 'Fieber/Infekt/Sepsis',
@@ -2213,8 +2150,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['fortschreitender Infektion, septischem Schock, Organversagen, bleibenden Organschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Fieber/Infekt/Sepsis“: Fieber bei Neutropenie/ausgeprägter Immunsuppression
-  // Quelle: redflags_150_szenarien.md, Nr. 112.
   {
     id: 'fieber-neutropenie-immunsuppression-verweigerung',
     parentId: 'fieber-infekt-sepsis-verweigerung',
@@ -2234,7 +2169,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Fieberhafter Infekt (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 26, 66.
   {
     id: 'fieberhafter-infekt-leicht-bvo',
     name: 'Fieberhafter Infekt (leicht)',
@@ -2253,8 +2187,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['übersehener bakterieller Infektion, zunehmendem Flüssigkeitsmangel oder einer Ausbreitung der Infektion'],
   },
 
-  // Unterszenario zu „Fieberhafter Infekt (leicht)“: Akute Bronchitis ohne Atemnot
-  // Quelle: redflags_150_szenarien.md, Nr. 26.
   {
     id: 'bronchitis-ohne-atemnot-bvo',
     parentId: 'fieberhafter-infekt-leicht-bvo',
@@ -2271,8 +2203,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['übersehener Lungenentzündung, zunehmenden Atembeschwerden oder verzögerter Behandlung einer anderen Lungenerkrankung'],
   },
 
-  // Unterszenario zu „Fieberhafter Infekt (leicht)“: Halsschmerzen ohne Schluck-/Atemstörung
-  // Quelle: redflags_150_szenarien.md, Nr. 66.
   {
     id: 'halsschmerzen-ohne-schluck-atemstoerung-bvo',
     parentId: 'fieberhafter-infekt-leicht-bvo',
@@ -2293,7 +2223,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Fremdkörperaspiration (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 28.
   {
     id: 'fremdkoerperaspiration-verdacht-verweigerung',
     name: 'Fremdkörperaspiration (Verdacht)',
@@ -2313,7 +2242,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Galliges Erbrechen beim Kind [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 146.
   {
     id: 'galliges-erbrechen-kind-verweigerung',
     name: 'Galliges Erbrechen beim Kind',
@@ -2334,7 +2262,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Geringfügige Haushaltsstoffexposition (toxikologisch abgeklärt) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 114.
   {
     id: 'haushaltsstoffexposition-abgeklaert-bvo',
     name: 'Geringfügige Haushaltsstoffexposition (toxikologisch abgeklärt)',
@@ -2356,7 +2283,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Halskompression/Strangulation [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 11.
   {
     id: 'halskompression-strangulation-verweigerung',
     name: 'Halskompression/Strangulation',
@@ -2377,7 +2303,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Hämoptysen (relevant oder wiederholt) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 30.
   {
     id: 'haemoptysen-relevant-wiederholt-verweigerung',
     name: 'Hämoptysen (relevant oder wiederholt)',
@@ -2397,7 +2322,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Hämorrhoidalbeschwerden ohne relevante Blutung [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 79.
   {
     id: 'haemorrhoidalbeschwerden-ohne-relevante-blutung-bvo',
     name: 'Hämorrhoidalbeschwerden ohne relevante Blutung',
@@ -2419,7 +2343,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Herpes zoster ohne Risikobeteiligung [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 106.
   {
     id: 'herpes-zoster-ohne-risikobeteiligung-bvo',
     name: 'Herpes zoster ohne Risikobeteiligung',
@@ -2442,7 +2365,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Hitzeerkrankung mit neurologischen Auffälligkeiten [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 18.
   {
     id: 'hitzeerkrankung-neurologische-auffaelligkeiten-verweigerung',
     name: 'Hitzeerkrankung mit neurologischen Auffälligkeiten',
@@ -2463,7 +2385,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Hitzeerschöpfung (vollständig gebessert) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 17.
   {
     id: 'hitzeerschoepfung-gebessert-bvo',
     name: 'Hitzeerschöpfung (vollständig gebessert)',
@@ -2486,7 +2407,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Hitzekrämpfe (vollständig rückläufig) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 16.
   {
     id: 'hitzekraempfe-ruecklaeufig-bvo',
     name: 'Hitzekrämpfe (vollständig rückläufig)',
@@ -2509,7 +2429,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Hyperglykämie (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 102.
   {
     id: 'hyperglykaemie-schwer-verweigerung',
     name: 'Hyperglykämie (schwer)',
@@ -2527,8 +2446,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['schwerer Austrocknung, Übersäuerung, Elektrolytstörungen, Bewusstlosigkeit, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Hyperglykämie (schwer)“: Diabetische Ketoazidose (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 102.
   {
     id: 'diabetische-ketoazidose-verdacht-verweigerung',
     parentId: 'hyperglykaemie-schwer-verweigerung',
@@ -2548,7 +2465,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: ICD-Schockabgabe mit Risikomerkmalen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 45.
   {
     id: 'icd-schockabgabe-risikomerkmale-verweigerung',
     name: 'ICD-Schockabgabe mit Risikomerkmalen',
@@ -2568,7 +2484,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Intoxikation (unklar) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 115, 116, 117, 118, 119, 121.
   {
     id: 'intoxikation-unklar-verweigerung',
     name: 'Intoxikation (unklar)',
@@ -2585,8 +2500,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['verzögertem Atemstillstand, Herzrhythmusstörungen, Krampfanfällen, bleibenden Organschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Intoxikation (unklar)“: Giftpilzaufnahme (möglich)
-  // Quelle: redflags_150_szenarien.md, Nr. 121.
   {
     id: 'giftpilzaufnahme-moeglich-verweigerung',
     parentId: 'intoxikation-unklar-verweigerung',
@@ -2602,8 +2515,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['verzögertem Leber- oder Nierenversagen, Gerinnungsstörungen, Transplantationspflichtigkeit oder dem Tod'],
   },
 
-  // Unterszenario zu „Intoxikation (unklar)“: Opioidintoxikation nach Antagonisierung
-  // Quelle: redflags_150_szenarien.md, Nr. 115.
   {
     id: 'opioidintoxikation-nach-antagonisierung-verweigerung',
     parentId: 'intoxikation-unklar-verweigerung',
@@ -2618,8 +2529,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['erneuter Atemlähmung nach Abklingen des Gegenmittels, Sauerstoffmangel, bleibenden Hirnschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Intoxikation (unklar)“: Paracetamolüberdosierung (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 118.
   {
     id: 'paracetamolueberdosierung-verdacht-verweigerung',
     parentId: 'intoxikation-unklar-verweigerung',
@@ -2635,8 +2544,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['verzögertem Leberversagen, Gerinnungsstörungen, Hirnschwellung, Transplantationspflichtigkeit oder dem Tod'],
   },
 
-  // Unterszenario zu „Intoxikation (unklar)“: Sedativa-/Mischintoxikation
-  // Quelle: redflags_150_szenarien.md, Nr. 116.
   {
     id: 'sedativa-mischintoxikation-verweigerung',
     parentId: 'intoxikation-unklar-verweigerung',
@@ -2652,8 +2559,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['verzögerter Atemlähmung, Erstickung an Erbrochenem, bleibenden Hirnschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Intoxikation (unklar)“: Stimulanzienintoxikation
-  // Quelle: redflags_150_szenarien.md, Nr. 117.
   {
     id: 'stimulanzienintoxikation-verweigerung',
     parentId: 'intoxikation-unklar-verweigerung',
@@ -2669,8 +2574,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['Herzinfarkt, Hirnblutung, gefährlicher Überhitzung, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Intoxikation (unklar)“: Verschlucken einer ätzenden Substanz
-  // Quelle: redflags_150_szenarien.md, Nr. 119.
   {
     id: 'aetzende-substanz-verschluckt-verweigerung',
     parentId: 'intoxikation-unklar-verweigerung',
@@ -2690,7 +2593,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Kind mit akuter Belastungsverweigerung eines Beins [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 150.
   {
     id: 'kind-belastungsverweigerung-bein-verweigerung',
     name: 'Kind mit akuter Belastungsverweigerung eines Beins',
@@ -2710,7 +2612,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Kleiner oberflächlicher Hautabszess ohne Warnzeichen [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 108.
   {
     id: 'hautabszess-klein-oberflaechlich-bvo',
     name: 'Kleiner oberflächlicher Hautabszess ohne Warnzeichen',
@@ -2732,7 +2633,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Kohlenmonoxidexposition ohne Brandereignis [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 120.
   {
     id: 'kohlenmonoxidexposition-ohne-brand-verweigerung',
     name: 'Kohlenmonoxidexposition ohne Brandereignis',
@@ -2753,7 +2653,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Kontaktdermatitis (lokal begrenzt) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 104.
   {
     id: 'kontaktdermatitis-lokal-bvo',
     name: 'Kontaktdermatitis (lokal begrenzt)',
@@ -2775,7 +2674,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Krampfanfall (neues Muster/erstmalig) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 144.
   {
     id: 'krampfanfall-neues-muster-erstmalig-verweigerung',
     name: 'Krampfanfall (neues Muster/erstmalig)',
@@ -2792,8 +2690,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['erneuten/anhaltenden Krampfanfällen, Verletzungen, Sauerstoffmangel, bleibenden Hirnschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Krampfanfall (neues Muster/erstmalig)“: Fieberkrampf (erstmalig oder atypisch)
-  // Quelle: redflags_150_szenarien.md, Nr. 144.
   {
     id: 'fieberkrampf-erstmalig-atypisch-verweigerung',
     parentId: 'krampfanfall-neues-muster-erstmalig-verweigerung',
@@ -2813,7 +2709,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Leichter Flüssigkeitsmangel (vollständig ausgeglichen) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 98.
   {
     id: 'fluessigkeitsmangel-ausgeglichen-bvo',
     name: 'Leichter Flüssigkeitsmangel (vollständig ausgeglichen)',
@@ -2836,7 +2731,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Liquorshunt-Komplikation (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 57.
   {
     id: 'liquorshunt-komplikation-verdacht-verweigerung',
     name: 'Liquorshunt-Komplikation (Verdacht)',
@@ -2857,7 +2751,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Lungenembolie (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 40.
   {
     id: 'lungenembolie-verdacht-verweigerung',
     name: 'Lungenembolie (Verdacht)',
@@ -2878,7 +2771,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Makrohämaturie mit Koageln/Abflussstörung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 91.
   {
     id: 'makrohaematurie-koagel-abflussstoerung-verweigerung',
     name: 'Makrohämaturie mit Koageln/Abflussstörung',
@@ -2898,7 +2790,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Manische Episode mit Gefährdung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 128.
   {
     id: 'manische-episode-mit-gefaehrdung-verweigerung',
     name: 'Manische Episode mit Gefährdung',
@@ -2919,7 +2810,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Medikamenteneinnahmefehler (toxikologisch niedriges Risiko) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 113.
   {
     id: 'medikamenteneinnahmefehler-niedrigrisiko-bvo',
     name: 'Medikamenteneinnahmefehler (toxikologisch niedriges Risiko)',
@@ -2940,7 +2830,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Meningitis-/Enzephalitisverdacht [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 54.
   {
     id: 'meningitis-enzephalitis-verdacht-verweigerung',
     name: 'Meningitis-/Enzephalitisverdacht',
@@ -2961,7 +2850,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Migräne (bekanntes, unverändertes Muster) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 49.
   {
     id: 'migraene-bekannt-unveraendert-bvo',
     name: 'Migräne (bekanntes, unverändertes Muster)',
@@ -2985,7 +2873,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Nabelschnurvorfall (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 137.
   {
     id: 'nabelschnurvorfall-verdacht-verweigerung',
     name: 'Nabelschnurvorfall (Verdacht)',
@@ -3005,7 +2892,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Nachblutung nach Tonsillenoperation [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 70.
   {
     id: 'nachblutung-tonsillenoperation-verweigerung',
     name: 'Nachblutung nach Tonsillenoperation',
@@ -3025,7 +2911,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Nachblutung nach Zahnextraktion (vollständig gestillt) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 69.
   {
     id: 'nachblutung-zahnextraktion-gestillt-bvo',
     name: 'Nachblutung nach Zahnextraktion (vollständig gestillt)',
@@ -3047,7 +2932,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Nebennierenkrise (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 101.
   {
     id: 'nebennierenkrise-verdacht-verweigerung',
     name: 'Nebennierenkrise (Verdacht)',
@@ -3068,7 +2952,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Nekrotisierende Weichteilinfektion (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 110.
   {
     id: 'nekrotisierende-weichteilinfektion-verdacht-verweigerung',
     name: 'Nekrotisierende Weichteilinfektion (Verdacht)',
@@ -3089,7 +2972,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Neuer Kopfschmerz mit Risikomerkmalen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 53.
   {
     id: 'kopfschmerz-neu-risikomerkmale-verweigerung',
     name: 'Neuer Kopfschmerz mit Risikomerkmalen',
@@ -3111,7 +2993,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Neurodermitisschub (bekannt und leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 105.
   {
     id: 'neurodermitisschub-leicht-bvo',
     name: 'Neurodermitisschub (bekannt und leicht)',
@@ -3133,7 +3014,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Oberflächliche Augenreizung (vollständig abgeklungen) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 60.
   {
     id: 'augenreizung-vollstaendig-abgeklungen-bvo',
     name: 'Oberflächliche Augenreizung (vollständig abgeklungen)',
@@ -3154,7 +3034,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Odontogene Mundboden-/Gesichtsschwellung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 75.
   {
     id: 'odontogene-mundboden-gesichtsschwellung-verweigerung',
     name: 'Odontogene Mundboden-/Gesichtsschwellung',
@@ -3175,7 +3054,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Offene Wunde (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 5, 6.
   {
     id: 'offene-wunde-schwer-verweigerung',
     name: 'Offene Wunde (schwer)',
@@ -3194,8 +3072,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['starkem Blutverlust, bleibenden Sehnen-/Nervenschäden, Funktionsverlust oder einer schweren Wundinfektion'],
   },
 
-  // Unterszenario zu „Offene Wunde (schwer)“: Bissverletzung mit tiefer Gewebebeteiligung
-  // Quelle: redflags_150_szenarien.md, Nr. 5.
   {
     id: 'bissverletzung-tief-verweigerung',
     parentId: 'offene-wunde-schwer-verweigerung',
@@ -3213,8 +3089,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['tiefer Wundinfektion, Sehnen-/Gelenkschäden, bleibendem Funktionsverlust oder einer Blutvergiftung'],
   },
 
-  // Unterszenario zu „Offene Wunde (schwer)“: Hochdruckinjektionsverletzung
-  // Quelle: redflags_150_szenarien.md, Nr. 6.
   {
     id: 'hochdruckinjektionsverletzung-verweigerung',
     parentId: 'offene-wunde-schwer-verweigerung',
@@ -3234,7 +3108,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Ohrenschmerzen ohne Warnzeichen [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 67.
   {
     id: 'ohrenschmerzen-ohne-warnzeichen-bvo',
     name: 'Ohrenschmerzen ohne Warnzeichen',
@@ -3256,7 +3129,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Ovarialtorsion (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 134.
   {
     id: 'ovarialtorsion-verdacht-verweigerung',
     name: 'Ovarialtorsion (Verdacht)',
@@ -3276,7 +3148,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Palpitationen/Herzrasen (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 44.
   {
     id: 'palpitationen-herzrasen-schwer-verweigerung',
     name: 'Palpitationen/Herzrasen (schwer)',
@@ -3292,8 +3163,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['anhaltenden Herzrhythmusstörungen, Herzversagen, Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Palpitationen/Herzrasen (schwer)“: Neu aufgetretenes Vorhofflimmern mit Beschwerden
-  // Quelle: redflags_150_szenarien.md, Nr. 44.
   {
     id: 'vorhofflimmern-neu-mit-beschwerden-verweigerung',
     parentId: 'palpitationen-herzrasen-schwer-verweigerung',
@@ -3313,7 +3182,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Paraphimose [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 93.
   {
     id: 'paraphimose-verweigerung',
     name: 'Paraphimose',
@@ -3333,7 +3201,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Penetrierende Augenverletzung (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 62.
   {
     id: 'penetrierende-augenverletzung-verdacht-verweigerung',
     name: 'Penetrierende Augenverletzung (Verdacht)',
@@ -3353,7 +3220,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Penetrierende Rumpfverletzung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 7.
   {
     id: 'penetrierende-rumpfverletzung-verweigerung',
     name: 'Penetrierende Rumpfverletzung',
@@ -3374,7 +3240,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Peritonealdialyse-assoziierte Peritonitis (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 97.
   {
     id: 'peritonealdialyse-peritonitis-verdacht-verweigerung',
     name: 'Peritonealdialyse-assoziierte Peritonitis (Verdacht)',
@@ -3395,7 +3260,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Peritonsillar-/tiefer Halsabszess (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 71.
   {
     id: 'peritonsillar-tiefer-halsabszess-verdacht-verweigerung',
     name: 'Peritonsillar-/tiefer Halsabszess (Verdacht)',
@@ -3416,7 +3280,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Plötzliche Hörminderung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 73.
   {
     id: 'ploetzliche-hoerminderung-verweigerung',
     name: 'Plötzliche Hörminderung',
@@ -3436,7 +3299,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Postoperative Nachblutung (anhaltend/relevant) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 14.
   {
     id: 'postoperative-nachblutung-verweigerung',
     name: 'Postoperative Nachblutung (anhaltend/relevant)',
@@ -3456,7 +3318,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Priapismus (Ischämieverdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 94.
   {
     id: 'priapismus-ischaemieverdacht-verweigerung',
     name: 'Priapismus (Ischämieverdacht)',
@@ -3475,7 +3336,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Pseudokrupp (leicht, ohne Ruhestridor) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 140.
   {
     id: 'pseudokrupp-leicht-ohne-ruhestridor-bvo',
     name: 'Pseudokrupp (leicht, ohne Ruhestridor)',
@@ -3497,7 +3357,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Pseudokrupp mit Ruhestridor [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 141.
   {
     id: 'pseudokrupp-mit-ruhestridor-verweigerung',
     name: 'Pseudokrupp mit Ruhestridor',
@@ -3517,7 +3376,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Pyelonephritis mit kompliziertem Verlauf (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 95.
   {
     id: 'pyelonephritis-kompliziert-verdacht-verweigerung',
     name: 'Pyelonephritis mit kompliziertem Verlauf (Verdacht)',
@@ -3538,7 +3396,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Quetschtrauma mit Crush-Risiko [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 12.
   {
     id: 'quetschtrauma-crush-risiko-verweigerung',
     name: 'Quetschtrauma mit Crush-Risiko',
@@ -3559,7 +3416,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Rasch progrediente Muskelschwäche [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 56.
   {
     id: 'muskelschwaeche-rasch-progredient-verweigerung',
     name: 'Rasch progrediente Muskelschwäche',
@@ -3580,7 +3436,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Reisekrankheit (vollständig abgeklungen) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 81.
   {
     id: 'reisekrankheit-abgeklungen-bvo',
     name: 'Reisekrankheit (vollständig abgeklungen)',
@@ -3603,7 +3458,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Schlaflosigkeit ohne akute psychiatrische Warnzeichen [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 124.
   {
     id: 'schlaflosigkeit-ohne-akute-warnzeichen-bvo',
     name: 'Schlaflosigkeit ohne akute psychiatrische Warnzeichen',
@@ -3626,7 +3480,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Schmerzhaft gerötetes Auge [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 63.
   {
     id: 'schmerzhaft-geroetetes-auge-verweigerung',
     name: 'Schmerzhaft gerötetes Auge',
@@ -3647,7 +3500,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Schrittmacherstörung mit Beschwerden [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 47.
   {
     id: 'schrittmacherstoerung-mit-beschwerden-verweigerung',
     name: 'Schrittmacherstörung mit Beschwerden',
@@ -3667,7 +3519,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Schwangerschaftsübelkeit ohne Dehydratation [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 131.
   {
     id: 'schwangerschaftsuebelkeit-ohne-dehydratation-bvo',
     name: 'Schwangerschaftsübelkeit ohne Dehydratation',
@@ -3691,7 +3542,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Schwere Exsikkose/fehlende Trinkfähigkeit [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 99.
   {
     id: 'schwere-exsikkose-fehlende-trinkfaehigkeit-verweigerung',
     name: 'Schwere Exsikkose/fehlende Trinkfähigkeit',
@@ -3712,7 +3562,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Spannungskopfschmerz (bekanntes Muster) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 48.
   {
     id: 'spannungskopfschmerz-bekannt-bvo',
     name: 'Spannungskopfschmerz (bekanntes Muster)',
@@ -3735,7 +3584,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Spontanpneumothorax (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 32.
   {
     id: 'spontanpneumothorax-verdacht-verweigerung',
     name: 'Spontanpneumothorax (Verdacht)',
@@ -3755,7 +3603,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Stillassoziierte Brustbeschwerden/Mastitis (lokal leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 132.
   {
     id: 'stillassoziierte-brustbeschwerden-mastitis-leicht-bvo',
     name: 'Stillassoziierte Brustbeschwerden/Mastitis (lokal leicht)',
@@ -3777,7 +3624,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Stomaversorgungsproblem ohne Funktionsstörung [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 80.
   {
     id: 'stomaversorgungsproblem-ohne-funktionsstoerung-bvo',
     name: 'Stomaversorgungsproblem ohne Funktionsstörung',
@@ -3799,7 +3645,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Stromunfall mit Risikomerkmalen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 21.
   {
     id: 'stromunfall-risikomerkmale-verweigerung',
     name: 'Stromunfall mit Risikomerkmalen',
@@ -3820,7 +3665,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Sturz ohne erkennbare Verletzung [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 1.
   {
     id: 'sturz-ohne-verletzung-bvo',
     name: 'Sturz ohne erkennbare Verletzung',
@@ -3842,7 +3686,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Subkonjunktivale Blutung (atraumatisch) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 59.
   {
     id: 'subkonjunktivale-blutung-atraumatisch-bvo',
     name: 'Subkonjunktivale Blutung (atraumatisch)',
@@ -3863,7 +3706,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Symptomatische Bradykardie [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 43.
   {
     id: 'symptomatische-bradykardie-verweigerung',
     name: 'Symptomatische Bradykardie',
@@ -3922,8 +3764,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['erneuten Ohnmachten mit Sturzverletzungen oder einer übersehenen behandlungsbedürftigen Herzrhythmusstörung'],
   },
 
-  // Unterszenario zu „Synkope (leicht)“: Orthostatische Synkope
-  // Vorhandenes orthostatisches Beispiel unverändert.
   {
     id: 'synkope-bvo-orthostatisch',
     parentId: 'synkope-bvo',
@@ -3941,12 +3781,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['erneuten Blutdruckabfällen, Sturzverletzungen oder übersehenem Flüssigkeitsmangel/Blutverlust'],
   },
 
-  // Unterszenario zu „Synkope (leicht)“: Vasovagale Synkope (bekanntes Niedrigrisikomuster)
-  // Quelle: redflags_150_szenarien.md, Nr. 36.
-  // Ersetzt Name und Beschreibung des vorhandenen vasovagalen Beispiels.
-  // ID und bisherige Inhalte bleiben erhalten; kein doppelter Unterfall.
-  // Die Quelle nennt allgemein „Synkope“. Wegen Anwendung BvO ist der
-  // passende Elternknoten synkope-bvo, nicht synkope-verweigerung.
   {
     id: 'synkope-bvo-vasovagal',
     parentId: 'synkope-bvo',
@@ -3968,7 +3802,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Tauchunfall mit Dekompressionsverdacht [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 23.
   {
     id: 'tauchunfall-dekompressionsverdacht-verweigerung',
     name: 'Tauchunfall mit Dekompressionsverdacht',
@@ -3989,7 +3822,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Thoraxschmerz, nicht-traumatisch (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 38, 39.
   {
     id: 'thoraxschmerz-nicht-traumatisch-schwer-verweigerung',
     name: 'Thoraxschmerz, nicht-traumatisch (schwer)',
@@ -4005,8 +3837,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['übersehenem Herzinfarkt/Gefäßeinriss, Herzrhythmusstörungen, Kreislaufstillstand, bleibenden Organschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Thoraxschmerz, nicht-traumatisch (schwer)“: Akutes Aortensyndrom (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 39.
   {
     id: 'aortensyndrom-verdacht-verweigerung',
     parentId: 'thoraxschmerz-nicht-traumatisch-schwer-verweigerung',
@@ -4022,8 +3852,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['einem Riss der Hauptschlagader, innerem Verbluten, Schlaganfall, Organversagen oder dem Tod'],
   },
 
-  // Unterszenario zu „Thoraxschmerz, nicht-traumatisch (schwer)“: Akutes Koronarsyndrom (Verdacht)
-  // Quelle: redflags_150_szenarien.md, Nr. 38.
   {
     id: 'koronares-syndrom-verdacht-verweigerung',
     parentId: 'thoraxschmerz-nicht-traumatisch-schwer-verweigerung',
@@ -4042,7 +3870,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Tiefe Venenthrombose (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 41.
   {
     id: 'tiefe-venenthrombose-verdacht-verweigerung',
     name: 'Tiefe Venenthrombose (Verdacht)',
@@ -4063,7 +3890,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Trachealkanülenkomplikation [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 34.
   {
     id: 'trachealkanuelenkomplikation-verweigerung',
     name: 'Trachealkanülenkomplikation',
@@ -4083,7 +3909,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Trigeminusneuralgie (bekanntes Muster) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 51.
   {
     id: 'trigeminusneuralgie-bekannt-bvo',
     name: 'Trigeminusneuralgie (bekanntes Muster)',
@@ -4106,7 +3931,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Trinkschwäche beim jungen Säugling [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 149.
   {
     id: 'trinkschwaeche-junger-saeugling-verweigerung',
     name: 'Trinkschwäche beim jungen Säugling',
@@ -4127,7 +3951,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Überlastungsbedingter Muskelschmerz (leicht) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 3.
   {
     id: 'muskelschmerz-ueberlastung-leicht-bvo',
     name: 'Überlastungsbedingter Muskelschmerz (leicht)',
@@ -4150,7 +3973,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Ungeklärtes Apnoe-/Zyanoseereignis beim Säugling [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 147.
   {
     id: 'apnoe-zyanoseereignis-saeugling-verweigerung',
     name: 'Ungeklärtes Apnoe-/Zyanoseereignis beim Säugling',
@@ -4170,7 +3992,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Unterkühlung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 19.
   {
     id: 'unterkuehlung-verweigerung',
     name: 'Unterkühlung',
@@ -4191,7 +4012,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Vaginale Blutung (schwer) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Elternknoten für Markdown-Nr. 138.
   {
     id: 'vaginale-blutung-schwer-verweigerung',
     name: 'Vaginale Blutung (schwer)',
@@ -4207,8 +4027,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     consequences: ['starkem Blutverlust, Kreislaufversagen, bleibenden Organschäden oder dem Tod'],
   },
 
-  // Unterszenario zu „Vaginale Blutung (schwer)“: Postpartale Blutung
-  // Quelle: redflags_150_szenarien.md, Nr. 138.
   {
     id: 'postpartale-blutung-verweigerung',
     parentId: 'vaginale-blutung-schwer-verweigerung',
@@ -4227,7 +4045,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Verbandbedingte Druckbeschwerden (vollständig behoben) [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 4.
   {
     id: 'verbanddruck-vollstaendig-behoben-bvo',
     name: 'Verbandbedingte Druckbeschwerden (vollständig behoben)',
@@ -4250,7 +4067,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Verdacht auf vorzeitigen Blasensprung [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 136.
   {
     id: 'vorzeitiger-blasensprung-verdacht-verweigerung',
     name: 'Verdacht auf vorzeitigen Blasensprung',
@@ -4271,7 +4087,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Verschluckter Hochrisikofremdkörper [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 148.
   {
     id: 'hochrisikofremdkoerper-verschluckt-verweigerung',
     name: 'Verschluckter Hochrisikofremdkörper',
@@ -4292,7 +4107,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Vorzeitige Wehen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 135.
   {
     id: 'vorzeitige-wehen-verweigerung',
     name: 'Vorzeitige Wehen',
@@ -4313,7 +4127,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Wirbelsäulentrauma mit Risikomerkmalen [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 10.
   {
     id: 'wirbelsaeulentrauma-risikomerkmale-verweigerung',
     name: 'Wirbelsäulentrauma mit Risikomerkmalen',
@@ -4333,7 +4146,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Wochenbettinfektion (Verdacht) [Verweigerung]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 139.
   {
     id: 'wochenbettinfektion-verdacht-verweigerung',
     name: 'Wochenbettinfektion (Verdacht)',
@@ -4354,7 +4166,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Zahnschmerzen ohne Ausbreitungszeichen [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 68.
   {
     id: 'zahnschmerzen-ohne-ausbreitungszeichen-bvo',
     name: 'Zahnschmerzen ohne Ausbreitungszeichen',
@@ -4376,7 +4187,6 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
   // Hauptszenario: Zeckenstich nach Entfernung, ohne Allgemeinsymptome [BvO]
   // -------------------------------------------------------------------------
 
-  // Quelle: redflags_150_szenarien.md, Nr. 107.
   {
     id: 'zeckenstich-entfernt-ohne-allgemeinsymptome-bvo',
     name: 'Zeckenstich nach Entfernung, ohne Allgemeinsymptome',

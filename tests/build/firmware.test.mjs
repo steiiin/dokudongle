@@ -8,9 +8,9 @@ import { prepare, check } from '../../scripts/firmware.mjs'
 const roots = []
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'doku-build-test-')); roots.push(root)
-  mkdirSync(join(root, 'keyboard-sender/xiao_sketch'), { recursive: true })
+  mkdirSync(join(root, 'hardware/keyboard-sender/xiao_sketch'), { recursive: true })
   mkdirSync(join(root, 'scripts'))
-  writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'sketch v1')
+  writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'sketch v1')
   writeFileSync(join(root, 'scripts/firmware.mjs'), 'builder')
   return root
 }
@@ -24,7 +24,7 @@ test('initial preparation publishes version 1; unchanged inputs never invoke com
 })
 test('sketch and build-input changes increment exactly once and stale app builds fail', () => {
   const root = fixture(); prepare(root, build)
-  writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed')
+  writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed')
   assert.throws(() => check(root), /stale/)
   assert.equal(prepare(root, build).version, 2)
   writeFileSync(join(root, 'scripts/firmware.mjs'), 'changed builder')
@@ -33,7 +33,7 @@ test('sketch and build-input changes increment exactly once and stale app builds
 })
 test('failed compilation leaves all previously published data intact', () => {
   const root = fixture(); const first = prepare(root, build)
-  writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed')
+  writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed')
   assert.throws(() => prepare(root, () => { throw new Error('compile failed') }), /compile failed/)
   assert.deepEqual(JSON.parse(readFileSync(join(root, 'firmware-version.json'))), first)
   assert.equal(readFileSync(join(root, 'public/firmware', first.packageFilename), 'utf8'), 'firmware 1')
@@ -60,9 +60,9 @@ test('inconsistent manifest is repaired and concurrent builds are refused', () =
 })
 test('source changes during compilation never publish a misleading checksum', () => {
   const root = fixture(); const first = prepare(root, build)
-  writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed')
+  writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed')
   assert.throws(() => prepare(root, () => {
-    writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed again')
+    writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed again')
     return Buffer.from('stale build')
   }), /changed while compiling/)
   assert.deepEqual(JSON.parse(readFileSync(join(root, 'firmware-version.json'))), first)
@@ -104,7 +104,7 @@ catch (error) { console.error(error.message); process.exitCode = 1 }
 `, root], { env, encoding: 'utf8' })
   return {
     root, env, executables, run,
-    change: () => writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed'),
+    change: () => writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'changed'),
     calls: () => existsSync(log) ? readFileSync(log, 'utf8').trim().split('\n').map(line => JSON.parse(line)) : [],
     assertPreserved: () => {
       for (const [path, bytes] of published) assert.deepEqual(readFileSync(path), bytes)

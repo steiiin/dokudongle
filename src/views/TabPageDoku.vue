@@ -52,25 +52,23 @@
 
 <script setup lang="ts">
 
-import DetailLevelCard from './dokuCards/DetailLevelCard.vue'
-import FlavorsCard from './dokuCards/FlavorsCard.vue'
-import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
+import DetailLevelCard from './doku/DetailLevelCard.vue'
+import FlavorsCard from './doku/FlavorsCard.vue'
+import DodoTextSuggestionHost from '@/components/text-assist/DodoTextSuggestionHost.vue'
 
-import IdentifikationCard from './dokuCards/IdentifikationCard.vue'
-import SettingCard from './dokuCards/SettingCard.vue'
-import SituationCard from './dokuCards/SituationCard.vue'
-import BlockVerlegungCard from './dokuCards/blocksourceCards/BlockVerlegungCard.vue'
-import BlockEinweisungCard from './dokuCards/blocksourceCards/BlockEinweisungCard.vue'
-import AbcdeContainerCard from './dokuCards/AbcdeContainerCard.vue'
-import SampleContainerCard from './dokuCards/SampleContainerCard.vue'
-import TasksContainerCard from './dokuCards/TasksContainerCard.vue'
+import IdentifikationCard from './doku/IdentifikationCard.vue'
+import SettingCard from './doku/SettingCard.vue'
+import SituationCard from './doku/SituationCard.vue'
+import AbcdeContainerCard from './doku/AbcdeContainerCard.vue'
+import SampleContainerCard from './doku/SampleContainerCard.vue'
+import TasksContainerCard from './doku/TasksContainerCard.vue'
 
 // ############################################################################
 
 import { computed, nextTick, ref, watch } from 'vue'
 
 import { ProtocolCourse } from '@/types/protocol'
-import { provideTextSuggestionScope } from '@/services/text-suggestions'
+import { provideTextSuggestionScope } from '@/services/text-assist/text-suggestions'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()

@@ -19,11 +19,11 @@ afterEach(() => { for (const root of roots.splice(0)) rmSync(root, { recursive: 
 const device = { location: '3-6', vendor: '2886', productId: '8044', manufacturer: 'STEIIIN', product: 'DokuDongle', serial: '1234', keyboard: true, ports: ['/dev/ttyACM1'] }
 function fixture() {
   const root = temporary()
-  for (const directory of ['scripts', 'keyboard-sender/xiao_sketch', 'keyboard-sender/xiao_bootloader']) mkdirSync(join(root, directory), { recursive: true })
+  for (const directory of ['scripts', 'hardware/keyboard-sender/xiao_sketch', 'hardware/keyboard-sender/xiao_bootloader']) mkdirSync(join(root, directory), { recursive: true })
   writeFileSync(join(root, 'scripts/firmware.mjs'), 'builder')
-  writeFileSync(join(root, 'keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'sketch')
-  const bootloader = join(root, 'keyboard-sender/xiao_bootloader', bootloaderFilename)
-  copyFileSync(join(repo, 'keyboard-sender/xiao_bootloader', bootloaderFilename), bootloader)
+  writeFileSync(join(root, 'hardware/keyboard-sender/xiao_sketch/xiao_sketch.ino'), 'sketch')
+  const bootloader = join(root, 'hardware/keyboard-sender/xiao_bootloader', bootloaderFilename)
+  copyFileSync(join(repo, 'hardware/keyboard-sender/xiao_bootloader', bootloaderFilename), bootloader)
   const manifest = prepare(root, () => Buffer.from('application'))
   const events = []
   let answers = ['', '/dev/ttyACM1']
@@ -46,7 +46,7 @@ test('two manual reset prompts bracket exact commands; manifest wins over higher
   assert.equal(flashes.length, 2)
   assert.equal(flashes[0].command, '/custom/nrfutil')
   assert.deepEqual(flashes[0].args, ['--verbose', 'dfu', 'serial', '--package', bootloaderFilename, '-p', '/dev/ttyACM0', '-b', '115200', '--singlebank', '--touch', '1200'])
-  assert.equal(flashes[0].options.cwd, join(f.root, 'keyboard-sender/xiao_bootloader'))
+  assert.equal(flashes[0].options.cwd, join(f.root, 'hardware/keyboard-sender/xiao_bootloader'))
   assert.deepEqual(flashes[1].args, ['dfu', 'serial', '-p', '/dev/ttyACM1', '-b', '115200', '--singlebank', '--package', join(f.root, 'public/firmware', f.manifest.packageFilename)])
   const prompts = f.events.filter(e => e.prompt)
   assert.equal(prompts.length, 2)

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ platform: 'android', disconnect: vi.fn(), getConnectedDevices: vi.fn(), discoverServices: vi.fn() }))
 vi.mock('@capacitor/core', () => ({ Capacitor: { getPlatform: () => mocks.platform } }))
 vi.mock('@capacitor-community/bluetooth-le', () => ({ BleClient: mocks }))
-import { disconnectDongle, discoverDongleServices, DongleDeadlineError } from '@/utils/dongle-connection'
+import { disconnectDongle, discoverDongleServices, DongleDeadlineError } from '@/utils/dongle/dongle-connection'
 
 beforeEach(() => {
   vi.resetAllMocks()

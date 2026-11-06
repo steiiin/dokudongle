@@ -16,8 +16,8 @@ vi.mock('@/utils/input', () => ({
   setNativeValue: vi.fn(),
 }))
 
-import DodoInputNumber from '@/components/DodoInputNumber.vue'
-import DodoInputSampleLimb from '@/components/DodoInputSampleLimb.vue'
+import DodoInputNumber from '@/components/inputs/DodoInputNumber.vue'
+import DodoInputSampleLimb from '@/components/inputs/DodoInputSampleLimb.vue'
 import { AssessedValue } from '@/types/protocol/input'
 import { SstLimb, SstLimbs } from '@/types/protocol/sample'
 

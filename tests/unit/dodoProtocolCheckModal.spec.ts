@@ -2,7 +2,7 @@ import { IonButton } from '@ionic/vue'
 import { shallowMount } from '@vue/test-utils'
 import { describe, expect, test } from 'vitest'
 
-import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
+import DodoProtocolCheckModal from '@/components/protocol/DodoProtocolCheckModal.vue'
 import type { ProtocolCheckResult } from '@/services/protocol-check'
 
 const result: ProtocolCheckResult = {

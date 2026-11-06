@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { IonInput } from '@ionic/vue'
 
-import DodoInputGravTerm from '@/components/DodoInputGravTerm.vue'
-import DodoInputSelect from '@/components/DodoInputSelect.vue'
-import DodoToggleButton from '@/components/DodoToggleButton.vue'
-import DodoToggleGroup from '@/components/DodoToggleGroup.vue'
+import DodoInputGravTerm from '@/components/inputs/DodoInputGravTerm.vue'
+import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoToggleButton from '@/components/inputs/DodoToggleButton.vue'
+import DodoToggleGroup from '@/components/inputs/DodoToggleGroup.vue'
 import { PregnancySpan } from '@/types/protocol/pregnancy'
 
 describe('PregnancySpan', () => {

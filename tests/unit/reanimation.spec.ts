@@ -3,16 +3,16 @@ import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoToggleChip from '@/components/DodoToggleChip.vue'
+import DodoToggleChip from '@/components/inputs/DodoToggleChip.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
 import { resetProtocol } from '@/types/protocol'
-import FlavorsCard from '@/views/dokuCards/FlavorsCard.vue'
-import AbcdeAirwayCard from '@/views/dokuCards/abcdeCards/AbcdeAirwayCard.vue'
-import AbcdeBreathingCard from '@/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue'
-import AbcdeCirculationCard from '@/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue'
-import AbcdeDisabilityCard from '@/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue'
-import AbcdeExposureCard from '@/views/dokuCards/abcdeCards/AbcdeExposureCard.vue'
+import FlavorsCard from '@/views/doku/FlavorsCard.vue'
+import AbcdeAirwayCard from '@/views/doku/abcde/AbcdeAirwayCard.vue'
+import AbcdeBreathingCard from '@/views/doku/abcde/AbcdeBreathingCard.vue'
+import AbcdeCirculationCard from '@/views/doku/abcde/AbcdeCirculationCard.vue'
+import AbcdeDisabilityCard from '@/views/doku/abcde/AbcdeDisabilityCard.vue'
+import AbcdeExposureCard from '@/views/doku/abcde/AbcdeExposureCard.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,

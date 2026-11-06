@@ -2,7 +2,7 @@ import { IonItem } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import ProtocolHistorySettingsCard from '@/views/settingsCards/ProtocolHistorySettingsCard.vue'
+import ProtocolHistorySettingsCard from '@/views/settings/ProtocolHistorySettingsCard.vue'
 
 const mocks = vi.hoisted(() => ({
   store: {

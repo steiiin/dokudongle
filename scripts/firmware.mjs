@@ -19,7 +19,7 @@ const readManifest = root => existsSync(manifestPath(root)) ? JSON.parse(readFil
 const help = 'Run npm run firmware:prepare (VSCode: Prepare dongle firmware).'
 
 export function inputs(root) {
-  const sketchDirectory = join(root, 'keyboard-sender/xiao_sketch')
+  const sketchDirectory = join(root, 'hardware/keyboard-sender/xiao_sketch')
   const files = directory => readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name)).flatMap(entry => {
     const path = join(directory, entry.name)
     return entry.isDirectory() ? files(path) : [[path.slice(root.length + 1), sha256(readFileSync(path))]]
@@ -59,7 +59,7 @@ function runTool(tool, args, options) {
   } catch (error) {
     const command = `${tool.name} (${JSON.stringify(tool.path)})`
     if (error.code === 'ENOENT') {
-      throw new Error(`${command} was not found or its interpreter is missing. ${tool.hint} See keyboard-sender/README.md.`, { cause: error })
+      throw new Error(`${command} was not found or its interpreter is missing. ${tool.hint} See hardware/keyboard-sender/README.md.`, { cause: error })
     }
     if (error.code === 'EACCES' || error.code === 'EPERM') {
       throw new Error(`${command} could not be executed: permission denied. Check file and directory permissions and allow execution. ${tool.hint}`, { cause: error })
@@ -93,7 +93,7 @@ function compile(root, temp, version) {
     '--build-property', `compiler.cpp.extra_flags=-DDOKU_FIRMWARE_VERSION=${version}UL`,
     '--build-property', `build.usb_product="${buildConfig.usbProduct}"`,
     '--build-property', `build.usb_manufacturer="${buildConfig.usbManufacturer}"`,
-    join(root, 'keyboard-sender/xiao_sketch')], { stdio: 'inherit' })
+    join(root, 'hardware/keyboard-sender/xiao_sketch')], { stdio: 'inherit' })
   const output = join(temp, 'application.zip')
   runTool(nrfutil, ['dfu', 'genpkg', '--dev-type', '0x0052', '--sd-req', buildConfig.softdevice,
     '--application-version', String(version), '--application', join(temp, 'xiao_sketch.ino.hex'), output], { stdio: 'inherit' })

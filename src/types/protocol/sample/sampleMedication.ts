@@ -1,4 +1,4 @@
-import { notEmpty, onNormal } from "@/utils/filter"
+import { notEmpty } from "@/utils/filter"
 
 import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }

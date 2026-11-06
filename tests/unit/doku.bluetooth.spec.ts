@@ -40,7 +40,7 @@ vi.mock('@capacitor/device', () => ({
 
 import { useDokuStore } from '@/store/doku'
 import { ConfigUUID, ServiceUUID } from '@/types/dongle'
-import { encodeDongleConfig, decodeDongleConfig } from '@/utils/dongle-config'
+import { encodeDongleConfig, decodeDongleConfig } from '@/utils/dongle/dongle-config'
 
 describe('DokuDongle Android BLE initialization', () => {
   beforeEach(() => {

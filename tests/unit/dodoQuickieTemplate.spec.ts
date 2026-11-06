@@ -3,9 +3,9 @@ import { shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { describe, expect, test } from 'vitest'
 
-import DodoInputSelect from '@/components/DodoInputSelect.vue'
-import DodoInputText from '@/components/DodoInputText.vue'
-import DodoQuickieTemplate from '@/components/quickie-components/DodoQuickieTemplate.vue'
+import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputText from '@/components/inputs/DodoInputText.vue'
+import DodoQuickieTemplate from '@/components/quickies/DodoQuickieTemplate.vue'
 import {
   DATA_Quickies,
   QU_SIT_Einweisung,

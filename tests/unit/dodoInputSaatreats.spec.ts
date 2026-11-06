@@ -3,7 +3,7 @@ import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { chevronBackOutline } from 'ionicons/icons'
 import { nextTick } from 'vue'
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import DodoInputSaatreats from '@/components/DodoInputSaatreats.vue'
+import DodoInputSaatreats from '@/components/inputs/DodoInputSaatreats.vue'
 import { DATA_Saatreats } from '@/data/lists/saatreats'
 
 enableAutoUnmount(afterEach)

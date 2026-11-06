@@ -26,8 +26,8 @@
 
 <script setup lang="ts">
 
-import DodoFirmwareUpdate from '@/views/settingsCards/DodoFirmwareUpdate.vue'
-import DodoTransmission from '@/components/DodoTransmission.vue'
+import DodoFirmwareUpdate from '@/views/settings/DodoFirmwareUpdate.vue'
+import DodoTransmission from '@/components/dongle/DodoTransmission.vue'
 import { cog, eye, flask } from 'ionicons/icons'
 
 import { useDokuStore } from '@/store/doku'

@@ -4,8 +4,8 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { IonButton } from '@ionic/vue'
 import { FirmwareUUID, DfuUUID, type FirmwareUpdateStatus, type FirmwareRecovery } from '@/types/firmware'
 import { ConfigUUID, ServiceUUID } from '@/types/dongle'
-import { decodeFirmwareInfo, parseFirmwareManifest, updateAvailable, offsetDfuAddress, matchesDfuAddress } from '@/utils/dongle-firmware'
-import { encodeDongleConfig } from '@/utils/dongle-config'
+import { decodeFirmwareInfo, parseFirmwareManifest, updateAvailable, offsetDfuAddress, matchesDfuAddress } from '@/utils/dongle/dongle-firmware'
+import { encodeDongleConfig } from '@/utils/dongle/dongle-config'
 
 const mocks = vi.hoisted(() => ({
   platform: 'android',
@@ -19,8 +19,8 @@ vi.mock('@/plugins/dongle-firmware', () => ({ DongleFirmware: mocks.native }))
 vi.mock('@capacitor/app', () => ({ App: mocks.app }))
 import { useDokuStore } from '@/store/doku'
 import { useFirmwareStore } from '@/store/firmware'
-import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
-import DodoFirmwareUpdate from '@/views/settingsCards/DodoFirmwareUpdate.vue'
+import DongleSettingsCard from '@/views/settings/DongleSettingsCard.vue'
+import DodoFirmwareUpdate from '@/views/settings/DodoFirmwareUpdate.vue'
 
 const manifest = { version: 2, protocolRevision: 1, targetId: 1, target: 'xiao-nrf52840',
   packageFilename: 'dongle-v2-0123456789abcdef.zip', packageSha256: 'a'.repeat(64), sketchSha256: 'b'.repeat(64), buildFingerprint: 'c'.repeat(64) }

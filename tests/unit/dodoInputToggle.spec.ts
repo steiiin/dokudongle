@@ -1,9 +1,9 @@
 import { mount, shallowMount } from '@vue/test-utils'
 import { IonItem, IonToggle } from '@ionic/vue'
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import DodoInputToggle, { type ToggleColor } from '@/components/DodoInputToggle.vue'
-import DodoInputTextOptional from '@/components/DodoInputTextOptional.vue'
-import DodoInputSelectOptional from '@/components/DodoInputSelectOptional.vue'
+import DodoInputToggle, { type ToggleColor } from '@/components/inputs/DodoInputToggle.vue'
+import DodoInputTextOptional from '@/components/inputs/DodoInputTextOptional.vue'
+import DodoInputSelectOptional from '@/components/inputs/DodoInputSelectOptional.vue'
 
 const mountToggle = (props: {
   modelValue?: boolean

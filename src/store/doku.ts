@@ -1,5 +1,5 @@
 import { FirmwareUUID, DfuUUID } from '@/types/firmware'
-import { decodeFirmwareInfo, isCompatibleFirmware } from '@/utils/dongle-firmware'
+import { decodeFirmwareInfo, isCompatibleFirmware } from '@/utils/dongle/dongle-firmware'
 import { BleClient } from '@capacitor-community/bluetooth-le'
 import { Capacitor } from '@capacitor/core'
 import { Device as CapacitorDevice } from '@capacitor/device'
@@ -28,11 +28,11 @@ import {
   removeTemporaryProtocolState,
   saveDokuState,
 } from '@/store/persistence'
-import { stripNotSupported, textToHidEvents } from '@/utils/keymaps/keymap-german'
+import { stripNotSupported, textToHidEvents } from '@/utils/dongle/keymaps/keymap-german'
 import { transmitDongleEvents } from '@/services/dongle-transmission'
 import { AuditExport } from '@/plugins/audit-export'
-import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/utils/dongle-config'
-import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle-connection'
+import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/utils/dongle/dongle-config'
+import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
 import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'

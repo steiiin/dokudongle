@@ -122,47 +122,6 @@ export class ExposureExcretions {
   }
 
 
-  // get excretionsText(): string
-  // {
-
-  //   const _catheter = this.urinary.catheterText
-  //   const _incontinence = textIf('eingenässt', this.urinaryIncontinence)
-  //   const _urinary = this.urinary.text
-
-  //   let _bowel = (this.bowelAbnormalities.active)
-  //     ? prefixDefecation(this.bowelAbnormalities.value)
-  //     : 'Stuhlgang o.B.'
-
-  //   const hasCatheter = _catheter.length > 0;
-  //   const hasIncontinence = _incontinence.length > 0;
-  //   const hasUrinary = _urinary.length > 0;
-  //   const isBowelNormal = _bowel === 'Stuhlgang o.B.';
-
-  //   // 1) Alles unauffällig
-  //   if (!hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
-  //     return 'Wasserlassen/Stuhlgang o.B.'
-  //   }
-
-  //   // 2) Nur Inkontinenz, sonst unauffällig
-  //   if (!hasCatheter && hasIncontinence && !hasUrinary && isBowelNormal) {
-  //     return 'eingenässt, sonst Wasserlassen/Stuhlgang o.B.'
-  //   }
-
-  //   // 3) Alles unauffällig, aber mit Katheter
-  //   if (hasCatheter && !hasIncontinence && !hasUrinary && isBowelNormal) {
-  //     return concatDoku([_catheter, (this.urinary.catheterIssues != '' ? 'sonst ' : '') + 'Wasserlassen/Stuhlgang o.B.'])
-  //   }
-
-  //   // --- Allgemeine Fälle ---
-  //   return concatDoku([
-  //     _catheter,
-  //     _incontinence,
-  //     this.urinary.text,
-  //     _bowel,
-  //   ]);
-
-  // }
-
 
 }
 

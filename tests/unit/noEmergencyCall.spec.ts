@@ -3,11 +3,11 @@ import { shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoToggleChip from '@/components/DodoToggleChip.vue'
+import DodoToggleChip from '@/components/inputs/DodoToggleChip.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState } from '@/store/persistence'
 import { resetProtocol } from '@/types/protocol'
-import FlavorsCard from '@/views/dokuCards/FlavorsCard.vue'
+import FlavorsCard from '@/views/doku/FlavorsCard.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,

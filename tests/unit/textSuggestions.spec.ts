@@ -2,9 +2,9 @@ import { mount } from '@vue/test-utils'
 import { computed, defineComponent, nextTick, ref } from 'vue'
 import { describe, expect, test, vi } from 'vitest'
 
-import DodoTextSuggestionHost from '@/components/DodoTextSuggestionHost.vue'
-import DodoTextSuggestionPanel from '@/components/DodoTextSuggestionPanel.vue'
-import { provideTextSuggestionScope } from '@/services/text-suggestions'
+import DodoTextSuggestionHost from '@/components/text-assist/DodoTextSuggestionHost.vue'
+import DodoTextSuggestionPanel from '@/components/text-assist/DodoTextSuggestionPanel.vue'
+import { provideTextSuggestionScope } from '@/services/text-assist/text-suggestions'
 import type { TextSuggestion } from '@/services/text-assist'
 
 const suggestion = (id: string): TextSuggestion => ({

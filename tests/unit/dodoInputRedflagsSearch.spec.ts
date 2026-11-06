@@ -1,8 +1,8 @@
 import { IonButton, IonItem, IonModal, IonSearchbar } from '@ionic/vue'
 import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import DodoInputRedflags from '@/components/DodoInputRedflags.vue'
-import DodoToggleGroup from '@/components/DodoToggleGroup.vue'
+import DodoInputRedflags from '@/components/inputs/DodoInputRedflags.vue'
+import DodoToggleGroup from '@/components/inputs/DodoToggleGroup.vue'
 import { DATA_Scenarios, DATA_Signals, DATA_Subscenarios } from '@/data/redflags'
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags'
 

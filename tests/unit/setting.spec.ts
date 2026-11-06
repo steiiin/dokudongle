@@ -5,14 +5,14 @@ import * as Ionic from '@ionic/vue'
 import { IonToggle } from '@ionic/vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoInputSelect from '@/components/DodoInputSelect.vue'
-import DodoInputSelectChips from '@/components/DodoInputSelectChips.vue'
-import DodoInputToggle from '@/components/DodoInputToggle.vue'
-import DodoInputToggleOptional from '@/components/DodoInputToggleOptional.vue'
+import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputSelectChips from '@/components/inputs/DodoInputSelectChips.vue'
+import DodoInputToggle from '@/components/inputs/DodoInputToggle.vue'
+import DodoInputToggleOptional from '@/components/inputs/DodoInputToggleOptional.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
 import { Setting } from '@/types/protocol/setting'
-import SettingCard from '@/views/dokuCards/SettingCard.vue'
+import SettingCard from '@/views/doku/SettingCard.vue'
 
 enableAutoUnmount(afterEach)
 

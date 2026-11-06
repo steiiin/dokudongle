@@ -20,9 +20,9 @@
 </template>
 
 <script setup lang="ts">
-import ProtocolHistorySettingsCard from '@/views/settingsCards/ProtocolHistorySettingsCard.vue'
-import SpellcheckerSettingsCard from '@/views/settingsCards/SpellcheckerSettingsCard.vue'
-import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
+import ProtocolHistorySettingsCard from '@/views/settings/ProtocolHistorySettingsCard.vue'
+import SpellcheckerSettingsCard from '@/views/settings/SpellcheckerSettingsCard.vue'
+import DongleSettingsCard from '@/views/settings/DongleSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'
 
 const store = useDokuStore()

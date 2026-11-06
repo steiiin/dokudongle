@@ -157,7 +157,7 @@ export async function initialize({
   if (platform !== 'linux') throw new Error('Dongle initialization currently requires Linux for USB verification.')
   signal?.throwIfAborted()
   const manifest = check(root)
-  const bootDirectory = join(root, 'keyboard-sender/xiao_bootloader')
+  const bootDirectory = join(root, 'hardware/keyboard-sender/xiao_bootloader')
   await validateBootloader(join(bootDirectory, bootloaderFilename), run, signal)
   const tool = env.ADAFRUIT_NRFUTIL || 'adafruit-nrfutil'
   await run(tool, ['version'], { signal, quiet: true })

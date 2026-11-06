@@ -2,7 +2,7 @@ import { IonButton, IonCard, IonInput, IonModal, IonProgressBar, IonRange } from
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import DongleSettingsCard from '@/views/settingsCards/DongleSettingsCard.vue'
+import DongleSettingsCard from '@/views/settings/DongleSettingsCard.vue'
 import type { DongleConfig } from '@/types/dongle'
 
 const mocks = vi.hoisted(() => ({

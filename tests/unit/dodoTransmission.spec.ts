@@ -2,7 +2,7 @@ import { IonButton, IonProgressBar, IonToast } from '@ionic/vue'
 import { shallowMount } from '@vue/test-utils'
 import { nextTick, reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import DodoTransmission from '@/components/DodoTransmission.vue'
+import DodoTransmission from '@/components/dongle/DodoTransmission.vue'
 
 const mocks = vi.hoisted(() => ({
   pauseSend: vi.fn(), resumeSend: vi.fn(), cancelSend: vi.fn(),

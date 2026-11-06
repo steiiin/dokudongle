@@ -6,8 +6,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, loadTemporaryProtocolState, saveDokuState } from '@/store/persistence'
 import { DisabilityPsych } from '@/types/protocol/abcde'
-import AbcdeDisabilityCard from '@/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue'
-import DodoInputSelectLR from '@/components/DodoInputSelectLR.vue'
+import AbcdeDisabilityCard from '@/views/doku/abcde/AbcdeDisabilityCard.vue'
+import DodoInputSelectLR from '@/components/inputs/DodoInputSelectLR.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,

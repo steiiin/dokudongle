@@ -7,9 +7,9 @@ import { DongleFirmware } from '@/plugins/dongle-firmware'
 import { useDokuStore } from '@/store/doku'
 import { ServiceUUID } from '@/types/dongle'
 import { DfuUUID, FirmwareUUID, type FirmwareManifest, type FirmwareUpdateStatus, type FirmwareRecovery } from '@/types/firmware'
-import { decodeFirmwareInfo, isCompatibleFirmware, parseFirmwareManifest, updateAvailable, matchesDfuAddress, offsetDfuAddress } from '@/utils/dongle-firmware'
-import { withDongleTimeout } from '@/utils/dongle-config'
-import { awaitBleOperation, disconnectDongle, discoverDongleServices, dongleConnectionTimeout, dongleTimeRemaining, DongleDeadlineError } from '@/utils/dongle-connection'
+import { decodeFirmwareInfo, isCompatibleFirmware, parseFirmwareManifest, updateAvailable, matchesDfuAddress, offsetDfuAddress } from '@/utils/dongle/dongle-firmware'
+import { withDongleTimeout } from '@/utils/dongle/dongle-config'
+import { awaitBleOperation, disconnectDongle, discoverDongleServices, dongleConnectionTimeout, dongleTimeRemaining, DongleDeadlineError } from '@/utils/dongle/dongle-connection'
 
 const CONFIRMATION_ERROR = 'Installation konnte nach dem Neustart nicht bestätigt werden. Bitte das Update erneut versuchen. Dongle angeschlossen lassen und Bluetooth einschalten.'
 const pause = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))

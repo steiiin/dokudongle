@@ -7,12 +7,12 @@ import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/blocks
 import { DATA_Quickies, resetQuickies } from '@/data/quickies'
 import { useDokuStore } from '@/store/doku'
 import { appendProtocolAuditEntry, loadDokuState, saveDokuState } from '@/store/persistence'
-import DodoInputSelect from '@/components/DodoInputSelect.vue'
-import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
-import DodoToggleChip from '@/components/DodoToggleChip.vue'
-import DodoItemModal from '@/components/DodoItemModal.vue'
-import SampleSymptomsCard from '@/views/dokuCards/sampleCards/SampleSymptomsCard.vue'
-import BlockSchwindelCard from '@/views/dokuCards/blocksourceCards/BlockSchwindelCard.vue'
+import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputTextArea from '@/components/inputs/DodoInputTextArea.vue'
+import DodoToggleChip from '@/components/inputs/DodoToggleChip.vue'
+import DodoItemModal from '@/components/ui/DodoItemModal.vue'
+import SampleSymptomsCard from '@/views/doku/sample/SampleSymptomsCard.vue'
+import BlockSchwindelCard from '@/views/doku/blocks/BlockSchwindelCard.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,

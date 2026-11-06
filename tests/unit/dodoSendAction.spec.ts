@@ -5,8 +5,8 @@ import { webcrypto } from 'node:crypto'
 import { reactive, watch } from 'vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
-import DodoSendAction from '@/components/DodoSendAction.vue'
+import DodoProtocolCheckModal from '@/components/protocol/DodoProtocolCheckModal.vue'
+import DodoSendAction from '@/components/dongle/DodoSendAction.vue'
 import { ProtocolCheckService, type ProtocolCheckResult } from '@/services/protocol-check'
 import TabPagePreview from '@/views/TabPagePreview.vue'
 

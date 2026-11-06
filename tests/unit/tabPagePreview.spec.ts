@@ -3,7 +3,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { reactive } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoProtocolCheckModal from '@/components/DodoProtocolCheckModal.vue'
+import DodoProtocolCheckModal from '@/components/protocol/DodoProtocolCheckModal.vue'
 import protocolCheckService, { type ProtocolCheckResult } from '@/services/protocol-check'
 import TabPagePreview from '@/views/TabPagePreview.vue'
 

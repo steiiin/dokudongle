@@ -76,13 +76,12 @@ export default defineConfig({
     vue(),
     legacy(),
     Components({
+      dirs: ['src/components'],
+      deep: true,
       resolvers: [
         (name) => {
           if (name.startsWith('Ion')) {
             return { name, from: '@ionic/vue' }
-          }
-          if (name.startsWith('Dodo')) {
-            return { name, from: './src/components'}
           }
         }
       ]

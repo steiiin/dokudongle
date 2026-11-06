@@ -1,5 +1,5 @@
-import DodoQuickieOPRST from "@/components/quickie-components/DodoQuickieOPRST.vue"
-import DodoQuickieTemplate from "@/components/quickie-components/DodoQuickieTemplate.vue"
+import DodoQuickieOPRST from "@/components/quickies/DodoQuickieOPRST.vue"
+import DodoQuickieTemplate from "@/components/quickies/DodoQuickieTemplate.vue"
 
 import { Component, markRaw } from "vue"
 import { TEXT_AREA_BLOCK_SOURCES } from "@/data/blocks/text-area-blocks"

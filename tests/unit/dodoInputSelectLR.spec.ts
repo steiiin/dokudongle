@@ -2,8 +2,8 @@ import { shallowMount } from '@vue/test-utils'
 import { IonButton, IonItem, IonPopover } from '@ionic/vue'
 import { describe, expect, test } from 'vitest'
 
-import DodoInputSelectLR from '@/components/DodoInputSelectLR.vue'
-import type { OptionInput, SelectValue } from '@/components/DodoInputSelect.vue'
+import DodoInputSelectLR from '@/components/inputs/DodoInputSelectLR.vue'
+import type { OptionInput, SelectValue } from '@/components/inputs/DodoInputSelect.vue'
 
 const mountSelect = (props: {
   left?: SelectValue

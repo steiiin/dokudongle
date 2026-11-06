@@ -1,8 +1,8 @@
 import { BleClient } from '@capacitor-community/bluetooth-le'
 import { watch } from 'vue'
 import { SendAckUUID, SendTextUUID, ServiceUUID, type DeviceConnection } from '@/types/dongle'
-import { awaitBleOperation, disconnectDongle } from '@/utils/dongle-connection'
-import { withDongleTimeout } from '@/utils/dongle-config'
+import { awaitBleOperation, disconnectDongle } from '@/utils/dongle/dongle-connection'
+import { withDongleTimeout } from '@/utils/dongle/dongle-config'
 
 const ACK_TIMEOUT_MS = 10000
 const RETRY_DELAY_MS = 2000

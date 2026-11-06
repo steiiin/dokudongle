@@ -3,16 +3,16 @@ import { shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
-import DodoToggleButton from '@/components/DodoToggleButton.vue'
-import DodoToggleChip from '@/components/DodoToggleChip.vue'
+import DodoInputTextArea from '@/components/inputs/DodoInputTextArea.vue'
+import DodoToggleButton from '@/components/inputs/DodoToggleButton.vue'
+import DodoToggleChip from '@/components/inputs/DodoToggleChip.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState } from '@/store/persistence'
 import { ProtocolCourse } from '@/types/protocol'
-import DetailLevelCard from '@/views/dokuCards/DetailLevelCard.vue'
-import FlavorsCard from '@/views/dokuCards/FlavorsCard.vue'
-import SituationCard from '@/views/dokuCards/SituationCard.vue'
-import TaskCourseCard from '@/views/dokuCards/taskCards/TaskCourseCard.vue'
+import DetailLevelCard from '@/views/doku/DetailLevelCard.vue'
+import FlavorsCard from '@/views/doku/FlavorsCard.vue'
+import SituationCard from '@/views/doku/SituationCard.vue'
+import TaskCourseCard from '@/views/doku/tasks/TaskCourseCard.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,

@@ -6,10 +6,10 @@ import { loadDokuState, loadTemporaryProtocolState, saveDokuState } from '@/stor
 import { AssessedValue } from '@/types/protocol/input'
 import { AbcdeDisability, DisabilityNeuro, DisabilityPsych } from '@/types/protocol/abcde'
 import { ProtocolVerbosity } from '@/types/protocol'
-import SampleSymptomsCard from '@/views/dokuCards/sampleCards/SampleSymptomsCard.vue'
-import SampleContainerCard from '@/views/dokuCards/SampleContainerCard.vue'
-import DodoInputTextArea from '@/components/DodoInputTextArea.vue'
-import DodoItemModal from '@/components/DodoItemModal.vue'
+import SampleSymptomsCard from '@/views/doku/sample/SampleSymptomsCard.vue'
+import SampleContainerCard from '@/views/doku/SampleContainerCard.vue'
+import DodoInputTextArea from '@/components/inputs/DodoInputTextArea.vue'
+import DodoItemModal from '@/components/ui/DodoItemModal.vue'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,

@@ -3,8 +3,8 @@ import { shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { describe, expect, test } from 'vitest'
 
-import DodoInputContacts from '@/components/DodoInputContacts.vue'
-import DodoInputText from '@/components/DodoInputText.vue'
+import DodoInputContacts from '@/components/inputs/DodoInputContacts.vue'
+import DodoInputText from '@/components/inputs/DodoInputText.vue'
 import { SampleContacts } from '@/types/protocol/sample'
 
 const mountContacts = () => shallowMount(DodoInputContacts, {

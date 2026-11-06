@@ -1,6 +1,6 @@
 import { createApp, defineComponent, h, ref } from 'vue'
 import { IonicVue, IonApp, IonContent } from '@ionic/vue'
-import DodoInputSaamed from '../../../src/components/DodoInputSaamed.vue'
+import DodoInputSaamed from '../../../src/components/inputs/DodoInputSaamed.vue'
 import { ConsentMedTask } from '../../../src/types/lists/saamed'
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/normalize.css'

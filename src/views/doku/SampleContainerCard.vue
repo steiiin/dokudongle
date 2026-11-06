@@ -1,0 +1,45 @@
+<template>
+  <DodoContainerCard title="SAMPLE(R)" card-in-card>
+
+    <IonCard class="sample-symptoms" v-show="ctx.requireSampleSymptoms">
+      <IonCardHeader>
+        <IonCardTitle>Symptome</IonCardTitle>
+      </IonCardHeader>
+      <IonCardContent class="card-in-card">
+
+        <SampleSymptomsTrauma v-show="ctx.isTrauma" />
+        <SampleSymptomsCard />
+
+      </IonCardContent>
+    </IonCard>
+    <SampleAllergiesCard />
+    <SampleMedicationsCard />
+    <SamplePlerCard />
+    <SampleContactsCard />
+
+  </DodoContainerCard>
+</template>
+
+<script setup lang="ts">
+
+import SampleSymptomsTrauma from './sample/SampleSymptomsTrauma.vue'
+import SampleSymptomsCard from './sample/SampleSymptomsCard.vue'
+import SampleAllergiesCard from './sample/SampleAllergiesCard.vue'
+import SampleMedicationsCard from './sample/SampleMedicationsCard.vue'
+import SamplePlerCard from './sample/SamplePlerCard.vue'
+import SampleContactsCard from './sample/SampleContactsCard.vue'
+
+import { computed } from 'vue'
+
+import { useDokuStore } from '@/store/doku'
+const store = useDokuStore()
+const ctx = computed(() => store.context)
+
+</script>
+<style scoped>
+
+  .sample-symptoms {
+    --card-bg: #214e83;
+  }
+
+</style>

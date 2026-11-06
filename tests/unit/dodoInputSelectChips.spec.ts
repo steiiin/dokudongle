@@ -2,9 +2,9 @@ import { shallowMount } from '@vue/test-utils'
 import { defineComponent, nextTick } from 'vue'
 import { IonItem, IonModal } from '@ionic/vue'
 import { describe, expect, test, vi } from 'vitest'
-import DodoInputSelectChips from '@/components/DodoInputSelectChips.vue'
-import DodoInputText from '@/components/DodoInputText.vue'
-import type { OptionInput, SelectValue } from '@/components/DodoInputSelect.vue'
+import DodoInputSelectChips from '@/components/inputs/DodoInputSelectChips.vue'
+import DodoInputText from '@/components/inputs/DodoInputText.vue'
+import type { OptionInput, SelectValue } from '@/components/inputs/DodoInputSelect.vue'
 
 const focus = vi.fn()
 const TextStub = defineComponent({

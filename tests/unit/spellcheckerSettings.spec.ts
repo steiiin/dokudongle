@@ -2,10 +2,10 @@ import { IonAccordion, IonAccordionGroup, IonButton, IonInput, IonItem, IonModal
 import { alertController } from '@ionic/core'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import DodoTextAssistEntriesModal from '@/components/DodoTextAssistEntriesModal.vue'
-import DodoTextAssistEntryList from '@/components/DodoTextAssistEntryList.vue'
-import DodoUserDictionaryModal from '@/components/DodoUserDictionaryModal.vue'
-import SpellcheckerSettingsCard from '@/views/settingsCards/SpellcheckerSettingsCard.vue'
+import DodoTextAssistEntriesModal from '@/components/text-assist/DodoTextAssistEntriesModal.vue'
+import DodoTextAssistEntryList from '@/components/text-assist/DodoTextAssistEntryList.vue'
+import DodoUserDictionaryModal from '@/components/text-assist/DodoUserDictionaryModal.vue'
+import SpellcheckerSettingsCard from '@/views/settings/SpellcheckerSettingsCard.vue'
 import { textAssistService } from '@/services/text-assist'
 
 vi.mock('@ionic/core', async importOriginal => ({

@@ -1,4 +1,3 @@
-import { onNormal } from "@/utils/filter"
 import { prefixAllergie } from "@/utils/prefix/sample"
 
 export class SampleAllergies {

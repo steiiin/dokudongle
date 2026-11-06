@@ -62,56 +62,56 @@
       "word": "rollstuhlmobil",
       "previousReplacement": "Rollstuhlmobil-",
       "entry": "rollstuhlmobil",
-      "source": "src/views/dokuCards/SettingCard.vue:33",
+      "source": "src/views/doku/SettingCard.vue:33",
       "context": "rollstuhlmobil"
     },
     {
       "word": "Rasselgeräusche",
       "previousReplacement": "Rassengeräusche",
       "entry": "Rasselgeräusche",
-      "source": "src/views/dokuCards/abcdeCards/AbcdeBreathingCard.vue:120",
+      "source": "src/views/doku/abcde/AbcdeBreathingCard.vue:120",
       "context": "Rasselgeräusche"
     },
     {
       "word": "Marmoriert",
       "previousReplacement": "Marmorwert",
       "entry": "marmoriert",
-      "source": "src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue:271",
+      "source": "src/views/doku/abcde/AbcdeCirculationCard.vue:271",
       "context": "Marmoriert"
     },
     {
       "word": "Druckdolent",
       "previousReplacement": "Druckdozent",
       "entry": "druckdolent",
-      "source": "src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue:177",
+      "source": "src/views/doku/abcde/AbcdeCirculationCard.vue:177",
       "context": "Druckdolent?"
     },
     {
       "word": "Baseline",
       "previousReplacement": "Vaseline",
       "entry": "baseline",
-      "source": "src/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue:175",
+      "source": "src/views/doku/abcde/AbcdeDisabilityCard.vue:175",
       "context": "Entspricht Baseline?"
     },
     {
       "word": "Psych-Befund",
       "previousReplacement": "Psyche-Befund",
       "entry": "Psych-Befund",
-      "source": "src/views/dokuCards/abcdeCards/AbcdeDisabilityCard.vue:328",
+      "source": "src/views/doku/abcde/AbcdeDisabilityCard.vue:328",
       "context": "Psych-Befund"
     },
     {
       "word": "Kindslage",
       "previousReplacement": "Kindeslage",
       "entry": "Kindslage",
-      "source": "src/views/dokuCards/blocksourceCards/BlockSchwangerschaftCard.vue:42",
+      "source": "src/views/doku/blocks/BlockSchwangerschaftCard.vue:42",
       "context": "Kindslage"
     },
     {
       "word": "Medis",
       "previousReplacement": "Media",
       "entry": "Medis",
-      "source": "src/views/dokuCards/taskCards/TaskCourseCard.vue:15",
+      "source": "src/views/doku/tasks/TaskCourseCard.vue:15",
       "context": "(außer Medis)"
     },
     {
@@ -487,97 +487,97 @@
     {
       "word": "color",
       "previousReplacement": "Chlor",
-      "source": "src/views/dokuCards/abcdeCards/AbcdeCirculationCard.vue:273",
+      "source": "src/views/doku/abcde/AbcdeCirculationCard.vue:273",
       "reason": "Technischer Bezeichner."
     },
     {
       "word": "provocation",
       "previousReplacement": "Provokation",
-      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:128",
+      "source": "src/views/doku/blocks/BlockBauchschmerzCard.vue:128",
       "reason": "Technischer Bezeichner."
     },
     {
       "word": "rovokation",
       "previousReplacement": "Provokation",
-      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:47",
+      "source": "src/views/doku/blocks/BlockBauchschmerzCard.vue:47",
       "reason": "HTML-Textfragment: Der Anfangsbuchstabe steht in einem eigenen Element."
     },
     {
       "word": "ualität",
       "previousReplacement": "Qualität",
-      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:71",
+      "source": "src/views/doku/blocks/BlockBauchschmerzCard.vue:71",
       "reason": "HTML-Textfragment: Der Anfangsbuchstabe steht in einem eigenen Element."
     },
     {
       "word": "adiation",
       "previousReplacement": "Radiation",
-      "source": "src/views/dokuCards/blocksourceCards/BlockBauchschmerzCard.vue:83",
+      "source": "src/views/doku/blocks/BlockBauchschmerzCard.vue:83",
       "reason": "HTML-Textfragment: Der Anfangsbuchstabe steht in einem eigenen Element."
     },
     {
       "word": "card-in-card",
       "previousReplacement": "ward-in-card",
-      "source": "src/components/DodoContainerCard.vue:6",
+      "source": "src/components/ui/DodoContainerCard.vue:6",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "phone",
       "previousReplacement": "Phon",
-      "source": "src/components/DodoInputContacts.vue:57",
+      "source": "src/components/inputs/DodoInputContacts.vue:57",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "number",
       "previousReplacement": "Nummer",
-      "source": "src/components/DodoInputNumber.vue:66",
+      "source": "src/components/inputs/DodoInputNumber.vue:66",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "scenario",
       "previousReplacement": "Szenario",
-      "source": "src/components/DodoInputRedflags.vue:159",
+      "source": "src/components/inputs/DodoInputRedflags.vue:159",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "indication",
       "previousReplacement": "Indikation",
-      "source": "src/components/DodoInputSaamed.vue:161",
+      "source": "src/components/inputs/DodoInputSaamed.vue:161",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "object",
       "previousReplacement": "Objekt",
-      "source": "src/components/DodoInputSelectChips.vue:100",
+      "source": "src/components/inputs/DodoInputSelectChips.vue:100",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "focus",
       "previousReplacement": "Fokus",
-      "source": "src/components/DodoInputText.vue:354",
+      "source": "src/components/inputs/DodoInputText.vue:354",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "is-enhancing",
       "previousReplacement": "iss-enhancing",
-      "source": "src/components/DodoInputTextArea.vue:24",
+      "source": "src/components/inputs/DodoInputTextArea.vue:24",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "is-inactive",
       "previousReplacement": "iss-inactive",
-      "source": "src/components/DodoTextAreaBlocks.vue:4",
+      "source": "src/components/protocol/DodoTextAreaBlocks.vue:4",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "quot",
       "previousReplacement": "Quote",
-      "source": "src/components/quickie-components/DodoQuickieTemplate.vue:108",
+      "source": "src/components/quickies/DodoQuickieTemplate.vue:108",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {
       "word": "style",
       "previousReplacement": "Stile",
-      "source": "src/components/quickie-components/DodoQuickieTemplate.vue:127",
+      "source": "src/components/quickies/DodoQuickieTemplate.vue:127",
       "reason": "Technischer Wert, CSS-Klasse oder HTML-Code."
     },
     {

@@ -1,6 +1,6 @@
 import { createApp, defineComponent, h, ref } from 'vue'
 import { IonicVue, IonApp, IonContent, IonList } from '@ionic/vue'
-import DodoInputToggle, { type ToggleColor } from '../../../src/components/DodoInputToggle.vue'
+import DodoInputToggle, { type ToggleColor } from '../../../src/components/inputs/DodoInputToggle.vue'
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/normalize.css'
 import '@ionic/vue/css/structure.css'

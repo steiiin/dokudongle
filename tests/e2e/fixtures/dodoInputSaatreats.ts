@@ -1,6 +1,6 @@
 import { createApp, defineComponent, h, ref } from 'vue'
 import { IonicVue, IonApp, IonContent } from '@ionic/vue'
-import DodoInputSaatreats from '../../../src/components/DodoInputSaatreats.vue'
+import DodoInputSaatreats from '../../../src/components/inputs/DodoInputSaatreats.vue'
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/normalize.css'
 import '@ionic/vue/css/structure.css'

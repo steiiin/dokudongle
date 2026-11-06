@@ -1,8 +1,8 @@
 import { shallowMount } from '@vue/test-utils'
 import { describe, expect, test } from 'vitest'
 
-import DodoInputSelect from '@/components/DodoInputSelect.vue'
-import DodoInputText from '@/components/DodoInputText.vue'
+import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputText from '@/components/inputs/DodoInputText.vue'
 
 const mountCustomSelect = (emptyLabel?: string) => shallowMount(DodoInputSelect, {
   props: {

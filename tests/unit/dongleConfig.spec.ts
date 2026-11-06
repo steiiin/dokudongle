@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { decodeDongleConfig, encodeDongleConfig } from '@/utils/dongle-config'
+import { decodeDongleConfig, encodeDongleConfig } from '@/utils/dongle/dongle-config'
 
 describe('dongle configuration wire format', () => {
   test.each([0, 30, 200])('round trips a maximum length name and %i ms within one BLE packet', keyGapMs => {
