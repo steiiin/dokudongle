@@ -38,6 +38,15 @@
             <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
           </button>
         </div>
+        <div class="dd-input-select-chips__row" v-if="isCustomMode">
+          <button
+            type="button" class="dd-input-select-chips__chip"
+            :class="{ 'dd-ripple-surface ion-activatable': rippleEnabled }"
+            @click="clearSelection">
+            Keiner
+            <IonRippleEffect v-if="rippleEnabled" aria-hidden="true" />
+          </button>
+        </div>
         <div class="dd-input-select-chips__row" v-if="allowCustom && !isCustomMode">
           <button
             type="button" class="dd-input-select-chips__chip dd-input-select-chips__custom"
@@ -85,7 +94,7 @@ const props = withDefaults(defineProps<{
   assistContextId?: string
   lines?: 'full' | 'inset' | 'none'
 }>(), {
-  emptyLabel: 'Keine',
+  emptyLabel: 'Keiner',
   customMode: 'replace',
   customOptionLabel: 'Andere',
 })
@@ -207,6 +216,12 @@ const resetCustom = () => {
   customText.value = ''
   customEntry.value = undefined
   focusCustomAfterDismiss = false
+}
+
+const clearSelection = () => {
+  resetCustom()
+  updateModel([])
+  isDialogOpen.value = false
 }
 
 const toggleValue = (value: SelectValue) => {
