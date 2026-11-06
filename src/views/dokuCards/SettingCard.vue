@@ -27,7 +27,7 @@
         ]">
       </DodoInputSelect>
 
-      <DodoInputSelectChips label="Vor Ort" v-model="store.doku.setting.helpers" lines="none"
+      <DodoInputSelectChips label="Vor Ort" v-model="store.doku.setting.helpers" lines="full"
         :options="[
           [ { value: 'nursing', label: 'Pflege' }, 'Ersthelfer' ],
           [ 'Sohn', 'Tochter', 'Kinder' ],
