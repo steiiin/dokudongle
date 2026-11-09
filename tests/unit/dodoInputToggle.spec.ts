@@ -1,15 +1,13 @@
 import { mount, shallowMount } from '@vue/test-utils'
 import { IonItem, IonToggle } from '@ionic/vue'
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import DodoInputToggle, { type ToggleColor } from '@/components/inputs/DodoInputToggle.vue'
+import DodoInputToggle from '@/components/inputs/DodoInputToggle.vue'
 import DodoInputTextOptional from '@/components/inputs/DodoInputTextOptional.vue'
 import DodoInputSelectOptional from '@/components/inputs/DodoInputSelectOptional.vue'
 
 const mountToggle = (props: {
   modelValue?: boolean
   disabled?: boolean
-  colorOn?: ToggleColor
-  colorOff?: ToggleColor
   lines?: 'full' | 'inset' | 'none'
 } = {}, attrs: Record<string, string> = {}) => shallowMount(DodoInputToggle, {
   props: { modelValue: false, ...props },
@@ -24,13 +22,16 @@ describe('DodoInputToggle', () => {
     expect(wrapper.findAllComponents(IonItem)).toHaveLength(1)
     const toggle = wrapper.getComponent(IonToggle)
     expect(toggle.text()).toBe('Atmung vorhanden?')
-    expect(toggle.props('labelPlacement')).toBe('end')
+    const defaultToggle = shallowMount(IonToggle)
+    expect(toggle.props('labelPlacement')).toBe(defaultToggle.props('labelPlacement'))
+    expect(toggle.attributes('mode')).toBe('ios')
     expect(toggle.props('modelValue')).toBe(false)
     expect(toggle.attributes('style') ?? '').toBe('')
     // Ionic's Vue proxy uses a sentinel for omitted props; compare to a bare item.
     const defaultItem = shallowMount(IonItem)
     expect(wrapper.getComponent(IonItem).props('lines')).toBe(defaultItem.props('lines'))
     defaultItem.unmount()
+    defaultToggle.unmount()
     wrapper.unmount()
   })
 
@@ -69,43 +70,6 @@ describe('DodoInputToggle', () => {
     expect(item.attributes('data-field')).toBe('breathing')
     await wrapper.getComponent(IonToggle).trigger('pointerdown')
     expect(wrapper.emitted('pointerdown')).toHaveLength(1)
-    wrapper.unmount()
-  })
-
-  test.each([
-    ['green', 'var(--ion-color-success)'],
-    ['yellow', 'var(--ion-color-warning)'],
-    ['orange', '#ff9800'],
-    ['red', 'var(--ion-color-danger)'],
-  ] as const)('colors both states with %s and clears overrides when props are removed', async (color, cssColor) => {
-    const wrapper = mountToggle({ colorOn: color, colorOff: color })
-    const style = (wrapper.getComponent(IonToggle).element as HTMLElement).style
-    expect(style.getPropertyValue('--track-background')).toBe(cssColor)
-    expect(style.getPropertyValue('--dd-toggle-label-color')).toBe(cssColor)
-    expect(style.getPropertyValue('--handle-background')).not.toBe('')
-    await wrapper.setProps({ modelValue: true })
-    expect(style.getPropertyValue('--track-background-checked')).toBe(cssColor)
-    expect(style.getPropertyValue('--dd-toggle-label-color')).toBe(cssColor)
-    expect(style.getPropertyValue('--handle-background-checked')).not.toBe('')
-    await wrapper.setProps({ colorOn: undefined, colorOff: undefined })
-    expect(style.cssText).toBe('')
-    wrapper.unmount()
-  })
-
-  test('resolves independent state colors and leaves omitted states at their defaults', async () => {
-    const wrapper = mountToggle({ colorOn: 'green', colorOff: 'red' })
-    const style = (wrapper.getComponent(IonToggle).element as HTMLElement).style
-    expect(style.getPropertyValue('--dd-toggle-label-color')).toBe('var(--ion-color-danger)')
-    await wrapper.setProps({ modelValue: true })
-    expect(style.getPropertyValue('--dd-toggle-label-color')).toBe('var(--ion-color-success)')
-    await wrapper.setProps({ colorOn: undefined })
-    expect(style.getPropertyValue('--dd-toggle-label-color')).toBe('')
-    expect(style.getPropertyValue('--track-background-checked')).toBe('')
-    expect(style.getPropertyValue('--handle-background-checked')).toBe('')
-    await wrapper.setProps({ modelValue: false, colorOn: 'orange', colorOff: undefined })
-    expect(style.getPropertyValue('--dd-toggle-label-color')).toBe('')
-    expect(style.getPropertyValue('--track-background')).toBe('')
-    expect(style.getPropertyValue('--handle-background')).toBe('')
     wrapper.unmount()
   })
 })

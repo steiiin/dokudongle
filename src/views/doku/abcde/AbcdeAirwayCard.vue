@@ -1,7 +1,7 @@
 <template>
   <DodoExaminationCard title="A - Airway">
 
-    <DodoInputToggle lines="full" v-model="store.doku.xAbcde.isBreathing" color-off="red">
+    <DodoInputToggle lines="full" v-model="store.doku.xAbcde.isBreathing">
       Atmung vorhanden?
     </DodoInputToggle>
 
