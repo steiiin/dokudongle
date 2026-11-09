@@ -6,7 +6,7 @@
         :model-value="modelValue"
         :disabled="disabled"
         :style="toggleStyle"
-        label-placement="end"
+        justify="space-between"
         @update:model-value="onChange"
         @pointerdown="emit('pointerdown', $event)"
       >
