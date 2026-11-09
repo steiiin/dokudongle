@@ -4,7 +4,7 @@
       <IonToggle
         :model-value="modelValue"
         :disabled="disabled"
-        justify="space-between" mode="ios"
+        justify="space-between" mode="md"
         @update:model-value="onChange"
         @pointerdown="emit('pointerdown', $event)"
       >
