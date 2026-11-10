@@ -155,6 +155,12 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
+    <DodoInputToggle lines="full" :model-value="store.doku.xabcDe.vision.matches(true)"
+      @update:model-value="store.setVisionSymptoms($event)">
+      Sehstörungen?
+      <template #label-end><DodoBlockSourceShortcut source="sehen" /></template>
+    </DodoInputToggle>
+
     <DodoExaminationItem id="dizziness" label="Schwindel" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabcDe.isExamined('dizziness')"

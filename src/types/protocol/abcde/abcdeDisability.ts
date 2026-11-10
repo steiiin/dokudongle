@@ -3,6 +3,7 @@ import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { prefixParaesthesis } from "@/utils/prefix/disability"
 import { onNormal, textIf } from "@/utils/filter"
 import { AssessedValue, OptionalValue } from "../input"
+export { DisabilityVision, visionSideSymptoms, visionSymptoms } from '@/types/blocks/sehen'
 
 import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }
@@ -415,6 +416,7 @@ export class AbcdeDisability {
   public dizziness: 'kein' | 'ungerichteter' | 'gerichteter'
 
   public neuro: AssessedValue<DisabilityNeuro>
+  public vision: AssessedValue<boolean>
   public psych: AssessedValue<DisabilityPsych>
   public baseline: boolean
 
@@ -435,6 +437,7 @@ export class AbcdeDisability {
     this.headache = false
     this.dizziness = 'kein'
     this.neuro = AssessedValue.unassessed(new DisabilityNeuro())
+    this.vision = AssessedValue.unassessed(false)
     this.psych = AssessedValue.unassessed(new DisabilityPsych())
     this.baseline = false
     this.bloodGlucose = AssessedValue.unassessed('normal')
@@ -509,6 +512,7 @@ export class AbcdeDisability {
         this.gcsScore < 14 ? `GCS ${this.gcsScore}` : '',
         textIf(headache, this.isExamined('headache')),
         this.dizzinessText,
+        textIf(this.vision.value ? 'Sehstörungen' : onNormal('keine Sehstörung'), this.vision.isAssessed),
         textIf(this.neuro.value.summaryText, this.neuro.isAssessed),
         textIf(this.psych.value.text, this.psych.isAssessed),
         textIf(

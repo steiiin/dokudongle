@@ -17,6 +17,9 @@ const global = {
 }
 
 const cases = [
+  { source: 'sehen', label: 'Sehstörungen', input: 'Sehverlust', value: 'rechts', field: 'visionLoss',
+    activate: (store: ReturnType<typeof useDokuStore>) => store.setVisionSymptoms(true),
+    deactivate: (store: ReturnType<typeof useDokuStore>) => store.setVisionSymptoms(false) },
   { source: 'schwangerschaft', label: 'Schwangerschaft', input: 'Mehrlingsstatus', value: 'Zwillinge', field: 'childCount',
     activate: (store: ReturnType<typeof useDokuStore>) => store.setPregnancyAssessed(true),
     deactivate: (store: ReturnType<typeof useDokuStore>) => store.setPregnancy(false) },
