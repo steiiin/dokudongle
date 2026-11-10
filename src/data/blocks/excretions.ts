@@ -1,6 +1,7 @@
 import { TextAreaBlock } from '@/types/blocks/text-area-block'
 import { OptionalValue } from '@/types/protocol/input'
 import type {
+  BowelBloodFinding,
   ExcretionsBowelsBlockSourceState, ExcretionsBowelsDetails,
   ExcretionsUrinaryBlockSourceState, ExcretionsUrinaryDetails,
 } from '@/types/blocks/excretions'
@@ -28,12 +29,75 @@ export const bowelConsistencyOptions = [
   { value: 'wässrig', label: 'Wässrig' },
 ]
 
+export const bowelBloodGroupOptions = [
+  { value: 'on_stool', label: 'Auf Stuhl aufgelagert' },
+  { value: 'mixed', label: 'Mit Stuhl vermischt' },
+  { value: 'without_stool', label: 'Blutabgang ohne Stuhl' },
+] as const
+
 export const bowelBloodOptions = [
-  { value: '', label: 'kein Blut' },
-  { value: 'Blut am Klopapier', label: 'Am Klopapier' },
-  { value: 'Blut im Stuhl', label: 'Im Stuhl' },
-  { value: 'Teerstuhl', label: 'Teerstuhl' },
+  [{ value: 'paper', label: 'Hellrotes Blut am Toilettenpapier' }],
+  bowelBloodGroupOptions,
+] as const
+
+export const bowelBloodAmountOptions = [
+  { value: 'minimale Menge', label: 'Minimal' },
+  { value: 'geringe Menge', label: 'Wenig' },
+  { value: 'deutliche Menge', label: 'Deutlich' },
+  { value: 'überwiegend Blut', label: 'Überwiegend' },
 ]
+
+export const bowelBloodAmountWithoutStoolOptions = [
+  { value: 'minimale Menge', label: 'minimale Menge' },
+  { value: 'geringe Menge', label: 'geringe Menge' },
+  { value: 'deutliche Menge', label: 'deutliche Menge' },
+  { value: 'große Menge', label: 'große Menge' },
+]
+
+export const bowelBloodColorOptions = [
+  { value: 'hellrot', label: 'Hellrot' },
+  { value: 'dunkelrot', label: 'Dunkelrot' },
+  { value: 'schwarz', label: 'Schwarz' },
+]
+
+export const hasBowelBloodGroup = (blood: readonly BowelBloodFinding[]) =>
+  bowelBloodGroupOptions.some(option => blood.includes(option.value))
+
+export function normalizeBowelBleeding(details: ExcretionsBowelsDetails,
+  previousBlood?: readonly BowelBloodFinding[]): ExcretionsBowelsDetails {
+  const validValues: readonly string[] = ['paper', 'on_stool', 'mixed', 'without_stool', 'clots']
+  const selected = [...new Set(details.blood.filter(value => validValues.includes(value)))]
+  const hasGroup = hasBowelBloodGroup(selected)
+  const blood = hasGroup ? selected : selected.filter(value => value !== 'clots')
+  const amountContextChanged = previousBlood !== undefined
+    && previousBlood.includes('without_stool') !== blood.includes('without_stool')
+  return {
+    ...details,
+    blood: blood.length === details.blood.length && blood.every((value, index) => value === details.blood[index])
+      ? details.blood : blood,
+    bloodAmount: !hasGroup || amountContextChanged ? '' : details.bloodAmount,
+    bloodColor: hasGroup ? details.bloodColor : '',
+  }
+}
+
+function renderBowelBleeding(details: ExcretionsBowelsDetails): string {
+  const normalized = normalizeBowelBleeding(details)
+  const { blood, bloodAmount, bloodColor } = normalized
+  const locations = [
+    blood.includes('on_stool') ? 'auf Stuhl aufgelagert' : '',
+    blood.includes('mixed') ? 'mit Stuhl vermischt' : '',
+  ].filter(Boolean)
+  const findings = [
+    locations.length ? `Blut ${locations.join(' und ')}` : '',
+    blood.includes('without_stool') ? 'Blutabgang ohne Stuhl' : '',
+  ].filter(Boolean).join(' und ')
+  const additions = [bloodColor, bloodAmount, blood.includes('clots') ? 'mit Koageln' : '']
+    .filter(Boolean).join(', ')
+  return [
+    blood.includes('paper') ? 'hellrotes Blut am Toilettenpapier' : '',
+    findings ? findings + (additions ? ` (${additions})` : '') : '',
+  ].filter(Boolean).join('; ')
+}
 
 export const bowelSoundsOptions = [
   { value: '', label: 'Nicht erfasst' },
@@ -85,7 +149,7 @@ export function createExcretionsBowelsBlockState(): ExcretionsBowelsBlockSourceS
     active: { 'excretions_bowel.symptoms': true },
     details: {
       pattern: '', consistency: '', lastBowel: OptionalValue.inactive(''),
-      bowelSounds: '', blood: '', bowelPain: false,
+      bowelSounds: '', blood: [], bloodAmount: '', bloodColor: '', mucus: false, bowelPain: false,
     },
   }
 }
@@ -103,9 +167,10 @@ export function renderExcretionsBowelsText(details: ExcretionsBowelsDetails): st
     [
       details.pattern,
       details.consistency,
+      details.mucus ? 'Schleimbeimengungen' : '',
       details.lastBowel.isActive ? prefix('zuletzt', prefixVor(details.lastBowel.value)) : '',
     ],
-    [details.blood, details.bowelPain ? 'schmerzhafter Stuhlgang' : ''],
+    [renderBowelBleeding(details), details.bowelPain ? 'schmerzhafter Stuhlgang' : ''],
     prefix('DG', details.bowelSounds),
   ]))
 }

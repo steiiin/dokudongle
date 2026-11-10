@@ -1,5 +1,8 @@
 <template>
   <DodoItemModal label="Wasserlassen" modal-label="Wasserlassen" :state="hasDetails ? '' : 'Keine Angabe'">
+    <template v-if="$slots.trigger" #trigger="{ open }">
+      <slot name="trigger" :open="open" />
+    </template>
     <template v-if="store.doku.xabcdE.excretions.value.catheterType != ''">
 
       <IonItemDivider>

@@ -9,6 +9,7 @@
         @pointerdown="emit('pointerdown', $event)"
       >
         <slot />
+        <slot name="label-end" />
       </IonToggle>
     </IonItem>
     <IonRippleEffect v-if="rippleEnabled && !disabled" aria-hidden="true" />

@@ -1,17 +1,19 @@
 <template>
-  <IonItem ref="trigger" :lines="lines" button :detail="detail" @click="open">
-    <template v-if="useStackedLayout">
-      <IonLabel>
-        <h2>{{ label }}</h2>
-        <p>{{ stateText }}</p>
-      </IonLabel>
-    </template>
-    <template v-else>
-      <IonLabel>{{ label }}</IonLabel>
-      <IonNote slot="end">{{ stateText }}</IonNote>
-    </template>
-  </IonItem>
-  <IonModal :is-open="isModalOpen" @will-dismiss="closeModal">
+  <slot name="trigger" :open="open">
+    <IonItem ref="trigger" :lines="lines" button :detail="detail" @click="open()">
+      <template v-if="useStackedLayout">
+        <IonLabel>
+          <h2>{{ label }}</h2>
+          <p>{{ stateText }}</p>
+        </IonLabel>
+      </template>
+      <template v-else>
+        <IonLabel>{{ label }}</IonLabel>
+        <IonNote slot="end">{{ stateText }}</IonNote>
+      </template>
+    </IonItem>
+  </slot>
+  <IonModal :is-open="isModalOpen" @will-dismiss="closeModal" @did-dismiss="restoreFocus">
     <IonHeader>
       <IonToolbar class="dd-modal-header-toolbar">
         <IonButtons slot="start">
@@ -54,13 +56,21 @@ const props = withDefaults(defineProps<{
 
 const isModalOpen = ref(false)
 const trigger = ref<InstanceType<typeof IonItem> | null>(null)
+let returnFocus: HTMLElement | undefined
 
 const stateText = computed(() => props.state ?? '')
 const useStackedLayout = computed(() => stateText.value.length > 22)
 
-const open = () => {
-  trigger.value?.$el.shadowRoot?.querySelector('button')?.focus()
+const open = (opener?: HTMLElement) => {
+  returnFocus = opener
+  if (opener) opener.focus({ preventScroll: true })
+  else trigger.value?.$el.shadowRoot?.querySelector('button')?.focus()
   isModalOpen.value = true
+}
+
+const restoreFocus = () => {
+  if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true })
+  returnFocus = undefined
 }
 
 defineExpose({ open })

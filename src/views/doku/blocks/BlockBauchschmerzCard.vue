@@ -1,6 +1,9 @@
 <template>
   <DodoItemModal
     label="Bauchschmerz" modal-label="Bauchschmerz" :state="hasDetails ? '' : 'Keine Angabe'">
+    <template v-if="$slots.trigger" #trigger="{ open }">
+      <slot name="trigger" :open="open" />
+    </template>
 
     <ion-item-divider>
       <ion-label>Region</ion-label>

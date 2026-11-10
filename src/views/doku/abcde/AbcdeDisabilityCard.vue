@@ -169,6 +169,7 @@
           { value: 'ungerichteter', label: 'Ungerichtet/Diffus' },
           { value: 'gerichteter', label: 'Dreh-/Schwankschwindel' },
         ]">
+        <template #label-end><DodoBlockSourceShortcut source="schwindel" /></template>
       </DodoInputSelect>
     </DodoExaminationItem>
 

@@ -100,7 +100,7 @@ describe('pregnancy findings in E', () => {
     store.doku.ident.age = new PatientAge(53, 'years')
     await nextTick()
     const row = card.get('.examination-item[data-examination="pregnancy"]')
-    const toggle = exposure.findAllComponents(DodoInputToggle).find(input => input.text() === 'Schwangerschaft')!
+    const toggle = row.getComponent(DodoInputToggle)
     toggle.vm.$emit('update:modelValue', false)
     await nextTick()
     expect(store.doku.xabcdE.pregnancy.matches(false)).toBe(true)

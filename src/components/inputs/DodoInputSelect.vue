@@ -1,10 +1,13 @@
 <template>
 
   <IonItem :lines="isCustomMode ? 'none' : lines">
-    <IonSelect ref="select" interface="popover" v-model="selectValue" :style="selectStyle" class="dd-input-select">
+    <IonSelect ref="select" interface="popover" v-model="selectValue" :disabled="disabled" :style="selectStyle" class="dd-input-select">
 
       <div slot="label" class="multiline-label-wrapper">
-        <div>{{ label }}</div>
+        <div class="select-label-line">
+          <span>{{ label }}</span>
+          <span class="select-label-end"><slot name="label-end" /></span>
+        </div>
         <div class="description-label-wrapper" v-if="description">{{ description }}</div>
       </div>
 
@@ -20,7 +23,7 @@
         {{ opt.label }}
       </IonSelectOption>
       <IonSelectOption v-if="allowCustom" :value="CUSTOM_VALUE">
-        Andere
+        {{ customOptionLabel ?? 'Andere' }}
       </IonSelectOption>
     </IonSelect>
   </IonItem>
@@ -29,6 +32,7 @@
     <DodoInputText
       ref="customInput"
       v-model="customText"
+      :disabled="disabled"
       :label="'↳ ' + customLabel"
       :placeholder="customPlaceholder"
       :label-color="labelColor"
@@ -64,6 +68,8 @@ const props = defineProps<{
   options: readonly OptionInput[]
   emptyLabel?: string
   allowCustom?: boolean
+  disabled?: boolean
+  customOptionLabel?: string
   customLabel?: string
   customPlaceholder?: string
   imeDictionary?: ImeDictionary,
@@ -79,6 +85,7 @@ const emit = defineEmits<{
 
 const select = ref<InstanceType<typeof IonSelect> | null>(null)
 const open = () => {
+  if (props.disabled) return
   const element = select.value?.$el as HTMLIonSelectElement | undefined
   // Ionic benötigt ein Ereignis als Bezugspunkt für Popovers; ohne dieses öffnet es einen Hinweisdialog.
   return element?.open({ target: element } as unknown as UIEvent)
@@ -135,9 +142,10 @@ const selectValue = computed({
     return props.modelValue
   },
   set(val: SelectValue) {
+    if (props.disabled) return
     if (val === CUSTOM_VALUE) {
       isCustomMode.value = true
-      setTimeout(() => { customInput.value?.setFocus() }, 300)
+      setTimeout(() => { if (!props.disabled) customInput.value?.setFocus() }, 300)
       return
     }
 
@@ -159,13 +167,14 @@ function isEmptyOption(value: SelectValue): boolean {
 // ############################################################################
 
 const handleEmpty = () => {
+  if (props.disabled) return
   selectValue.value = !props.emptyLabel ? normalizedOptions.value[0].value : ''
 }
 
 // ############################################################################
 
 watch(customText, (value) => {
-  if (isCustomMode.value) {
+  if (isCustomMode.value && !props.disabled) {
     emit('update:modelValue', value)
   }
 })
@@ -205,6 +214,19 @@ watch(
 
 .multiline-label-wrapper {
   padding: .5rem 0;
+}
+
+.select-label-line {
+  display: flex;
+  align-items: center;
+}
+
+.select-label-end {
+  display: flex;
+  align-items: center;
+  flex: none;
+  /* Keep the action's hit area from changing the label's line height. */
+  height: 0;
 }
 
 .description-label-wrapper {

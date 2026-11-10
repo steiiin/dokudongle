@@ -14,7 +14,7 @@ import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intox
 import type { IntoxicationSubstance } from '@/types/blocks/intoxikation'
 import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
 import { createBauchschmerzBlockState } from '@/data/blocks/bauchschmerz'
-import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState } from '@/data/blocks/excretions'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState, normalizeBowelBleeding } from '@/data/blocks/excretions'
 import { composeTextAreaText } from '@/types/blocks/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -221,7 +221,32 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       }
     }
   }
+  // Einzelne Blutungsangaben aus älteren Protokollen vor der Array-Hydrierung übertragen.
+  const sources = normalizedInput.textAreaBlocks
+  const bowelSource = isRecord(sources) ? sources.excretions_bowel : undefined
+  const bowelDetails = isRecord(bowelSource) ? bowelSource.details : undefined
+  if (isRecord(sources) && isRecord(bowelSource) && isRecord(bowelDetails) && typeof bowelDetails.blood === 'string') {
+    const legacyBlood = bowelDetails.blood
+    normalizedInput = {
+      ...normalizedInput,
+      textAreaBlocks: {
+        ...sources,
+        excretions_bowel: {
+          ...bowelSource,
+          details: {
+            ...bowelDetails,
+            blood: legacyBlood === 'Blut am Klopapier' ? ['paper']
+              : legacyBlood === 'Blut im Stuhl' || legacyBlood === 'Teerstuhl' ? ['mixed'] : [],
+            bloodAmount: '',
+            bloodColor: legacyBlood === 'Teerstuhl' ? 'schwarz' : '',
+          },
+        },
+      },
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
+  hydratedProtocol.textAreaBlocks.excretions_bowel.details = normalizeBowelBleeding(
+    hydratedProtocol.textAreaBlocks.excretions_bowel.details)
   restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
 
   if (legacyCourse === 1 || legacyCourse === 2) {

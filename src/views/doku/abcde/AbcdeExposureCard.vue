@@ -86,9 +86,11 @@
         </IonItemDivider>
         <DodoInputToggle lines="inset" :model-value="store.doku.xabcdE.excretions.value.urinaryAbnormalities" @update:model-value="store.setUrinaryAbnormalities">
           Wasserlassen auffällig?
+          <template #label-end><DodoBlockSourceShortcut source="excretions_urinary" /></template>
         </DodoInputToggle>
         <DodoInputToggle lines="none" :model-value="store.doku.xabcdE.excretions.value.bowelAbnormalities" @update:model-value="store.setBowelAbnormalities">
           Stuhlgang auffällig?
+          <template #label-end><DodoBlockSourceShortcut source="excretions_bowel" /></template>
         </DodoInputToggle>
 
       </DodoItemModal>
@@ -126,6 +128,7 @@
               { value: '', label: 'Mittel' },
               { value: 'starke', label: 'Stark' },
             ]">
+            <template #label-end><DodoBlockSourceShortcut source="bauchschmerz" /></template>
           </DodoInputSelect>
         </DodoExaminationItem>
 
@@ -150,6 +153,7 @@
       <DodoInputToggle :model-value="store.doku.xabcdE.pregnancy.value"
         @update:model-value="store.setPregnancy" lines="none">
         Schwangerschaft
+        <template #label-end><DodoBlockSourceShortcut source="schwangerschaft" /></template>
       </DodoInputToggle>
     </DodoExaminationItem>
 

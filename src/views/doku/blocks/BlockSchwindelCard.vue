@@ -1,6 +1,9 @@
 <template>
   <DodoItemModal
     label="Schwindel" modal-label="Schwindel" :state="hasDetails ? '' : 'Keine Angabe'">
+    <template v-if="$slots.trigger" #trigger="{ open }">
+      <slot name="trigger" :open="open" />
+    </template>
 
     <ion-item-divider>
       <ion-label><b>O</b>nset</ion-label>

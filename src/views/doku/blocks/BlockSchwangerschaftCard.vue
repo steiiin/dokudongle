@@ -1,5 +1,8 @@
 <template>
   <DodoItemModal label="Schwangerschaft" modal-label="Schwangerschaft" :state="hasDetails ? '' : 'Keine Angabe'">
+    <template v-if="$slots.trigger" #trigger="{ open }">
+      <slot name="trigger" :open="open" />
+    </template>
     <IonItemDivider>
       <IonLabel>Schwangerschaftsanamnese</IonLabel>
     </IonItemDivider>

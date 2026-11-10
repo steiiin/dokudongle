@@ -16,6 +16,8 @@ import AbcdeAirwayCard from '../../../src/views/doku/abcde/AbcdeAirwayCard.vue'
 import AbcdeCirculationCard from '../../../src/views/doku/abcde/AbcdeCirculationCard.vue'
 import AbcdeDisabilityCard from '../../../src/views/doku/abcde/AbcdeDisabilityCard.vue'
 import AbcdeExposureCard from '../../../src/views/doku/abcde/AbcdeExposureCard.vue'
+import SampleSymptomsCard from '../../../src/views/doku/sample/SampleSymptomsCard.vue'
+import SamplePlerCard from '../../../src/views/doku/sample/SamplePlerCard.vue'
 import AbcdeContainerCard from '../../../src/views/doku/AbcdeContainerCard.vue'
 import { useDokuStore } from '../../../src/store/doku'
 
@@ -26,6 +28,15 @@ createApp(defineComponent({
     const disability = params.has('disability')
     const store = useDokuStore()
     store.doku.ident.age.timespan = 35
+    if (params.has('shortcuts')) {
+      store.setPregnancyAssessed(true)
+      store.setDizziness('gerichteter')
+      store.setExcretionsAssessed(true)
+      store.setBowelAbnormalities(true)
+      store.setUrinaryAbnormalities(true)
+      store.setAbdominalAssessed(true)
+      store.setAbdominalPain('leichte')
+    }
     const circulation = params.has('circulation')
     const exposure = params.has('exposure')
     if (params.has('nonverbal')) {
@@ -38,6 +49,7 @@ createApp(defineComponent({
     const select = ref<InstanceType<typeof DodoInputSelect>>()
     return () => h(IonApp, {}, () => h(IonContent, {}, () => [
       ...(params.has('all') ? [h(AbcdeContainerCard)] : disability ? [h(AbcdeDisabilityCard)] : exposure ? [h(AbcdeExposureCard)] : circulation ? [h(AbcdeCirculationCard)] : [h(AbcdeAirwayCard), h(AbcdeBreathingCard)]),
+      ...(params.has('shortcuts') ? [h('div', { id: 'original-block-forms' }, [h(SampleSymptomsCard), h(SamplePlerCard)])] : []),
       h('button', { id: 'toggle-nonverbal', onClick: () => store.setFlavor('non_verbal', !store.doku.flavors.non_verbal) }, 'Nonverbal wechseln'),
       h('pre', { id: 'report', style: { whiteSpace: 'pre-wrap' } }, store.generatedProtocol),
       h(DodoExaminationCard, { title: 'Controls' }, () => [
