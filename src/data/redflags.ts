@@ -30,143 +30,143 @@ export type {
 export const DATA_Signals: readonly RedflagSignal[] = [
   {
     id: 'abdomen__afterjuckreiz',
-    text: 'anhaltendem Juckreiz am After'
+    text: 'anhaltendem Afterjucken',
   },
   {
     id: 'abdomen__anhaltende_verstopfung',
-    text: 'anhaltender Verstopfung'
+    text: 'anhaltender Verstopfung',
   },
   {
     id: 'abdomen__anhaltender_durchfall',
-    text: 'anhaltendem Durchfall'
+    text: 'anhaltendem Durchfall',
   },
   {
     id: 'abdomen__anhaltendes_erbrechen',
-    text: 'anhaltendem Erbrechen'
+    text: 'anhaltendem Erbrechen',
   },
   {
     id: 'abdomen__blut_im_stuhl',
-    text: 'Blut im Stuhl'
+    text: 'Blut im Stuhl',
   },
   {
     id: 'abdomen__blutiges_erbrechen',
-    text: 'blutigem/kaffeesatzartigem Erbrechen'
+    text: 'blutigem/kaffeesatzartigem Erbrechen',
   },
   {
     id: 'abdomen__durchfall',
-    text: 'Durchfall'
+    text: 'Durchfall',
   },
   {
     id: 'abdomen__geringe_wiederkehrende_blutspuren',
-    text: 'geringen wiederkehrenden Blutspuren am Stuhl'
+    text: 'wiederholten geringen Blutspuren am Stuhl',
   },
   {
     id: 'abdomen__gruenes_erbrechen',
-    text: 'grünem Erbrechen'
+    text: 'grünem Erbrechen',
   },
   {
     id: 'abdomen__hart_geblaeht',
-    text: 'hartem/aufgeblähtem Bauch'
+    text: 'hartem/aufgeblähtem Bauch',
   },
   {
     id: 'abdomen__leichte_wiederkehrende_schmerzen',
-    text: 'wiederkehrenden leichten Bauchschmerzen'
+    text: 'wiederkehrenden leichten Bauchschmerzen',
   },
   {
     id: 'abdomen__naechtliche_beschwerden',
-    text: 'nächtlichen Bauchbeschwerden'
+    text: 'nächtlichen Bauchbeschwerden',
   },
   {
     id: 'abdomen__schmerzhafte_bruchvorwoelbung',
-    text: 'schmerzhafter/fester Bruchvorwölbung'
+    text: 'schmerzhafter/fester Bruchvorwölbung',
   },
   {
     id: 'abdomen__starke_afterschmerzen',
-    text: 'starken Schmerzen am After'
+    text: 'starken Afterschmerzen',
   },
   {
     id: 'abdomen__starke_rektalblutung',
-    text: 'starker/nicht stillbarer Blutung aus dem After'
+    text: 'starker/unstillbarer Afterblutung',
   },
   {
     id: 'abdomen__teerstuhl',
-    text: 'schwarzem/teerartigem Stuhl'
+    text: 'schwarzem/teerartigem Stuhl',
   },
   {
     id: 'abdomen__wiederkehrendes_sodbrennen',
-    text: 'wiederkehrendem Sodbrennen'
+    text: 'wiederkehrendem Sodbrennen',
   },
   {
     id: 'abdomen__windverhalt_mit_blaehung',
-    text: 'fehlendem Windabgang mit zunehmender Bauchblähung'
+    text: 'zunehmender Bauchblähung ohne Windabgang',
   },
   {
     id: 'abdomen__zunehmende_schmerzen',
-    text: 'zunehmenden Bauchschmerzen'
+    text: 'zunehmenden Bauchschmerzen',
   },
   {
     id: 'augen__anhaltende_roetung',
-    text: 'anhaltender Augenrötung'
+    text: 'anhaltender Augenrötung',
   },
   {
     id: 'augen__eitriges_sekret',
-    text: 'verklebten Augenlidern/eitrigem Augensekret'
+    text: 'verklebten Lidern/eitrigem Augensekret',
   },
   {
     id: 'augen__fremdkoerpergefuehl',
-    text: 'anhaltendem Fremdkörpergefühl im Auge'
+    text: 'anhaltendem Fremdkörpergefühl im Auge',
   },
   {
     id: 'augen__juckreiz_traenenfluss',
-    text: 'anhaltendem Augenjucken/Tränenfluss'
+    text: 'anhaltendem Augenjucken/Tränenfluss',
   },
   {
     id: 'augen__lichtscheu',
-    text: 'ausgeprägter Lichtscheu'
+    text: 'ausgeprägter Lichtscheu',
   },
   {
     id: 'augen__neue_ptosis',
-    text: 'einseitig hängendem Augenlid'
+    text: 'einseitig hängendem Augenlid',
   },
   {
     id: 'augen__neue_pupillendifferenz',
-    text: 'deutlicher Pupillendifferenz'
+    text: 'deutlicher Pupillendifferenz',
   },
   {
     id: 'augen__starke_augenschmerzen',
-    text: 'starken Augenschmerzen'
+    text: 'starken Augenschmerzen',
   },
   {
     id: 'augen__wiederkehrende_einblutung',
-    text: 'wiederkehrenden Einblutungen ins Augenweiß'
+    text: 'wiederholten Einblutungen ins Augenweiß',
   },
   {
     id: 'becken__zunehmende_schmerzen',
-    text: 'zunehmenden Beckenschmerzen'
+    text: 'zunehmenden Beckenschmerzen',
   },
   {
     id: 'blutung__nase_zahnfleisch',
-    text: 'Blutungen aus Nase/Zahnfleisch'
+    text: 'Blutungen aus Nase/Zahnfleisch',
   },
   {
     id: 'blutung__wiederkehrende_haut_schleimhautblutungen',
-    text: 'wiederkehrenden Haut-/Schleimhautblutungen'
+    text: 'wiederkehrenden Haut-/Schleimhautblutungen',
   },
   {
     id: 'drainage__unerwarteter_foerderstopp',
-    text: 'ausbleibendem Sekretabfluss',
+    text: 'fehlendem Sekretabfluss',
   },
   {
     id: 'drainage__sogverlust',
-    text: 'Sogverlust am Drainagebehälter',
+    text: 'Sogverlust der Drainage',
   },
   {
     id: 'drainage__dislokation',
-    text: 'herausgerutschtem Drainageschlauch',
+    text: 'verrutschtem Drainageschlauch',
   },
   {
     id: 'drainage__leckage',
-    text: 'Flüssigkeitsaustritt neben dem Drainageschlauch',
+    text: 'Flüssigkeitsaustritt an der Drainage',
   },
   {
     id: 'drainage__geringe_erneute_blutbeimengungen',
@@ -174,703 +174,703 @@ export const DATA_Signals: readonly RedflagSignal[] = [
   },
   {
     id: 'extremitaet__belastungsunfaehigkeit',
-    text: 'fehlender Belastbarkeit'
+    text: 'fehlender Belastbarkeit',
   },
   {
     id: 'extremitaet__bewegungsstoerung',
-    text: 'Bewegungsstörungen'
+    text: 'Bewegungsstörungen',
   },
   {
     id: 'extremitaet__blaesse_blaufarbung',
-    text: 'auffälliger Blässe/Blaufärbung'
+    text: 'auffälliger Blässe/Blaufärbung',
   },
   {
     id: 'extremitaet__einseitige_schwellung_schmerz',
-    text: 'einseitiger schmerzhafter Beinschwellung'
+    text: 'einseitiger schmerzhafter Beinschwellung',
   },
   {
     id: 'extremitaet__gespannte_schwellung',
-    text: 'praller/gespannter Schwellung'
+    text: 'praller Schwellung',
   },
   {
     id: 'extremitaet__kalte_extremitaet',
-    text: 'auffällig kalter Hand/kaltem Fuß'
+    text: 'auffällig kalter Hand/kaltem Fuß',
   },
   {
     id: 'extremitaet__langsame_beidseitige_beinoedeme',
-    text: 'langsam zunehmenden beidseitigen Beinschwellungen'
+    text: 'langsam zunehmender Schwellung beider Beine',
   },
   {
     id: 'extremitaet__pulsverlust',
-    text: 'fehlendem Puls an der Extremität'
+    text: 'fehlendem Puls an der Extremität',
   },
   {
     id: 'extremitaet__sensibilitaetsstoerung',
-    text: 'Gefühlsstörungen'
+    text: 'Gefühlsstörungen',
   },
   {
     id: 'extremitaet__starke_dehnungsschmerzen',
-    text: 'starken Schmerzen beim Strecken von Fingern/Zehen'
+    text: 'starken Schmerzen beim Strecken von Fingern/Zehen',
   },
   {
     id: 'extremitaet__zunehmende_schmerzen',
-    text: 'zunehmenden Schmerzen'
+    text: 'zunehmenden Schmerzen',
   },
   {
     id: 'gelenk__anhaltende_leichte_schmerzen',
-    text: 'anhaltenden leichten Gelenkschmerzen'
+    text: 'anhaltenden leichten Gelenkschmerzen',
   },
   {
     id: 'gelenk__anhaltende_schmerzen',
-    text: 'anhaltenden Gelenkschmerzen'
+    text: 'anhaltenden Gelenkschmerzen',
   },
   {
     id: 'gelenk__bewegungsverlust',
-    text: 'eingeschränkter Beweglichkeit'
+    text: 'eingeschränkter Beweglichkeit',
   },
   {
     id: 'gelenk__roetung_ueberwaermung',
-    text: 'gerötetem/überwärmtem Gelenk'
+    text: 'gerötetem/überwärmtem Gelenk',
   },
   {
     id: 'gelenk__wiederkehrende_steifigkeit',
-    text: 'wiederkehrender Gelenksteifigkeit'
+    text: 'wiederholter Gelenksteifigkeit',
   },
   {
     id: 'gelenk__zunehmende_schmerzen',
-    text: 'zunehmenden Gelenkschmerzen'
+    text: 'zunehmenden Gelenkschmerzen',
   },
   {
     id: 'gelenk__zunehmende_schwellung',
-    text: 'zunehmender Gelenkschwellung'
+    text: 'zunehmender Gelenkschwellung',
   },
   {
     id: 'gyn__anhaltende_brustverhaertung',
-    text: 'anhaltender Verhärtung der Brust'
+    text: 'anhaltender Verhärtung der Brust',
   },
   {
     id: 'gyn__anhaltende_stillbeschwerden',
-    text: 'anhaltenden Schmerzen beim Stillen'
+    text: 'anhaltenden Stillschmerzen',
   },
   {
     id: 'gyn__auffaelliges_fruchtwasser',
-    text: 'grünem/braunem/übel riechendem Fruchtwasser'
+    text: 'grünem/braunem/übel riechendem Fruchtwasser',
   },
   {
     id: 'gyn__fruchtwasserabgang',
-    text: 'wässrigem Flüssigkeitsabgang aus der Scheide'
+    text: 'wässrigem Abgang aus der Scheide',
   },
   {
     id: 'gyn__grosse_blutklumpen_wochenfluss',
-    text: 'großen Blutklumpen im Wochenfluss'
+    text: 'großen Blutklumpen im Wochenfluss',
   },
   {
     id: 'gyn__pressdrang',
-    text: 'Pressdrang'
+    text: 'Pressdrang',
   },
   {
     id: 'gyn__regelmaessige_schmerzhafte_wehen',
-    text: 'regelmäßigen schmerzhaften Wehen'
+    text: 'regelmäßigen schmerzhaften Wehen',
   },
   {
     id: 'gyn__schulterspitzenschmerz',
-    text: 'Schmerzen an der Schulterspitze'
+    text: 'Schulterspitzenschmerz',
   },
   {
     id: 'gyn__sichtbare_nabelschnur',
-    text: 'sichtbarer/tastbarer Nabelschnur an der Scheide'
+    text: 'sichtbarer/tastbarer Nabelschnur an der Scheide',
   },
   {
     id: 'gyn__starke_anhaltende_unterbauchschmerzen',
-    text: 'anhaltenden starken Unterbauchschmerzen'
+    text: 'anhaltenden starken Unterbauchschmerzen',
   },
   {
     id: 'gyn__starke_brustdruesenschmerzen',
-    text: 'starken Schmerzen in der Brustdrüse'
+    text: 'starken Brustdrüsenschmerzen',
   },
   {
     id: 'gyn__starke_einseitige_unterbauchschmerzen',
-    text: 'starken einseitigen Unterbauchschmerzen'
+    text: 'starken einseitigen Unterbauchschmerzen',
   },
   {
     id: 'gyn__starke_vaginale_blutung',
-    text: 'starker/zunehmender vaginaler Blutung'
+    text: 'starker/zunehmender Scheidenblutung',
   },
   {
     id: 'gyn__uebel_riechender_wochenfluss',
-    text: 'übel riechendem Wochenfluss'
+    text: 'übel riechendem Wochenfluss',
   },
   {
     id: 'gyn__vaginale_blutung',
-    text: 'vaginaler Blutung'
+    text: 'vaginaler Blutung',
   },
   {
     id: 'gyn__verminderte_kindsbewegungen',
-    text: 'verminderten/ausbleibenden Kindsbewegungen'
+    text: 'verminderten/ausbleibenden Kindsbewegungen',
   },
   {
     id: 'gyn__wiederkehrende_regelschmerzen',
-    text: 'wiederkehrenden Regelschmerzen'
+    text: 'wiederkehrenden Regelschmerzen',
   },
   {
     id: 'gyn__zwischenblutungen',
-    text: 'wiederkehrenden Zwischenblutungen'
+    text: 'wiederkehrenden Zwischenblutungen',
   },
   {
     id: 'haut__anhaltende_brennende_schmerzen',
-    text: 'anhaltenden brennenden Hautschmerzen'
+    text: 'anhaltenden brennenden Hautschmerzen',
   },
   {
     id: 'haut__anhaltende_taubheit',
-    text: 'anhaltender Taubheit der Haut'
+    text: 'anhaltender Taubheit der Haut',
   },
   {
     id: 'haut__anhaltender_juckreiz',
-    text: 'anhaltendem Juckreiz'
+    text: 'anhaltendem Juckreiz',
   },
   {
     id: 'haut__blaeschen_auge_nase_ohr',
-    text: 'Bläschen an Auge/Nasenspitze/Ohr'
+    text: 'Bläschen an Auge/Nasenspitze/Ohr',
   },
   {
     id: 'haut__blasenbildung',
-    text: 'Hautblasen'
+    text: 'Hautblasen',
   },
   {
     id: 'haut__dunkle_verfaerbung',
-    text: 'dunkler/schwarzer Hautverfärbung'
+    text: 'dunkler Hautverfärbung',
   },
   {
     id: 'haut__eitriges_sekret',
-    text: 'eitrigem Sekret'
+    text: 'eitrigem Sekret',
   },
   {
     id: 'haut__grossflaechige_blaeschenausbreitung',
-    text: 'großflächiger Ausbreitung von Hautbläschen'
+    text: 'großflächig zunehmenden Hautbläschen',
   },
   {
     id: 'haut__marmorierung',
-    text: 'fleckiger/marmorierter Hautverfärbung'
+    text: 'fleckiger/marmorierter Haut',
   },
   {
     id: 'haut__naessende_offene_stellen',
-    text: 'nässenden/offenen Hautstellen'
+    text: 'nässenden/offenen Hautstellen',
   },
   {
     id: 'haut__nicht_wegdrueckbare_flecken',
-    text: 'nicht wegdrückbaren roten/violetten Hautflecken'
+    text: 'nicht wegdrückbaren roten/violetten Flecken',
   },
   {
     id: 'haut__rasch_ausbreitende_roetung',
-    text: 'rasch ausbreitender Rötung'
+    text: 'rasch ausbreitender Rötung',
   },
   {
     id: 'haut__schleimhautwunden',
-    text: 'wunden Stellen an Mund/Augen/Genitalien'
+    text: 'wunden Stellen an Mund/Augen/Genitalien',
   },
   {
     id: 'haut__schmerzhafte_blaeschen',
-    text: 'schmerzhaften Hautbläschen'
+    text: 'schmerzhaften Hautbläschen',
   },
   {
     id: 'haut__sich_vergroessernde_roetung_nach_stich',
-    text: 'sich vergrößernder Rötung um die Stichstelle'
+    text: 'größer werdender Rötung um die Stichstelle',
   },
   {
     id: 'haut__starke_schmerzen',
-    text: 'starken Hautschmerzen'
+    text: 'starken Hautschmerzen',
   },
   {
     id: 'haut__wiederkehrender_ausschlag',
-    text: 'wiederkehrendem Hautausschlag'
+    text: 'wiederkehrendem Hautausschlag',
   },
   {
     id: 'haut__zunehmende_lokale_roetung',
-    text: 'zunehmender örtlicher Rötung'
+    text: 'zunehmender Rötung',
   },
   {
     id: 'haut__zunehmende_lokale_schwellung',
-    text: 'zunehmender örtlicher Schwellung'
+    text: 'zunehmender Schwellung',
   },
   {
     id: 'hno__anhaltende_halsschmerzen',
-    text: 'anhaltenden Halsschmerzen'
+    text: 'anhaltenden Halsschmerzen',
   },
   {
     id: 'hno__anhaltende_leichte_ohrenschmerzen',
-    text: 'anhaltenden leichten Ohrenschmerzen'
+    text: 'anhaltenden leichten Ohrenschmerzen',
   },
   {
     id: 'hno__anhaltende_mundschmerzen',
-    text: 'anhaltenden Zahn-/Wundschmerzen im Mund'
+    text: 'anhaltenden Zahn-/Mundschmerzen',
   },
   {
     id: 'hno__anhaltende_schluckbeschwerden',
-    text: 'anhaltenden Schluckbeschwerden'
+    text: 'anhaltenden Schluckbeschwerden',
   },
   {
     id: 'hno__anhaltendes_ohrgeraeusch',
-    text: 'anhaltenden Ohrgeräuschen'
+    text: 'anhaltenden Ohrgeräuschen',
   },
   {
     id: 'hno__auffaellig_haeufiges_schlucken',
-    text: 'auffällig häufigem Schlucken'
+    text: 'auffällig häufigem Schlucken',
   },
   {
     id: 'hno__blut_mund_rachen',
-    text: 'frischem Blut aus Mund/Rachen'
+    text: 'frischem Blut aus Mund/Rachen',
   },
   {
     id: 'hno__eingeschraenkte_mundoeffnung',
-    text: 'erschwerter Mundöffnung'
+    text: 'erschwerter Mundöffnung',
   },
   {
     id: 'hno__geringe_blutspuren_speichel',
-    text: 'wiederkehrenden geringen Blutspuren im Speichel'
+    text: 'wiederholten geringen Blutspuren im Speichel',
   },
   {
     id: 'hno__heiserkeit',
-    text: 'Heiserkeit'
+    text: 'Heiserkeit',
   },
   {
     id: 'hno__kieferklemme',
-    text: 'stark eingeschränkter Mundöffnung'
+    text: 'stark eingeschränkter Mundöffnung',
   },
   {
     id: 'hno__kloessige_stimme',
-    text: 'kloßiger/veränderter Stimme'
+    text: 'kloßiger/veränderter Stimme',
   },
   {
     id: 'hno__ohrsekret',
-    text: 'Flüssigkeits-/Eiteraustritt aus dem Ohr'
+    text: 'Flüssigkeit/Eiter aus dem Ohr',
   },
   {
     id: 'hno__ploetzliche_hoerminderung',
-    text: 'Hörminderung/Hörverlust'
+    text: 'Hörminderung/Hörverlust',
   },
   {
     id: 'hno__schwellung_hinter_ohr',
-    text: 'schmerzhafter Rötung/Schwellung hinter dem Ohr'
+    text: 'schmerzhafter Rötung/Schwellung hinter dem Ohr',
   },
   {
     id: 'hno__speichel_nicht_schluckbar',
-    text: 'Unfähigkeit zum Schlucken von Speichel'
+    text: 'Unfähigkeit zum Schlucken von Speichel',
   },
   {
     id: 'hno__wiederholtes_verschlucken',
-    text: 'wiederholtem Verschlucken beim Trinken/Essen'
+    text: 'wiederholtem Verschlucken beim Essen/Trinken',
   },
   {
     id: 'hno__zunehmende_gesichtsschwellung',
-    text: 'zunehmender Gesichts-/Halsschwellung'
+    text: 'zunehmender Gesichts-/Halsschwellung',
   },
   {
     id: 'hno__zunge_rachenschwellung',
-    text: 'Zungen-/Rachenschwellung'
+    text: 'Zungen-/Rachenschwellung',
   },
   {
     id: 'infekt__anhaltendes_fieber',
-    text: 'anhaltendem/wiederkehrendem Fieber'
+    text: 'anhaltendem/wiederkehrendem Fieber',
   },
   {
     id: 'infekt__fieber_schuettelfrost',
-    text: 'Fieber/Schüttelfrost'
+    text: 'Fieber/Schüttelfrost',
   },
   {
     id: 'infekt__grippeaehnliche_beschwerden',
-    text: 'grippeähnlichen Beschwerden mit Kopf-/Gliederschmerzen'
+    text: 'grippeähnlichen Beschwerden',
   },
   {
     id: 'intox__starkes_zittern_schwitzen',
-    text: 'starkem Zittern/Schwitzen'
+    text: 'starkem Zittern/Schwitzen',
   },
   {
     id: 'intox__uebelkeit_erbrechen',
-    text: 'Übelkeit/Erbrechen'
+    text: 'Übelkeit/Erbrechen',
   },
   {
     id: 'katheter__verminderter_fehlender_urinabfluss',
-    text: 'anhaltend stark vermindertem/fehlendem Urinabfluss',
+    text: 'anhaltend sehr geringem/fehlendem Urinabfluss',
   },
   {
     id: 'katheter__herausgerutscht',
-    text: '(teilw.) herausgerutschtem Katheter',
+    text: 'verrutschtem Katheter',
   },
   {
     id: 'katheter__geringe_leckage_bei_normalem_abfluss',
-    text: 'Urinverlust neben dem Katheter bei sonst normalem Abfluss',
+    text: 'Urin neben dem Katheter trotz normalem Abfluss',
   },
   {
     id: 'kreislauf__anhaltendes_herzrasen',
-    text: 'anhaltendem Herzrasen/Herzstolpern'
+    text: 'anhaltendem Herzrasen/-stolpern',
   },
   {
     id: 'kreislauf__erneute_icd_schocks',
-    text: 'erneuten ICD-Schocks'
+    text: 'erneuten ICD-Schocks',
   },
   {
     id: 'kreislauf__langsamer_herzschlag_mit_beschwerden',
-    text: 'langsamem Herzschlag mit Schwäche/Schwindel'
+    text: 'langsamem Herzschlag mit Schwäche/Schwindel',
   },
   {
     id: 'kreislauf__neue_probleme',
-    text: 'Kreislaufproblemen (starker Schwindel/auffällige Blässe/kalter Schweiß)'
+    text: 'starkem Schwindel, auffälliger Blässe oder kaltem Schweiß',
   },
   {
     id: 'muskeln__anhaltende_leichte_schmerzen',
-    text: 'anhaltenden leichten Muskelschmerzen'
+    text: 'anhaltenden leichten Muskelschmerzen',
   },
   {
     id: 'muskeln__starke_schmerzen_schwellung',
-    text: 'starken Muskelschmerzen/-schwellungen'
+    text: 'starken Muskelschmerzen/-schwellungen',
   },
   {
     id: 'neuro__anhaltende_leichte_kopfschmerzen',
-    text: 'anhaltenden leichten Kopfschmerzen'
+    text: 'anhaltenden leichten Kopfschmerzen',
   },
   {
     id: 'neuro__anhaltende_neugedaechtnisstoerung',
-    text: 'anhaltender Unfähigkeit zum Merken neuer Informationen'
+    text: 'anhaltender Unfähigkeit, Neues zu behalten',
   },
   {
     id: 'neuro__blasen_darmkontrollverlust',
-    text: 'Verlust der Blasen-/Darmkontrolle'
+    text: 'Verlust der Blasen-/Darmkontrolle',
   },
   {
     id: 'neuro__blitzartiger_maximalkopfschmerz',
-    text: 'schlagartig maximalen Kopfschmerzen'
+    text: 'schlagartig maximalen Kopfschmerzen',
   },
   {
     id: 'neuro__erneute_gedaechtnisluecken',
-    text: 'erneuten Erinnerungslücken'
+    text: 'erneuten Erinnerungslücken',
   },
   {
     id: 'neuro__fehlende_erholung_nach_anfall',
-    text: 'fehlender Rückkehr zu normaler Ansprechbarkeit nach einem Krampfanfall'
+    text: 'fehlender normaler Ansprechbarkeit nach Krampfanfall',
   },
   {
     id: 'neuro__gesichtslaehmung',
-    text: 'einseitiger Gesichtslähmung'
+    text: 'einseitiger Gesichtslähmung',
   },
   {
     id: 'neuro__gesichtstaubheit',
-    text: 'Taubheit im Gesicht'
+    text: 'Taubheit im Gesicht',
   },
   {
     id: 'neuro__leichte_konzentrationsprobleme',
-    text: 'anhaltenden Konzentrationsproblemen'
+    text: 'anhaltenden Konzentrationsproblemen',
   },
   {
     id: 'neuro__leichter_lageschwindel',
-    text: 'kurzzeitigem Schwindel beim Aufstehen'
+    text: 'kurzem Schwindel beim Aufstehen',
   },
   {
     id: 'neuro__leichter_wiederkehrender_schwindel',
-    text: 'wiederkehrendem leichtem Schwindel'
+    text: 'wiederkehrendem leichtem Schwindel',
   },
   {
     id: 'neuro__muskelkraempfe',
-    text: 'Muskelkrämpfen'
+    text: 'Muskelkrämpfen',
   },
   {
     id: 'neuro__neue_bewusstlosigkeit',
-    text: 'Bewusstlosigkeit'
+    text: 'Bewusstlosigkeit',
   },
   {
     id: 'neuro__neue_einseitige_schwaeche',
-    text: 'einseitiger Schwäche/Lähmung'
+    text: 'einseitiger Schwäche/Lähmung',
   },
   {
     id: 'neuro__neue_gangunsicherheit',
-    text: 'ausgeprägter Gangunsicherheit'
+    text: 'ausgeprägter Gangunsicherheit',
   },
   {
     id: 'neuro__neue_krampfanfaelle',
-    text: 'einem Krampfanfall'
+    text: 'einem Krampfanfall',
   },
   {
     id: 'neuro__neue_nackensteifigkeit',
-    text: 'Nackensteifigkeit'
+    text: 'Nackensteifigkeit',
   },
   {
     id: 'neuro__neue_sprachstoerung',
-    text: 'Sprachstörungen'
+    text: 'Sprachstörungen',
   },
   {
     id: 'neuro__neue_verwirrtheit',
-    text: 'Verwirrtheit'
+    text: 'Verwirrtheit',
   },
   {
     id: 'neuro__ploetzliche_starke_kopfschmerzen',
-    text: 'starken Kopfschmerzen'
+    text: 'starken Kopfschmerzen',
   },
   {
     id: 'neuro__taubheit_schritt',
-    text: 'Taubheit im Schritt/Gesäßbereich'
+    text: 'Taubheit im Schritt/Gesäßbereich',
   },
   {
     id: 'neuro__wiederkehrende_gesichtsschmerzen',
-    text: 'wiederkehrenden Gesichtsschmerzattacken'
+    text: 'wiederkehrenden Gesichtsschmerzattacken',
   },
   {
     id: 'neuro__wiederkehrende_typische_kopfschmerzen',
-    text: 'wiederkehrenden Kopfschmerzen im bekannten Muster'
+    text: 'wiederkehrenden gewohnten Kopfschmerzen',
   },
   {
     id: 'neuro__zunehmende_muskelschwaeche',
-    text: 'zunehmender Muskelschwäche'
+    text: 'zunehmender Muskelschwäche',
   },
   {
     id: 'neuro__zunehmende_schlaefrigkeit',
-    text: 'zunehmender Schläfrigkeit/erschwerter Weckbarkeit'
+    text: 'zunehmender Schläfrigkeit/erschwerter Weckbarkeit',
   },
   {
     id: 'paediatrie__anfallsartiges_schreien_blaesse',
-    text: 'anfallsartigem Schreien mit Blässe'
+    text: 'anfallsartigem Schreien mit Blässe',
   },
   {
     id: 'paediatrie__angestrengte_atmung',
-    text: 'angestrengter Atmung mit Einziehungen/Stöhnen'
+    text: 'angestrengter Atmung mit Einziehungen/Stöhnen',
   },
   {
     id: 'paediatrie__schlaff_teilnahmslos',
-    text: 'auffälliger Schlaffheit/Teilnahmslosigkeit'
+    text: 'Schlaffheit/Teilnahmslosigkeit',
   },
   {
     id: 'paediatrie__trinkschwaeche',
-    text: 'deutlich vermindertem Trinken'
+    text: 'deutlich vermindertem Trinken',
   },
   {
     id: 'paediatrie__wenige_nasse_windeln',
-    text: 'deutlich weniger nassen Windeln'
+    text: 'deutlich weniger nassen Windeln',
   },
   {
     id: 'paediatrie__wiederkehrender_bellender_husten',
-    text: 'wiederkehrendem bellendem Husten'
+    text: 'wiederkehrendem bellendem Husten',
   },
   {
     id: 'peg__fluessigkeitsaustritt',
-    text: 'Austritt von Nahrung/Mageninhalt an der Sondenöffnung'
+    text: 'Austritt von Nahrung/Mageninhalt an der Sondenöffnung',
   },
   {
     id: 'psych__anhaltende_alltagsbeeintraechtigung',
-    text: 'anhaltenden Schwierigkeiten bei Bewältigung des Alltags'
+    text: 'anhaltenden Problemen der Alltagsbewältigung',
   },
   {
     id: 'psych__anhaltende_niedergeschlagenheit',
-    text: 'anhaltender Niedergeschlagenheit/Interesselosigkeit'
+    text: 'anhaltender Niedergeschlagenheit/Interesselosigkeit',
   },
   {
     id: 'psych__anhaltende_schlafstoerungen',
-    text: 'anhaltenden Schlafstörungen'
+    text: 'anhaltenden Schlafstörungen',
   },
   {
     id: 'psych__belastende_wiedererinnerungen',
-    text: 'wiederkehrenden belastenden Erinnerungen/Albträumen'
+    text: 'wiederkehrenden belastenden Erinnerungen/Albträumen',
   },
   {
     id: 'psych__fremdgefaehrdungsimpulse',
-    text: 'Fremdgefährdungsimpulsen'
+    text: 'Fremdgefährdungsimpulsen',
   },
   {
     id: 'psych__gefaehrliches_enthemmtes_verhalten',
-    text: 'unkontrollierbarem riskantem Verhalten'
+    text: 'unkontrollierbarem riskantem Verhalten',
   },
   {
     id: 'psych__halluzinationen',
-    text: 'Stimmenhören/Halluzinationen'
+    text: 'Stimmenhören/Halluzinationen',
   },
   {
     id: 'psych__konkrete_suizidabsicht',
-    text: 'konkreten Absichten zur Selbsttötung'
+    text: 'konkreten Suizidabsichten',
   },
   {
     id: 'psych__schlaflosigkeit_mit_ueberaktivitaet',
-    text: 'ausbleibendem Schlaf mit ausgeprägter Überaktivität'
+    text: 'Schlaflosigkeit mit starker Überaktivität',
   },
   {
     id: 'psych__schwere_erregung',
-    text: 'extremen Erregungszuständen mit Kontrollverlust'
+    text: 'starker Erregung mit Kontrollverlust',
   },
   {
     id: 'psych__suizidgedanken',
-    text: 'Gedanken an Suizid/Selbstverletzung'
+    text: 'Suizid-/Selbstverletzungsgedanken',
   },
   {
     id: 'psych__wiederkehrende_angstzustaende',
-    text: 'wiederkehrenden Angstzuständen'
+    text: 'wiederkehrenden Angstzuständen',
   },
   {
     id: 'psych__zunehmende_selbstvernachlaessigung',
-    text: 'Selbstvernachlässigung'
+    text: 'Selbstvernachlässigung',
   },
   {
     id: 'pulmo__anhaltender_husten',
-    text: 'anhaltendem Husten'
+    text: 'anhaltendem Husten',
   },
   {
     id: 'pulmo__atempausen',
-    text: 'Atempausen'
+    text: 'Atempausen',
   },
   {
     id: 'pulmo__blutspuren_im_auswurf',
-    text: 'einzelnen Blutspuren im Auswurf'
+    text: 'einzelnen Blutspuren im Auswurf',
   },
   {
     id: 'pulmo__langsame_flache_atmung',
-    text: 'auffällig langsamer/flacher Atmung'
+    text: 'auffällig langsamer/flacher Atmung',
   },
   {
     id: 'pulmo__neue_luftnot',
-    text: 'Atemnot'
+    text: 'Atemnot',
   },
   {
     id: 'pulmo__relevante_haemoptyse',
-    text: 'stärkerem/wiederholtem Bluthusten'
+    text: 'stärkerem/wiederholtem Bluthusten',
   },
   {
     id: 'pulmo__schaumiger_auswurf',
-    text: 'schaumigem/rosafarbenem Auswurf'
+    text: 'schaumigem/rosafarbenem Auswurf',
   },
   {
     id: 'pulmo__stridor',
-    text: 'pfeifendem/ziehendem Geräusch beim Einatmen'
+    text: 'pfeifendem/ziehendem Einatemgeräusch',
   },
   {
     id: 'pulmo__stridor_in_ruhe',
-    text: 'pfeifendem/ziehendem Einatemgeräusch in Ruhe'
+    text: 'pfeifendem/ziehendem Einatemgeräusch in Ruhe',
   },
   {
     id: 'pulmo__zyanose',
-    text: 'bläulichen Lippen'
+    text: 'bläulichen Lippen',
   },
   {
     id: 'ruecken__starke_schmerzen',
-    text: 'starken Nacken-/Rückenschmerzen'
+    text: 'starken Nacken-/Rückenschmerzen',
   },
   {
     id: 'sehstoerung__neue_doppelbilder',
-    text: 'Doppelbildern'
+    text: 'Doppelbildern',
   },
   {
     id: 'sehstoerung__neue_lichtblitze',
-    text: 'Lichtblitzen'
+    text: 'Lichtblitzen',
   },
   {
     id: 'sehstoerung__neuer_gesichtsfeldschatten',
-    text: 'dunklem Schatten/Vorhang im Gesichtsfeld'
+    text: 'Schatten/Vorhang im Blickfeld',
   },
   {
     id: 'sehstoerung__neuer_russregen',
-    text: 'zahlreichen schwarzen Punkten vorm Auge'
+    text: 'vielen schwarzen Punkten vorm Auge',
   },
   {
     id: 'sehstoerung__ploetzlicher_sehverlust',
-    text: 'Sehverlust'
+    text: 'Sehverlust',
   },
   {
     id: 'sehstoerung__rasche_sehverschlechterung',
-    text: 'rascher Sehverschlechterung'
+    text: 'rascher Sehverschlechterung',
   },
   {
     id: 'shunt__anhaltende_erneute_blutung',
-    text: 'anhaltender/erneuter Blutung am Dialyseshunt'
+    text: 'anhaltender/erneuter Blutung am Dialyseshunt',
   },
   {
     id: 'shunt__roetung_schmerzen_verlauf',
-    text: 'Rötung/Schmerzen entlang des Shuntschlauchs'
+    text: 'Rötung/Schmerzen entlang des Shuntschlauchs',
   },
   {
     id: 'stoffwechsel__anhaltende_muedigkeit',
-    text: 'anhaltender Müdigkeit'
+    text: 'anhaltender Müdigkeit',
   },
   {
     id: 'stoffwechsel__durst_mundtrockenheit',
-    text: 'anhaltendem Durst/trockenem Mund'
+    text: 'anhaltendem Durst/trockenem Mund',
   },
   {
     id: 'stoffwechsel__fehlende_trinkfaehigkeit',
-    text: 'fehlender Trinkfähigkeit'
+    text: 'fehlender Trinkfähigkeit',
   },
   {
     id: 'stoffwechsel__fruchtiger_atem',
-    text: 'fruchtig/azetonartig riechendem Atem'
+    text: 'fruchtigem/azetonartigem Atem',
   },
   {
     id: 'stoffwechsel__gelbfaerbung',
-    text: 'Gelbfärbung von Haut/Augen'
+    text: 'Gelbfärbung von Haut/Augen',
   },
   {
     id: 'stoffwechsel__starker_durst_polyurie',
-    text: 'starkem Durst mit häufigem Wasserlassen'
+    text: 'starkem Durst mit häufigem Wasserlassen',
   },
   {
     id: 'stoffwechsel__tiefe_schnelle_atmung',
-    text: 'auffällig tiefer/schneller Atmung'
+    text: 'auffällig tiefer/schneller Atmung',
   },
   {
     id: 'stoffwechsel__ungewollter_gewichtsverlust',
-    text: 'ungewolltem Gewichtsverlust'
+    text: 'ungewolltem Gewichtsverlust',
   },
   {
     id: 'stoffwechsel__wiederkehrende_uebelkeit',
-    text: 'wiederkehrender Übelkeit'
+    text: 'wiederkehrender Übelkeit',
   },
   {
     id: 'stoma__dunkle_blasse_verfaerbung',
-    text: 'dunkler/auffällig blasser Verfärbung des Stomas'
+    text: 'dunklem/auffällig blassem Stoma',
   },
   {
     id: 'stoma__foerderstopp',
-    text: 'plötzlich ausbleibender Ausscheidung'
+    text: 'plötzlich ausbleibender Ausscheidung',
   },
   {
     id: 'stoma__hautreizung',
-    text: 'zunehmenden Hautreizungen im Stomabereich'
+    text: 'zunehmender Hautreizung am Stoma',
   },
   {
     id: 'stoma__nicht_ruecklaeufiger_prolaps',
-    text: 'nicht rückläufigem Hervortreten'
+    text: 'nicht zurückgehendem Stomavorfall',
   },
   {
     id: 'stoma__starke_blutung',
-    text: 'starker Blutung aus dem Stoma'
+    text: 'starker Blutung aus dem Stoma',
   },
   {
     id: 'stoma__vermehrte_duennfluessige_ausscheidung',
-    text: 'anhaltend vermehrter dünnflüssiger Ausscheidung'
+    text: 'anhaltend vermehrter dünnflüssiger Ausscheidung',
   },
   {
     id: 'stoma__verminderte_ausscheidung',
-    text: 'anhaltend verminderter Ausscheidung'
+    text: 'anhaltend verminderter Ausscheidung',
   },
   {
     id: 'temperatur__auffaellig_kalte_haut',
-    text: 'auffällig kalter Haut'
+    text: 'auffällig kalter Haut',
   },
   {
     id: 'temperatur__nachlassendes_kaeltezittern',
-    text: 'nachlassendem Zittern trotz anhaltender Kälte'
+    text: 'nachlassendem Zittern trotz Kälte',
   },
   {
     id: 'thorax__schmerzen_druck',
-    text: 'Brustschmerzen/Druckgefühl'
+    text: 'Brustschmerzen/Druckgefühl',
   },
   {
     id: 'trachea__frische_blutung',
-    text: 'frischer Blutung aus/an der Trachealkanüle'
+    text: 'frischem Blut aus/an der Trachealkanüle',
   },
   {
     id: 'trachea__verminderter_luftstrom',
-    text: 'vermindertem/fehlendem Luftstrom an der Kanüle'
+    text: 'vermindertem/fehlendem Luftstrom an der Kanüle',
   },
   {
     id: 'trauma__anhaltende_leichte_schmerzen',
-    text: 'anhaltenden leichten Schmerzen'
+    text: 'anhaltenden leichten Schmerzen',
   },
   {
     id: 'umwelt__sehr_heisse_haut',
-    text: 'sehr heißer Haut'
+    text: 'sehr heißer Haut',
   },
   {
     id: 'unterdruck__anhaltender_wiederkehrender_alarm',
@@ -886,103 +886,103 @@ export const DATA_Signals: readonly RedflagSignal[] = [
   },
   {
     id: 'uro__anhaltende_oligurie_anurie',
-    text: 'anhaltend stark vermindertem/ausbleibendem Wasserlassen'
+    text: 'anhaltend sehr wenig/keinem Urin',
   },
   {
     id: 'uro__anhaltende_schmerzhafte_erektion',
-    text: 'anhaltender schmerzhafter Erektion'
+    text: 'anhaltender schmerzhafter Erektion',
   },
   {
     id: 'uro__dunkelbrauner_urin',
-    text: 'dunkelbraunem Urin'
+    text: 'dunkelbraunem Urin',
   },
   {
     id: 'uro__eichelreizung',
-    text: 'Rötung/Juckreiz an Eichel/Vorhaut'
+    text: 'Rötung/Juckreiz an Eichel/Vorhaut',
   },
   {
     id: 'uro__eichelsekret',
-    text: 'Sekret an Eichel/Vorhaut'
+    text: 'Sekret an Eichel/Vorhaut',
   },
   {
     id: 'uro__eicheltaubheit',
-    text: 'Taubheit der Eichel'
+    text: 'Taubheit der Eichel',
   },
   {
     id: 'uro__eichelverfaerbung',
-    text: 'dunkler/bläulicher Verfärbung der Eichel'
+    text: 'dunkler/bläulicher Eichelverfärbung',
   },
   {
     id: 'uro__eingeklemmte_vorhaut',
-    text: 'schmerzhaft hinter der Eichel festsitzender Vorhaut'
+    text: 'schmerzhaft hinter der Eichel festsitzender Vorhaut',
   },
   {
     id: 'uro__flankenschmerzen',
-    text: 'starken Schmerzen in der Nierengegend/Flanke'
+    text: 'starken Flanken-/Nierenschmerzen',
   },
   {
     id: 'uro__gerinnsel_im_urin',
-    text: 'Blutgerinnseln im Urin'
+    text: 'Blutgerinnseln im Urin',
   },
   {
     id: 'uro__neue_haematurie',
-    text: 'Blut im Urin'
+    text: 'Blut im Urin',
   },
   {
     id: 'uro__rasch_zunehmende_oedeme',
-    text: 'rasch zunehmenden Bein-/Gesichtsschwellungen'
+    text: 'rasch zunehmenden Bein-/Gesichtsschwellungen',
   },
   {
     id: 'uro__rasche_penisschwellung',
-    text: 'rasch zunehmender Penisschwellung'
+    text: 'rasch zunehmender Penisschwellung',
   },
   {
     id: 'uro__starke_flankenschmerzen',
-    text: 'starken Schmerzen in der Nierengegend/Flanke'
+    text: 'starken Flanken-/Nierenschmerzen',
   },
   {
     id: 'uro__starke_penisschmerzen',
-    text: 'starken Schmerzen an Eichel/Vorhaut'
+    text: 'starken Eichel-/Vorhautschmerzen',
   },
   {
     id: 'uro__truebes_dialysat',
-    text: 'trüber Flüssigkeit im Dialysebeutel'
+    text: 'trüber Dialyseflüssigkeit',
   },
   {
     id: 'uro__verfaerbung_hodensack',
-    text: 'dunkler/bläulicher Verfärbung'
+    text: 'dunkler/bläulicher Verfärbung',
   },
   {
     id: 'uro__zunehmende_hodenschmerzen',
-    text: 'erneuten/zunehmenden Hodenschmerzen'
+    text: 'erneuten/zunehmenden Hodenschmerzen',
   },
   {
     id: 'uro__zunehmende_hodenschwellung',
-    text: 'rasch zunehmender Schwellung'
+    text: 'rasch zunehmender Schwellung',
   },
   {
     id: 'uro__starke_blasenschmerzen',
-    text: 'starken Schmerzen im Blasenbereich',
+    text: 'starken Blasenschmerzen',
   },
   {
     id: 'uro__geringe_blutspuren_urin',
-    text: 'geringen wiederkehrenden Blutspuren im Urin',
+    text: 'wiederholten geringen Blutspuren im Urin',
   },
   {
     id: 'verband__wiederkehrendes_druckgefuehl',
-    text: 'wiederkehrendem Druckgefühl unterm Verband'
+    text: 'erneutem Druckgefühl unterm Verband',
   },
   {
     id: 'wunde__rasch_zunehmender_bluterguss',
-    text: 'rasch zunehmendem Bluterguss'
+    text: 'rasch zunehmendem Bluterguss',
   },
   {
     id: 'wunde__starke_anhaltende_blutung',
-    text: 'starker/nicht stillbarer Blutung'
+    text: 'starker/unstillbarer Blutung',
   },
   {
     id: 'wunde__zunehmende_schmerzen',
-    text: 'zunehmenden Wundschmerzen'
+    text: 'zunehmenden Wundschmerzen',
   },
   {
     id: 'wunde__anhaltende_zunehmende_sekretion',
@@ -1011,7 +1011,85 @@ export const DATA_Signals: readonly RedflagSignal[] = [
   {
     id: 'wunde__starke_schmerzen',
     text: 'starken Wundschmerzen',
-  }
+  },
+
+  // Konkrete ODER-Gruppen; bestehende Signal-IDs bleiben für gespeicherte Auswahlen erhalten.
+  {
+    id: 'drainage__funktionsstoerung',
+    text: 'Abfluss-/Sogstörung, Leckage oder verrutschtem Schlauch',
+  },
+  {
+    id: 'extremitaet__durchblutungszeichen',
+    text: 'einem auffällig blassen, blauen oder kalten Arm/Bein',
+  },
+  {
+    id: 'extremitaet__sensomotorikstoerung',
+    text: 'Gefühls- oder Bewegungsstörungen',
+  },
+  {
+    id: 'gelenk__zunehmende_schmerzen_schwellung',
+    text: 'zunehmenden Gelenkschmerzen oder -schwellungen',
+  },
+  {
+    id: 'haut__lokale_entzuendungszeichen',
+    text: 'zunehmender Rötung/Schwellung',
+  },
+  {
+    id: 'haut__schmerzhafte_ausgedehnte_blaeschen',
+    text: 'schmerzhaften oder sich ausbreitenden Hautbläschen',
+  },
+  {
+    id: 'neuro__bewusstseinsstoerung',
+    text: 'zunehmender Schläfrigkeit, Verwirrtheit oder Bewusstlosigkeit',
+  },
+  {
+    id: 'neuro__blasen_darmstoerung',
+    text: 'neu erschwertem Wasserlassen oder Verlust der Blasen-/Darmkontrolle',
+  },
+  {
+    id: 'neuro__fokale_ausfaelle',
+    text: 'einseitiger Schwäche, Sprach- oder Sehstörungen',
+  },
+  {
+    id: 'paediatrie__fieber_ab_38',
+    text: 'Fieber ab 38 °C',
+  },
+  {
+    id: 'psych__erregung_gefaehrliches_verhalten',
+    text: 'Kontrollverlust oder gefährlichem Verhalten',
+  },
+  {
+    id: 'pulmo__atemdepression',
+    text: 'langsamer/flacher Atmung oder Atempausen',
+  },
+  {
+    id: 'sehstoerung__netzhautwarnzeichen',
+    text: 'Lichtblitzen, neuen schwarzen Punkten oder Schatten im Blickfeld',
+  },
+  {
+    id: 'sehstoerung__sehverschlechterung_verlust',
+    text: 'rascher Sehverschlechterung/Sehverlust',
+  },
+  {
+    id: 'unterdruck__funktionsstoerung',
+    text: 'Pumpenalarm/-ausfall oder undichtem Verband',
+  },
+  {
+    id: 'uro__starke_blasen_flankenschmerzen',
+    text: 'starken Blasen- oder Flankenschmerzen',
+  },
+  {
+    id: 'wunde__auffaellige_sekretion',
+    text: 'anhaltendem/zunehmendem/erneutem Wundnässen',
+  },
+  {
+    id: 'wunde__infektsekret',
+    text: 'eitrigem/übelriechendem Wundsekret',
+  },
+  {
+    id: 'wunde__lokale_verschlechterung',
+    text: 'zunehmenden Wundschmerzen/Rötungen/Schwellungen',
+  },
 ]
 
 // ---------------------------------------------------------------------------
@@ -1052,8 +1130,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'haut',
     majorSignalIds: [
-      'gelenk__zunehmende_schmerzen', 'gelenk__zunehmende_schwellung', 'gelenk__bewegungsverlust',
-      'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
+      'gelenk__zunehmende_schmerzen_schwellung',
+      'gelenk__bewegungsverlust',
+      'infekt__fieber_schuettelfrost',
+      'kreislauf__neue_probleme',
+      'neuro__neue_verwirrtheit',
       'pulmo__neue_luftnot',
     ],
     minorSignalIds: [],
@@ -1077,8 +1158,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'neuro__neue_verwirrtheit', 'psych__schwere_erregung', 'pulmo__neue_luftnot',
     ],
     minorSignalIds: [
-      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
-      'psych__belastende_wiedererinnerungen', 'psych__anhaltende_alltagsbeeintraechtigung',
+      'psych__anhaltende_schlafstoerungen',
+      'psych__wiederkehrende_angstzustaende',
+      'psych__belastende_wiedererinnerungen',
     ],
     minorSpecialist: 'Psychiater',
     diagnoses: ['Akute Belastungsreaktion', 'Anpassungsstörung'],
@@ -1099,10 +1181,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'psych__fremdgefaehrdungsimpulse', 'psych__schwere_erregung', 'psych__halluzinationen',
       'psych__suizidgedanken', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
     ],
-    minorSignalIds: [
-      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
-      'psych__anhaltende_alltagsbeeintraechtigung',
-    ],
+    minorSignalIds: [],
     diagnoses: ['Psychose', 'Delir', 'Intoxikation'],
     consequences: ['schweren Selbst-/Fremdverletzungen, übersehenen Vergiftungen/körperlichen Erkrankungen, bleibenden Schäden oder dem Tod'],
   },
@@ -1119,9 +1198,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'kreislauf',
     majorSignalIds: [
-      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
-      'extremitaet__zunehmende_schmerzen', 'extremitaet__pulsverlust', 'extremitaet__sensibilitaetsstoerung',
-      'extremitaet__bewegungsstoerung',
+      'extremitaet__durchblutungszeichen',
+      'extremitaet__zunehmende_schmerzen',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__pulsverlust',
     ],
     minorSignalIds: [],
     diagnoses: ['Akuter arterieller Gefäßverschluss'],
@@ -1144,9 +1224,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme', 'infekt__fieber_schuettelfrost', 'uro__neue_haematurie',
       'uro__starke_flankenschmerzen', 'uro__rasch_zunehmende_oedeme',
     ],
-    minorSignalIds: [
-      'stoffwechsel__anhaltende_muedigkeit', 'stoffwechsel__wiederkehrende_uebelkeit',
-    ],
+    minorSignalIds: [],
     minorSpecialist: 'Urologen',
     diagnoses: ['Akutes Nierenversagen', 'Harnverhalt', 'Elektrolytstörung'],
     consequences: ['akutem Nierenversagen, lebensbedrohlichen Herzrhythmusstörungen, einem Lungenödem, bleibenden Nierenschäden, Dialysepflichtigkeit oder dem Tod'],
@@ -1167,10 +1245,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'psych__schwere_erregung', 'neuro__neue_verwirrtheit', 'psych__zunehmende_selbstvernachlaessigung',
       'neuro__neue_krampfanfaelle', 'neuro__neue_bewusstlosigkeit', 'infekt__fieber_schuettelfrost',
     ],
-    minorSignalIds: [
-      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
-      'psych__anhaltende_alltagsbeeintraechtigung',
-    ],
+    minorSignalIds: [],
     diagnoses: ['Akute Psychose', 'Delir', 'Intoxikation'],
     consequences: ['schweren Selbst-/Fremdverletzungen, übersehenen körperlichen Erkrankungen, fehlender Selbstversorgung, bleibenden Schäden oder dem Tod'],
   },
@@ -1186,11 +1261,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'augen',
     majorSignalIds: [
-      'sehstoerung__ploetzlicher_sehverlust', 'sehstoerung__rasche_sehverschlechterung',
-      'sehstoerung__neue_doppelbilder', 'sehstoerung__neue_lichtblitze', 'sehstoerung__neuer_russregen',
-      'sehstoerung__neuer_gesichtsfeldschatten', 'augen__starke_augenschmerzen',
-      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_sprachstoerung',
-      'neuro__neue_einseitige_schwaeche', 'neuro__neue_gangunsicherheit', 'neuro__neue_verwirrtheit',
+      'sehstoerung__sehverschlechterung_verlust',
+      'sehstoerung__neue_doppelbilder',
+      'sehstoerung__netzhautwarnzeichen',
+      'augen__starke_augenschmerzen',
+      'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__neue_sprachstoerung',
+      'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_gangunsicherheit',
+      'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [],
     diagnoses: ['Schlaganfall', 'Retinaler Gefäßverschluss', 'Netzhautablösung'],
@@ -1220,9 +1299,8 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name_alt: 'Netzhautablösung',
     requirements: 'Neu aufgetretene Symptome, insbesondere Vorhangphänomen; dringlicher Ausschluss von Netzhautriss oder -ablösung.',
     majorSignalIds: [
-      'sehstoerung__neue_lichtblitze', 'sehstoerung__neuer_russregen',
-      'sehstoerung__neuer_gesichtsfeldschatten', 'sehstoerung__rasche_sehverschlechterung',
-      'sehstoerung__ploetzlicher_sehverlust',
+      'sehstoerung__netzhautwarnzeichen',
+      'sehstoerung__sehverschlechterung_verlust',
     ],
     minorSignalIds: [],
     diagnoses: ['Netzhautriss', 'Netzhautablösung', 'Glaskörperblutung'],
@@ -1244,9 +1322,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'abdomen__zunehmende_schmerzen', 'abdomen__hart_geblaeht', 'abdomen__anhaltendes_erbrechen',
       'kreislauf__neue_probleme', 'infekt__fieber_schuettelfrost',
     ],
-    minorSignalIds: [
-      'stoma__verminderte_ausscheidung', 'stoma__hautreizung',
-    ],
+    minorSignalIds: [],
     diagnoses: ['Stomaischämie', 'Darmverschluss', 'Peritonitis'],
     consequences: ['absterbendem Darmgewebe, einem Darmverschluss, einer Bauchfellentzündung, Kreislaufversagen oder dem Tod'],
   },
@@ -1262,14 +1338,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'psych',
     majorSignalIds: [
-      'psych__suizidgedanken', 'psych__konkrete_suizidabsicht', 'psych__halluzinationen',
-      'psych__schwere_erregung', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
-      'neuro__neue_krampfanfaelle', 'pulmo__neue_luftnot', 'psych__zunehmende_selbstvernachlaessigung',
+      'psych__suizidgedanken',
+      'psych__halluzinationen',
+      'psych__schwere_erregung',
+      'neuro__neue_verwirrtheit',
+      'neuro__neue_bewusstlosigkeit',
+      'neuro__neue_krampfanfaelle',
+      'pulmo__neue_luftnot',
     ],
-    minorSignalIds: [
-      'psych__anhaltende_schlafstoerungen', 'psych__wiederkehrende_angstzustaende',
-      'psych__anhaltende_alltagsbeeintraechtigung',
-    ],
+    minorSignalIds: [],
     diagnoses: ['Akute Suizidalität', 'Intoxikation', 'Depressive Episode'],
     consequences: ['erneuten Suizidhandlungen, unbemerkten Verletzungen/Vergiftungen, bleibenden Gesundheitsschäden oder dem Tod'],
   },
@@ -1285,15 +1362,17 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'neuro',
     majorSignalIds: [
-      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'neuro__zunehmende_schlaefrigkeit',
-      'neuro__neue_einseitige_schwaeche', 'neuro__neue_sprachstoerung', 'neuro__neue_krampfanfaelle',
-      'neuro__ploetzliche_starke_kopfschmerzen', 'infekt__fieber_schuettelfrost', 'psych__halluzinationen',
-      'psych__schwere_erregung', 'pulmo__neue_luftnot',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung',
+      'neuro__neue_krampfanfaelle',
+      'neuro__ploetzliche_starke_kopfschmerzen',
+      'infekt__fieber_schuettelfrost',
+      'psych__halluzinationen',
+      'psych__schwere_erregung',
+      'pulmo__neue_luftnot',
     ],
-    minorSignalIds: [
-      'psych__anhaltende_schlafstoerungen', 'stoffwechsel__anhaltende_muedigkeit',
-      'neuro__leichte_konzentrationsprobleme',
-    ],
+    minorSignalIds: [],
     diagnoses: ['Delir', 'Schlaganfall', 'Sepsis'],
     consequences: ['übersehenen Schlaganfällen, schweren Infektionen, Stoffwechselentgleisungen, Krampfanfällen, bleibenden Hirnschäden oder dem Tod'],
   },
@@ -1304,14 +1383,17 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Akute Gedächtnisstörung/Amnesie',
     requirements: 'Neue Unfähigkeit, Informationen zu behalten, oder ungeklärte Erinnerungslücke; nicht vorschnell als harmlose transiente Amnesie einstufen.',
     majorSignalIds: [
-      'neuro__erneute_gedaechtnisluecken', 'neuro__anhaltende_neugedaechtnisstoerung',
-      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'neuro__neue_krampfanfaelle', 'neuro__ploetzliche_starke_kopfschmerzen',
-      'neuro__neue_gangunsicherheit', 'sehstoerung__ploetzlicher_sehverlust', 'infekt__fieber_schuettelfrost',
+      'neuro__erneute_gedaechtnisluecken',
+      'neuro__anhaltende_neugedaechtnisstoerung',
+      'neuro__neue_verwirrtheit',
+      'neuro__neue_bewusstlosigkeit',
+      'neuro__fokale_ausfaelle',
+      'neuro__neue_krampfanfaelle',
+      'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__neue_gangunsicherheit',
+      'infekt__fieber_schuettelfrost',
     ],
-    minorSignalIds: [
-      'neuro__leichte_konzentrationsprobleme', 'stoffwechsel__anhaltende_muedigkeit',
-    ],
+    minorSignalIds: [],
     diagnoses: ['Schlaganfall', 'Epileptischer Anfall', 'Transiente globale Amnesie'],
     consequences: ['übersehenen Schlaganfällen, epileptischen Anfällen, Gehirnentzündungen, bleibenden Gedächtnisstörungen oder dem Tod'],
   },
@@ -1346,10 +1428,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'neuro',
     majorSignalIds: [
-      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_bewusstlosigkeit',
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'neuro__neue_krampfanfaelle', 'sehstoerung__ploetzlicher_sehverlust',
-      'sehstoerung__neue_doppelbilder', 'neuro__neue_gangunsicherheit', 'abdomen__anhaltendes_erbrechen',
+      'neuro__blitzartiger_maximalkopfschmerz',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_einseitige_schwaeche',
+      'neuro__neue_sprachstoerung',
+      'sehstoerung__ploetzlicher_sehverlust',
+      'sehstoerung__neue_doppelbilder',
+      'neuro__neue_krampfanfaelle',
+      'neuro__neue_gangunsicherheit',
+      'abdomen__anhaltendes_erbrechen',
       'neuro__neue_nackensteifigkeit',
     ],
     minorSignalIds: [],
@@ -1368,8 +1455,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'atmung',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'pulmo__schaumiger_auswurf', 'pulmo__zyanose', 'thorax__schmerzen_druck',
-      'kreislauf__neue_probleme', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+      'pulmo__neue_luftnot',
+      'pulmo__schaumiger_auswurf',
+      'pulmo__zyanose',
+      'thorax__schmerzen_druck',
+      'kreislauf__neue_probleme',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Lungenödem', 'Akute Herzinsuffizienz', 'Akutes Koronarsyndrom'],
@@ -1410,7 +1501,8 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung', 'augen__lichtscheu',
     ],
     minorSignalIds: [
-      'augen__juckreiz_traenenfluss', 'augen__anhaltende_roetung', 'augen__eitriges_sekret',
+      'augen__juckreiz_traenenfluss',
+      'augen__eitriges_sekret',
     ],
     diagnoses: ['Allergische Konjunktivitis', 'Keratitis', 'Uveitis'],
     consequences: ['einer übersehenen Hornhautentzündung, anhaltenden Beschwerden oder bleibender Sehverschlechterung'],
@@ -1447,7 +1539,8 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'neuro__neue_bewusstlosigkeit',
     ],
     minorSignalIds: [
-      'haut__zunehmende_lokale_roetung', 'haut__zunehmende_lokale_schwellung', 'haut__anhaltender_juckreiz',
+      'haut__lokale_entzuendungszeichen',
+      'haut__anhaltender_juckreiz',
     ],
     diagnoses: ['Lokale Stichreaktion', 'Anaphylaxie', 'Hautinfektion'],
     consequences: ['einer übersehenen allergischen Allgemeinreaktion, Atemwegsverengung oder fortschreitenden Hautinfektion'],
@@ -1543,8 +1636,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'atmung',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__zyanose', 'pulmo__stridor',
-      'kreislauf__neue_probleme', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+      'pulmo__neue_luftnot',
+      'thorax__schmerzen_druck',
+      'pulmo__zyanose',
+      'pulmo__stridor',
+      'kreislauf__neue_probleme',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Lungenembolie', 'Akute Herzinsuffizienz', 'Asthma-/COPD-Exazerbation'],
@@ -1562,8 +1659,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'augen',
     majorSignalIds: [
-      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung',
-      'sehstoerung__ploetzlicher_sehverlust', 'augen__lichtscheu',
+      'augen__starke_augenschmerzen',
+      'sehstoerung__sehverschlechterung_verlust',
+      'augen__lichtscheu',
     ],
     minorSignalIds: [],
     diagnoses: ['Hornhautverätzung', 'Bindehautverätzung', 'Sekundärglaukom'],
@@ -1581,8 +1679,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'atmung',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'pulmo__langsame_flache_atmung', 'pulmo__atempausen', 'pulmo__zyanose',
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+      'pulmo__neue_luftnot',
+      'pulmo__langsame_flache_atmung',
+      'pulmo__atempausen',
+      'pulmo__zyanose',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Akute Ateminsuffizienz', 'Hyperkapnie', 'Hypoxie'],
@@ -1645,7 +1746,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'abdomen__leichte_wiederkehrende_schmerzen', 'stoffwechsel__wiederkehrende_uebelkeit',
+      'abdomen__leichte_wiederkehrende_schmerzen',
       'abdomen__anhaltender_durchfall',
     ],
     diagnoses: ['Appendizitis', 'Darmverschluss', 'Gastrointestinale Blutung'],
@@ -1695,8 +1796,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'abdomen__windverhalt_mit_blaehung', 'infekt__fieber_schuettelfrost',
     ],
     minorSignalIds: [
-      'abdomen__leichte_wiederkehrende_schmerzen', 'abdomen__anhaltender_durchfall',
-      'abdomen__anhaltende_verstopfung', 'abdomen__naechtliche_beschwerden',
+      'abdomen__anhaltender_durchfall',
+      'abdomen__anhaltende_verstopfung',
+      'abdomen__naechtliche_beschwerden',
       'stoffwechsel__ungewollter_gewichtsverlust',
     ],
     diagnoses: ['Reizdarmsyndrom', 'Chronisch-entzündliche Darmerkrankung', 'Kolorektales Karzinom'],
@@ -1848,9 +1950,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'umwelt',
     majorSignalIds: [
-      'thorax__schmerzen_druck', 'kreislauf__anhaltendes_herzrasen', 'pulmo__neue_luftnot',
-      'neuro__neue_bewusstlosigkeit', 'neuro__neue_verwirrtheit', 'extremitaet__bewegungsstoerung',
-      'extremitaet__sensibilitaetsstoerung', 'hno__ploetzliche_hoerminderung',
+      'thorax__schmerzen_druck',
+      'kreislauf__anhaltendes_herzrasen',
+      'pulmo__neue_luftnot',
+      'neuro__neue_bewusstlosigkeit',
+      'neuro__neue_verwirrtheit',
+      'extremitaet__sensomotorikstoerung',
+      'hno__ploetzliche_hoerminderung',
     ],
     minorSignalIds: [
       'hno__anhaltendes_ohrgeraeusch',
@@ -1948,9 +2054,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'neuro',
     majorSignalIds: [
-      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'sehstoerung__rasche_sehverschlechterung', 'neuro__neue_nackensteifigkeit',
-      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+      'neuro__blitzartiger_maximalkopfschmerz',
+      'neuro__fokale_ausfaelle',
+      'neuro__neue_nackensteifigkeit',
+      'neuro__neue_verwirrtheit',
+      'neuro__neue_bewusstlosigkeit',
     ],
     minorSignalIds: [
       'neuro__wiederkehrende_typische_kopfschmerzen',
@@ -1974,8 +2082,8 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'psych__zunehmende_selbstvernachlaessigung', 'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'psych__anhaltende_niedergeschlagenheit', 'psych__anhaltende_schlafstoerungen',
-      'psych__anhaltende_alltagsbeeintraechtigung',
+      'psych__anhaltende_niedergeschlagenheit',
+      'psych__anhaltende_schlafstoerungen',
     ],
     diagnoses: ['Depressive Episode', 'Anpassungsstörung', 'Suizidale Krise'],
     consequences: ['zunehmender Depression, schwerer Selbstvernachlässigung, Selbstverletzungen oder einem Suizid'],
@@ -2070,9 +2178,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'umwelt',
     majorSignalIds: [
-      'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung',
-      'extremitaet__kalte_extremitaet', 'haut__blasenbildung', 'haut__dunkle_verfaerbung',
-      'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__kalte_extremitaet',
+      'haut__blasenbildung',
+      'haut__dunkle_verfaerbung',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Erfrierung', 'Gewebsnekrose', 'Unterkühlung'],
@@ -2090,8 +2200,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'umwelt',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'pulmo__anhaltender_husten', 'pulmo__schaumiger_auswurf', 'pulmo__zyanose',
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit',
+      'pulmo__neue_luftnot',
+      'pulmo__anhaltender_husten',
+      'pulmo__schaumiger_auswurf',
+      'pulmo__zyanose',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Aspirationsbedingte Lungenschädigung', 'Lungenödem', 'Hypoxische Hirnschädigung'],
@@ -2149,9 +2262,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'trauma',
     majorSignalIds: [
-      'extremitaet__bewegungsstoerung', 'extremitaet__zunehmende_schmerzen',
-      'extremitaet__gespannte_schwellung', 'extremitaet__sensibilitaetsstoerung',
-      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet', 'wunde__starke_anhaltende_blutung',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__zunehmende_schmerzen',
+      'extremitaet__gespannte_schwellung',
+      'extremitaet__durchblutungszeichen',
+      'wunde__starke_anhaltende_blutung',
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [],
@@ -2165,10 +2280,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Akutes Kompartmentsyndrom (Verdacht)',
     requirements: 'Unverhältnismäßiger zunehmender Schmerz, gespannte Schwellung, Dehnungsschmerz oder Sensibilitätsstörung; erhaltene Pulse schließen es nicht aus.',
     majorSignalIds: [
-      'extremitaet__bewegungsstoerung', 'extremitaet__zunehmende_schmerzen',
-      'extremitaet__starke_dehnungsschmerzen', 'extremitaet__gespannte_schwellung',
-      'extremitaet__sensibilitaetsstoerung', 'extremitaet__blaesse_blaufarbung',
-      'extremitaet__kalte_extremitaet',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__zunehmende_schmerzen',
+      'extremitaet__starke_dehnungsschmerzen',
+      'extremitaet__gespannte_schwellung',
+      'extremitaet__durchblutungszeichen',
     ],
     minorSignalIds: [],
     diagnoses: ['Kompartmentsyndrom', 'Muskelnekrose', 'Akute Extremitätenischämie'],
@@ -2201,9 +2317,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'paediatrie',
     majorSignalIds: [
-      'infekt__fieber_schuettelfrost', 'paediatrie__trinkschwaeche', 'paediatrie__wenige_nasse_windeln',
-      'paediatrie__schlaff_teilnahmslos', 'paediatrie__angestrengte_atmung', 'pulmo__atempausen',
-      'haut__nicht_wegdrueckbare_flecken', 'neuro__neue_krampfanfaelle',
+      'paediatrie__fieber_ab_38',
+      'paediatrie__trinkschwaeche',
+      'paediatrie__wenige_nasse_windeln',
+      'paediatrie__schlaff_teilnahmslos',
+      'paediatrie__angestrengte_atmung',
+      'pulmo__atempausen',
+      'haut__nicht_wegdrueckbare_flecken',
+      'neuro__neue_krampfanfaelle',
     ],
     minorSignalIds: [],
     diagnoses: ['Schwere bakterielle Infektion', 'Sepsis', 'Meningitis'],
@@ -2221,8 +2342,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'infekt',
     majorSignalIds: [
-      'infekt__fieber_schuettelfrost', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
-      'pulmo__neue_luftnot', 'kreislauf__neue_probleme', 'uro__anhaltende_oligurie_anurie',
+      'infekt__fieber_schuettelfrost',
+      'neuro__bewusstseinsstoerung',
+      'pulmo__neue_luftnot',
+      'kreislauf__neue_probleme',
+      'uro__anhaltende_oligurie_anurie',
       'haut__nicht_wegdrueckbare_flecken',
     ],
     minorSignalIds: [],
@@ -2236,8 +2360,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Fieber bei Neutropenie/ausgeprägter Immunsuppression',
     requirements: 'Fieber oder klinische Verschlechterung unter entsprechender Therapie/Risikokonstellation; diskrete Befunde können schwere Infektion verbergen.',
     majorSignalIds: [
-      'infekt__fieber_schuettelfrost', 'neuro__zunehmende_muskelschwaeche', 'neuro__neue_verwirrtheit',
-      'neuro__zunehmende_schlaefrigkeit', 'pulmo__neue_luftnot', 'kreislauf__neue_probleme',
+      'infekt__fieber_schuettelfrost',
+      'neuro__zunehmende_muskelschwaeche',
+      'neuro__bewusstseinsstoerung',
+      'pulmo__neue_luftnot',
+      'kreislauf__neue_probleme',
       'uro__anhaltende_oligurie_anurie',
     ],
     minorSignalIds: [],
@@ -2256,12 +2383,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'infekt',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
-      'neuro__neue_nackensteifigkeit', 'haut__nicht_wegdrueckbare_flecken',
-      'stoffwechsel__fehlende_trinkfaehigkeit', 'kreislauf__neue_probleme',
+      'pulmo__neue_luftnot',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_nackensteifigkeit',
+      'haut__nicht_wegdrueckbare_flecken',
+      'stoffwechsel__fehlende_trinkfaehigkeit',
+      'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'infekt__anhaltendes_fieber', 'stoffwechsel__anhaltende_muedigkeit',
+      'infekt__anhaltendes_fieber',
     ],
     diagnoses: ['Viraler Infekt', 'Pneumonie', 'Harnwegsinfekt'],
     consequences: ['übersehener bakterieller Infektion, zunehmendem Flüssigkeitsmangel oder einer Ausbreitung der Infektion'],
@@ -2413,7 +2543,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'infekt__fieber_schuettelfrost', 'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'abdomen__afterjuckreiz', 'abdomen__geringe_wiederkehrende_blutspuren',
+      'abdomen__geringe_wiederkehrende_blutspuren',
     ],
     diagnoses: ['Hämorrhoidalleiden', 'Analfissur', 'Perianalabszess'],
     consequences: ['einer übersehenen Blutungsquelle, Blutarmut oder einem unentdeckten Abszess'],
@@ -2433,10 +2563,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     majorSignalIds: [
       'katheter__verminderter_fehlender_urinabfluss',
       'katheter__herausgerutscht',
-      'uro__starke_blasenschmerzen',
+      'uro__starke_blasen_flankenschmerzen',
       'uro__gerinnsel_im_urin',
       'wunde__starke_anhaltende_blutung',
-      'uro__starke_flankenschmerzen',
       'infekt__fieber_schuettelfrost',
       'neuro__neue_verwirrtheit',
       'kreislauf__neue_probleme',
@@ -2466,11 +2595,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     majorSignalIds: [
       'katheter__verminderter_fehlender_urinabfluss',
       'katheter__herausgerutscht',
-      'uro__starke_blasenschmerzen',
-      'abdomen__hart_geblaeht',
+      'uro__starke_blasen_flankenschmerzen',
       'uro__gerinnsel_im_urin',
       'wunde__starke_anhaltende_blutung',
-      'uro__starke_flankenschmerzen',
       'infekt__fieber_schuettelfrost',
       'neuro__neue_verwirrtheit',
       'kreislauf__neue_probleme',
@@ -2495,12 +2622,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     majorSignalIds: [
       'katheter__herausgerutscht',
       'katheter__verminderter_fehlender_urinabfluss',
-      'uro__starke_blasenschmerzen',
+      'uro__starke_blasen_flankenschmerzen',
       'abdomen__zunehmende_schmerzen',
-      'abdomen__hart_geblaeht',
       'uro__gerinnsel_im_urin',
       'wunde__starke_anhaltende_blutung',
-      'uro__starke_flankenschmerzen',
       'infekt__fieber_schuettelfrost',
       'neuro__neue_verwirrtheit',
       'kreislauf__neue_probleme',
@@ -2549,8 +2674,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'umwelt',
     majorSignalIds: [
-      'neuro__neue_verwirrtheit', 'neuro__neue_gangunsicherheit', 'neuro__neue_krampfanfaelle',
-      'neuro__neue_bewusstlosigkeit', 'kreislauf__neue_probleme', 'uro__dunkelbrauner_urin',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_gangunsicherheit',
+      'neuro__neue_krampfanfaelle',
+      'kreislauf__neue_probleme',
+      'uro__dunkelbrauner_urin',
       'uro__anhaltende_oligurie_anurie',
     ],
     minorSignalIds: [],
@@ -2569,12 +2697,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'umwelt',
     majorSignalIds: [
-      'neuro__neue_verwirrtheit', 'neuro__neue_gangunsicherheit', 'neuro__neue_krampfanfaelle',
-      'neuro__neue_bewusstlosigkeit', 'kreislauf__neue_probleme', 'abdomen__anhaltendes_erbrechen',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_gangunsicherheit',
+      'neuro__neue_krampfanfaelle',
+      'kreislauf__neue_probleme',
+      'abdomen__anhaltendes_erbrechen',
       'uro__anhaltende_oligurie_anurie',
     ],
     minorSignalIds: [
-      'stoffwechsel__anhaltende_muedigkeit', 'stoffwechsel__wiederkehrende_uebelkeit',
+      'stoffwechsel__wiederkehrende_uebelkeit',
     ],
     diagnoses: ['Hitzeerschöpfung', 'Hitzschlag', 'Flüssigkeits-/Elektrolytstörung'],
     consequences: ['erneuter Überwärmung, Austrocknung, Kreislaufkollaps oder einer übersehenen schweren Hitzeerkrankung'],
@@ -2591,12 +2722,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'umwelt',
     majorSignalIds: [
-      'neuro__neue_verwirrtheit', 'neuro__neue_bewusstlosigkeit', 'kreislauf__neue_probleme',
-      'muskeln__starke_schmerzen_schwellung', 'neuro__zunehmende_muskelschwaeche', 'uro__dunkelbrauner_urin',
+      'neuro__bewusstseinsstoerung',
+      'kreislauf__neue_probleme',
+      'muskeln__starke_schmerzen_schwellung',
+      'neuro__zunehmende_muskelschwaeche',
+      'uro__dunkelbrauner_urin',
       'uro__anhaltende_oligurie_anurie',
     ],
     minorSignalIds: [
-      'neuro__muskelkraempfe', 'stoffwechsel__anhaltende_muedigkeit',
+      'neuro__muskelkraempfe',
     ],
     diagnoses: ['Hitzekrämpfe', 'Elektrolytstörung', 'Rhabdomyolyse'],
     consequences: ['anhaltenden Elektrolytstörungen, Muskelzerfall, Nierenschäden oder Kreislaufkollaps'],
@@ -2613,9 +2747,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'stoffwechsel',
     majorSignalIds: [
-      'stoffwechsel__starker_durst_polyurie', 'abdomen__anhaltendes_erbrechen',
-      'abdomen__zunehmende_schmerzen', 'stoffwechsel__tiefe_schnelle_atmung',
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'stoffwechsel__fehlende_trinkfaehigkeit',
+      'stoffwechsel__starker_durst_polyurie',
+      'abdomen__anhaltendes_erbrechen',
+      'abdomen__zunehmende_schmerzen',
+      'stoffwechsel__tiefe_schnelle_atmung',
+      'neuro__bewusstseinsstoerung',
+      'stoffwechsel__fehlende_trinkfaehigkeit',
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [],
@@ -2629,9 +2766,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Diabetische Ketoazidose (Verdacht)',
     requirements: 'Diabetes mit Übelkeit, Bauchschmerz, Dehydratation oder tiefer Atmung; auch bei wachem Patienten und nicht stark erhöhtem Blutzucker.',
     majorSignalIds: [
-      'abdomen__anhaltendes_erbrechen', 'abdomen__zunehmende_schmerzen', 'stoffwechsel__tiefe_schnelle_atmung',
-      'stoffwechsel__fruchtiger_atem', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit',
-      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit',
+      'abdomen__anhaltendes_erbrechen',
+      'abdomen__zunehmende_schmerzen',
+      'stoffwechsel__tiefe_schnelle_atmung',
+      'stoffwechsel__fruchtiger_atem',
+      'neuro__bewusstseinsstoerung',
+      'kreislauf__neue_probleme',
     ],
     minorSignalIds: [],
     diagnoses: ['Diabetische Ketoazidose', 'Elektrolytstörung'],
@@ -2668,9 +2808,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'intox',
     majorSignalIds: [
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'pulmo__langsame_flache_atmung',
-      'pulmo__atempausen', 'pulmo__neue_luftnot', 'neuro__neue_krampfanfaelle', 'thorax__schmerzen_druck',
-      'kreislauf__anhaltendes_herzrasen', 'kreislauf__neue_probleme',
+      'neuro__bewusstseinsstoerung',
+      'pulmo__atemdepression',
+      'pulmo__neue_luftnot',
+      'neuro__neue_krampfanfaelle',
+      'thorax__schmerzen_druck',
+      'kreislauf__anhaltendes_herzrasen',
+      'kreislauf__neue_probleme',
     ],
     minorSignalIds: [],
     diagnoses: ['Vergiftung', 'Atemdepression', 'Toxische Herzrhythmusstörung'],
@@ -2698,8 +2842,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Opioidintoxikation nach Antagonisierung',
     requirements: 'Aktuell gebessert, aber erneute Atemdepression oder Mischintoxikation möglich; erforderliche Überwachung wird abgelehnt.',
     majorSignalIds: [
-      'neuro__zunehmende_schlaefrigkeit', 'pulmo__langsame_flache_atmung', 'pulmo__atempausen',
-      'pulmo__zyanose', 'neuro__neue_bewusstlosigkeit', 'pulmo__neue_luftnot',
+      'neuro__bewusstseinsstoerung',
+      'pulmo__atemdepression',
+      'pulmo__zyanose',
+      'pulmo__neue_luftnot',
     ],
     minorSignalIds: [],
     diagnoses: ['Erneute Opioidintoxikation', 'Atemdepression', 'Aspirationspneumonie'],
@@ -2712,8 +2858,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Paracetamolüberdosierung (Verdacht)',
     requirements: 'Potenziell toxische Menge, wiederholte Überdosierung oder unklare Menge; anfängliche Beschwerdefreiheit schließt Organschädigung nicht aus.',
     majorSignalIds: [
-      'intox__uebelkeit_erbrechen', 'abdomen__zunehmende_schmerzen', 'stoffwechsel__gelbfaerbung',
-      'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit', 'blutung__nase_zahnfleisch',
+      'intox__uebelkeit_erbrechen',
+      'abdomen__zunehmende_schmerzen',
+      'stoffwechsel__gelbfaerbung',
+      'neuro__bewusstseinsstoerung',
+      'blutung__nase_zahnfleisch',
       'uro__anhaltende_oligurie_anurie',
     ],
     minorSignalIds: [],
@@ -2727,8 +2876,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Sedativa-/Mischintoxikation',
     requirements: 'Benzodiazepine, Schlafmittel oder Kombination mit Alkohol/anderen Substanzen; Atemdepression und verzögerte Verschlechterung möglich.',
     majorSignalIds: [
-      'neuro__zunehmende_schlaefrigkeit', 'pulmo__langsame_flache_atmung', 'pulmo__atempausen',
-      'pulmo__zyanose', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_krampfanfaelle',
+      'neuro__bewusstseinsstoerung',
+      'pulmo__atemdepression',
+      'pulmo__zyanose',
+      'neuro__neue_krampfanfaelle',
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [],
@@ -2800,7 +2951,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'haut__zunehmende_lokale_roetung', 'haut__zunehmende_lokale_schwellung', 'haut__eitriges_sekret',
+      'haut__lokale_entzuendungszeichen',
     ],
     diagnoses: ['Hautabszess', 'Zellulitis'],
     consequences: ['einer Ausbreitung der Infektion, zunehmender Eiteransammlung, Gewebeschäden oder einer Blutvergiftung'],
@@ -2817,9 +2968,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'intox',
     majorSignalIds: [
-      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_verwirrtheit', 'neuro__neue_gangunsicherheit',
-      'neuro__erneute_gedaechtnisluecken', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
-      'neuro__neue_bewusstlosigkeit', 'neuro__neue_krampfanfaelle',
+      'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_gangunsicherheit',
+      'neuro__erneute_gedaechtnisluecken',
+      'thorax__schmerzen_druck',
+      'pulmo__neue_luftnot',
+      'neuro__neue_krampfanfaelle',
     ],
     minorSignalIds: [],
     diagnoses: ['Kohlenmonoxidvergiftung', 'Myokardschädigung', 'Verzögerte toxische Hirnschädigung'],
@@ -2841,7 +2996,8 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'haut__grossflaechige_blaeschenausbreitung',
     ],
     minorSignalIds: [
-      'haut__anhaltender_juckreiz', 'haut__zunehmende_lokale_roetung', 'haut__naessende_offene_stellen',
+      'haut__zunehmende_lokale_roetung',
+      'haut__naessende_offene_stellen',
     ],
     diagnoses: ['Kontaktdermatitis', 'Allergische Reaktion', 'Hautinfektion'],
     consequences: ['einer anhaltenden Hautentzündung, Hautschädigung oder zusätzlichen bakteriellen Infektion'],
@@ -2893,12 +3049,15 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'stoffwechsel',
     majorSignalIds: [
-      'stoffwechsel__fehlende_trinkfaehigkeit', 'abdomen__anhaltendes_erbrechen', 'kreislauf__neue_probleme',
-      'uro__anhaltende_oligurie_anurie', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'stoffwechsel__fehlende_trinkfaehigkeit',
+      'abdomen__anhaltendes_erbrechen',
+      'kreislauf__neue_probleme',
+      'uro__anhaltende_oligurie_anurie',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [
-      'stoffwechsel__durst_mundtrockenheit', 'neuro__leichter_lageschwindel',
-      'stoffwechsel__anhaltende_muedigkeit',
+      'stoffwechsel__durst_mundtrockenheit',
+      'neuro__leichter_lageschwindel',
     ],
     diagnoses: ['Dehydratation', 'Elektrolytstörung'],
     consequences: ['erneutem Flüssigkeitsmangel, Stürzen, Elektrolytstörungen oder einer Nierenschädigung'],
@@ -2974,8 +3133,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'psych',
     majorSignalIds: [
-      'psych__schwere_erregung', 'psych__gefaehrliches_enthemmtes_verhalten', 'psych__halluzinationen',
-      'psych__fremdgefaehrdungsimpulse', 'psych__suizidgedanken', 'psych__zunehmende_selbstvernachlaessigung',
+      'psych__erregung_gefaehrliches_verhalten',
+      'psych__halluzinationen',
+      'psych__fremdgefaehrdungsimpulse',
+      'psych__suizidgedanken',
+      'psych__zunehmende_selbstvernachlaessigung',
       'psych__schlaflosigkeit_mit_ueberaktivitaet',
     ],
     minorSignalIds: [],
@@ -2994,8 +3156,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'intox',
     majorSignalIds: [
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_verwirrtheit', 'pulmo__langsame_flache_atmung',
-      'pulmo__neue_luftnot', 'neuro__neue_krampfanfaelle', 'kreislauf__anhaltendes_herzrasen',
+      'neuro__bewusstseinsstoerung',
+      'pulmo__langsame_flache_atmung',
+      'pulmo__neue_luftnot',
+      'neuro__neue_krampfanfaelle',
+      'kreislauf__anhaltendes_herzrasen',
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [],
@@ -3014,9 +3179,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'neuro',
     majorSignalIds: [
-      'infekt__fieber_schuettelfrost', 'neuro__ploetzliche_starke_kopfschmerzen',
-      'neuro__neue_nackensteifigkeit', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
-      'neuro__neue_krampfanfaelle', 'haut__nicht_wegdrueckbare_flecken',
+      'infekt__fieber_schuettelfrost',
+      'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__neue_nackensteifigkeit',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_krampfanfaelle',
+      'haut__nicht_wegdrueckbare_flecken',
     ],
     minorSignalIds: [],
     diagnoses: ['Bakterielle Meningitis', 'Enzephalitis', 'Meningokokkensepsis'],
@@ -3034,13 +3202,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'neuro',
     majorSignalIds: [
-      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'sehstoerung__ploetzlicher_sehverlust', 'neuro__neue_nackensteifigkeit',
-      'infekt__fieber_schuettelfrost', 'neuro__neue_verwirrtheit', 'neuro__neue_krampfanfaelle',
+      'neuro__blitzartiger_maximalkopfschmerz',
+      'neuro__fokale_ausfaelle',
+      'neuro__neue_nackensteifigkeit',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
+      'neuro__neue_krampfanfaelle',
       'stoffwechsel__fehlende_trinkfaehigkeit',
     ],
     minorSignalIds: [
-      'neuro__wiederkehrende_typische_kopfschmerzen', 'stoffwechsel__wiederkehrende_uebelkeit',
+      'neuro__wiederkehrende_typische_kopfschmerzen',
     ],
     diagnoses: ['Migräne', 'Subarachnoidalblutung', 'Meningitis'],
     consequences: ['anhaltenden Schmerzattacken, Austrocknung oder verzögerter Erkennung einer anderen Kopfschmerzursache'],
@@ -3116,8 +3287,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'stoffwechsel',
     majorSignalIds: [
-      'kreislauf__neue_probleme', 'neuro__zunehmende_muskelschwaeche', 'abdomen__anhaltendes_erbrechen',
-      'abdomen__zunehmende_schmerzen', 'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit',
+      'kreislauf__neue_probleme',
+      'neuro__zunehmende_muskelschwaeche',
+      'abdomen__anhaltendes_erbrechen',
+      'abdomen__zunehmende_schmerzen',
+      'neuro__bewusstseinsstoerung',
       'neuro__neue_krampfanfaelle',
     ],
     minorSignalIds: [],
@@ -3156,9 +3330,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'neuro',
     majorSignalIds: [
-      'neuro__ploetzliche_starke_kopfschmerzen', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'sehstoerung__ploetzlicher_sehverlust', 'neuro__neue_nackensteifigkeit',
-      'infekt__fieber_schuettelfrost', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_krampfanfaelle',
+      'neuro__ploetzliche_starke_kopfschmerzen',
+      'neuro__fokale_ausfaelle',
+      'neuro__neue_nackensteifigkeit',
+      'infekt__fieber_schuettelfrost',
+      'neuro__zunehmende_schlaefrigkeit',
+      'neuro__neue_krampfanfaelle',
       'abdomen__anhaltendes_erbrechen',
     ],
     minorSignalIds: [],
@@ -3177,8 +3354,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'haut',
     majorSignalIds: [
-      'haut__schmerzhafte_blaeschen', 'haut__grossflaechige_blaeschenausbreitung',
-      'haut__rasch_ausbreitende_roetung', 'infekt__fieber_schuettelfrost', 'augen__starke_augenschmerzen',
+      'haut__schmerzhafte_ausgedehnte_blaeschen',
+      'haut__rasch_ausbreitende_roetung',
+      'infekt__fieber_schuettelfrost',
+      'augen__starke_augenschmerzen',
     ],
     minorSignalIds: [
       'haut__anhaltender_juckreiz', 'haut__naessende_offene_stellen', 'haut__eitriges_sekret',
@@ -3238,8 +3417,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'trauma',
     majorSignalIds: [
-      'wunde__starke_anhaltende_blutung', 'extremitaet__sensibilitaetsstoerung',
-      'extremitaet__bewegungsstoerung', 'extremitaet__blaesse_blaufarbung', 'kreislauf__neue_probleme',
+      'wunde__starke_anhaltende_blutung',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__blaesse_blaufarbung',
+      'kreislauf__neue_probleme',
       'infekt__fieber_schuettelfrost',
     ],
     minorSignalIds: [
@@ -3255,8 +3436,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Bissverletzung mit tiefer Gewebebeteiligung',
     requirements: 'Tiefe Verletzung, insbesondere an Hand oder Gelenk; mögliche Sehnen-, Nerven-, Gefäß- oder Gelenkbeteiligung.',
     majorSignalIds: [
-      'wunde__starke_anhaltende_blutung', 'extremitaet__sensibilitaetsstoerung',
-      'extremitaet__bewegungsstoerung', 'gelenk__zunehmende_schmerzen', 'haut__rasch_ausbreitende_roetung',
+      'wunde__starke_anhaltende_blutung',
+      'extremitaet__sensomotorikstoerung',
+      'gelenk__zunehmende_schmerzen',
+      'haut__rasch_ausbreitende_roetung',
       'infekt__fieber_schuettelfrost',
     ],
     minorSignalIds: [
@@ -3272,9 +3455,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Hochdruckinjektionsverletzung',
     requirements: 'Farbe, Fett oder andere Stoffe unter Druck ins Gewebe eingebracht; auch bei kleiner Eintrittswunde dringlicher chirurgischer Verdacht.',
     majorSignalIds: [
-      'extremitaet__zunehmende_schmerzen', 'extremitaet__gespannte_schwellung',
-      'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung',
-      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+      'extremitaet__zunehmende_schmerzen',
+      'extremitaet__gespannte_schwellung',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__durchblutungszeichen',
     ],
     minorSignalIds: [],
     diagnoses: ['Hochdruckinjektionsverletzung', 'Kompartmentsyndrom', 'Gewebsnekrose'],
@@ -3294,16 +3478,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     majorSignalIds: [
       'wunde__starke_anhaltende_blutung',
       'wunde__starke_schmerzen',
-      'extremitaet__sensibilitaetsstoerung',
-      'extremitaet__bewegungsstoerung',
+      'extremitaet__sensomotorikstoerung',
       'haut__rasch_ausbreitende_roetung',
       'kreislauf__neue_probleme',
       'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'wunde__zunehmende_schmerzen',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
+      'wunde__lokale_verschlechterung',
       'haut__eitriges_sekret',
       'infekt__fieber_schuettelfrost',
     ],
@@ -3335,11 +3516,8 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'wunde__zunehmende_schmerzen',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'wunde__anhaltende_zunehmende_sekretion',
-      'wunde__erneute_sekretion',
+      'wunde__lokale_verschlechterung',
+      'wunde__auffaellige_sekretion',
       'wunde__oberflaechliche_wundoeffnung',
       'haut__eitriges_sekret',
     ],
@@ -3371,14 +3549,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'wunde__anhaltende_zunehmende_sekretion',
-      'wunde__erneute_sekretion',
+      'wunde__auffaellige_sekretion',
       'wunde__oberflaechliche_wundoeffnung',
-      'wunde__zunehmende_schmerzen',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'haut__eitriges_sekret',
-      'wunde__uebelriechendes_sekret',
+      'wunde__lokale_verschlechterung',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -3386,9 +3560,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'Serom/Hämatom',
       'Wunddehiszenz',
     ],
-    consequences: [
-      'einer tiefen Wundinfektion, einem Wundaufbruch, einer Sepsis oder einer erneuten Operation',
-    ],
+    consequences: ['tiefer Wundinfektion, Wundaufbruch, Sepsis oder erneuter Operation'],
   },
 
   {
@@ -3408,14 +3580,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'wunde__anhaltende_zunehmende_sekretion',
-      'wunde__erneute_sekretion',
+      'wunde__auffaellige_sekretion',
       'wunde__oberflaechliche_wundoeffnung',
-      'wunde__zunehmende_schmerzen',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'haut__eitriges_sekret',
-      'wunde__uebelriechendes_sekret',
+      'wunde__lokale_verschlechterung',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -3423,9 +3591,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'Serom/Hämatom',
       'Wunddehiszenz',
     ],
-    consequences: [
-      'einer Protheseninfektion, einer Sepsis, bleibenden Gelenkschäden oder einer Operation bis zum Prothesenwechsel',
-    ],
+    consequences: ['Protheseninfektion, Sepsis, bleibenden Gelenkschäden oder Operation bis zum Prothesenwechsel'],
   },
 
   {
@@ -3439,20 +3605,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'wunde__starke_schmerzen',
       'haut__rasch_ausbreitende_roetung',
       'haut__dunkle_verfaerbung',
-      'extremitaet__kalte_extremitaet',
-      'extremitaet__blaesse_blaufarbung',
+      'extremitaet__durchblutungszeichen',
       'infekt__fieber_schuettelfrost',
       'neuro__neue_verwirrtheit',
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'wunde__zunehmende_schmerzen',
+      'wunde__lokale_verschlechterung',
       'wunde__zunehmende_wundgroesse',
       'wunde__anhaltende_zunehmende_sekretion',
-      'wunde__uebelriechendes_sekret',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'haut__eitriges_sekret',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -3476,20 +3638,16 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'wunde__starke_schmerzen',
       'haut__rasch_ausbreitende_roetung',
       'haut__dunkle_verfaerbung',
-      'extremitaet__kalte_extremitaet',
-      'extremitaet__blaesse_blaufarbung',
+      'extremitaet__durchblutungszeichen',
       'infekt__fieber_schuettelfrost',
       'neuro__neue_verwirrtheit',
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'wunde__zunehmende_schmerzen',
+      'wunde__lokale_verschlechterung',
       'wunde__zunehmende_wundgroesse',
       'wunde__anhaltende_zunehmende_sekretion',
-      'wunde__uebelriechendes_sekret',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'haut__eitriges_sekret',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -3497,9 +3655,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'Ischämische Gewebsnekrose',
       'Osteomyelitis',
     ],
-    consequences: [
-      'einer tiefen Gewebe-/Knocheninfektion, einer Sepsis, bleibenden Gewebeschäden oder einer Amputation',
-    ],
+    consequences: ['tiefer Gewebe-/Knocheninfektion, Sepsis, bleibenden Gewebeschäden oder Amputation'],
   },
 
   // -------------------------------------------------------------------------
@@ -3567,9 +3723,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     name: 'Neu aufgetretenes Vorhofflimmern mit Beschwerden',
     requirements: 'Neu dokumentierte absolute Arrhythmie mit anhaltenden Beschwerden; Frequenz, Beginn und Begleiterkrankungen müssen beurteilt werden.',
     majorSignalIds: [
-      'kreislauf__anhaltendes_herzrasen', 'thorax__schmerzen_druck', 'pulmo__neue_luftnot',
-      'kreislauf__neue_probleme', 'neuro__neue_bewusstlosigkeit', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'sehstoerung__ploetzlicher_sehverlust',
+      'kreislauf__anhaltendes_herzrasen',
+      'thorax__schmerzen_druck',
+      'pulmo__neue_luftnot',
+      'kreislauf__neue_probleme',
+      'neuro__neue_bewusstlosigkeit',
+      'neuro__fokale_ausfaelle',
     ],
     minorSignalIds: [],
     diagnoses: ['Vorhofflimmern', 'Akute Herzinsuffizienz', 'Schlaganfall'],
@@ -3587,8 +3746,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'uro',
     majorSignalIds: [
-      'uro__eingeklemmte_vorhaut', 'uro__starke_penisschmerzen', 'uro__rasche_penisschwellung',
-      'uro__eichelverfaerbung', 'uro__eicheltaubheit', 'uro__anhaltende_oligurie_anurie',
+      'uro__starke_penisschmerzen',
+      'uro__rasche_penisschwellung',
+      'uro__eichelverfaerbung',
+      'uro__eicheltaubheit',
+      'uro__anhaltende_oligurie_anurie',
     ],
     minorSignalIds: [],
     diagnoses: ['Paraphimose', 'Eichelischämie'],
@@ -3606,8 +3768,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'augen',
     majorSignalIds: [
-      'sehstoerung__rasche_sehverschlechterung', 'sehstoerung__ploetzlicher_sehverlust',
-      'augen__starke_augenschmerzen', 'augen__neue_pupillendifferenz', 'augen__lichtscheu',
+      'sehstoerung__sehverschlechterung_verlust',
+      'augen__starke_augenschmerzen',
+      'augen__neue_pupillendifferenz',
+      'augen__lichtscheu',
     ],
     minorSignalIds: [],
     diagnoses: ['Offene Bulbusverletzung', 'Intraokularer Fremdkörper', 'Endophthalmitis'],
@@ -3801,9 +3965,13 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'trauma',
     majorSignalIds: [
-      'muskeln__starke_schmerzen_schwellung', 'extremitaet__gespannte_schwellung',
-      'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung', 'uro__dunkelbrauner_urin',
-      'uro__anhaltende_oligurie_anurie', 'kreislauf__anhaltendes_herzrasen', 'kreislauf__neue_probleme',
+      'muskeln__starke_schmerzen_schwellung',
+      'extremitaet__sensomotorikstoerung',
+      'uro__dunkelbrauner_urin',
+      'uro__anhaltende_oligurie_anurie',
+      'kreislauf__anhaltendes_herzrasen',
+      'kreislauf__neue_probleme',
+      'extremitaet__gespannte_schwellung',
     ],
     minorSignalIds: [],
     diagnoses: ['Crush-Syndrom/Rhabdomyolyse', 'Kompartmentsyndrom', 'Akutes Nierenversagen'],
@@ -3867,8 +4035,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'psych__schwere_erregung', 'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'psych__anhaltende_schlafstoerungen', 'stoffwechsel__anhaltende_muedigkeit',
-      'neuro__leichte_konzentrationsprobleme',
+      'psych__anhaltende_schlafstoerungen',
     ],
     diagnoses: ['Insomnie', 'Depressive Episode', 'Manische Episode'],
     consequences: ['anhaltender Erschöpfung, Konzentrationsstörungen, Unfallgefahr oder verzögerter Erkennung einer psychischen Erkrankung'],
@@ -3885,8 +4052,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'augen',
     majorSignalIds: [
-      'augen__starke_augenschmerzen', 'sehstoerung__rasche_sehverschlechterung',
-      'sehstoerung__ploetzlicher_sehverlust', 'augen__lichtscheu', 'neuro__ploetzliche_starke_kopfschmerzen',
+      'augen__starke_augenschmerzen',
+      'sehstoerung__sehverschlechterung_verlust',
+      'augen__lichtscheu',
+      'neuro__ploetzliche_starke_kopfschmerzen',
       'abdomen__anhaltendes_erbrechen',
     ],
     minorSignalIds: [],
@@ -3929,7 +4098,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'stoffwechsel__wiederkehrende_uebelkeit', 'stoffwechsel__durst_mundtrockenheit',
+      'stoffwechsel__wiederkehrende_uebelkeit',
       'stoffwechsel__ungewollter_gewichtsverlust',
     ],
     diagnoses: ['Hyperemesis gravidarum', 'Extrauteringravidität', 'Gastroenteritis'],
@@ -3947,9 +4116,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'stoffwechsel',
     majorSignalIds: [
-      'stoffwechsel__fehlende_trinkfaehigkeit', 'abdomen__anhaltendes_erbrechen',
-      'uro__anhaltende_oligurie_anurie', 'kreislauf__neue_probleme', 'neuro__neue_verwirrtheit',
-      'neuro__zunehmende_schlaefrigkeit', 'kreislauf__anhaltendes_herzrasen',
+      'stoffwechsel__fehlende_trinkfaehigkeit',
+      'abdomen__anhaltendes_erbrechen',
+      'uro__anhaltende_oligurie_anurie',
+      'kreislauf__neue_probleme',
+      'neuro__bewusstseinsstoerung',
+      'kreislauf__anhaltendes_herzrasen',
     ],
     minorSignalIds: [],
     diagnoses: ['Exsikkose', 'Akutes Nierenversagen', 'Elektrolytstörung'],
@@ -3967,12 +4139,14 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'neuro',
     majorSignalIds: [
-      'neuro__blitzartiger_maximalkopfschmerz', 'neuro__neue_einseitige_schwaeche',
-      'neuro__neue_sprachstoerung', 'neuro__neue_nackensteifigkeit', 'infekt__fieber_schuettelfrost',
-      'neuro__neue_verwirrtheit', 'sehstoerung__ploetzlicher_sehverlust',
+      'neuro__blitzartiger_maximalkopfschmerz',
+      'neuro__fokale_ausfaelle',
+      'neuro__neue_nackensteifigkeit',
+      'infekt__fieber_schuettelfrost',
+      'neuro__neue_verwirrtheit',
     ],
     minorSignalIds: [
-      'neuro__anhaltende_leichte_kopfschmerzen', 'neuro__wiederkehrende_typische_kopfschmerzen',
+      'neuro__anhaltende_leichte_kopfschmerzen',
     ],
     diagnoses: ['Spannungskopfschmerz', 'Subarachnoidalblutung', 'Meningitis'],
     consequences: ['anhaltenden Schmerzen, Alltagsbeeinträchtigung oder verzögerter Erkennung einer anderen Kopfschmerzursache'],
@@ -3989,8 +4163,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'atmung',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__zyanose', 'kreislauf__neue_probleme',
-      'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+      'pulmo__neue_luftnot',
+      'thorax__schmerzen_druck',
+      'pulmo__zyanose',
+      'kreislauf__neue_probleme',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Pneumothorax', 'Spannungspneumothorax', 'Lungenembolie'],
@@ -4156,7 +4333,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'neuro__neue_krampfanfaelle', 'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'neuro__leichter_wiederkehrender_schwindel', 'stoffwechsel__anhaltende_muedigkeit',
+      'neuro__leichter_wiederkehrender_schwindel',
     ],
     diagnoses: ['Reflexsynkope', 'Orthostatische Hypotonie', 'Herzrhythmusstörung'],
     consequences: ['erneuten Ohnmachten mit Sturzverletzungen oder einer übersehenen behandlungsbedürftigen Herzrhythmusstörung'],
@@ -4173,7 +4350,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'neuro__leichter_lageschwindel', 'stoffwechsel__anhaltende_muedigkeit',
+      'neuro__leichter_lageschwindel',
     ],
     diagnoses: ['Orthostatische Hypotonie', 'Dehydratation', 'Medikamentös bedingte Hypotonie'],
     consequences: ['erneuten Blutdruckabfällen, Sturzverletzungen oder übersehenem Flüssigkeitsmangel/Blutverlust'],
@@ -4190,7 +4367,7 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'neuro__leichter_wiederkehrender_schwindel', 'stoffwechsel__anhaltende_muedigkeit',
+      'neuro__leichter_wiederkehrender_schwindel',
     ],
     diagnoses: ['Vasovagale Synkope', 'Herzrhythmusstörung'],
     consequences: ['erneuten Ohnmachten, Sturzverletzungen oder verzögerter Erkennung einer anderen Kreislaufursache'],
@@ -4275,9 +4452,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'kreislauf',
     majorSignalIds: [
-      'pulmo__neue_luftnot', 'thorax__schmerzen_druck', 'pulmo__relevante_haemoptyse',
-      'neuro__neue_bewusstlosigkeit', 'extremitaet__einseitige_schwellung_schmerz',
-      'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+      'pulmo__neue_luftnot',
+      'thorax__schmerzen_druck',
+      'pulmo__relevante_haemoptyse',
+      'neuro__neue_bewusstlosigkeit',
+      'extremitaet__einseitige_schwellung_schmerz',
+      'extremitaet__durchblutungszeichen',
     ],
     minorSignalIds: [],
     diagnoses: ['Tiefe Venenthrombose', 'Lungenembolie'],
@@ -4295,8 +4475,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'atmung',
     majorSignalIds: [
-      'trachea__frische_blutung', 'trachea__verminderter_luftstrom', 'pulmo__neue_luftnot', 'pulmo__zyanose',
-      'pulmo__atempausen', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_bewusstlosigkeit',
+      'trachea__frische_blutung',
+      'trachea__verminderter_luftstrom',
+      'pulmo__neue_luftnot',
+      'pulmo__zyanose',
+      'pulmo__atempausen',
+      'neuro__bewusstseinsstoerung',
     ],
     minorSignalIds: [],
     diagnoses: ['Trachealkanülenverlegung', 'Trachealkanülendislokation', 'Tracheale Blutung'],
@@ -4356,9 +4540,12 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'trauma',
     majorSignalIds: [
-      'muskeln__starke_schmerzen_schwellung', 'extremitaet__gespannte_schwellung',
-      'neuro__zunehmende_muskelschwaeche', 'extremitaet__sensibilitaetsstoerung', 'uro__dunkelbrauner_urin',
+      'muskeln__starke_schmerzen_schwellung',
+      'neuro__zunehmende_muskelschwaeche',
+      'extremitaet__sensibilitaetsstoerung',
+      'uro__dunkelbrauner_urin',
       'uro__anhaltende_oligurie_anurie',
+      'extremitaet__gespannte_schwellung',
     ],
     minorSignalIds: [
       'muskeln__anhaltende_leichte_schmerzen',
@@ -4397,8 +4584,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'umwelt',
     majorSignalIds: [
-      'neuro__neue_verwirrtheit', 'neuro__zunehmende_schlaefrigkeit', 'neuro__neue_gangunsicherheit',
-      'pulmo__langsame_flache_atmung', 'neuro__neue_bewusstlosigkeit',
+      'neuro__bewusstseinsstoerung',
+      'neuro__neue_gangunsicherheit',
+      'pulmo__langsame_flache_atmung',
       'temperatur__nachlassendes_kaeltezittern',
     ],
     minorSignalIds: [],
@@ -4450,8 +4638,9 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'BvO',
     category: 'trauma',
     majorSignalIds: [
-      'extremitaet__zunehmende_schmerzen', 'extremitaet__sensibilitaetsstoerung',
-      'extremitaet__bewegungsstoerung', 'extremitaet__blaesse_blaufarbung', 'extremitaet__kalte_extremitaet',
+      'extremitaet__zunehmende_schmerzen',
+      'extremitaet__sensomotorikstoerung',
+      'extremitaet__durchblutungszeichen',
       'extremitaet__gespannte_schwellung',
     ],
     minorSignalIds: [
@@ -4532,8 +4721,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
     application: 'Verweigerung',
     category: 'trauma',
     majorSignalIds: [
-      'ruecken__starke_schmerzen', 'extremitaet__sensibilitaetsstoerung', 'extremitaet__bewegungsstoerung',
-      'neuro__taubheit_schritt', 'neuro__blasen_darmkontrollverlust', 'pulmo__neue_luftnot',
+      'ruecken__starke_schmerzen',
+      'extremitaet__sensomotorikstoerung',
+      'neuro__taubheit_schritt',
+      'neuro__blasen_darmstoerung',
+      'pulmo__neue_luftnot',
     ],
     minorSignalIds: [],
     diagnoses: ['Wirbelsäulenfraktur', 'Rückenmarkverletzung', 'Cauda-equina-Syndrom'],
@@ -4579,16 +4771,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'drainage__unerwarteter_foerderstopp',
-      'drainage__sogverlust',
-      'drainage__dislokation',
-      'drainage__leckage',
+      'drainage__funktionsstoerung',
       'drainage__geringe_erneute_blutbeimengungen',
-      'wunde__zunehmende_schmerzen',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'haut__eitriges_sekret',
-      'wunde__uebelriechendes_sekret',
+      'wunde__lokale_verschlechterung',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -4616,16 +4802,10 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'drainage__unerwarteter_foerderstopp',
-      'drainage__sogverlust',
-      'drainage__dislokation',
-      'drainage__leckage',
+      'drainage__funktionsstoerung',
       'drainage__geringe_erneute_blutbeimengungen',
-      'wunde__zunehmende_schmerzen',
-      'haut__zunehmende_lokale_roetung',
-      'haut__zunehmende_lokale_schwellung',
-      'haut__eitriges_sekret',
-      'wunde__uebelriechendes_sekret',
+      'wunde__lokale_verschlechterung',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -4652,14 +4832,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'unterdruck__anhaltender_wiederkehrender_alarm',
-      'unterdruck__therapieausfall',
-      'unterdruck__undichter_verband',
+      'unterdruck__funktionsstoerung',
       'drainage__geringe_erneute_blutbeimengungen',
       'wunde__zunehmende_schmerzen',
       'haut__zunehmende_lokale_roetung',
-      'haut__eitriges_sekret',
-      'wunde__uebelriechendes_sekret',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
@@ -4686,14 +4863,11 @@ const SCENARIO_ENTRIES: readonly (RedflagScenario | RedflagSubscenario)[] = [
       'kreislauf__neue_probleme',
     ],
     minorSignalIds: [
-      'unterdruck__anhaltender_wiederkehrender_alarm',
-      'unterdruck__therapieausfall',
-      'unterdruck__undichter_verband',
+      'unterdruck__funktionsstoerung',
       'drainage__geringe_erneute_blutbeimengungen',
       'wunde__zunehmende_schmerzen',
       'haut__zunehmende_lokale_roetung',
-      'haut__eitriges_sekret',
-      'wunde__uebelriechendes_sekret',
+      'wunde__infektsekret',
     ],
     minorSpecialist: 'Chirurgen',
     diagnoses: [
