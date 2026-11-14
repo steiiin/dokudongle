@@ -8,8 +8,10 @@
         @update:model-value="onChange"
         @pointerdown="emit('pointerdown', $event)"
       >
-        <slot />
-        <slot name="label-end" />
+        <span class="toggle-label-line">
+          <span><slot /></span>
+          <span class="toggle-label-end"><slot name="label-end" /></span>
+        </span>
       </IonToggle>
     </IonItem>
     <IonRippleEffect v-if="rippleEnabled && !disabled" aria-hidden="true" />
@@ -38,3 +40,18 @@ const onChange = (value: boolean | null | undefined) => {
   if (!props.disabled) emit('update:modelValue', !!value)
 }
 </script>
+
+<style scoped>
+.toggle-label-line {
+  display: flex;
+  align-items: center;
+}
+
+.toggle-label-end {
+  display: flex;
+  align-items: center;
+  flex: none;
+  /* Keep the action's hit area from changing the label's line height. */
+  height: 0;
+}
+</style>

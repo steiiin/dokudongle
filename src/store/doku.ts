@@ -10,6 +10,7 @@ import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
 import { createSchwindelBlockState } from '@/data/blocks/schwindel'
+import { createSehenBlockState } from '@/data/blocks/sehen'
 import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intoxicationBasisOptions, renderIntoxicationSummary } from '@/data/blocks/intoxikation'
 import type { IntoxicationSubstance } from '@/types/blocks/intoxikation'
 import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
@@ -35,7 +36,7 @@ import { decodeDongleConfig, encodeDongleConfig, withDongleTimeout } from '@/uti
 import { awaitBleOperation, disconnectDongle, dongleConnectionTimeout } from '@/utils/dongle/dongle-connection'
 import { Device, DeviceConnection, DongleConfig, DONGLE_NAME_PREFIX, ServiceUUID, ConfigUUID } from '@/types/dongle'
 import { Protocol, ProtocolContext, ProtocolCourse, ProtocolFlavors, ProtocolVerbosity, resetProtocol } from '@/types/protocol'
-import { DisabilityNeuro, DisabilityPsych, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
+import { DisabilityNeuro, DisabilityPsych, DisabilityVision, ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
 import { isNonVerbalProtocol } from '@/types/protocol/assessment'
 import { EnhanceableText } from '@/types/protocol/input'
 import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sample'
@@ -180,15 +181,47 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       disability.intoxication = { assessed: intoxication.active, value: intoxication.value }
     }
     normalizedInput = { ...input, xabcDe: disability }
+    // Sehstörungen aus dem bisherigen D-Modal in die Symptome-Blocksource übernehmen.
+    const previousVision = disability.vision
+    if (isRecord(previousVision) && isRecord(previousVision.value)) {
+      const details = hydrateLikeTemplate(new DisabilityVision(), previousVision.value)
+      disability.vision = {
+        assessed: previousVision.assessed === true,
+        value: Boolean(details.findingsText),
+      }
+      const blocks = isRecord(input.textAreaBlocks) ? input.textAreaBlocks : {}
+      normalizedInput = {
+        ...normalizedInput,
+        textAreaBlocks: { ...blocks, sehen: blocks.sehen ?? { ...createSehenBlockState(), details } },
+      }
+    }
+  }
+  // Trachealverschiebung aus bisherigen B-Befunden nach A übernehmen.
+  const previousBreathing = normalizedInput.xaBcde
+  if (isRecord(previousBreathing)) {
+    const airway = isRecord(normalizedInput.xAbcde) ? normalizedInput.xAbcde : {}
+    const trachealDeviation = previousBreathing.trachealDeviation === undefined
+      ? previousBreathing.hasTrachealDeviation
+      : previousBreathing.trachealDeviation
+    normalizedInput = {
+      ...normalizedInput,
+      xAbcde: {
+        ...airway,
+        trachealDeviation: airway.trachealDeviation === undefined ? trachealDeviation : airway.trachealDeviation,
+      },
+    }
   }
   if (isRecord(normalizedInput.xAbcde)) {
     const airway = normalizedInput.xAbcde
     const stridor = airway.stridor === undefined ? airway.hasStridor : airway.stridor
+    const trachealDeviation = airway.trachealDeviation
     normalizedInput = {
       ...normalizedInput,
       xAbcde: {
         ...airway,
         stridor: typeof stridor === 'boolean' ? { assessed: stridor, value: stridor } : stridor,
+        trachealDeviation: typeof trachealDeviation === 'boolean'
+          ? { assessed: trachealDeviation, value: trachealDeviation } : trachealDeviation,
       },
     }
   }
@@ -200,7 +233,6 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       paradoxical: 'isParadoxical',
       jugularVenousDistension: 'hasJugularVenousDistension',
       emphysema: 'hasEmphysema',
-      trachealDeviation: 'hasTrachealDeviation',
     } as const
     for (const [key, legacyKey] of Object.entries(legacyBreathingFields)) {
       const finding = breathing[key] === undefined ? breathing[legacyKey] : breathing[key]
@@ -857,6 +889,11 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xabcDe.dizziness = value
       if (value !== 'gerichteter') this.doku.textAreaBlocks.schwindel = createSchwindelBlockState()
     },
+    setVisionSymptoms(value: boolean) {
+      this.doku.xabcDe.vision.assessed = true
+      this.doku.xabcDe.vision.value = value
+      if (!value) this.doku.textAreaBlocks.sehen = createSehenBlockState()
+    },
     setPregnancyAssessed(value: boolean) {
       if (this.doku.xabcdE.pregnancy.assessed !== value || !value) {
         this.doku.xabcdE.pregnancy.value = true
@@ -1189,7 +1226,7 @@ export const useDokuStore = defineStore('doku', {
         !state.doku.xAbcde.isBreathing
         || (state.doku.xaBcde.isExamined('breathlessness') && state.doku.xaBcde.breathlessness == 'schwere')
         || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
-        || state.doku.xaBcde.trachealDeviation.matches(true)
+        || state.doku.xAbcde.trachealDeviation.matches(true)
         || state.doku.xabCde.pulse.peripheralStrength == 'nicht'
         || state.doku.xabCde.pulse.centralStrength != 'gut'
         || (isTrauma && gcs <= 12 && !isBaseline)

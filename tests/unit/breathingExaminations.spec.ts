@@ -21,7 +21,6 @@ const findings = [
   ['paradoxical', 'isParadoxical', 'paradoxe Atmung', 'keine paradoxe Atmung'],
   ['jugularVenousDistension', 'hasJugularVenousDistension', 'Halsvenenstauung', 'keine Halsvenenstauung'],
   ['emphysema', 'hasEmphysema', 'subkutanes Emphysem', 'kein subkutanes Emphysem'],
-  ['trachealDeviation', 'hasTrachealDeviation', 'Trachea verschoben', 'keine Trachealverschiebung'],
 ] as const
 
 beforeEach(() => {
@@ -54,18 +53,6 @@ describe('Breathing assessment semantics', () => {
       expect(breathing.normalBreathing).toBe(true)
       expect(breathing.thoraxText.includes(negative)).toBe(verbosity !== ProtocolVerbosity.LOW)
     }
-  })
-
-  test('only assessed positive tracheal deviation makes the context critical', () => {
-    const store = useDokuStore()
-    const finding = store.doku.xaBcde.trachealDeviation
-    expect(store.context.isCritical).toBe(false)
-    finding.value = true
-    expect(store.context.isCritical).toBe(false)
-    finding.assessed = true
-    expect(store.context.isCritical).toBe(true)
-    finding.value = false
-    expect(store.context.isCritical).toBe(false)
   })
 
   test.each([ProtocolVerbosity.LOW, ProtocolVerbosity.NORMAL, ProtocolVerbosity.HIGH])('preserves auscultation rules at verbosity %s', verbosity => {

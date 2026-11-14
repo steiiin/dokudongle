@@ -8,6 +8,7 @@ import type { SchwangerschaftBlockSourceState } from '@/types/blocks/schwangersc
 import { createSchwangerschaftBlockState, SchwangerschaftTextAreaBlock } from '@/data/blocks/schwangerschaft'
 import type { SchwindelBlockSourceState } from '@/types/blocks/schwindel'
 import { createSchwindelBlockState, SchwindelTextAreaBlock } from '@/data/blocks/schwindel'
+import { createSehenBlockState, SehenTextAreaBlock, type SehenBlockSourceState } from '@/data/blocks/sehen'
 import type { BauchschmerzBlockSourceState } from '@/types/blocks/bauchschmerz'
 import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock } from '@/data/blocks/bauchschmerz'
 import type { ExcretionsBowelsBlockSourceState, ExcretionsUrinaryBlockSourceState } from '@/types/blocks/excretions'
@@ -20,6 +21,7 @@ export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
   intoxikation: IntoxicationBlockSourceState
   schwangerschaft: SchwangerschaftBlockSourceState
   schwindel: SchwindelBlockSourceState
+  sehen: SehenBlockSourceState
   excretions_bowel: ExcretionsBowelsBlockSourceState
   excretions_urinary: ExcretionsUrinaryBlockSourceState
   bauchschmerz: BauchschmerzBlockSourceState
@@ -63,6 +65,12 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
     isAvailable: protocol => assessmentActive(protocol.xabcDe.assessment.dizziness, protocol) && protocol.xabcDe.dizziness === 'gerichteter',
     createState: createSchwindelBlockState,
     outputs: [new SchwindelTextAreaBlock()],
+  },
+  {
+    id: 'sehen', fields: [],
+    isAvailable: protocol => protocol.xabcDe.vision.matches(true),
+    createState: createSehenBlockState,
+    outputs: [new SehenTextAreaBlock()],
   },
   {
     id: 'excretions_bowel', fields: [],

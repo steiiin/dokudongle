@@ -2,6 +2,8 @@
 
     <hr v-if="ctx.isTrauma">
 
+    <BlockSehenCard v-if="ctx.requireSampleSymptoms && store.doku.xabcDe.vision.matches(true)" />
+
     <BlockSchwindelCard
       v-if="ctx.requireSampleSymptoms && ctx.hasDizziness && store.doku.xabcDe.dizziness === 'gerichteter'" />
 
@@ -31,6 +33,7 @@ import { computed } from 'vue'
 import { useDokuStore } from '@/store/doku'
 import { QU_SYM_OPQRST } from '@/data/quickies'
 import BlockSchwindelCard from '../blocks/BlockSchwindelCard.vue'
+import BlockSehenCard from '../blocks/BlockSehenCard.vue'
 import BlockExcretionsBowelsCard from '../blocks/BlockExcretionsBowelsCard.vue'
 import BlockExcretionsUrinaryCard from '../blocks/BlockExcretionsUrinaryCard.vue'
 import BlockBauchschmerzCard from '../blocks/BlockBauchschmerzCard.vue'

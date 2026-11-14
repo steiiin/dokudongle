@@ -157,15 +157,6 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="trachealDeviation" label="Trachealverschiebung"
-      v-model:assessed="store.doku.xaBcde.trachealDeviation.assessed"
-      @select="store.doku.xaBcde.trachealDeviation.value = true"
-      @remove="store.doku.xaBcde.trachealDeviation.value = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xaBcde.trachealDeviation.value">
-        Trachealverschiebung?
-      </DodoInputToggle>
-    </DodoExaminationItem>
-
   </DodoExaminationCard>
 </template>
 

@@ -190,17 +190,17 @@ describe('examination card grouping', () => {
   test('moves a formerly last row up with a separator and omits the last visible separator', async () => {
     const store = useDokuStore()
     const wrapper = mount(AbcdeBreathingCard, { global })
-    const tracheal = () => wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'trachealDeviation')!
-    expect(tracheal().props('showLine')).toBe(false)
-    store.doku.xaBcde.trachealDeviation.assessed = true
+    const emphysema = () => wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'emphysema')!
+    expect(emphysema().props('showLine')).toBe(false)
+    store.doku.xaBcde.emphysema.assessed = true
     await nextTick()
-    expect(tracheal().props('showLine')).toBe('full')
-    expect(wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'emphysema')!.props('showLine')).toBe(false)
+    expect(emphysema().props('showLine')).toBe('full')
+    expect(wrapper.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'jugularVenousDistension')!.props('showLine')).toBe(false)
     // A negative finding is still assessed and stays in the upper group.
-    expect(store.doku.xaBcde.trachealDeviation.value).toBe(false)
+    expect(store.doku.xaBcde.emphysema.value).toBe(false)
     const list = wrapper.get('ion-list-stub').element
     const ids = Array.from(list.children).map(el => el.getAttribute('data-examination')).filter(Boolean)
-    expect(ids).toEqual(['breathlessness', 'trachealDeviation', 'hasHypoxia', 'auscultation', 'jugularVenousDistension', 'emphysema'])
+    expect(ids).toEqual(['breathlessness', 'emphysema', 'hasHypoxia', 'auscultation', 'jugularVenousDistension'])
   })
 
   test('keeps adult and pediatric orientation instances distinct through context and order changes', async () => {
@@ -284,6 +284,14 @@ describe('inline examination controls', () => {
 })
 
 describe('ABCDE examination integration', () => {
+  test('places tracheal deviation after stridor in A and removes it from B', () => {
+    const airway = mount(AbcdeAirwayCard, { global })
+    const breathing = mount(AbcdeBreathingCard, { global })
+    expect(airway.findAll('[data-examination]').map(row => row.attributes('data-examination')))
+      .toEqual(['stridor', 'trachealDeviation'])
+    expect(breathing.find('[data-examination="trachealDeviation"]').exists()).toBe(false)
+  })
+
   test('stridor activates as true and remains visible after clearing', async () => {
     const store = useDokuStore()
     const wrapper = mount(AbcdeAirwayCard, { global })
@@ -301,15 +309,17 @@ describe('ABCDE examination integration', () => {
   test.each(['accessoryMuscles', 'retractions', 'paradoxical', 'jugularVenousDistension', 'emphysema', 'trachealDeviation'] as const)(
     '%s activates as true, allows false and resets on removal', async field => {
       const store = useDokuStore()
-      const wrapper = mount(AbcdeBreathingCard, { global })
+      const airway = field === 'trachealDeviation'
+      const finding = airway ? store.doku.xAbcde.trachealDeviation : store.doku.xaBcde[field]
+      const wrapper = mount(airway ? AbcdeAirwayCard : AbcdeBreathingCard, { global })
       await wrapper.get(`[data-examination="${field}"] .activate-examination`).trigger('click')
-      expect(store.doku.xaBcde[field]).toMatchObject({ assessed: true, value: true })
+      expect(finding).toMatchObject({ assessed: true, value: true })
       wrapper.get(`[data-examination="${field}"]`).getComponent(DodoInputToggle).vm.$emit('update:modelValue', false)
-      expect(store.doku.xaBcde[field]).toMatchObject({ assessed: true, value: false })
+      expect(finding).toMatchObject({ assessed: true, value: false })
       await wrapper.get(`[data-examination="${field}"] .remove-examination`).trigger('click')
-      expect(store.doku.xaBcde[field]).toMatchObject({ assessed: false, value: false })
+      expect(finding).toMatchObject({ assessed: false, value: false })
       await wrapper.get(`[data-examination="${field}"] .activate-examination`).trigger('click')
-      expect(store.doku.xaBcde[field]).toMatchObject({ assessed: true, value: true })
+      expect(finding).toMatchObject({ assessed: true, value: true })
     },
   )
 

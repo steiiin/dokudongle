@@ -155,6 +155,12 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
+    <DodoInputToggle lines="full" :model-value="store.doku.xabcDe.vision.matches(true)"
+      @update:model-value="store.setVisionSymptoms($event)">
+      Sehstörungen?
+      <template #label-end><DodoBlockSourceShortcut source="sehen" /></template>
+    </DodoInputToggle>
+
     <DodoExaminationItem id="dizziness" label="Schwindel" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabcDe.isExamined('dizziness')"
@@ -202,6 +208,15 @@
             ]">
           </DodoInputSelect>
         </DodoExaminationItem>
+
+        <DodoInputSelect v-model="store.doku.xabcDe.neuro.value.gazeDeviation"
+          label="Blickdeviation" lines="full" allow-custom custom-label="Wie?" custom-placeholder="z.B. Herdblick"
+          :options="[
+            { value: '', label: 'Keine' },
+            { value: 'nach rechts', label: 'Nach Rechts' },
+            { value: 'nach links', label: 'Nach Links' },
+          ]">
+        </DodoInputSelect>
 
         <IonItemDivider>
           <IonLabel>Motorik</IonLabel>
@@ -260,6 +275,27 @@
         <DodoInputToggle lines="none" v-model="store.doku.xabcDe.neuro.value.msTremor">
           Tremor/Myoklonien?
         </DodoInputToggle>
+
+        <IonItemDivider>
+          <IonLabel>Koordination</IonLabel>
+        </IonItemDivider>
+        <DodoExaminationItem id="fingerNose" label="Finger-Nase-Versuch" show-line="inset"
+          :removable="store.context.isNonVerbal"
+          :assessed="store.doku.xabcDe.neuro.value.isExamined('fingerNose')"
+          @update:assessed="store.doku.xabcDe.neuro.value.assessment.fingerNose = $event ? 'active' : 'inactive'"
+          @select="resetNeuroField('fingerNose')" @remove="resetNeuroField('fingerNose')">
+          <DodoInputSelectLR v-model:left="store.doku.xabcDe.neuro.value.fingerNose.left"
+            v-model:right="store.doku.xabcDe.neuro.value.fingerNose.right"
+            @update:left="store.doku.xabcDe.neuro.value.assessment.fingerNose = 'active'"
+            @update:right="store.doku.xabcDe.neuro.value.assessment.fingerNose = 'active'"
+            label="Finger-Nase-Versuch" lines="none"
+            :options="[
+              { value: 'unauffällig', label: 'Unauffällig' },
+              { value: 'leicht ataktisch', label: 'leicht ataktisch', color: 'yellow' },
+              { value: 'deutlich ataktisch', label: 'deutlich ataktisch', color: 'orange' },
+            ]">
+          </DodoInputSelectLR>
+        </DodoExaminationItem>
 
         <IonItemDivider>
           <IonLabel>Sensorik</IonLabel>
