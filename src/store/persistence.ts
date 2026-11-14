@@ -1,6 +1,7 @@
 import { Storage } from '@ionic/storage'
 import type { UnwrapRef } from 'vue'
 import type { Protocol } from '@/types/protocol'
+import type { PreviewDocument } from '@/utils/preview-document'
 
 // ############################################################################
 
@@ -20,12 +21,14 @@ export interface PersistedDokuState {
   doku?: any
   protocolHistory?: ProtocolHistoryEntry[]
   activeHistoryEntryId?: string | null
+  preview?: PreviewDocument | null
 }
 
 export interface ProtocolHistoryEntry {
   id: string
   archivedAt: string
   doku: UnwrapRef<Protocol>
+  preview?: PreviewDocument | null
 }
 
 export interface ProtocolAuditEntry {

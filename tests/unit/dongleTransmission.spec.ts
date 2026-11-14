@@ -3,6 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { useDokuStore } from '@/store/doku'
 import { SendTextUUID } from '@/types/dongle'
+import { stripNotSupported, textToHidEvents } from '@/utils/dongle/keymaps/keymap-german'
 
 const ble = vi.hoisted(() => ({
   connect: vi.fn(), disconnect: vi.fn(), startNotifications: vi.fn(), stopNotifications: vi.fn(), write: vi.fn(),
@@ -65,6 +66,14 @@ function bytes(index: number) {
 }
 
 describe('pausing a protocol transmission', () => {
+  test.each([false, true])('transmits edited text with explicit snapshot=%s', async explicit => {
+    store.editPreview('Änderung')
+    const text = explicit ? 'Snapshot' : store.effectiveProtocolText
+    task = explicit ? store.sendProtocol(text) : store.sendProtocol()
+    await flushPromises()
+    expect(bytes(0)).toEqual(textToHidEvents(stripNotSupported(text)).flat())
+  })
+
   test('finishes the current block, freezes progress, and supports repeated pause/resume', async () => {
     await start()
     expect(ble.write).toHaveBeenCalledTimes(1)
