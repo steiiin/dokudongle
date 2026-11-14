@@ -196,14 +196,32 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       }
     }
   }
+  // Trachealverschiebung aus bisherigen B-Befunden nach A übernehmen.
+  const previousBreathing = normalizedInput.xaBcde
+  if (isRecord(previousBreathing)) {
+    const airway = isRecord(normalizedInput.xAbcde) ? normalizedInput.xAbcde : {}
+    const trachealDeviation = previousBreathing.trachealDeviation === undefined
+      ? previousBreathing.hasTrachealDeviation
+      : previousBreathing.trachealDeviation
+    normalizedInput = {
+      ...normalizedInput,
+      xAbcde: {
+        ...airway,
+        trachealDeviation: airway.trachealDeviation === undefined ? trachealDeviation : airway.trachealDeviation,
+      },
+    }
+  }
   if (isRecord(normalizedInput.xAbcde)) {
     const airway = normalizedInput.xAbcde
     const stridor = airway.stridor === undefined ? airway.hasStridor : airway.stridor
+    const trachealDeviation = airway.trachealDeviation
     normalizedInput = {
       ...normalizedInput,
       xAbcde: {
         ...airway,
         stridor: typeof stridor === 'boolean' ? { assessed: stridor, value: stridor } : stridor,
+        trachealDeviation: typeof trachealDeviation === 'boolean'
+          ? { assessed: trachealDeviation, value: trachealDeviation } : trachealDeviation,
       },
     }
   }
@@ -215,7 +233,6 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       paradoxical: 'isParadoxical',
       jugularVenousDistension: 'hasJugularVenousDistension',
       emphysema: 'hasEmphysema',
-      trachealDeviation: 'hasTrachealDeviation',
     } as const
     for (const [key, legacyKey] of Object.entries(legacyBreathingFields)) {
       const finding = breathing[key] === undefined ? breathing[legacyKey] : breathing[key]
@@ -1209,7 +1226,7 @@ export const useDokuStore = defineStore('doku', {
         !state.doku.xAbcde.isBreathing
         || (state.doku.xaBcde.isExamined('breathlessness') && state.doku.xaBcde.breathlessness == 'schwere')
         || state.doku.xaBcde.mechanics.pattern == 'Biotsche Atmung'
-        || state.doku.xaBcde.trachealDeviation.matches(true)
+        || state.doku.xAbcde.trachealDeviation.matches(true)
         || state.doku.xabCde.pulse.peripheralStrength == 'nicht'
         || state.doku.xabCde.pulse.centralStrength != 'gut'
         || (isTrauma && gcs <= 12 && !isBaseline)

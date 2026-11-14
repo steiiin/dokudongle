@@ -65,6 +65,15 @@
       </DodoInputToggle>
     </DodoExaminationItem>
 
+    <DodoExaminationItem id="trachealDeviation" label="Trachealverschiebung"
+      v-model:assessed="store.doku.xAbcde.trachealDeviation.assessed"
+      @select="store.doku.xAbcde.trachealDeviation.value = true"
+      @remove="store.doku.xAbcde.trachealDeviation.value = false">
+      <DodoInputToggle lines="none" v-model="store.doku.xAbcde.trachealDeviation.value">
+        Trachealverschiebung?
+      </DodoInputToggle>
+    </DodoExaminationItem>
+
   </DodoExaminationCard>
 </template>
 
@@ -83,6 +92,8 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
 
   store.doku.xAbcde.stridor.assessed = false
   store.doku.xAbcde.stridor.value = false
+  store.doku.xAbcde.trachealDeviation.assessed = false
+  store.doku.xAbcde.trachealDeviation.value = false
   store.doku.xAbcde.mucosa.e = v ? 'rosig' : 'bläulich'
 
   store.doku.xaBcde.breathlessness = 'keine'
@@ -107,8 +118,6 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
   store.doku.xaBcde.jugularVenousDistension.value = false
   store.doku.xaBcde.emphysema.assessed = false
   store.doku.xaBcde.emphysema.value = false
-  store.doku.xaBcde.trachealDeviation.assessed = false
-  store.doku.xaBcde.trachealDeviation.value = false
 
 }, { flush: 'sync' })
 

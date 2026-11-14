@@ -50,8 +50,8 @@ function seedFindings(store: ReturnType<typeof useDokuStore>) {
   p.xaBcde.jugularVenousDistension.value = true
   p.xaBcde.emphysema.assessed = true
   p.xaBcde.emphysema.value = true
-  p.xaBcde.trachealDeviation.assessed = true
-  p.xaBcde.trachealDeviation.value = true
+  p.xAbcde.trachealDeviation.assessed = true
+  p.xAbcde.trachealDeviation.value = true
   p.xabCde.skin.color = 'blass'
   p.xabCde.skin.peripheralTemp = 'warm'
   p.xabCde.skin.centralTemp = 'warm'
@@ -72,15 +72,18 @@ describe('Reanimation restoration', () => {
     vi.mocked(loadDokuState).mockReset()
   })
 
-  test.each([false, true])('restores a negative Stridor value with assessed=%s', async assessed => {
+  test.each([false, true])('restores negative airway findings with assessed=%s', async assessed => {
     const store = useDokuStore()
     store.doku.xAbcde.stridor.assessed = assessed
+    store.doku.xAbcde.trachealDeviation.assessed = assessed
     mountClinicalCards()
     store.setFlavor('reanimation', true)
     expect(store.doku.xAbcde.stridor).toMatchObject({ assessed: false, value: false })
+    expect(store.doku.xAbcde.trachealDeviation).toMatchObject({ assessed: false, value: false })
     store.setFlavor('reanimation', false)
     await nextTick()
     expect(store.doku.xAbcde.stridor).toMatchObject({ assessed, value: false })
+    expect(store.doku.xAbcde.trachealDeviation).toMatchObject({ assessed, value: false })
   })
 
   test.each([false, true])('restores headache=%s', async headache => {
@@ -96,7 +99,7 @@ describe('Reanimation restoration', () => {
 
   test.each([false, true])('restores negative breathing examinations with assessed=%s', async assessed => {
     const store = useDokuStore()
-    const keys = ['accessoryMuscles', 'retractions', 'paradoxical', 'jugularVenousDistension', 'emphysema', 'trachealDeviation', 'auscultation'] as const
+    const keys = ['accessoryMuscles', 'retractions', 'paradoxical', 'jugularVenousDistension', 'emphysema', 'auscultation'] as const
     for (const key of keys) store.doku.xaBcde[key].assessed = assessed
     mountClinicalCards()
     const before = plain(store.doku.xaBcde)
@@ -295,6 +298,7 @@ describe('Reanimation restoration', () => {
     store.setFlavor('non_verbal', true)
     await nextTick()
     expect(store.doku.xAbcde.stridor).toMatchObject({ assessed: false, value: false })
+    expect(store.doku.xAbcde.trachealDeviation).toMatchObject({ assessed: false, value: false })
     expect(store.doku.xaBcde.mechanics.pattern).toBe('')
     expect(store.doku.xaBcde.hasHypoxia).toBe(true)
     expect(store.doku.xabCde.pulse.peripheralStrength).toBe('nicht')

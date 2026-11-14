@@ -41,7 +41,6 @@ export class AbcdeBreathing {
   public paradoxical: AssessedValue<boolean>
   public jugularVenousDistension: AssessedValue<boolean>
   public emphysema: AssessedValue<boolean>
-  public trachealDeviation: AssessedValue<boolean>
 
   // #####################################################################
 
@@ -58,7 +57,6 @@ export class AbcdeBreathing {
     this.paradoxical = AssessedValue.unassessed(false)
     this.jugularVenousDistension = AssessedValue.unassessed(false)
     this.emphysema = AssessedValue.unassessed(false)
-    this.trachealDeviation = AssessedValue.unassessed(false)
 
   }
 
@@ -81,7 +79,6 @@ export class AbcdeBreathing {
       || this.paradoxical.matches(true)
       || this.jugularVenousDistension.matches(true)
       || this.emphysema.matches(true)
-      || this.trachealDeviation.matches(true)
   }
 
   // #####################################################################
@@ -104,7 +101,6 @@ export class AbcdeBreathing {
       && !this.paradoxical.matches(true)
       && !this.jugularVenousDistension.matches(true)
       && !this.emphysema.matches(true)
-      && !this.trachealDeviation.matches(true)
     )
   }
 
@@ -192,7 +188,6 @@ export class AbcdeBreathing {
       ],
       assessedText(this.jugularVenousDistension, 'Halsvenenstauung', 'keine Halsvenenstauung'),
       assessedText(this.emphysema, 'subkutanes Emphysem', 'kein subkutanes Emphysem'),
-      assessedText(this.trachealDeviation, 'Trachea verschoben', 'keine Trachealverschiebung'),
     ])
   }
 
