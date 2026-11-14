@@ -195,15 +195,19 @@ export class DisabilityGcs {
 
 // ############################################################################
 
+type FingerNoseFinding = 'unauffällig' | 'leicht ataktisch' | 'deutlich ataktisch'
+
 export class DisabilityNeuro {
 
-  public assessment = assessmentDefaults('followInstructions', 'msMeningism', 'sensitivity', 'paraesthesia', 'dysarthria', 'aphasia')
+  public assessment = assessmentDefaults('followInstructions', 'msMeningism', 'fingerNose', 'sensitivity', 'paraesthesia', 'dysarthria', 'aphasia')
 
   isExamined(field: keyof typeof this.assessment): boolean {
     return assessmentActive(this.assessment[field], useDokuStore().doku)
   }
 
   public followInstructions: 'befolgt' | 'teilweise befolgt' | 'nicht befolgt'
+  public gazeDeviation: string
+  public fingerNose: { left: FingerNoseFinding; right: FingerNoseFinding }
 
   public msFace: '' | 'leichte' | 'ausgeprägte' | 'komplette'
 
@@ -224,6 +228,8 @@ export class DisabilityNeuro {
   constructor()
   {
     this.followInstructions = 'befolgt'
+    this.gazeDeviation = ''
+    this.fingerNose = { left: 'unauffällig', right: 'unauffällig' }
     this.msFace = ''
     this.msArmLeft = 'ohne Absinken'
     this.msArmRight = 'ohne Absinken'
@@ -242,6 +248,8 @@ export class DisabilityNeuro {
       || this.msArmLeft != 'ohne Absinken' || this.msArmRight != 'ohne Absinken'
       || this.msLegLeft != 'ohne Absinken' || this.msLegRight != 'ohne Absinken'
       || this.msTremor
+      || this.gazeDeviationText !== ''
+      || this.fingerNoseText !== ''
       || (this.isExamined('followInstructions') && this.followInstructions !== 'befolgt')
       || (this.isExamined('msMeningism') && (this.msMeningism == 'leichter' || this.msMeningism == 'ausgeprägter'))
       || (this.isExamined('sensitivity') && this.sensitivity.isActive)
@@ -269,10 +277,29 @@ export class DisabilityNeuro {
       textIf('Aphasie', (this.isExamined('aphasia') && this.aphasia != '' && this.aphasia != 'keine')
         || (this.isExamined('dysarthria') && this.dysarthria != '' && this.dysarthria != 'normal')),
       pareses.length > 1 ? 'Parese' : pareses[0],
+      textIf('Blickdeviation', this.gazeDeviationText !== ''),
+      textIf('Ataxie', this.fingerNoseText !== ''),
       textIf('Störung Sensibilität', this.isExamined('sensitivity') && this.sensitivity.isActive),
       textIf('Parästhesien', this.isExamined('paraesthesia') && this.paraesthesia.isActive),
       this.neckStiffnessText,
     ].filter(Boolean).join(', ') || (this.isExamined('paraesthesia') ? 'keine Paresen/Parästhesien' : 'keine Paresen')
+  }
+
+  get gazeDeviationText(): string {
+    const finding = this.gazeDeviation.trim()
+    if (!finding) return ''
+    if (finding === 'nach rechts' || finding === 'nach links') return `Blickdeviation ${finding}`
+    return `Blickdeviation: ${finding}`
+  }
+
+  get fingerNoseText(): string {
+    if (!this.isExamined('fingerNose')) return ''
+    const { left, right } = this.fingerNose
+    if (left === right) return left === 'unauffällig' ? '' : `Finger-Nase-Versuch bds. ${left}`
+    return concatDoku([
+      textIf(`Finger-Nase-Versuch li ${left}`, left !== 'unauffällig'),
+      textIf(`Finger-Nase-Versuch re ${right}`, right !== 'unauffällig'),
+    ], false)
   }
 
   get neckStiffnessText(): string {
@@ -318,10 +345,12 @@ export class DisabilityNeuro {
 
     return concatDoku([
       textIf(`Anweisungen ${this.followInstructions}`, this.isExamined('followInstructions') && this.followInstructions != 'befolgt'),
+      this.gazeDeviationText,
       textIf(`${this.msFace} Fazialisparese`, this.msFace != ''),
       ...limbFindings,
       textIf(neckStiffness, this.isExamined('msMeningism')),
       textIf('Tremor/Myoklonien', this.msTremor),
+      this.fingerNoseText,
       textIf(prefix('Sensibilitätsstörung:', this.sensitivity.value), this.isExamined('sensitivity') && this.sensitivity.isActive),
       textIf(prefixParaesthesis(this.paraesthesia.value), this.isExamined('paraesthesia') && this.paraesthesia.isActive),
       textIf(articulation[this.dysarthria], this.isExamined('dysarthria')),

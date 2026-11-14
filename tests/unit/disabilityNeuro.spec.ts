@@ -9,6 +9,86 @@ beforeEach(() => {
   setActivePinia(createPinia())
 })
 
+describe('gaze deviation and coordination', () => {
+  test.each([
+    ['', ''],
+    ['   ', ''],
+    ['nach rechts', 'Blickdeviation nach rechts'],
+    ['nach links', 'Blickdeviation nach links'],
+    ['  nach oben  ', 'Blickdeviation: nach oben'],
+  ])('formats gaze deviation %j in verbal and non-verbal contexts', (value, expected) => {
+    const store = useDokuStore()
+    const neuro = new DisabilityNeuro()
+    neuro.gazeDeviation = value
+    for (const nonVerbal of [false, true]) {
+      store.doku.flavors.non_verbal = nonVerbal
+      expect(neuro.text).toBe(expected)
+      expect(neuro.hasAbnormalities).toBe(Boolean(expected))
+      expect(neuro.state).toBe(expected || 'normal')
+      if (expected) {
+        expect(neuro.symptomsText).toContain(expected)
+        expect(neuro.summaryText).toBe('Blickdeviation')
+      } else {
+        expect(neuro.symptomsText).not.toContain('Blickdeviation')
+        expect(neuro.summaryText).not.toContain('Blickdeviation')
+      }
+    }
+  })
+
+  test.each([
+    ['unauffällig', 'unauffällig', ''],
+    ['leicht ataktisch', 'unauffällig', 'Finger-Nase-Versuch li leicht ataktisch'],
+    ['deutlich ataktisch', 'unauffällig', 'Finger-Nase-Versuch li deutlich ataktisch'],
+    ['unauffällig', 'leicht ataktisch', 'Finger-Nase-Versuch re leicht ataktisch'],
+    ['unauffällig', 'deutlich ataktisch', 'Finger-Nase-Versuch re deutlich ataktisch'],
+    ['leicht ataktisch', 'leicht ataktisch', 'Finger-Nase-Versuch bds. leicht ataktisch'],
+    ['deutlich ataktisch', 'deutlich ataktisch', 'Finger-Nase-Versuch bds. deutlich ataktisch'],
+    ['leicht ataktisch', 'deutlich ataktisch', 'Finger-Nase-Versuch li leicht ataktisch; Finger-Nase-Versuch re deutlich ataktisch'],
+    ['deutlich ataktisch', 'leicht ataktisch', 'Finger-Nase-Versuch li deutlich ataktisch; Finger-Nase-Versuch re leicht ataktisch'],
+  ] as const)(
+    'formats finger-nose findings %s / %s and gates them on assessment', (left, right, expected) => {
+      const store = useDokuStore()
+      const neuro = new DisabilityNeuro()
+      const finding = { left, right }
+      neuro.fingerNose = finding
+      expect(neuro.text).toBe(expected)
+      expect(neuro.state).toBe(expected || 'normal')
+      expect(neuro.hasAbnormalities).toBe(Boolean(expected))
+      expect(neuro.summaryText).toBe(expected ? 'Ataxie' : 'keine Paresen/Parästhesien')
+
+      store.doku.flavors.non_verbal = true
+      expect(neuro.text).toBe('')
+      expect(neuro.symptomsText).toBe('')
+      expect(neuro.hasAbnormalities).toBe(false)
+      expect(neuro.summaryText).not.toContain('Ataxie')
+      neuro.assessment.fingerNose = 'active'
+      expect(neuro.text).toBe(expected)
+      expect(neuro.symptomsText).toBe(expected)
+      expect(neuro.fingerNose).toEqual(finding)
+
+      neuro.assessment.fingerNose = 'inactive'
+      store.doku.flavors.non_verbal = false
+      expect(neuro.text).toBe('')
+      expect(neuro.hasAbnormalities).toBe(false)
+    },
+  )
+
+  test('includes new findings only when Neuro is assessed', () => {
+    const store = useDokuStore()
+    const neuro = store.doku.xabcDe.neuro
+    neuro.value.gazeDeviation = 'nach links'
+    neuro.value.fingerNose.left = 'leicht ataktisch'
+    expect(store.generatedProtocol).not.toMatch(/Blickdeviation|Ataxie|Finger-Nase-Versuch/)
+    neuro.assessed = true
+    expect(store.generatedProtocol).toContain('Blickdeviation nach links')
+    expect(store.generatedProtocol).toContain('Finger-Nase-Versuch li leicht ataktisch')
+    expect(neuro.value.summaryText).toBe('Blickdeviation, Ataxie')
+    neuro.value.assessment.fingerNose = 'inactive'
+    expect(store.generatedProtocol).toContain('Blickdeviation nach links')
+    expect(store.generatedProtocol).not.toMatch(/Ataxie|Finger-Nase-Versuch/)
+  })
+})
+
 describe('DisabilityNeuro non-verbal context', () => {
   test.each([
     {},

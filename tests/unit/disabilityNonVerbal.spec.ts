@@ -4,6 +4,7 @@ import { defineComponent, nextTick } from 'vue'
 import * as Ionic from '@ionic/vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputSelectLR from '@/components/inputs/DodoInputSelectLR.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
 import { resetProtocol } from '@/types/protocol'
@@ -44,7 +45,7 @@ const triggers: [string, (store: ReturnType<typeof useDokuStore>, enabled: boole
   ['verbal GCS', (store, enabled) => { store.doku.xabcDe.gcs.v = enabled ? 3 : 5 }],
   ['not breathing', (store, enabled) => { store.doku.xAbcde.isBreathing = !enabled }],
 ]
-const neuroFields = ['followInstructions', 'msMeningism', 'sensitivity', 'paraesthesia', 'dysarthria', 'aphasia'] as const
+const neuroFields = ['followInstructions', 'msMeningism', 'fingerNose', 'sensitivity', 'paraesthesia', 'dysarthria', 'aphasia'] as const
 
 function seedNeuro() {
   const neuro = useDokuStore().doku.xabcDe.neuro
@@ -53,12 +54,72 @@ function seedNeuro() {
     followInstructions: 'nicht befolgt', sensitivity: OptionalValue.active('Taubheit li. Arm'),
     paraesthesia: OptionalValue.active('Kribbeln li. Bein'), dysarthria: 'verwaschen',
     aphasia: 'schwere', msArmLeft: 'Absinken', msMeningism: 'leichter', msTremor: true,
+    gazeDeviation: 'nach rechts', fingerNose: { left: 'leicht ataktisch', right: 'deutlich ataktisch' },
   } satisfies Partial<DisabilityNeuro>)
   for (const key of neuroFields) neuro.value.assessment[key] = 'active'
   return neuro
 }
 
 describe('individual nonverbal assessments', () => {
+  test('offers gaze deviation with custom text and independent coordination sides', async () => {
+    const store = useDokuStore()
+    store.doku.xabcDe.neuro.assessed = true
+    const wrapper = mount(AbcdeDisabilityCard, { global })
+    const gaze = wrapper.findAllComponents(DodoInputSelect).find(input => input.props('label') === 'Blickdeviation')!
+    expect(gaze.props('allowCustom')).toBe(true)
+    expect(gaze.props('options')).toEqual([
+      { value: '', label: 'Keine' },
+      { value: 'nach rechts', label: 'Nach Rechts' },
+      { value: 'nach links', label: 'Nach Links' },
+    ])
+    gaze.vm.$emit('update:modelValue', 'nach oben')
+    const coordination = wrapper.findAllComponents(DodoInputSelectLR).find(input => input.props('label') === 'Finger-Nase-Versuch')!
+    expect(coordination.props('options').map(option => typeof option === 'object' ? option.value : option))
+      .toEqual(['unauffällig', 'leicht ataktisch', 'deutlich ataktisch'])
+    coordination.vm.$emit('update:left', 'leicht ataktisch')
+    await nextTick()
+    const neuro = store.doku.xabcDe.neuro.value
+    expect(neuro.fingerNose).toEqual({ left: 'leicht ataktisch', right: 'unauffällig' })
+    expect(neuro.assessment.fingerNose).toBe('active')
+    neuro.assessment.fingerNose = 'auto'
+    coordination.vm.$emit('update:right', 'deutlich ataktisch')
+    await nextTick()
+    expect(neuro.fingerNose).toEqual({ left: 'leicht ataktisch', right: 'deutlich ataktisch' })
+    expect(neuro.assessment.fingerNose).toBe('active')
+    expect(store.generatedProtocol).toContain('Blickdeviation: nach oben')
+  })
+
+  test('activates, removes and reactivates both coordination sides together', async () => {
+    const store = useDokuStore()
+    store.doku.flavors.non_verbal = true
+    store.doku.xabcDe.neuro.assessed = true
+    const wrapper = mount(AbcdeDisabilityCard, { global })
+    const row = () => wrapper.get('[data-examination="fingerNose"]')
+    expect(row().classes()).toContain('examination-inactive')
+    expect(wrapper.findAllComponents(DodoInputSelect).some(input => input.props('label') === 'Blickdeviation')).toBe(true)
+    await row().get('.activate-examination').trigger('click')
+    const neuro = store.doku.xabcDe.neuro.value
+    expect(neuro.assessment.fingerNose).toBe('active')
+    expect(store.generatedProtocol).not.toMatch(/Finger-Nase-Versuch|Ataxie/)
+    const coordination = row().getComponent(DodoInputSelectLR)
+    coordination.vm.$emit('update:left', 'leicht ataktisch')
+    coordination.vm.$emit('update:right', 'deutlich ataktisch')
+    await nextTick()
+    expect(store.generatedProtocol).toContain('Finger-Nase-Versuch li leicht ataktisch')
+    await row().get('.remove-examination').trigger('click')
+    expect(neuro.fingerNose).toEqual({ left: 'unauffällig', right: 'unauffällig' })
+    expect(neuro.assessment.fingerNose).toBe('inactive')
+    expect(store.generatedProtocol).not.toMatch(/Finger-Nase-Versuch|Ataxie/)
+    store.doku.flavors.non_verbal = false
+    await nextTick()
+    expect(row().classes()).toContain('examination-inactive')
+    await row().get('.activate-examination').trigger('click')
+    store.doku.flavors.non_verbal = true
+    await nextTick()
+    expect(row().classes()).not.toContain('examination-inactive')
+    expect(neuro.fingerNose).toEqual({ left: 'unauffällig', right: 'unauffällig' })
+  })
+
   test.each(triggers)('keeps all untouched checks visible and independently inactive on %s', async (_, trigger) => {
     const store = useDokuStore()
     trigger(store, true)
@@ -221,6 +282,28 @@ describe('individual nonverbal assessments', () => {
 })
 
 describe('assessment persistence', () => {
+  test.each(['auto', 'active', 'inactive'] as const)('round-trips coordination intent %s and gaze free text', async intent => {
+    const store = useDokuStore()
+    store.doku.flavors.non_verbal = true
+    store.doku.xabcDe.neuro.assessed = true
+    const neuro = store.doku.xabcDe.neuro.value
+    neuro.gazeDeviation = 'nach oben'
+    neuro.assessment.fingerNose = intent
+    // Explicit normal findings must retain their active intent, too.
+    if (intent !== 'active') neuro.fingerNose.left = 'deutlich ataktisch'
+    await store.persistToStorage()
+    vi.mocked(loadDokuState).mockResolvedValueOnce(vi.mocked(saveDokuState).mock.lastCall![0])
+    setActivePinia(createPinia())
+    const restored = useDokuStore()
+    await restored.hydrateFromStorage()
+    expect(restored.doku.xabcDe.neuro.value).toBeInstanceOf(DisabilityNeuro)
+    expect(restored.doku.xabcDe.neuro.value.fingerNose).toEqual(neuro.fingerNose)
+    expect(restored.doku.xabcDe.neuro.value.assessment.fingerNose).toBe(intent)
+    expect(restored.doku.xabcDe.neuro.value.isExamined('fingerNose')).toBe(intent === 'active')
+    expect(restored.generatedProtocol).toContain('Blickdeviation: nach oben')
+    expect(restored.generatedProtocol).not.toMatch(/Finger-Nase-Versuch|Ataxie/)
+  })
+
   test('round-trips explicit negative, inactive and automatic intent with saved findings', async () => {
     const store = useDokuStore()
     seedNeuro()
@@ -240,6 +323,9 @@ describe('assessment persistence', () => {
     expect(restored.doku.xabcDe.assessment).toEqual(store.doku.xabcDe.assessment)
     expect(restored.doku.xabcDe.neuro.value).toBeInstanceOf(DisabilityNeuro)
     expect(restored.doku.xabcDe.neuro.value.assessment).toEqual(store.doku.xabcDe.neuro.value.assessment)
+    expect(restored.doku.xabcDe.neuro.value.fingerNose).toEqual(store.doku.xabcDe.neuro.value.fingerNose)
+    expect(restored.generatedProtocol).toContain('Blickdeviation nach rechts')
+    expect(restored.generatedProtocol).toContain('Finger-Nase-Versuch li leicht ataktisch; Finger-Nase-Versuch re deutlich ataktisch')
     expect(restored.generatedProtocol).toContain('schwere Aphasie')
     expect(restored.generatedProtocol).toContain('stechend')
     expect(restored.doku.xabcDe.isExamined('headache')).toBe(true)
@@ -267,6 +353,10 @@ describe('assessment persistence', () => {
     expect(store.doku.xabCde.assessment.chest).toBe('active')
     expect(store.doku.xabcDe.assessment).toMatchObject({ headache: 'active', dizziness: 'auto', zops: 'auto' })
     expect(store.doku.xabcDe.neuro.value.assessment).toMatchObject({ aphasia: 'active', msMeningism: 'auto' })
+    expect(store.doku.xabcDe.neuro.value.gazeDeviation).toBe('')
+    expect(store.doku.xabcDe.neuro.value.fingerNose).toEqual({ left: 'unauffällig', right: 'unauffällig' })
+    expect(store.doku.xabcDe.neuro.value.assessment.fingerNose).toBe('auto')
+    expect(store.generatedProtocol).not.toMatch(/Blickdeviation|Finger-Nase-Versuch|Ataxie/)
     expect(store.doku.xabcdE.assessment.nausea).toBe('active')
     expect(store.doku.xabcdE.abdominal.value.assessment.pain).toBe('active')
     expect(store.generatedProtocol).toContain('leichte Aphasie')
