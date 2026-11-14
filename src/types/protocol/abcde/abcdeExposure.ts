@@ -167,7 +167,8 @@ export class ExposureAbdominal {
     // Abwehrspannung
     if (this.guarding != '')
     {
-      parts.push(`${this.guarding} Abwehrspannung`)
+      if (this.guarding == 'leichte') { parts.push('leichte Abwehrspannung') }
+      else { parts.push('Abwehrspannung') }
     }
     else
     {
