@@ -3,6 +3,20 @@
   "scannedTokens": 3548,
   "fixes": [
     {
+      "word": "Leberzirrhose",
+      "previousReplacement": "Leberzierhose",
+      "entry": "Leberzirrhose/N",
+      "source": "Nutzermeldung",
+      "context": "Leberzirrhose Leberzirrhosen"
+    },
+    {
+      "word": "Leberzirrhosen",
+      "previousReplacement": "Leberzierhosen",
+      "entry": "Leberzirrhose/N",
+      "source": "Regression zur Nutzermeldung",
+      "context": "Leberzirrhose Leberzirrhosen"
+    },
+    {
       "word": "Schienung",
       "previousReplacement": "Schiebung",
       "entry": "Schienung/P",

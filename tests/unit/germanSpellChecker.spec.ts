@@ -46,7 +46,7 @@ describe('Hunspell German engine', () => {
   })
 
   test('recognizes bundled medical words and suffixes before and after rebuilding user words', async () => {
-    const words = [...medicalVocabulary, 'KoPlaWus', 'Demenz-WGs', 'Patienten', 'Schienung', 'Schienungen']
+    const words = [...medicalVocabulary, 'KoPlaWus', 'Demenz-WGs', 'Patienten', 'Schienung', 'Schienungen', 'Leberzirrhose', 'Leberzirrhosen']
     for (const word of words) await expect(spellChecker.correct(word), word).resolves.toBe(true)
     await spellChecker.rebuild([])
     for (const word of words) await expect(spellChecker.correct(word), word).resolves.toBe(true)

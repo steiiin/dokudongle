@@ -430,11 +430,11 @@ describe('text assist integration', () => {
     },
   )
 
-  test('preserves Schienung and its plural after rebuilding user words', async () => {
+  test('preserves medical regression words and their plurals after rebuilding user words', async () => {
     await service.autocorrect.rebuildUserWords()
-    for (const word of ['Schienung', 'Schienungen']) {
+    for (const word of ['Schienung', 'Schienungen', 'Leberzirrhose', 'Leberzirrhosen']) {
       for (const delimiter of [' ', '.', ',']) {
-        const input = change(`schienung-rebuilt-${word}-${delimiter}`, word, word + delimiter)
+        const input = change(`medical-rebuilt-${word}-${delimiter}`, word, word + delimiter)
         expect((await service.processInput(input)).mutation).toBeUndefined()
         expect(await service.processAutomaticInput(input)).toBeNull()
       }
@@ -447,6 +447,14 @@ describe('text assist integration', () => {
     expect(update.mutation).toMatchObject({ replacement: 'Schienung' })
     expect(applyMutation(input.after.text, update.mutation!)).toBe(`Schienung${delimiter}`)
     expect(await service.processAutomaticInput(input)).toMatchObject({ replacement: 'Schienung' })
+  })
+
+  test.each([' ', '.', ','])('only capitalizes leberzirrhose before delimiter %j', async delimiter => {
+    const input = change(`leberzirrhose-case-${delimiter}`, 'leberzirrhose', `leberzirrhose${delimiter}`)
+    const update = await service.processInput(input)
+    expect(update.mutation).toMatchObject({ replacement: 'Leberzirrhose' })
+    expect(applyMutation(input.after.text, update.mutation!)).toBe(`Leberzirrhose${delimiter}`)
+    expect(await service.processAutomaticInput(input)).toMatchObject({ replacement: 'Leberzirrhose' })
   })
 
   test.each([
