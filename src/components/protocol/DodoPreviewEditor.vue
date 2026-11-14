@@ -1,9 +1,6 @@
 <template>
   <div class="preview-editor">
-    <div v-if="document.conflicts.length" class="conflict-summary" role="status">
-      {{ document.conflicts.length }} Textänderung{{ document.conflicts.length === 1 ? '' : 'en' }} zur Auswahl.
-      Markierung antippen, um den Text auszuwählen.
-    </div>
+
     <div class="editor-surface">
       <textarea ref="textarea" :value="draft" aria-label="Protokolltext bearbeiten"
         :readonly="readonly" spellcheck="false" autocorrect="off" autocapitalize="off"
@@ -21,12 +18,11 @@
     </div>
     <IonPopover :is-open="!!selected" :event="popoverEvent" @didDismiss="selectedId = null">
       <div v-if="selected" class="conflict-options">
-        <p><strong>Eigener Text</strong></p>
         <p class="alternative">{{ selected.userText || '(Text entfernen)' }}</p>
-        <IonButton expand="block" @click="resolve('user')">Eigenen Text verwenden</IonButton>
-        <p><strong>Generierter Text</strong></p>
+        <IonButton expand="block" color="success" @click="resolve('user')">Eigene Version</IonButton>
+        <hr>
         <p class="alternative">{{ selected.generatedText || '(Text entfernen)' }}</p>
-        <IonButton expand="block" @click="resolve('generated')">Generierten Text verwenden</IonButton>
+        <IonButton expand="block" color="danger" @click="resolve('generated')">Neue Version</IonButton>
       </div>
     </IonPopover>
   </div>
@@ -152,5 +148,10 @@ textarea { resize: none; display: block; background: var(--ion-background-color)
   line-height: 1; padding: 0.1em; pointer-events: auto;
 }
 .conflict-options { padding: 1rem; }
-.alternative { white-space: pre-wrap; overflow-wrap: anywhere; }
+.alternative {
+  margin: 0; padding: 0 0 .25rem 0;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 </style>
