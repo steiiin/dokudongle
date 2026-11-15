@@ -1,7 +1,7 @@
 import { App as CapacitorApp } from '@capacitor/app'
 import type { PluginListenerHandle } from '@capacitor/core'
 import { toastController } from '@ionic/vue'
-import { reactive, readonly, type DeepReadonly } from 'vue'
+import { reactive, readonly, watch, type DeepReadonly } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 import { initStorage } from '@/store/persistence'
@@ -66,7 +66,13 @@ function scheduleAfterPaint(callback: () => void): void {
 }
 
 const defaultDependencies: AppStartupDependencies = {
-  getStore: () => useDokuStore(),
+  getStore: () => {
+    const store = useDokuStore()
+    // Batch synchronous form mutations, even when the preview tab is not mounted.
+    // Consumers also reconcile synchronously through the store getter/actions.
+    watch(() => store.generatedProtocol, () => store.reconcilePreview())
+    return store
+  },
   initializeStorage: initStorage,
   registerAppStateChange,
   scheduleAfterPaint,

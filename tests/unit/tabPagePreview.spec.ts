@@ -11,8 +11,9 @@ const generatedProtocol = 'Generated protocol text'
 
 const mocks = vi.hoisted(() => ({
   store: {
-    generatedProtocol: 'Generated protocol text',
+    effectiveProtocolText: 'Generated protocol text',
     isDongleConnecting: false,
+    connection: { isTransmitting: false },
   },
 }))
 
@@ -39,7 +40,7 @@ describe('TabPagePreview protocol check', () => {
   beforeEach(() => {
     vi.mocked(protocolCheckService.checkProtocol).mockReset()
     vi.mocked(protocolCheckService.getCachedResult).mockReset().mockResolvedValue(null)
-    mocks.store.generatedProtocol = generatedProtocol
+    mocks.store.effectiveProtocolText = generatedProtocol
     mocks.store.isDongleConnecting = false
   })
 
@@ -70,6 +71,31 @@ describe('TabPagePreview protocol check', () => {
       isChecking: false,
       result: successfulResult,
     })
+  })
+
+  test('discards an in-flight result when the displayed text changes', async () => {
+    let finish!: (result: ProtocolCheckResult) => void
+    vi.mocked(protocolCheckService.checkProtocol).mockReturnValueOnce(new Promise(resolve => { finish = resolve }))
+    const wrapper = mountPreview()
+    await wrapper.getComponent(IonFabButton).trigger('click')
+    await flushPromises()
+    reactive(mocks.store).effectiveProtocolText = 'New edited text'
+    await wrapper.vm.$nextTick()
+    finish(successfulResult)
+    await flushPromises()
+    expect(wrapper.getComponent(DodoProtocolCheckModal).props()).toMatchObject({
+      isOpen: false, isChecking: false, result: null,
+    })
+  })
+
+  test('hides checks for an empty draft or remaining placeholders', async () => {
+    const wrapper = mountPreview()
+    reactive(mocks.store).effectiveProtocolText = ' \n '
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(IonFabButton).exists()).toBe(false)
+    reactive(mocks.store).effectiveProtocolText = '[Missing]'
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent(IonFabButton).exists()).toBe(false)
   })
 
   test('passes all issues to the shared modal in API order', async () => {

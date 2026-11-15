@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { paperPlaneSharp } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
 import { Network } from '@capacitor/network'
@@ -59,16 +59,28 @@ const checkResult = ref<ProtocolCheckResult | null>(null)
 const checkError = ref(false)
 const checkErrorMessage = ref('')
 const pendingProtocolText = ref<string | null>(null)
+let pendingProtocol: typeof store.doku | null = null
 
 const isAvailable = computed(() =>
   store.connection.isConnected
   && !store.connection.isTransmitting
   && !store.connection.isSavingSettings
+  && !store.isProtocolChanging
+  && !!store.effectiveProtocolText.trim()
   && !isProcessing.value,
 )
 
 const OFFLINE_MESSAGE = 'Es besteht keine Internetverbindung. Das Protokoll konnte nicht geprüft werden.'
 const CHECK_FAILED_MESSAGE = 'Das Protokoll konnte nicht geprüft werden. Prüfe die Internetverbindung oder versuche es erneut.'
+const CHANGED_MESSAGE = 'Der Text wurde während der Prüfung geändert. Bitte prüfe die Vorschau und tippe erneut auf Senden.'
+
+const pendingChanged = () => pendingProtocol !== store.doku || pendingProtocolText.value !== store.effectiveProtocolText
+watch(() => [store.effectiveProtocolText, store.doku], () => {
+  if (!isProcessing.value || !pendingChanged()) return
+  checkResult.value = null
+  checkError.value = true
+  checkErrorMessage.value = CHANGED_MESSAGE
+})
 
 const connectDongle = async () => {
   if (store.isDongleConnected || store.isDongleConnecting) return
@@ -141,6 +153,7 @@ const resetCheckState = () => {
   checkError.value = false
   checkErrorMessage.value = ''
   pendingProtocolText.value = null
+  pendingProtocol = null
   isSending.value = false
   isProcessing.value = false
 }
@@ -153,7 +166,16 @@ const transmitProtocol = async () => {
 
   try {
     await tryScrollingToTop()
-    await store.sendProtocol()
+    if (pendingChanged()) {
+      const alert = await alertController.create({
+        header: 'Protokoll geändert',
+        message: CHANGED_MESSAGE,
+        buttons: ['OK'],
+      })
+      await alert.present()
+      return
+    }
+    await store.sendProtocol(pendingProtocolText.value!)
   }
   finally {
     resetCheckState()
@@ -171,6 +193,7 @@ const checkBeforeSend = async () => {
 
   try {
     const cachedResult = await protocolCheckService.getCachedResult(protocolText)
+    if (pendingChanged()) { await transmitProtocol(); return }
     if (cachedResult) {
       if (cachedResult.issues.length === 0) {
         await transmitProtocol()
@@ -191,6 +214,7 @@ const checkBeforeSend = async () => {
     }
 
     const result = await protocolCheckService.checkProtocol(protocolText)
+    if (pendingChanged()) { await transmitProtocol(); return }
 
     if (result.issues.length === 0) {
       await transmitProtocol()
@@ -200,6 +224,7 @@ const checkBeforeSend = async () => {
     checkResult.value = result
   }
   catch {
+    if (pendingChanged()) { await transmitProtocol(); return }
     isCheckModalOpen.value = true
     checkErrorMessage.value = CHECK_FAILED_MESSAGE
     checkError.value = true
@@ -213,7 +238,8 @@ const send = async () => {
   if (!isAvailable.value) return
 
   isProcessing.value = true
-  pendingProtocolText.value = store.generatedProtocol
+  pendingProtocolText.value = store.effectiveProtocolText
+  pendingProtocol = store.doku
 
   try {
     if (

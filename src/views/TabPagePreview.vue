@@ -13,7 +13,9 @@
       :fullscreen="true"
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
     >
-      <textarea readonly :value="localPreview"></textarea>
+      <DodoPreviewEditor :document="store.previewDocument"
+        :readonly="store.isProtocolChanging || store.connection.isTransmitting"
+        @edit="store.editPreview" @resolve="store.resolvePreviewDifference" />
       <IonFab slot="fixed" vertical="bottom" horizontal="end" v-if="hasntPlaceholders">
         <IonFabButton
           color="primary"
@@ -39,44 +41,51 @@
 </template>
 <script setup lang="ts">
 
-import { onIonViewDidEnter } from '@ionic/vue'
 import { shieldCheckmarkOutline } from 'ionicons/icons'
+import DodoPreviewEditor from '@/components/protocol/DodoPreviewEditor.vue'
 
 import protocolCheckService, {
   type ProtocolCheckResult,
 } from '@/services/protocol-check'
 import { useDokuStore } from '@/store/doku'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 const store = useDokuStore()
 
-const localPreview = ref<string>(store.generatedProtocol)
+const localPreview = computed(() => store.effectiveProtocolText)
 const isCheckModalOpen = ref(false)
 const isChecking = ref(false)
 const checkResult = ref<ProtocolCheckResult | null>(null)
 const checkError = ref(false)
 
-onIonViewDidEnter(() => {
-  localPreview.value = store.generatedProtocol
+let checkVersion = 0
+watch(localPreview, () => {
+  checkVersion++
+  isCheckModalOpen.value = false
+  isChecking.value = false
+  checkResult.value = null
+  checkError.value = false
 })
 
 const checkProtocol = async () => {
   if (isChecking.value) return
 
   const protocolText = localPreview.value
+  const version = ++checkVersion
   isCheckModalOpen.value = true
   isChecking.value = true
   checkResult.value = null
   checkError.value = false
 
   try {
-    checkResult.value = await protocolCheckService.getCachedResult(protocolText)
+    const result = await protocolCheckService.getCachedResult(protocolText)
       ?? await protocolCheckService.checkProtocol(protocolText)
+    if (version === checkVersion) checkResult.value = result
   }
   catch {
-    checkError.value = true
+    if (version === checkVersion) checkError.value = true
   }
   finally {
-    isChecking.value = false
+    if (version === checkVersion) isChecking.value = false
   }
 }
 
@@ -85,22 +94,10 @@ const closeCheckModal = () => {
   isCheckModalOpen.value = false
 }
 
-const hasntPlaceholders = computed(() => !localPreview.value.includes('['))
+const hasntPlaceholders = computed(() => !!localPreview.value.trim() && !localPreview.value.includes('['))
 
 </script>
 <style scoped lang="scss">
-
-  textarea {
-    display: block;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    background: var(--ion-background-color);
-    border: none;
-    resize: none;
-    margin: 0;
-    padding: 1rem;
-  }
 
   ion-fab {
     margin-bottom: 0.5rem;

@@ -43,6 +43,7 @@ import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sampl
 
 import { breakDoku, multiline, placeholder, prefix } from '@/utils/text'
 import { textIf } from '@/utils/filter'
+import { editPreview, hasPreviewEdits, hydratePreview, reconcilePreview, resolvePreviewConflict, resolvePreviewDifference, type PreviewDocument } from '@/utils/preview-document'
 
 // ############################################################################
 
@@ -366,34 +367,38 @@ function hydrateHistory(input: unknown): ProtocolHistoryEntry[] {
     if (!doku) return []
     clearProtocolEditingState(doku)
     ids.add(entry.id)
-    return [{ id: entry.id, archivedAt: entry.archivedAt, doku }]
+    return [{ id: entry.id, archivedAt: entry.archivedAt, doku, preview: hydratePreview(entry.preview) }]
   }).sort((a, b) => Date.parse(b.archivedAt) - Date.parse(a.archivedAt)).slice(0, 3)
 }
 
 function updateHistoryEntry(
   protocol: UnwrapRef<Protocol>, history: ProtocolHistoryEntry[], activeHistoryEntryId: string | null,
+  preview: PreviewDocument | null = null,
 ): ProtocolHistoryEntry[] {
   const entry = history.find(entry => entry.id === activeHistoryEntryId)
   if (!entry) return history
   const doku = toPersistable(protocol)
   // Bei unverändertem Inhalt dieselbe Referenz beibehalten, damit das automatische Speichern
   // das Speicherabonnement nicht endlos erneut auslösen kann.
-  if (JSON.stringify(toPersistable(entry.doku)) === JSON.stringify(doku)) return history
-  return history.map(item => item.id === entry.id ? { ...item, doku } : item)
+  if (JSON.stringify(toPersistable(entry.doku)) === JSON.stringify(doku)
+    && JSON.stringify(entry.preview ?? null) === JSON.stringify(preview)) return history
+  return history.map(item => item.id === entry.id ? { ...item, doku, preview: toPersistable(preview) } : item)
 }
 
 function archiveProtocol(
   protocol: UnwrapRef<Protocol>, history: ProtocolHistoryEntry[], activeHistoryEntryId: string | null,
   preserveId?: string,
+  preview: PreviewDocument | null = null,
 ): ProtocolHistoryEntry[] {
   if (history.some(entry => entry.id === activeHistoryEntryId)) {
-    return updateHistoryEntry(protocol, history, activeHistoryEntryId)
+    return updateHistoryEntry(protocol, history, activeHistoryEntryId, preview)
   }
-  if (!containsProtocolData(protocol)) return history
+  if (!containsProtocolData(protocol) && !hasPreviewEdits(preview)) return history
   const next = [{
     id: crypto.randomUUID(),
     archivedAt: new Date().toISOString(),
     doku: toPersistable(protocol),
+    preview: toPersistable(preview),
   }, ...history]
   // Das Öffnen des ältesten Eintrags darf den gerade zu bearbeitenden Eintrag nicht verdrängen.
   while (next.length > 3) {
@@ -414,6 +419,7 @@ function serializeStorage<T>(store: object, operation: () => Promise<T>): Promis
 
 function persistedProtocolState(state: {
   doku: UnwrapRef<Protocol>
+  preview: PreviewDocument | null
   protocolHistory: ProtocolHistoryEntry[]
   activeHistoryEntryId: string | null
   lastProtocolResetAt: string
@@ -427,6 +433,7 @@ function persistedProtocolState(state: {
     lastProtocolOpenedAt: state.lastProtocolOpenedAt,
     lastProtocolSentAt: state.lastProtocolSentAt ?? undefined,
     doku: toPersistable(state.doku),
+    preview: toPersistable(state.preview),
     protocolHistory: toPersistable(state.protocolHistory),
     activeHistoryEntryId: state.activeHistoryEntryId,
   }
@@ -545,6 +552,7 @@ export const useDokuStore = defineStore('doku', {
     } as DeviceConnection,
 
     doku: resetProtocolState(),
+    preview: null as PreviewDocument | null,
     protocolHistory: [] as ProtocolHistoryEntry[],
     activeHistoryEntryId: null as string | null,
     isProtocolChanging: false,
@@ -808,20 +816,36 @@ export const useDokuStore = defineStore('doku', {
     },
 
     // Protokoll
+    reconcilePreview() {
+      const next = this.previewDocument
+      if (next !== this.preview) this.preview = next
+      return next
+    },
+    editPreview(text: string) {
+      this.preview = editPreview(this.reconcilePreview(), text)
+    },
+    resolvePreviewConflict(id: string, choice: 'user' | 'generated') {
+      this.preview = resolvePreviewConflict(this.reconcilePreview(), id, choice)
+    },
+    resolvePreviewDifference(id: string, choice: 'user' | 'generated') {
+      this.preview = resolvePreviewDifference(this.reconcilePreview(), id, choice)
+    },
     async newProtocol() {
       if (this.isProtocolChanging) return
       this.isProtocolChanging = true
       try {
         await serializeStorage(this, async () => {
+          const preview = this.previewDocument
           const next = {
             doku: resetProtocol(),
-            protocolHistory: archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId),
+            preview: null,
+            protocolHistory: archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId, undefined, preview),
             activeHistoryEntryId: null,
             lastProtocolResetAt: new Date().toISOString(),
             lastProtocolOpenedAt: new Date().toISOString(),
             lastProtocolSentAt: null,
           }
-          await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, this.generatedProtocol))
+          await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, preview.text))
           await saveDokuState(persistedProtocolState(next))
           resetQuickies()
           discardReanimationSnapshot(this.doku)
@@ -837,13 +861,14 @@ export const useDokuStore = defineStore('doku', {
       try {
         return await serializeStorage(this, async () => {
           if (!this.protocolHistory.some(entry => entry.id === id)) return false
-          const protocolHistory = archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId, id)
+          const protocolHistory = archiveProtocol(this.doku, this.protocolHistory, this.activeHistoryEntryId, id, this.previewDocument)
           const entry = protocolHistory.find(entry => entry.id === id)
           const doku = entry && hydrateProtocol(toPersistable(entry.doku))
           if (!doku) return false
           clearProtocolEditingState(doku)
           const next = {
             doku,
+            preview: hydratePreview(entry.preview),
             protocolHistory,
             activeHistoryEntryId: id,
             lastProtocolResetAt: new Date().toISOString(),
@@ -1024,7 +1049,7 @@ export const useDokuStore = defineStore('doku', {
       await serializeStorage(this, async () => {
         if (this.doku !== protocol) return
         const lastProtocolOpenedAt = new Date(referenceTime).toISOString()
-        await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolOpenedAt }))
+        await saveDokuState(persistedProtocolState({ ...this.$state, preview: this.previewDocument, lastProtocolOpenedAt }))
         this.lastProtocolOpenedAt = lastProtocolOpenedAt
       })
     },
@@ -1033,8 +1058,8 @@ export const useDokuStore = defineStore('doku', {
       await serializeStorage(this, async () => {
         if (this.doku !== sentProtocol) return
         const lastProtocolSentAt = new Date(referenceTime).toISOString()
-        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId)
-        await saveDokuState(persistedProtocolState({ ...this.$state, lastProtocolSentAt, protocolHistory }))
+        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId, this.previewDocument)
+        await saveDokuState(persistedProtocolState({ ...this.$state, preview: this.previewDocument, lastProtocolSentAt, protocolHistory }))
         if (protocolHistory !== this.protocolHistory) this.protocolHistory = protocolHistory
         this.lastProtocolSentAt = lastProtocolSentAt
       })
@@ -1071,6 +1096,7 @@ export const useDokuStore = defineStore('doku', {
         }
         const next = {
           doku: doku ?? resetProtocol(),
+          preview: doku ? hydratePreview(persistedState?.preview) : null,
           protocolHistory,
           activeHistoryEntryId: doku && typeof persistedState?.activeHistoryEntryId === 'string'
             && protocolHistory.some(entry => entry.id === persistedState.activeHistoryEntryId)
@@ -1089,7 +1115,7 @@ export const useDokuStore = defineStore('doku', {
           next.lastProtocolSentAt = null
         }
         clearProtocolEditingState(next.doku)
-        next.protocolHistory = updateHistoryEntry(next.doku, next.protocolHistory, next.activeHistoryEntryId)
+        next.protocolHistory = updateHistoryEntry(next.doku, next.protocolHistory, next.activeHistoryEntryId, next.preview)
         await saveDokuState(persistedProtocolState(next))
         resetQuickies()
         discardReanimationSnapshot(this.doku)
@@ -1112,12 +1138,14 @@ export const useDokuStore = defineStore('doku', {
     },
     async persistToStorage() {
       await serializeStorage(this, async () => {
-        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId)
-        await saveDokuState(persistedProtocolState({ ...this.$state, protocolHistory }))
+        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId, this.previewDocument)
+        await saveDokuState(persistedProtocolState({ ...this.$state, preview: this.previewDocument, protocolHistory }))
         if (protocolHistory !== this.protocolHistory) this.protocolHistory = protocolHistory
       })
     },
-    async sendProtocol() {
+    async sendProtocol(text?: string) {
+      const protocolText = text ?? this.reconcilePreview().text
+      if (!protocolText.trim()) return false
       if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
       this.connection.isTransmitting = true
       this.connection.transmissionPaused = false
@@ -1126,7 +1154,6 @@ export const useDokuStore = defineStore('doku', {
       this.connection.transmissionCurrent = 0
 
       const protocol = this.doku
-      const protocolText = this.generatedProtocol
       const deviceId = this.connection.device?.id
       const wasConnected = this.connection.isConnected
       const controller = new AbortController()
@@ -1180,7 +1207,13 @@ export const useDokuStore = defineStore('doku', {
 
   },
   getters: {
-    hasProtocolData: (state): boolean => containsProtocolData(state.doku),
+    hasProtocolData: (state): boolean => containsProtocolData(state.doku) || hasPreviewEdits(state.preview),
+    previewDocument(): PreviewDocument {
+      return reconcilePreview(this.preview, this.generatedProtocol)
+    },
+    effectiveProtocolText(): string {
+      return this.previewDocument.text
+    },
 
     // Anwendungsstatus
     isDongleConnecting: (state) => state.connection.isConnecting,
