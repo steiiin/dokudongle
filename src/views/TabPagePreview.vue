@@ -15,7 +15,7 @@
     >
       <DodoPreviewEditor :document="store.previewDocument"
         :readonly="store.isProtocolChanging || store.connection.isTransmitting"
-        @edit="store.editPreview" @resolve="store.resolvePreviewConflict" />
+        @edit="store.editPreview" @resolve="store.resolvePreviewDifference" />
       <IonFab slot="fixed" vertical="bottom" horizontal="end" v-if="hasntPlaceholders">
         <IonFabButton
           color="primary"

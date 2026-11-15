@@ -8,6 +8,12 @@ export interface PreviewConflict {
   generatedText: string
 }
 
+// Derived UI state: manual differences do not change the persisted merge conflicts.
+export interface PreviewDifference extends PreviewConflict {
+  kind: 'manual' | 'conflict'
+  changeType: 'insertion' | 'deletion' | 'replacement' | 'conflict'
+}
+
 export interface PreviewDocument {
   baseline: string
   text: string
@@ -22,7 +28,41 @@ export function createPreviewDocument(text: string): PreviewDocument {
   return { baseline: text, text, conflicts: [], nextConflictId: 1 }
 }
 
-const tokenize = (text: string): string[] => text.match(/[\p{L}\p{N}\p{M}_]+|\s+|[^\p{L}\p{N}\p{M}_\s]/gu) ?? []
+// Keep inter-word spacing with its word so an unrelated space cannot align
+// "teilweise orientiert. added." as two replacements when restoring a word.
+const tokenize = (text: string): string[] => text.match(/[\p{L}\p{N}\p{M}_]+[ \t]*|\s+|[^\p{L}\p{N}\p{M}_\s]/gu) ?? []
+
+function trimEditContext(before: string, edit: Edit): Edit {
+  let { start, end, text } = edit
+  // Grouped spacing is only an alignment aid. Keep unchanged whole words out
+  // of the final ranges (for example, "C" -> "C D" only inserts " D").
+  const words = (value: string) => value.match(/[\p{L}\p{N}\p{M}_]+|\s+|[^\p{L}\p{N}\p{M}_\s]/gu) ?? []
+  const left = words(before.slice(start, end))
+  const right = words(text)
+  let prefix = 0
+  while (prefix < left.length && prefix < right.length && left[prefix] === right[prefix]) {
+    start += left[prefix].length
+    text = text.slice(left[prefix].length)
+    prefix++
+  }
+  let suffix = 0
+  while (suffix < left.length - prefix && suffix < right.length - prefix
+    && left[left.length - suffix - 1] === right[right.length - suffix - 1]) {
+    const length = left[left.length - suffix - 1].length
+    end -= length
+    text = text.slice(0, -length)
+    suffix++
+  }
+  while (start < end && text.length && /\s/u.test(text[0]) && before[start] === text[0]) {
+    start++
+    text = text.slice(1)
+  }
+  while (start < end && text.length && /\s/u.test(text.at(-1)!) && before[end - 1] === text.at(-1)) {
+    end--
+    text = text.slice(0, -1)
+  }
+  return { start, end, text }
+}
 
 // Myers' shortest edit path. Offsets are UTF-16 offsets, matching textarea selections.
 // Bound pathological diffs; a conservative replacement is safer than freezing the editor.
@@ -33,7 +73,10 @@ export function textEdits(before: string, after: string, characters = false): Ed
   let prefix = 0
   while (prefix < a.length && prefix < b.length && a[prefix] === b[prefix]) prefix++
   let suffix = 0
-  while (suffix < a.length - prefix && suffix < b.length - prefix
+  // For word diffs, let Myers align repeated punctuation from the start.
+  // Trimming a shared final period would merge "changed. added." into one
+  // replacement instead of matching the first period and retaining the addition.
+  while (characters && suffix < a.length - prefix && suffix < b.length - prefix
     && a[a.length - suffix - 1] === b[b.length - suffix - 1]) suffix++
   const left = a.slice(prefix, a.length - suffix)
   const right = b.slice(prefix, b.length - suffix)
@@ -85,7 +128,7 @@ export function textEdits(before: string, after: string, characters = false): Ed
         }
       }
       if (pending) edits.push(pending)
-      return edits
+      return characters ? edits : edits.map(edit => trimEditContext(before, edit))
     }
   }
   return fallback()
@@ -97,6 +140,18 @@ function overlaps(a: Edit, b: Edit, inclusive = false): boolean {
   if (a.start === a.end) return a.start > b.start && a.start < b.end
   if (b.start === b.end) return b.start > a.start && b.start < a.end
   return a.start < b.end && b.start < a.end
+}
+
+function mergeOverlaps(a: MergeEdit, b: MergeEdit): boolean {
+  // A generated qualifier beside a replaced word ("teilweise orientiert")
+  // changes that alternative too. Do not absorb independent user insertions.
+  const generated = a.side === 'generated' ? a : b
+  const user = a.side === 'user' ? a : b
+  const qualifiesReplacement = generated.side === 'generated' && user.side === 'user'
+    && generated.start === generated.end && !generated.conflict
+    && user.start < user.end && user.text.length > 0
+  return overlaps(a, b, qualifiesReplacement
+    || !!(a.conflict && a.start === a.end || b.conflict && b.start === b.end))
 }
 
 function applyEdits(text: string, edits: Edit[], start = 0, end = text.length): string {
@@ -128,8 +183,7 @@ export function reconcilePreview(document: PreviewDocument | null, generated: st
   ].sort((a, b) => a.start - b.start || a.end - b.end)
   const groups: MergeEdit[][] = []
   for (const edit of edits) {
-    const matching = groups.filter(group => group.some(other => overlaps(edit, other,
-      !!(edit.conflict && edit.start === edit.end || other.conflict && other.start === other.end))))
+    const matching = groups.filter(group => group.some(other => mergeOverlaps(edit, other)))
     const combined = [...matching.flat(), edit]
     for (const group of matching) groups.splice(groups.indexOf(group), 1)
     groups.push(combined)
@@ -179,6 +233,46 @@ export function editPreview(document: PreviewDocument, text: string): PreviewDoc
     return [{ ...conflict, start: conflict.start + shift, end: conflict.end + shift }]
   })
   return { ...document, text, conflicts }
+}
+
+export function previewDifferences(document: PreviewDocument): PreviewDifference[] {
+  const differences: PreviewDifference[] = []
+  let basePosition = 0
+  let position = 0
+  const appendManualDifferences = (baseEnd: number, end: number) => {
+    let shift = 0
+    for (const edit of textEdits(document.baseline.slice(basePosition, baseEnd), document.text.slice(position, end))) {
+      const start = position + edit.start + shift
+      const baseStart = basePosition + edit.start
+      const baseEnd = basePosition + edit.end
+      differences.push({
+        id: `difference-${baseStart}-${baseEnd}-${start}-${start + edit.text.length}`,
+        kind: 'manual', start, end: start + edit.text.length, baseStart, baseEnd,
+        changeType: baseStart === baseEnd ? 'insertion' : edit.text.length ? 'replacement' : 'deletion',
+        userText: edit.text, generatedText: document.baseline.slice(baseStart, baseEnd),
+      })
+      shift += edit.text.length - (edit.end - edit.start)
+    }
+  }
+  // Existing conflicts anchor corresponding ranges in both versions. Diff only
+  // the gaps so retained alternatives never overlap or get hidden by manual edits.
+  for (const conflict of document.conflicts) {
+    appendManualDifferences(conflict.baseStart, conflict.start)
+    differences.push({ ...conflict, kind: 'conflict', changeType: 'conflict' })
+    basePosition = conflict.baseEnd
+    position = conflict.end
+  }
+  appendManualDifferences(document.baseline.length, document.text.length)
+  return differences
+}
+
+export function resolvePreviewDifference(document: PreviewDocument, id: string, choice: 'user' | 'generated'): PreviewDocument {
+  const difference = previewDifferences(document).find(item => item.id === id)
+  if (!difference) return document
+  if (difference.kind === 'conflict') return resolvePreviewConflict(document, id, choice)
+  if (choice === 'user') return document
+  return editPreview(document,
+    document.text.slice(0, difference.start) + difference.generatedText + document.text.slice(difference.end))
 }
 
 export function resolvePreviewConflict(document: PreviewDocument, id: string, choice: 'user' | 'generated'): PreviewDocument {

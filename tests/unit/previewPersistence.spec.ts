@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { useDokuStore } from '@/store/doku'
 import { appendProtocolAuditEntry, loadDokuState, saveDokuState } from '@/store/persistence'
+import { previewDifferences } from '@/utils/preview-document'
 
 vi.mock('@/store/persistence', () => ({
   DOKU_SCHEMA_VERSION: 1,
@@ -17,6 +18,26 @@ beforeEach(() => {
 })
 
 describe('preview persistence and lifecycle', () => {
+  test('restores separate insertion and conflict markings after regeneration and reload', async () => {
+    const store = useDokuStore()
+    store.doku.situation.setText('Patient orientiert.')
+    store.editPreview(store.generatedProtocol.replace('orientiert.', 'orientiert. added.'))
+    store.editPreview(store.effectiveProtocolText.replace('orientiert.', 'desorientiert.'))
+    store.doku.situation.setText('Patient teilweise orientiert.')
+    expect(store.effectiveProtocolText).toContain('Patient teilweise orientiert. added.')
+    const differences = previewDifferences(store.previewDocument)
+    expect(differences.map(item => item.changeType)).toEqual(['conflict', 'insertion'])
+    await store.persistToStorage()
+    vi.mocked(loadDokuState).mockResolvedValue(JSON.parse(JSON.stringify(vi.mocked(saveDokuState).mock.lastCall![0])))
+    setActivePinia(createPinia())
+    const restored = useDokuStore()
+    await restored.hydrateFromStorage()
+    expect(previewDifferences(restored.previewDocument)).toEqual(differences)
+    restored.resolvePreviewDifference(differences[0].id, 'user')
+    expect(restored.effectiveProtocolText).toContain('Patient desorientiert. added.')
+    expect(previewDifferences(restored.previewDocument).map(item => item.changeType)).toEqual(['replacement', 'insertion'])
+  })
+
   test('starts from generated text and keeps structured inputs unchanged while editing', () => {
     const store = useDokuStore()
     expect(store.effectiveProtocolText).toBe(store.generatedProtocol)
@@ -90,5 +111,23 @@ describe('preview persistence and lifecycle', () => {
     await store.hydrateFromStorage()
     expect(store.effectiveProtocolText).toBe(store.generatedProtocol)
     expect(store.previewDocument.conflicts).toEqual([])
+  })
+
+  test('restores live markers after reload and resolves either version through the store', async () => {
+    const store = useDokuStore()
+    store.doku.situation.setText('Patient wach.')
+    store.editPreview(store.generatedProtocol.replace('Patient wach', 'Patient müde'))
+    const [difference] = previewDifferences(store.previewDocument)
+    store.resolvePreviewDifference(difference.id, 'user')
+    expect(previewDifferences(store.previewDocument)).toEqual([difference])
+    await store.persistToStorage()
+    vi.mocked(loadDokuState).mockResolvedValue(JSON.parse(JSON.stringify(vi.mocked(saveDokuState).mock.lastCall![0])))
+    setActivePinia(createPinia())
+    const restored = useDokuStore()
+    await restored.hydrateFromStorage()
+    expect(previewDifferences(restored.previewDocument)).toEqual([difference])
+    restored.resolvePreviewDifference(difference.id, 'generated')
+    expect(restored.effectiveProtocolText).toBe(restored.generatedProtocol)
+    expect(previewDifferences(restored.previewDocument)).toEqual([])
   })
 })

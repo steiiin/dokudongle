@@ -43,7 +43,7 @@ import { SampleContactsItem, SampleMedicationItem } from '@/types/protocol/sampl
 
 import { breakDoku, multiline, placeholder, prefix } from '@/utils/text'
 import { textIf } from '@/utils/filter'
-import { editPreview, hasPreviewEdits, hydratePreview, reconcilePreview, resolvePreviewConflict, type PreviewDocument } from '@/utils/preview-document'
+import { editPreview, hasPreviewEdits, hydratePreview, reconcilePreview, resolvePreviewConflict, resolvePreviewDifference, type PreviewDocument } from '@/utils/preview-document'
 
 // ############################################################################
 
@@ -826,6 +826,9 @@ export const useDokuStore = defineStore('doku', {
     },
     resolvePreviewConflict(id: string, choice: 'user' | 'generated') {
       this.preview = resolvePreviewConflict(this.reconcilePreview(), id, choice)
+    },
+    resolvePreviewDifference(id: string, choice: 'user' | 'generated') {
+      this.preview = resolvePreviewDifference(this.reconcilePreview(), id, choice)
     },
     async newProtocol() {
       if (this.isProtocolChanging) return

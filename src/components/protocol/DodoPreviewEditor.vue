@@ -6,23 +6,41 @@
         :readonly="readonly" spellcheck="false" autocorrect="off" autocapitalize="off"
         @input="input" @compositionstart="composing = true" @compositionend="compositionEnd"
         @scroll="syncMirror" />
-      <div ref="mirror" class="text-mirror"><template v-for="(part, index) in parts" :key="part.conflict?.id ?? index"><span
-        v-if="part.conflict" class="conflict" :class="{ deletion: !part.text }"
+      <div ref="mirror" class="text-mirror"><template v-for="(part, index) in parts" :key="part.difference?.id ?? index"><span
+        v-if="part.difference" class="difference" :class="[part.difference.changeType, { deletion: !part.text }]"
         role="button" :tabindex="readonly ? -1 : 0" :aria-disabled="readonly"
         :aria-label="part.text ? `Textänderung auswählen: ${part.text}` : 'Gelöschten Text auswählen'"
-        :data-conflict-id="part.conflict.id" @pointerdown.prevent
-        @click="openConflict(part.conflict.id, $event)"
-        @keydown.enter.prevent="openConflict(part.conflict.id, $event)"
-        @keydown.space.prevent="openConflict(part.conflict.id, $event)"
+        :data-difference-id="part.difference.id"
+        :data-change-type="part.difference.changeType"
+        :data-conflict-id="part.difference.kind === 'conflict' ? part.difference.id : undefined" @pointerdown.prevent
+        @click="openDifference(part.difference.id, $event)"
+        @keydown.enter.prevent="openDifference(part.difference.id, $event)"
+        @keydown.space.prevent="openDifference(part.difference.id, $event)"
       >{{ part.text }}</span><span v-else aria-hidden="true">{{ part.text }}</span></template>{{ '\u200b' }}</div>
     </div>
     <IonPopover :is-open="!!selected" :event="popoverEvent" @didDismiss="selectedId = null">
       <div v-if="selected" class="conflict-options">
-        <p class="alternative">{{ selected.userText || '(Text entfernen)' }}</p>
-        <IonButton expand="block" color="success" @click="resolve('user')">Eigene Version</IonButton>
-        <hr>
-        <p class="alternative">{{ selected.generatedText || '(Text entfernen)' }}</p>
-        <IonButton expand="block" color="danger" @click="resolve('generated')">Neue Version</IonButton>
+        <template v-if="selected.changeType === 'conflict'">
+          <p class="alternative">{{ selected.userText || '(Text entfernen)' }}</p>
+          <IonButton expand="block" color="success" @click="resolve('user')">Eigener Text</IonButton>
+          <hr>
+          <p class="alternative">{{ selected.generatedText || '(Text entfernen)' }}</p>
+          <IonButton expand="block" color="danger" @click="resolve('generated')">Neuer Text</IonButton>
+        </template>
+        <template v-else-if="selected.changeType === 'insertion'">
+          <p class="alternative">{{ selected.userText }}</p>
+          <IonButton expand="block" color="danger" @click="resolve('generated')">Eingefügtes entfernen</IonButton>
+        </template>
+        <template v-else>
+          <template v-if="selected.changeType === 'replacement'">
+            <p class="alternative">{{ selected.userText }}</p>
+            <hr>
+          </template>
+          <p class="alternative">{{ selected.generatedText }}</p>
+          <IonButton expand="block" color="success" @click="resolve('generated')">{{
+            selected.changeType === 'deletion' ? 'Gelöschtes wiederherstellen' : 'Generierten Text wiederherstellen'
+          }}</IonButton>
+        </template>
       </div>
     </IonPopover>
   </div>
@@ -30,8 +48,8 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { PreviewConflict, PreviewDocument } from '@/utils/preview-document'
-import { textEdits } from '@/utils/preview-document'
+import type { PreviewDifference, PreviewDocument } from '@/utils/preview-document'
+import { previewDifferences, textEdits } from '@/utils/preview-document'
 
 const props = defineProps<{ document: PreviewDocument; readonly?: boolean }>()
 const emit = defineEmits<{
@@ -44,19 +62,23 @@ const draft = ref(props.document.text)
 const composing = ref(false)
 const selectedId = ref<string | null>(null)
 const popoverEvent = ref<Event>()
-const selected = computed(() => props.document.conflicts.find(item => item.id === selectedId.value))
+const differences = computed(() => previewDifferences(props.document))
+const selected = computed(() => differences.value.find(item => item.id === selectedId.value))
 const parts = computed(() => {
-  const result: { text: string; conflict?: PreviewConflict }[] = []
+  const result: { text: string; difference?: PreviewDifference }[] = []
   let position = 0
   // During IME composition the native text remains authoritative; highlights resume on commit.
-  for (const conflict of composing.value ? [] : props.document.conflicts) {
-    result.push({ text: draft.value.slice(position, conflict.start) })
-    result.push({ text: draft.value.slice(conflict.start, conflict.end), conflict })
-    position = conflict.end
+  for (const difference of composing.value ? [] : differences.value) {
+    result.push({ text: draft.value.slice(position, difference.start) })
+    result.push({ text: draft.value.slice(difference.start, difference.end), difference })
+    position = difference.end
   }
   result.push({ text: draft.value.slice(position) })
   return result
 })
+
+watch(() => props.document, () => { selectedId.value = null })
+watch(composing, () => { selectedId.value = null })
 
 function syncMirror() {
   if (!textarea.value || !mirror.value) return
@@ -91,6 +113,7 @@ watch(() => props.document.text, async text => {
 })
 
 function input(event: Event) {
+  selectedId.value = null
   draft.value = (event.target as HTMLTextAreaElement).value
   if (!composing.value) emit('edit', draft.value)
   void nextTick(syncMirror)
@@ -101,7 +124,7 @@ function compositionEnd(event: CompositionEvent) {
   input(event)
 }
 
-function openConflict(id: string, event: Event) {
+function openDifference(id: string, event: Event) {
   if (props.readonly || composing.value) return
   selectedId.value = id
   popoverEvent.value = event
@@ -136,14 +159,19 @@ textarea, .text-mirror {
 }
 textarea { resize: none; display: block; background: var(--ion-background-color); color: var(--ion-text-color); }
 .text-mirror { color: transparent; pointer-events: none; overflow: hidden; user-select: none; }
-.conflict { background: rgb(255 196 9 / 30%); border-radius: 2px; pointer-events: auto; cursor: pointer; }
-.conflict:focus-visible { outline: 2px solid var(--ion-color-warning); }
+.difference {
+  --marking-rgb: var(--ion-color-warning-rgb, 255, 196, 9);
+  background: rgba(var(--marking-rgb), 0.3); border-radius: 2px; pointer-events: auto; cursor: pointer;
+}
+.difference.insertion { --marking-rgb: var(--ion-color-success-rgb, 45, 211, 111); }
+.difference[data-change-type="deletion"] { --marking-rgb: var(--ion-color-danger-rgb, 235, 68, 90); }
+.difference:focus-visible { outline: 2px solid rgb(var(--marking-rgb)); }
 .deletion {
   position: relative; display: inline-block; width: 1em; height: 1em;
   margin-right: -1em; vertical-align: text-bottom;
 }
 .deletion::after {
-  content: '↧'; position: absolute; left: 0; top: -0.35em; color: var(--ion-color-warning);
+  content: '↧'; position: absolute; left: 0; top: -0.35em; color: rgb(var(--marking-rgb));
   background: var(--ion-background-color); border: 1px solid currentColor; border-radius: 3px;
   line-height: 1; padding: 0.1em; pointer-events: auto;
 }

@@ -1,7 +1,7 @@
 import { createApp, defineComponent, h, ref } from 'vue'
 import { IonicVue, IonApp, IonContent } from '@ionic/vue'
 import DodoPreviewEditor from '../../../src/components/protocol/DodoPreviewEditor.vue'
-import { createPreviewDocument, editPreview, reconcilePreview, resolvePreviewConflict } from '../../../src/utils/preview-document'
+import { createPreviewDocument, editPreview, reconcilePreview, resolvePreviewDifference } from '../../../src/utils/preview-document'
 import '@ionic/vue/css/core.css'
 import '@ionic/vue/css/normalize.css'
 import '@ionic/vue/css/structure.css'
@@ -13,6 +13,12 @@ createApp(defineComponent({
   setup() {
     const document = ref(editPreview(createPreviewDocument('Patient wach, ruhig.' + extra), 'Patient müde, ruhig.' + extra))
     return () => h(IonApp, {}, () => h(IonContent, {}, () => [
+      h('button', { id: 'orientation', onClick: () => {
+        document.value = createPreviewDocument('orientiert. ')
+      } }, 'Orientierung'),
+      h('button', { id: 'qualify', onClick: () => {
+        document.value = reconcilePreview(document.value, 'teilweise orientiert. ')
+      } }, 'Orientierung ändern'),
       h('button', { id: 'generate', onClick: () => {
         document.value = reconcilePreview(document.value, 'Patient schläfrig, unruhig.' + extra)
       } }, 'Formular ändern'),
@@ -23,7 +29,7 @@ createApp(defineComponent({
         document: document.value,
         onEdit: (text: string) => { document.value = editPreview(document.value, text) },
         onResolve: (id: string, choice: 'user' | 'generated') => {
-          document.value = resolvePreviewConflict(document.value, id, choice)
+          document.value = resolvePreviewDifference(document.value, id, choice)
         },
       })]),
     ]))

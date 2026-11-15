@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { createPreviewDocument, editPreview, hydratePreview, reconcilePreview, resolvePreviewConflict, textEdits } from '@/utils/preview-document'
+import { createPreviewDocument, editPreview, hydratePreview, previewDifferences, reconcilePreview, resolvePreviewConflict, resolvePreviewDifference, textEdits } from '@/utils/preview-document'
 
 function merge(base: string, user: string, generated: string) {
   return reconcilePreview(editPreview(createPreviewDocument(base), user), generated)
@@ -108,5 +108,124 @@ describe('preview three-way merge', () => {
       expect(merge(before, before, after).text).toBe(after)
       expect(merge(before, after, after).conflicts).toEqual([])
     }
+  })
+})
+
+describe('live preview differences', () => {
+  test.each(['user', 'generated'] as const)('keeps additions separate through replacements, regeneration and the %s choice', choice => {
+    let document = editPreview(createPreviewDocument('orientiert. '), 'orientiert. added.')
+    expect(previewDifferences(document)).toMatchObject([{ changeType: 'insertion', userText: 'added.' }])
+    document = editPreview(document, 'desorientiert. added.')
+    expect(previewDifferences(document)).toMatchObject([
+      { changeType: 'replacement', userText: 'desorientiert', generatedText: 'orientiert' },
+      { changeType: 'insertion', userText: 'added.' },
+    ])
+    document = reconcilePreview(document, 'teilweise orientiert. ')
+    expect(document.text).toBe('teilweise orientiert. added.')
+    const id = document.conflicts[0].id
+    expect(previewDifferences(document)).toMatchObject([
+      { changeType: 'conflict', userText: 'desorientiert', generatedText: 'teilweise orientiert' },
+      { changeType: 'insertion', userText: 'added.' },
+    ])
+    document = reconcilePreview(document, 'teilweise orientiert! ')
+    document = hydratePreview(JSON.parse(JSON.stringify(document)))!
+    expect(document.conflicts[0].id).toBe(id)
+    document = resolvePreviewDifference(document, id, choice)
+    expect(document.text).toBe(`${choice === 'user' ? 'desorientiert' : 'teilweise orientiert'}! added.`)
+    expect(previewDifferences(document).at(-1)).toMatchObject({ changeType: 'insertion', userText: 'added.' })
+  })
+
+  test.each(['teilweise orientiert.', 'orientiert teilweise.'])('conflicts on a generated qualifier at either replacement boundary: %s', generated => {
+    const document = merge('orientiert.', 'desorientiert. added.', generated)
+    expect(document.text).toBe(`${generated} added.`)
+    expect(document.conflicts).toHaveLength(1)
+    expect(resolvePreviewConflict(document, document.conflicts[0].id, 'user').text).toBe('desorientiert. added.')
+  })
+
+  test('keeps edits inside an insertion green and clears the marking when removed', () => {
+    let document = editPreview(createPreviewDocument('orientiert. '), 'orientiert. added.')
+    document = editPreview(document, 'orientiert. edited addition.')
+    expect(previewDifferences(document)).toMatchObject([{ changeType: 'insertion', userText: 'edited addition.' }])
+    document = editPreview(document, 'orientiert. ')
+    expect(previewDifferences(document)).toEqual([])
+  })
+
+  test.each(['insertion', 'deletion', 'replacement'])('resolves only the selected %s alongside other edits', changeType => {
+    const document = editPreview(createPreviewDocument('Alpha rot. Beta grün. Gamma blau.'), 'Alpha rosa. Beta . Gamma blau. added.')
+    const differences = previewDifferences(document)
+    expect(differences.map(item => item.changeType)).toEqual(['replacement', 'deletion', 'insertion'])
+    const selected = differences.find(item => item.changeType === changeType)!
+    const result = resolvePreviewDifference(document, selected.id, 'generated')
+    expect(previewDifferences(result).map(item => [item.changeType, item.userText, item.generatedText])).toEqual(
+      differences.filter(item => item !== selected).map(item => [item.changeType, item.userText, item.generatedText]))
+  })
+
+  test.each([
+    ['Patient wach.', 'Patient wacher.'],
+    ['Patient wach.', 'Patient müde.'],
+    ['Patient wach.', 'Heute: Patient wach.'],
+    ['Patient wach.', 'Patient .'],
+    ['Patient wach.', ''],
+    ['', 'Erste Zeile\n<b>Nur Text</b> 🙂'],
+    ['Übelkeit 🙂\nPatient wach.\tEnde', 'Keine Übelkeit 🙂\nPatient müde.\tSchluss'],
+  ])('derives selectable differences from %j to %j', (baseline, text) => {
+    const document = editPreview(createPreviewDocument(baseline), text)
+    const saved = JSON.stringify(document)
+    const differences = previewDifferences(document)
+    expect(differences.length).toBeGreaterThan(0)
+    expect(document.conflicts).toEqual([])
+    let restored = text
+    for (const difference of differences.toReversed()) {
+      expect(difference.kind).toBe('manual')
+      expect(text.slice(difference.start, difference.end)).toBe(difference.userText)
+      expect(baseline.slice(difference.baseStart, difference.baseEnd)).toBe(difference.generatedText)
+      expect(resolvePreviewDifference(document, difference.id, 'user')).toBe(document)
+      expect(resolvePreviewDifference(document, difference.id, 'generated').text).toBe(
+        text.slice(0, difference.start) + difference.generatedText + text.slice(difference.end))
+      restored = restored.slice(0, difference.start) + difference.generatedText + restored.slice(difference.end)
+    }
+    expect(restored).toBe(baseline)
+    expect(JSON.stringify(document)).toBe(saved)
+    expect(previewDifferences(hydratePreview(JSON.parse(saved))!)).toEqual(differences)
+    expect(previewDifferences(editPreview(document, baseline))).toEqual([])
+  })
+
+  test('keeps manual differences and retained conflicts separate across generation updates', () => {
+    let document = merge('Alpha rot, Beta grün, Gamma blau.',
+      'Alpha rosa, Beta gelb, Gamma türkis.', 'Alpha orange, Beta grün, Gamma violett.')
+    document = editPreview(document, `Heute: ${document.text}!`)
+    const differences = previewDifferences(document)
+    expect(differences.map(item => item.kind)).toEqual(['manual', 'conflict', 'manual', 'conflict', 'manual'])
+    for (let index = 1; index < differences.length; index++) {
+      expect(differences[index].start).toBeGreaterThanOrEqual(differences[index - 1].end)
+    }
+    const manual = differences.find(item => item.userText === 'gelb')!
+    document = resolvePreviewDifference(document, manual.id, 'generated')
+    expect(document.text).toContain('Beta grün')
+    expect(document.conflicts).toHaveLength(2)
+    const conflict = document.conflicts[0]
+    document = resolvePreviewDifference(document, conflict.id, 'user')
+    expect(document.text).toContain('Alpha rosa')
+    expect(previewDifferences(document)).toContainEqual(expect.objectContaining({
+      kind: 'manual', userText: 'rosa', generatedText: 'orange',
+    }))
+    document = reconcilePreview(document, 'Alpha rosa, Beta grün, Gamma violett.')
+    expect(previewDifferences(document).some(item => item.userText === 'rosa')).toBe(false)
+    expect(document.conflicts).toHaveLength(1)
+  })
+
+  test('replaces a directly edited conflict with a live manual difference', () => {
+    const document = editPreview(merge('Patient wach.', 'Patient müde.', 'Patient schläfrig.'), 'Patient fit.')
+    expect(document.conflicts).toEqual([])
+    expect(previewDifferences(document)).toMatchObject([
+      { kind: 'manual', userText: 'fit', generatedText: 'schläfrig' },
+    ])
+    expect(resolvePreviewDifference(document, 'missing', 'generated')).toBe(document)
+  })
+
+  test('places manual differences around a zero-width conflict', () => {
+    const document = editPreview(merge('A B C', 'A X C', 'A C'), 'Before A C after')
+    expect(previewDifferences(document).map(item => item.kind)).toEqual(['manual', 'conflict', 'manual'])
+    expect(previewDifferences(document)[1]).toMatchObject({ start: 9, end: 9, generatedText: '' })
   })
 })
