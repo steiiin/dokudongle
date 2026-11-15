@@ -20,7 +20,8 @@ const mocks = vi.hoisted(() => ({
   scrollToTop: vi.fn(),
   createAlert: vi.fn(),
   store: {
-    generatedProtocol: 'Generated protocol text',
+    effectiveProtocolText: 'Generated protocol text',
+    doku: { identity: 1 },
     isProtocolChanging: false,
     isDongleConnected: true,
     isDongleConnecting: false,
@@ -113,7 +114,8 @@ describe('DodoSendAction protocol check', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     vi.stubGlobal('crypto', webcrypto)
-    mocks.store.generatedProtocol = 'Generated protocol text'
+    mocks.store.effectiveProtocolText = 'Generated protocol text'
+    mocks.store.doku = { identity: 1 }
     mocks.store.isDongleConnected = true
     mocks.store.isDongleConnecting = false
     mocks.store.connection.isConnected = true
@@ -178,18 +180,51 @@ describe('DodoSendAction protocol check', () => {
     const { service, create } = useRealCheckCache(findingResult)
     let resolveNetwork!: (status: { connected: boolean }) => void
     mocks.getNetworkStatus.mockReturnValue(new Promise(resolve => { resolveNetwork = resolve }))
-    const originalText = mocks.store.generatedProtocol
+    const originalText = mocks.store.effectiveProtocolText
     const wrapper = mountAction()
 
     await sendButton(wrapper).trigger('click')
     await vi.waitFor(() => expect(mocks.getNetworkStatus).toHaveBeenCalledOnce())
-    reactive(mocks.store).generatedProtocol = 'Edited while checking'
+    reactive(mocks.store).effectiveProtocolText = 'Edited while checking'
     resolveNetwork({ connected: true })
-    await vi.waitFor(() => expect(modal(wrapper).props('result')).toEqual(findingResult))
+    await vi.waitFor(() => expect(mocks.createAlert).toHaveBeenCalledWith(expect.objectContaining({ header: 'Protokoll geändert' })))
+    expect(mocks.sendProtocol).not.toHaveBeenCalled()
+    expect(modal(wrapper).props('result')).toBeNull()
 
     expect(create).toHaveBeenCalledWith(expect.objectContaining({ input: originalText }))
     expect(await service.getCachedResult(originalText)).toEqual(findingResult)
-    expect(await service.getCachedResult(mocks.store.generatedProtocol)).toBeNull()
+    expect(await service.getCachedResult(mocks.store.effectiveProtocolText)).toBeNull()
+  })
+
+  test('checks and transmits the edited text snapshot', async () => {
+    mocks.store.effectiveProtocolText = 'Manually edited protocol'
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(mocks.checkProtocol).toHaveBeenCalledWith('Manually edited protocol')
+    expect(mocks.sendProtocol).toHaveBeenCalledExactlyOnceWith('Manually edited protocol')
+  })
+
+  test('rejects a new protocol with the same text while checking', async () => {
+    let finish!: (value: ProtocolCheckResult) => void
+    mocks.checkProtocol.mockReturnValueOnce(new Promise(resolve => { finish = resolve }))
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    reactive(mocks.store).doku = { identity: 2 }
+    finish(cleanResult)
+    await flushPromises()
+    expect(mocks.sendProtocol).not.toHaveBeenCalled()
+    expect(mocks.createAlert).toHaveBeenCalledWith(expect.objectContaining({ header: 'Protokoll geändert' }))
+  })
+
+  test('does not check or send an empty draft', async () => {
+    mocks.store.effectiveProtocolText = ' \n '
+    const wrapper = mountAction()
+    expect(sendButton(wrapper).props('disabled')).toBe(true)
+    await sendButton(wrapper).trigger('click')
+    expect(mocks.checkProtocol).not.toHaveBeenCalled()
+    expect(mocks.sendProtocol).not.toHaveBeenCalled()
   })
 
   test('reuses a clean result on repeated sends and checks again after text changes', async () => {
@@ -203,7 +238,7 @@ describe('DodoSendAction protocol check', () => {
     expect(create).toHaveBeenCalledOnce()
     expect(mocks.getNetworkStatus).toHaveBeenCalledOnce()
 
-    reactive(mocks.store).generatedProtocol += ' '
+    reactive(mocks.store).effectiveProtocolText += ' '
     await sendButton(wrapper).trigger('click')
     await vi.waitFor(() => expect(mocks.sendProtocol).toHaveBeenCalledTimes(3))
     expect(create).toHaveBeenCalledTimes(2)
@@ -212,7 +247,7 @@ describe('DodoSendAction protocol check', () => {
 
   test('requires confirmation for cached findings on every send', async () => {
     const { service, create } = useRealCheckCache(findingResult)
-    await service.checkProtocol(mocks.store.generatedProtocol)
+    await service.checkProtocol(mocks.store.effectiveProtocolText)
     const wrapper = mountAction()
 
     for (let sendCount = 1; sendCount <= 2; sendCount++) {
@@ -333,7 +368,7 @@ describe('DodoSendAction protocol check', () => {
   })
 
   test('requires confirmation before checking a protocol with missing inputs', async () => {
-    mocks.store.generatedProtocol = 'Protocol with [missing input]'
+    mocks.store.effectiveProtocolText = 'Protocol with [missing input]'
     mocks.createAlert.mockResolvedValueOnce({
       present: vi.fn().mockResolvedValue(undefined),
       onDidDismiss: vi.fn().mockResolvedValue({ role: 'cancel' }),
