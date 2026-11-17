@@ -37,7 +37,7 @@
             @update:model-value="representation.setDirectiveStatus($event as DirectiveStatus)" />
           <template v-if="representation.advanceDirective.status === 'Vorhanden'">
             <DodoInputSelectChips :model-value="representation.advanceDirective.restrictions"
-              label="↳ Beschränkungen?" :options="restrictionOptions" empty-label="Keine Angabe" lines="none"
+              label="↳ Beschränkungen?" :options="restrictionOptions" empty-label="k.A." lines="none"
               @update:model-value="representation.setRestrictions($event as TherapyRestriction[])" />
             <IonItem v-if="representation.advanceDirective.restrictions.includes('Andere')" lines="none">
               <DodoInputText v-model="representation.advanceDirective.otherRestriction"
@@ -119,30 +119,4 @@ ion-card-content {
   border-radius: 9999px;
 }
 
-/* Labels and entered values each need a full line on narrow nested cards. */
-@container (max-width: 420px) {
-  :deep(.advance-directive ion-select::part(wrapper)) {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  :deep(.advance-directive ion-select::part(label)) {
-    margin: 0;
-    max-width: 100%;
-  }
-  :deep(.advance-directive ion-select::part(inner)) {
-    padding-bottom: 8px;
-  }
-  :deep(.dd-input-select-chips) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  :deep(.dd-input-select-chips__label) {
-    grid-column: 1 / -1;
-    hyphens: auto;
-  }
-  :deep(.dd-input-select-chips__summary) {
-    text-align: start;
-    font-size: .875em;
-  }
-}
 </style>
