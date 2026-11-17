@@ -15,15 +15,6 @@
         ]">
       </DodoInputSelect>
 
-      <template v-if="isModeBvO">
-
-        <DodoInputTextOptional
-          toggle-label="Gesetzlicher Betreuer/Vormund?" v-model:toggle="store.doku.redflags.attendant.active"
-          text-label="Name/Art:" text-placeholder="z.B. Tochter" v-model:text="store.doku.redflags.attendant.value">
-        </DodoInputTextOptional>
-
-      </template>
-
       <template v-if="!isModeNormal">
 
         <DodoInputRedflags v-model="store.doku.redflags" />
@@ -46,7 +37,6 @@ const store = useDokuStore()
 // ############################################################################
 
 const isModeNormal = computed(() => store.doku.redflags.noTransportType == '')
-const isModeBvO = computed(() => store.doku.redflags.noTransportType == 'BvO')
 
 // ############################################################################
 
@@ -59,8 +49,7 @@ watch(() => [
   store.doku.redflags.removedMinorSignals?.length ?? 0,
   store.doku.redflags.removedMajorSignalIds.length,
   store.doku.redflags.removedMinorSignalIds.length,
-  store.doku.redflags.disableMinorBlock,
-  store.doku.redflags.attendant.active
+  store.doku.redflags.disableMinorBlock
 ], async (oldV, newV) => {
 
   const changed = oldV.toString() != newV.toString()

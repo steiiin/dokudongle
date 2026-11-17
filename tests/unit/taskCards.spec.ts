@@ -175,7 +175,7 @@ describe('task cards', () => {
     medications.unmount()
   })
 
-  test('explanation modes retain attendant fields, redflags and scrolling', async () => {
+  test('explanation modes omit the old attendant field and retain redflags and scrolling', async () => {
     const store = useDokuStore()
     store.doku.redflags.consent = 'Zeitkritisch'
     const wrapper = shallowMount(TaskRedflagsCard, { global })
@@ -184,12 +184,7 @@ describe('task cards', () => {
     expect(wrapper.findComponent(DodoInputRedflags).exists()).toBe(false)
     mode.vm.$emit('update:modelValue', 'BvO')
     await nextTick()
-    const attendant = wrapper.getComponent(DodoInputTextOptional)
-    attendant.vm.$emit('update:toggle', true)
-    attendant.vm.$emit('update:text', 'Betreuerin')
-    await nextTick()
-    expect(store.doku.redflags.attendant.active).toBe(true)
-    expect(store.doku.redflags.attendant.value).toBe('Betreuerin')
+    expect(wrapper.findComponent(DodoInputTextOptional).exists()).toBe(false)
     expect(wrapper.getComponent(DodoInputRedflags).props('modelValue')).toEqual(store.doku.redflags)
     expect(tryScrollingToBottom).toHaveBeenCalled()
     mode.vm.$emit('update:modelValue', 'Verweigerung')
