@@ -16,6 +16,7 @@
     <SampleMedicationsCard />
     <SamplePlerCard />
     <SampleContactsCard />
+    <SampleRepresentationCard />
 
   </DodoContainerCard>
 </template>
@@ -28,6 +29,7 @@ import SampleAllergiesCard from './sample/SampleAllergiesCard.vue'
 import SampleMedicationsCard from './sample/SampleMedicationsCard.vue'
 import SamplePlerCard from './sample/SamplePlerCard.vue'
 import SampleContactsCard from './sample/SampleContactsCard.vue'
+import SampleRepresentationCard from './sample/SampleRepresentationCard.vue'
 
 import { computed } from 'vue'
 

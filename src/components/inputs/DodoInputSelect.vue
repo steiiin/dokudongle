@@ -1,7 +1,8 @@
 <template>
 
   <IonItem :lines="isCustomMode ? 'none' : lines">
-    <IonSelect ref="select" interface="popover" v-model="selectValue" :disabled="disabled" :style="selectStyle" class="dd-input-select">
+    <IonSelect ref="select" interface="popover" v-model="selectValue" :disabled="disabled" :style="selectStyle" class="dd-input-select"
+      @ionDismiss="emit('ionDismiss')">
 
       <div slot="label" class="multiline-label-wrapper">
         <div class="select-label-line">
@@ -79,6 +80,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: SelectValue): void
+  (e: 'ionDismiss'): void
 }>()
 
 // ############################################################################

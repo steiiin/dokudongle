@@ -277,7 +277,44 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       },
     }
   }
+  // Frühere Vertretungsangaben waren einzeln aktivierbare Untersuchungswerte.
+  const savedSampler = normalizedInput.sampler
+  if (isRecord(savedSampler) && isRecord(savedSampler.representation)) {
+    const savedRepresentation = savedSampler.representation
+    const unwrap = (value: unknown): unknown => isRecord(value) && 'assessed' in value
+      ? (value.assessed === true ? value.value : undefined)
+      : value
+    normalizedInput = {
+      ...normalizedInput,
+      sampler: {
+        ...savedSampler,
+        representation: {
+          representative: unwrap(savedRepresentation.representative),
+          advanceDirective: unwrap(savedRepresentation.advanceDirective),
+        },
+      },
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
+  // Das alte Feld unterschied Vormund und Betreuer nicht. Die Originalangabe erhalten,
+  // ohne daraus eine konkrete Vertretungsbefugnis abzuleiten oder neue Daten zu ersetzen.
+  const samplerInput = isRecord(normalizedInput.sampler) ? normalizedInput.sampler : {}
+  const redflagsInput = isRecord(normalizedInput.redflags) ? normalizedInput.redflags : {}
+  const legacyAttendant = redflagsInput.attendant
+  if (samplerInput.representation === undefined && isRecord(legacyAttendant)
+    && legacyAttendant.active === true && typeof legacyAttendant.value === 'string' && legacyAttendant.value.trim()) {
+    const representation = hydratedProtocol.sampler.representation
+    representation.representative = {
+      role: 'Sonstige',
+      name: `${legacyAttendant.value} (Vormund/Betreuer – Altangabe)`,
+      involvement: 'Anwesend',
+    }
+  }
+  const representation = hydratedProtocol.sampler.representation
+  representation.setRepresentativeRole(representation.representative.role)
+  if (!representation.representative.involvement) representation.representative.involvement = 'Anwesend'
+  representation.setDirectiveStatus(representation.advanceDirective.status)
+  representation.setRestrictions(representation.advanceDirective.restrictions)
   hydratedProtocol.textAreaBlocks.excretions_bowel.details = normalizeBowelBleeding(
     hydratedProtocol.textAreaBlocks.excretions_bowel.details)
   restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
@@ -1399,6 +1436,7 @@ export const useDokuStore = defineStore('doku', {
         ], true)
         text += breakDoku(this.freeformText['sampler.pler.PLER'], true)
         text += breakDoku(state.doku.sampler.contacts.generateText(), true)
+        text += breakDoku(state.doku.sampler.representation.generateText(), true)
 
       }
 
@@ -1416,7 +1454,7 @@ export const useDokuStore = defineStore('doku', {
         ? placeholder(this.freeformText.treatment, 'Verlauf')
         : this.freeformText.treatment.trim(), true)
       text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
-      text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(), true), this.context.requireRedflags)
+      text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(state.doku.sampler.representation.explanationContext), true), this.context.requireRedflags)
 
       return text.trim()
 

@@ -1,7 +1,7 @@
 import { DATA_Redflags } from '@/data/redflags'
 import type { RedflagSignal, RedflagApplication, RedflagCategory, RedflagScenarioSelection, ResolvedRedflagScenario } from '@/types/redflags'
 import { interleaveUnique, resolveRedflagScenario } from '@/utils/redflags'
-import { OptionalValue } from "../input"
+import type { RepresentationContext } from '../sample/sampleRepresentation'
 
 /** Gespeicherte Momentaufnahmen aus der Zeit vor dem Katalogaustausch; werden niemals als neue Auswahl angeboten. */
 export interface LegacyRedflagScenario {
@@ -41,8 +41,6 @@ export class TreatmentRedflags {
   public removedMinorSignalIds: string[]
   public disableMinorBlock: boolean
 
-  public attendant: OptionalValue<string>
-
   public consent: '' | 'Fähig' | 'Unfähig' | 'Zeitkritisch'
 
   // ##########################################################################
@@ -58,7 +56,6 @@ export class TreatmentRedflags {
     this.removedMajorSignalIds = []
     this.removedMinorSignalIds = []
     this.disableMinorBlock = false
-    this.attendant = OptionalValue.inactive('')
 
     this.consent = ''
   }
@@ -157,7 +154,7 @@ export class TreatmentRedflags {
 
   }
 
-  public getRedflagBlock(): string {
+  public getRedflagBlock(representation?: RepresentationContext): string {
 
     // Überspringen, wenn keine Angaben zu Warnzeichen benötigt werden
     if (this.noTransportType == '') { return '' }
@@ -165,6 +162,11 @@ export class TreatmentRedflags {
     const content = this.getResolvedContent()
     let block = content.resolutions.filter(entry => entry.error)
       .map(entry => `[RedFlags-Auswahl prüfen: ${entry.error}] \n`).join('')
+
+    if (representation?.contactStatus) block += `${representation.contactStatus} \n`
+    if (representation?.addressee && this.noTransportType === 'Verweigerung') {
+      block += `Aufklärung gegenüber ${representation.addressee}. \n`
+    }
 
     // Einleitung erstellen
     const diagnoses = content.diagnoses
@@ -202,9 +204,12 @@ export class TreatmentRedflags {
     }
     else if (this.noTransportType == 'BvO')
     {
-      if (this.attendant.isActive) { block += `${this.attendant.value} (Vormund/Betreuer) anwesend. \nA` }
-      else { block += 'Pat. a' }
-      block += 'ufgeklärt über mögliche Verschlechterungszeichen; entscheidungsfähig und einverstanden mit weiteren Vorgehen. \n'
+      if (representation?.addressee) {
+        block += `Aufklärung über mögliche Verschlechterungszeichen gegenüber ${representation.addressee}. \n`
+        block += 'Pat. entscheidungsfähig und einverstanden mit weiteren Vorgehen. \n'
+      } else {
+        block += 'Pat. aufgeklärt über mögliche Verschlechterungszeichen; entscheidungsfähig und einverstanden mit weiteren Vorgehen. \n'
+      }
     }
 
     return block
