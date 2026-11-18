@@ -6,6 +6,7 @@ import { Device as CapacitorDevice } from '@capacitor/device'
 import { defineStore } from 'pinia'
 
 import { toRaw, type UnwrapRef } from 'vue'
+import { protocolValues } from '@/utils/protocol-values'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
@@ -364,17 +365,6 @@ function toPersistable<T>(value: T): T {
   return rawValue
 }
 
-
-// Über Vue-Proxys lesen, damit der Getter verschachtelte Änderungen erfasst. Nur Textwerte,
-// nicht der vorübergehende Editorzustand, bestimmen, ob ein Protokoll Daten enthält.
-function protocolValues(value: unknown): unknown {
-  if (value instanceof EnhanceableText) return value.value
-  if (Array.isArray(value)) return value.map(protocolValues)
-  if (isRecord(value)) {
-    return Object.fromEntries(Object.keys(value).sort().map(key => [key, protocolValues(value[key])]))
-  }
-  return value
-}
 
 // Protokollklassen importieren vom Store abhängige Texthilfsfunktionen; erst nach dem Laden der Module initialisieren.
 let emptyProtocolValues: string | undefined
