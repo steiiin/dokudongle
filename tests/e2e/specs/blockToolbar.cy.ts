@@ -1,8 +1,16 @@
-export {}
+import type { Components } from '@ionic/core'
 
 const toolbar = '.block-toolbar:visible'
 const expectGroup = (id: string) => cy.get(toolbar).should('have.attr', 'data-current-group', id)
-const go = (label: string) => cy.get(`${toolbar} button[aria-label="Zu ${label}"]`).click({ scrollBehavior: false })
+const go = (label: string) => cy.get<HTMLElement & Components.IonContent>('ion-content:visible').first().then($content => {
+  const scrollToPoint = cy.spy($content[0], 'scrollToPoint')
+  cy.get(`${toolbar} button[aria-label="Zu ${label}"]`).click({ scrollBehavior: false })
+  // The label now changes during scrolling; wait for navigation itself to finish.
+  cy.then(() => {
+    expect(scrollToPoint.callCount).to.eq(1)
+    return scrollToPoint.lastCall.returnValue
+  }).then(() => { scrollToPoint.restore() })
+})
 const scrollContent = () => cy.get('ion-content:visible').first().shadow().find<HTMLElement>('[part="scroll"]')
 
 const reset = () => {
@@ -54,6 +62,25 @@ for (const width of [375, 1024]) {
       expectGroup('einsatz')
     })
 
+    it('tracks the largest visible block before its heading reaches the top in both directions', () => {
+      // Place the EINSATZ/ABCDE boundary at known fractions of the real viewport.
+      for (const [fraction, expected] of [[0.35, 'abcde'], [0.45, 'abcde'], [0.55, 'einsatz'], [0.65, 'einsatz']] as const) {
+        scrollContent().then($scroll => {
+          const element = $scroll[0]
+          const section = element.ownerDocument.querySelector('[data-doku-group="abcde"]')!
+          element.scrollTop += section.getBoundingClientRect().top - element.getBoundingClientRect().top - element.clientHeight * fraction
+        })
+        expectGroup(expected)
+        scrollContent().should($scroll => {
+          const element = $scroll[0]
+          const viewportTop = element.getBoundingClientRect().top
+          const bounds = element.ownerDocument.querySelector('[data-doku-group="abcde"]')!.getBoundingClientRect()
+          expect(bounds.top - viewportTop).to.be.closeTo(element.clientHeight * fraction, 2)
+          expect(bounds.bottom).to.be.at.least(viewportTop + element.clientHeight)
+        })
+      }
+    })
+
     it('skips hidden groups, handles a short final card, and resets indicators', () => {
       cy.contains('[data-doku-group="einsatz"] ion-chip', 'Verlegung').click()
       cy.get(`${toolbar} .edit-indicator`).should('have.attr', 'aria-label', 'Bearbeitet')
@@ -83,11 +110,19 @@ for (const width of [375, 1024]) {
       expectGroup('abcde')
       cy.contains('ion-tab-button', 'Einstellungen').click()
       cy.get(toolbar).should('not.exist')
+      // Wait for Ionic to finish leaving the page before navigating back.
+      cy.get('.block-toolbar').closest('.ion-page').should('have.class', 'ion-page-hidden')
       cy.contains('ion-tab-button', 'Eingabe').click()
       expectGroup('abcde')
-      // Expanding an earlier section moves the heading below the viewport boundary.
+      // A small expansion leaves ABCDE dominant; a larger one makes EINSATZ dominant.
       scrollContent().invoke('css', 'overflow-anchor', 'none')
-      cy.get('[data-doku-group="einsatz"]').invoke('css', 'padding-bottom', '200px')
+      scrollContent().then($scroll => {
+        cy.get('[data-doku-group="einsatz"]').invoke('css', 'padding-bottom', `${$scroll[0].clientHeight * 0.3}px`)
+      })
+      expectGroup('abcde')
+      scrollContent().then($scroll => {
+        cy.get('[data-doku-group="einsatz"]').invoke('css', 'padding-bottom', `${$scroll[0].clientHeight * 0.7}px`)
+      })
       expectGroup('einsatz')
       go('ABCDE')
       expectGroup('abcde')

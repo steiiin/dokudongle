@@ -16,9 +16,11 @@ export function useDokuGroupNavigation(
   let frame: number | undefined
   let generation = 0
 
+  const section = (id: DokuGroupId) => content.value?.$el?.querySelector<HTMLElement>(`[data-doku-group="${id}"]`)
+
   const anchor = (id: DokuGroupId) => {
-    const section = content.value?.$el?.querySelector<HTMLElement>(`[data-doku-group="${id}"]`)
-    return section?.querySelector<HTMLElement>('ion-card') ?? section
+    const element = section(id)
+    return element?.querySelector<HTMLElement>('ion-card') ?? element
   }
 
   function updateCurrentGroup() {
@@ -31,11 +33,21 @@ export function useDokuGroupNavigation(
       activeId.value = groups.value[groups.value.length - 1].id
       return
     }
-    const top = scrollElement.getBoundingClientRect().top
-    activeId.value = groups.value.reduce<DokuGroupId>((active, group) => {
-      const element = anchor(group.id)
-      return element && element.getBoundingClientRect().top <= top + 2 ? group.id : active
-    }, 'einsatz')
+    const top = scrollElement.getBoundingClientRect().top + scrollElement.clientTop
+    const bottom = top + scrollElement.clientHeight
+    let largestHeight = 0
+    let largestId = activeId.value
+    for (const group of groups.value) {
+      const bounds = section(group.id)?.getBoundingClientRect()
+      if (!bounds) continue
+      const visibleHeight = Math.max(0, Math.min(bounds.bottom, bottom) - Math.max(bounds.top, top))
+      // Keep the current group on ties to avoid flickering at an even split.
+      if (visibleHeight > largestHeight || (visibleHeight > 0 && visibleHeight === largestHeight && group.id === activeId.value)) {
+        largestHeight = visibleHeight
+        largestId = group.id
+      }
+    }
+    activeId.value = largestId
   }
 
   function scheduleUpdate() {
