@@ -1,5 +1,6 @@
 <template>
   <div class="dd-grav-term">
+
     <DodoToggleGroup v-model="mode" class="dd-grav-term__switch">
       <DodoToggleButton v-if="allowClear" value="unrecorded">Keine Angabe</DodoToggleButton>
       <DodoToggleButton value="unknown">Termin unbekannt</DodoToggleButton>
@@ -148,8 +149,8 @@ const dateInput = computed({
   display: grid;
 
   &__switch {
-    padding: .5rem var(--padding-start);
-    padding-bottom: 0;
+    padding: .5rem 16px;
+    padding-bottom: .5rem;
     & :deep(ion-button) {
       margin-inline: 0;
     }
@@ -157,10 +158,11 @@ const dateInput = computed({
 
   &__approx {
     padding: .5rem 0;
+    border-top: 1px solid var(--ion-background-color-step-150, rgba(0,0,0,0.13));
   }
 
   &__date {
-    padding: .5rem var(--padding-start);
+    padding: .5rem 16px;
     padding-bottom: .75rem;
   }
 

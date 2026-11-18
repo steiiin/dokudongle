@@ -7,7 +7,7 @@
       <IonLabel>Schwangerschaftsanamnese</IonLabel>
     </IonItemDivider>
 
-    <IonItem>
+    <IonItem lines="full">
       <DodoInputNumber v-model="details.gravida"
         label="Gravida"
         :min="1">
@@ -20,7 +20,7 @@
 
     <DodoInputSelect
       v-model="details.childCount"
-      label="Mehrlingsstatus" lines="inset"
+      label="Mehrlingsstatus" lines="full"
       empty-label="Einling"
       :options="[
         'Zwillinge',
@@ -42,7 +42,7 @@
 
     <DodoInputSelect
       v-model="details.presentation"
-      label="Kindslage" lines="inset"
+      label="Kindslage" lines="full"
       empty-label="Nicht Erfasst"
       :options="[
         { value: 'SL', label: 'Schädellage' },
