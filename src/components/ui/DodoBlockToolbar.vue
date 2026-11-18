@@ -61,6 +61,7 @@ const emit = defineEmits<{ navigate: [id: DokuGroupId] }>()
 .group-heading { position: relative; justify-self: center; }
 .group-label { font-size: .85rem; font-weight: 600; letter-spacing: 1px; }
 .edit-indicator {
+  display: none;
   position: absolute;
   left: calc(100% + 8px);
   top: 50%;
