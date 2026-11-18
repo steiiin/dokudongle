@@ -5,8 +5,8 @@
       Atmung vorhanden?
     </DodoInputToggle>
 
-    <DodoInputSelect label="Obstruktion" v-model="store.doku.xAbcde.obstruction"
-      lines="inset" empty-label="Keine"
+    <DodoInputSelect label="Mundraum" v-model="store.doku.xAbcde.obstruction"
+      lines="inset" empty-label="Frei"
       :options="[
         'Fremdkörper',
         'Schwellung',
