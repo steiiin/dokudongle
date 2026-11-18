@@ -1,4 +1,4 @@
-export const representativeRoles = ['Sorgeberechtigt', 'Rechtl. Betreuer', 'Bevollmächtigter', 'Sonstige'] as const
+export const representativeRoles = ['Sorgeberechtigt', 'Gesetzl. Betreuer', 'Bevollmächtigter', 'Sonstige'] as const
 export const representativeInvolvements = ['Anwesend', 'Telefonisch', 'Nicht Erreicht', 'Nicht Kontaktiert'] as const
 export const therapyRestrictions = ['Keine Einschränkungen', 'Keine Reanimation', 'Keine Beatmung', 'Keine Klinikeinweisung', 'Andere'] as const
 
@@ -33,7 +33,19 @@ export class SampleRepresentation {
 
   public setRepresentativeRole(role: RepresentativeRole): void {
     if (!role) this.representative = emptyRepresentative()
-    else this.representative.role = role
+    else {
+      this.representative.role = role
+      if (!this.availableInvolvements.includes(this.representative.involvement)) {
+        this.representative.involvement = 'Anwesend'
+      }
+    }
+  }
+
+  get availableInvolvements(): readonly RepresentativeInvolvement[] {
+    const { role } = this.representative
+    return role === 'Bevollmächtigter' || role === 'Sonstige'
+      ? representativeInvolvements.filter(value => value !== 'Nicht Kontaktiert')
+      : representativeInvolvements
   }
 
   public setDirectiveStatus(status: DirectiveStatus): void {
@@ -74,14 +86,26 @@ export class SampleRepresentation {
     const lines: string[] = []
     const { role, name, involvement } = this.representative
     if (role) {
-      const roleText = role === 'Sorgeberechtigt' ? 'Sorgeberechtigter' : role === 'Sonstige' ? 'Sonstige Vertretung' : role
+      const present = involvement === 'Anwesend'
+      const roleText = role === 'Sorgeberechtigt'
+        ? (present ? 'Sorgeberechtigter' : 'Sorgeberechtigten')
+        : role === 'Sonstige' ? 'Sonstige Vertretung' : role
+      const person = `${roleText}${name.trim() ? ` (${name.trim()})` : ''}`
       const involvementText: Record<RepresentativeInvolvement, string> = {
         Anwesend: 'anwesend',
         Telefonisch: 'tel. informiert',
         'Nicht Erreicht': 'nicht erreicht',
-        'Nicht Kontaktiert': 'nicht kontaktiert',
+        'Nicht Kontaktiert': role === 'Sonstige' ? 'nicht kontaktiert' : 'noch nicht kontaktiert',
       }
-      lines.push(`${roleText}${name.trim() ? ` (${name.trim()})` : ''} ${involvementText[involvement]}.`)
+      const contact = involvementText[involvement]
+      const contrast = involvement === 'Nicht Erreicht' ? 'aber ' : ''
+      if (!present && role === 'Gesetzl. Betreuer') {
+        lines.push(`Hat ${person}; ${contrast}${contact}.`)
+      } else if (!present && role === 'Bevollmächtigter') {
+        lines.push(`${person} vorhanden; ${contrast}${contact}.`)
+      } else {
+        lines.push(`${person} ${contact}.`)
+      }
     }
     const { status, restrictions, otherRestriction } = this.advanceDirective
     if (status === 'Keine') {

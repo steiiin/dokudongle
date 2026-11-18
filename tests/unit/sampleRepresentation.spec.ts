@@ -3,37 +3,54 @@ import { SampleRepresentation, representativeRoles, representativeInvolvements }
 import { TreatmentRedflags } from '@/types/protocol/treatment/treatmentRedflags'
 
 describe('representation and protocol text', () => {
-  describe.each([
-    ['Sorgeberechtigt', 'Sorgeberechtigter'],
-    ['Rechtl. Betreuer', 'Rechtl. Betreuer'],
-    ['Bevollmächtigter', 'Bevollmächtigter'],
-    ['Sonstige', 'Sonstige Vertretung'],
-  ] as const)('standalone sentences for %s', (role, roleText) => {
-    test.each([
-      ['Anwesend', 'anwesend'],
-      ['Telefonisch', 'tel. informiert'],
-      ['Nicht Erreicht', 'nicht erreicht'],
-      ['Nicht Kontaktiert', 'nicht kontaktiert'],
-    ] as const)('formats %s with optional names', (involvement, involvementText) => {
-      const value = new SampleRepresentation()
-      value.representative = { role, name: '  Hr. Müller  ', involvement }
-      expect(value.generateText()).toBe(`${roleText} (Hr. Müller) ${involvementText}.`)
-      expect(value.representativeSummary).toBe(`${role} · Hr. Müller · ${involvement}`)
-      for (const name of ['', '   ']) {
-        value.representative.name = name
-        expect(value.generateText()).toBe(`${roleText} ${involvementText}.`)
-      }
-    })
+  test.each([
+    ['Sorgeberechtigt', 'Anwesend', 'Sorgeberechtigter{ name } anwesend.'],
+    ['Sorgeberechtigt', 'Telefonisch', 'Sorgeberechtigten{ name } tel. informiert.'],
+    ['Sorgeberechtigt', 'Nicht Erreicht', 'Sorgeberechtigten{ name } nicht erreicht.'],
+    ['Sorgeberechtigt', 'Nicht Kontaktiert', 'Sorgeberechtigten{ name } noch nicht kontaktiert.'],
+    ['Gesetzl. Betreuer', 'Anwesend', 'Gesetzl. Betreuer{ name } anwesend.'],
+    ['Gesetzl. Betreuer', 'Telefonisch', 'Hat Gesetzl. Betreuer{ name }; tel. informiert.'],
+    ['Gesetzl. Betreuer', 'Nicht Erreicht', 'Hat Gesetzl. Betreuer{ name }; aber nicht erreicht.'],
+    ['Gesetzl. Betreuer', 'Nicht Kontaktiert', 'Hat Gesetzl. Betreuer{ name }; noch nicht kontaktiert.'],
+    ['Bevollmächtigter', 'Anwesend', 'Bevollmächtigter{ name } anwesend.'],
+    ['Bevollmächtigter', 'Telefonisch', 'Bevollmächtigter{ name } vorhanden; tel. informiert.'],
+    ['Bevollmächtigter', 'Nicht Erreicht', 'Bevollmächtigter{ name } vorhanden; aber nicht erreicht.'],
+    ['Sonstige', 'Anwesend', 'Sonstige Vertretung{ name } anwesend.'],
+    ['Sonstige', 'Telefonisch', 'Sonstige Vertretung{ name } tel. informiert.'],
+    ['Sonstige', 'Nicht Erreicht', 'Sonstige Vertretung{ name } nicht erreicht.'],
+  ] as const)('formats %s / %s with optional names', (role, involvement, expected) => {
+    const value = new SampleRepresentation()
+    value.representative = { role, name: '  Hr. Müller  ', involvement }
+    expect(value.generateText()).toBe(expected.replace('{ name }', ' (Hr. Müller)'))
+    expect(value.representativeSummary).toBe(`${role} · Hr. Müller · ${involvement}`)
+    for (const name of ['', '   ']) {
+      value.representative.name = name
+      expect(value.generateText()).toBe(expected.replace('{ name }', ''))
+    }
+  })
+
+  test.each(representativeRoles)('normalizes contact status on switching to %s', role => {
+    const value = new SampleRepresentation()
+    value.representative = { role: 'Sorgeberechtigt', name: 'Alex', involvement: 'Nicht Kontaktiert' }
+    value.setRepresentativeRole(role)
+    const restricted = role === 'Bevollmächtigter' || role === 'Sonstige'
+    expect(value.representative).toEqual({ role, name: 'Alex', involvement: restricted ? 'Anwesend' : 'Nicht Kontaktiert' })
+    expect(value.availableInvolvements.includes('Nicht Kontaktiert')).toBe(!restricted)
+    for (const involvement of ['Anwesend', 'Telefonisch', 'Nicht Erreicht'] as const) {
+      value.representative = { role: 'Sorgeberechtigt', name: 'Alex', involvement }
+      value.setRepresentativeRole(role)
+      expect(value.representative).toEqual({ role, name: 'Alex', involvement })
+    }
   })
 
   test('keeps the directive in its own sentence without a heading', () => {
     const value = new SampleRepresentation()
     value.representative = { role: 'Sorgeberechtigt', name: 'Mama', involvement: 'Nicht Erreicht' }
     value.setDirectiveStatus('Keine')
-    expect(value.generateText()).toBe('Sorgeberechtigter (Mama) nicht erreicht.\nKeine Patientenverfügung.')
+    expect(value.generateText()).toBe('Sorgeberechtigten (Mama) nicht erreicht.\nKeine Patientenverfügung.')
     value.setDirectiveStatus('Vorhanden')
     value.setRestrictions(['Keine Einschränkungen'])
-    expect(value.generateText()).toBe('Sorgeberechtigter (Mama) nicht erreicht.\nPatientenverfügung vorhanden, keine Therapiebeschränkungen.')
+    expect(value.generateText()).toBe('Sorgeberechtigten (Mama) nicht erreicht.\nPatientenverfügung vorhanden, keine Therapiebeschränkungen.')
     value.representative.role = ''
     expect(value.generateText()).toBe('Patientenverfügung vorhanden, keine Therapiebeschränkungen.')
   })

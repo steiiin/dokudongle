@@ -9,6 +9,21 @@ const choose = (label: string, value: string) => {
   cy.get('ion-popover:visible').should('not.exist')
 }
 
+it('filters contact options and resets uncontacted when switching roles', () => {
+  cy.visit('/tests/e2e/fixtures/representation.html')
+  representative().click()
+  for (const [source, target] of [['Sorgeberechtigt', 'Bevollmächtigter'], ['Gesetzl. Betreuer', 'Sonstige']]) {
+    choose('Vertreter vorhanden?', source)
+    choose('Beteiligung', 'Nicht Kontaktiert')
+    choose('Vertreter vorhanden?', target)
+    cy.get('ion-modal:visible').contains('ion-select', 'Beteiligung')
+      .should('contain.text', 'Anwesend').click()
+    cy.get('ion-popover:visible').should('not.contain.text', 'Nicht Kontaktiert')
+    cy.get('ion-popover:visible').contains('ion-radio', 'Telefonisch').click()
+    cy.get('ion-popover:visible').should('not.exist')
+  }
+})
+
 for (const mode of ['md', 'ios']) {
   for (const width of [320, 1024]) {
     it(`captures representation without overflow at ${width}px (${mode})`, () => {
@@ -35,7 +50,7 @@ for (const mode of ['md', 'ios']) {
       cy.get('ion-modal:visible').should('not.exist')
       representative().should('contain.text', 'Sorgeberechtigt · Mama · Telefonisch')
       cy.get('#report').should('contain.text', 'gegenüber Mama (Sorgeberechtigt), telefonisch')
-        .and('contain.text', 'Sorgeberechtigter (Mama) tel. informiert.')
+        .and('contain.text', 'Sorgeberechtigten (Mama) tel. informiert.')
         .and('not.contain.text', 'Vertretung:')
         .and('not.contain.text', 'Vertreter:')
 
@@ -46,7 +61,7 @@ for (const mode of ['md', 'ios']) {
       cy.get('ion-modal:visible').contains('.name-suggestion', 'Tochter').click()
       cy.get('ion-modal:visible ion-input input').should('have.value', 'Tochter')
       cy.get('ion-modal:visible ion-header ion-button').click()
-      cy.get('#report').should('contain.text', 'Bevollmächtigter (Tochter) tel. informiert.')
+      cy.get('#report').should('contain.text', 'Bevollmächtigter (Tochter) vorhanden; tel. informiert.')
         .and('not.contain.text', 'Vorsorgevollmacht')
 
       representative().click()

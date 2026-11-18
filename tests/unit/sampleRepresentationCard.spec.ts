@@ -20,6 +20,26 @@ const selectByLabel = (wrapper: ReturnType<typeof mountCard>, label: string) =>
   wrapper.findAllComponents(DodoInputSelect).find(select => select.props('label') === label)!
 
 describe('representation card', () => {
+  test.each(['Bevollmächtigter', 'Sonstige'])('hides uncontacted and resets the selection for %s', async role => {
+    const value = useDokuStore().doku.sampler.representation
+    const wrapper = mountCard()
+    const roleSelect = selectByLabel(wrapper, 'Vertreter vorhanden?')
+    expect(roleSelect.props('options')).toContain('Gesetzl. Betreuer')
+    expect(roleSelect.props('options')).not.toContain('Rechtl. Betreuer')
+    for (const sourceRole of ['Sorgeberechtigt', 'Gesetzl. Betreuer']) {
+      roleSelect.vm.$emit('update:modelValue', sourceRole)
+      await nextTick()
+      expect(selectByLabel(wrapper, 'Beteiligung').props('options')).toContain('Nicht Kontaktiert')
+      selectByLabel(wrapper, 'Beteiligung').vm.$emit('update:modelValue', 'Nicht Kontaktiert')
+      await nextTick()
+      roleSelect.vm.$emit('update:modelValue', role)
+      await nextTick()
+      expect(selectByLabel(wrapper, 'Beteiligung').props('options')).toEqual(['Anwesend', 'Telefonisch', 'Nicht Erreicht'])
+      expect(selectByLabel(wrapper, 'Beteiligung').props('modelValue')).toBe('Anwesend')
+      expect(value.generateText()).toBe(role === 'Sonstige' ? 'Sonstige Vertretung anwesend.' : 'Bevollmächtigter anwesend.')
+    }
+  })
+
   test('follows contacts and immediately shows ordinary rows with empty defaults', () => {
     const container = shallowMount(SampleContainerCard, { global: { renderStubDefaultSlot: true } })
     expect(container.find('sample-contacts-card-stub + sample-representation-card-stub').exists()).toBe(true)
@@ -81,7 +101,7 @@ describe('representation card', () => {
     ['Sorgeberechtigt', 'z.B. Mama', 2],
     ['Bevollmächtigter', 'z.B. Tochter', 4],
     ['Sonstige', 'Name/Bezeichnung', 0],
-    ['Rechtl. Betreuer', 'z.B. Frau Müller', 0],
+    ['Gesetzl. Betreuer', 'z.B. Frau Müller', 0],
   ])('shows the placeholder and suggestions for %s', async (role, placeholder, count) => {
     const wrapper = mountCard()
     selectByLabel(wrapper, 'Vertreter vorhanden?').vm.$emit('update:modelValue', role)

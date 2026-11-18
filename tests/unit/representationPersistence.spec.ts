@@ -22,7 +22,7 @@ beforeEach(() => {
 function filledProtocol() {
   const protocol = resetProtocol()
   const value = protocol.sampler.representation
-  value.representative = { role: 'Rechtl. Betreuer', name: 'Alex Muster', involvement: 'Telefonisch' }
+  value.representative = { role: 'Gesetzl. Betreuer', name: 'Alex Muster', involvement: 'Telefonisch' }
   value.setDirectiveStatus('Vorhanden')
   value.setRestrictions(['Keine Reanimation', 'Andere'])
   value.advanceDirective.otherRestriction = 'Keine Dialyse'
@@ -32,6 +32,38 @@ function filledProtocol() {
 }
 
 describe('representation store integration', () => {
+  test.each([
+    ['Rechtl. Betreuer', 'Gesetzl. Betreuer', 'Nicht Kontaktiert'],
+    ['Bevollmächtigter', 'Bevollmächtigter', 'Anwesend'],
+    ['Sonstige', 'Sonstige', 'Anwesend'],
+  ])('migrates %s in current, historical and temporary protocols', async (oldRole, role, involvement) => {
+    for (const wrapped of [false, true]) {
+      setActivePinia(createPinia())
+      const protocol = copy(filledProtocol())
+      const representative = { role: oldRole, name: 'Alex Muster', involvement: 'Nicht Kontaktiert' }
+      Object.assign(protocol.sampler.representation, {
+        representative: wrapped ? { assessed: true, value: representative } : representative,
+      })
+      vi.mocked(loadDokuState).mockResolvedValueOnce({ schemaVersion: 1, doku: protocol,
+        protocolHistory: [{ id: 'legacy', archivedAt: '2026-11-15T10:00:00.000Z', doku: copy(protocol) }] })
+      vi.mocked(loadTemporaryProtocolState).mockResolvedValueOnce({ schemaVersion: 1, savedAt: '2026-11-15T11:00:00.000Z', doku: copy(protocol) })
+      const store = useDokuStore()
+      await store.hydrateFromStorage()
+      expect(store.protocolHistory).toHaveLength(2)
+      for (const restored of [store.doku, ...store.protocolHistory.map(entry => entry.doku)]) {
+        const value = restored.sampler.representation
+        expect(value.representative).toEqual({ role, name: 'Alex Muster', involvement })
+        expect(value.generateText()).not.toContain('Rechtl. Betreuer')
+        expect(value.representativeSummary).toBe(`${role} · Alex Muster · ${involvement}`)
+        expect(value.explanationContext.contactStatus).toBe(role === 'Gesetzl. Betreuer'
+          ? 'Vertreter Alex Muster (Gesetzl. Betreuer) nicht kontaktiert.' : '')
+      }
+      await store.persistToStorage()
+      expect(copy(vi.mocked(saveDokuState).mock.lastCall![0]).doku.sampler.representation.representative)
+        .toEqual({ role, name: 'Alex Muster', involvement })
+    }
+  })
+
   test('round-trips active, historical and temporary protocols with class methods and resets new protocols', async () => {
     const protocol = filledProtocol()
     const expected = protocol.sampler.representation.generateText()
@@ -48,7 +80,7 @@ describe('representation store integration', () => {
     expect(store.generatedProtocol).toContain(expected)
     expect(store.generatedProtocol).toContain('Kontakt Muster')
     expect(store.generatedProtocol.indexOf('Kontakt Muster')).toBeLessThan(store.generatedProtocol.indexOf(expected))
-    expect(store.generatedProtocol).toContain('gegenüber Alex Muster (Rechtl. Betreuer), telefonisch')
+    expect(store.generatedProtocol).toContain('gegenüber Alex Muster (Gesetzl. Betreuer), telefonisch')
     await store.persistToStorage()
     const saved = copy(vi.mocked(saveDokuState).mock.lastCall![0])
     setActivePinia(createPinia())
@@ -58,7 +90,7 @@ describe('representation store integration', () => {
     expect(restarted.doku.sampler.representation.generateText()).toBe(expected)
     await restarted.newProtocol()
     expect(restarted.doku.sampler.representation).toEqual(new SampleRepresentation())
-    expect(restarted.generatedProtocol).not.toContain('Rechtl. Betreuer (Alex Muster) tel. informiert.')
+    expect(restarted.generatedProtocol).not.toContain('Hat Gesetzl. Betreuer (Alex Muster); tel. informiert.')
     expect(await restarted.restoreProtocolFromHistory('history')).toBe(true)
     expect(restarted.doku.sampler.representation.generateText()).toBe(expected)
   })
@@ -135,12 +167,12 @@ describe('representation store integration', () => {
     const store = useDokuStore()
     store.doku = filledProtocol()
     store.setFlavor('verlegung', true)
-    expect(store.generatedProtocol).not.toContain('Rechtl. Betreuer (Alex Muster) tel. informiert.')
+    expect(store.generatedProtocol).not.toContain('Hat Gesetzl. Betreuer (Alex Muster); tel. informiert.')
     expect(store.generatedProtocol).not.toContain('Alex Muster')
     store.setFlavor('verlegung', false)
-    expect(store.generatedProtocol).toContain('Rechtl. Betreuer (Alex Muster) tel. informiert.')
+    expect(store.generatedProtocol).toContain('Hat Gesetzl. Betreuer (Alex Muster); tel. informiert.')
     store.doku.redflags.noTransportType = ''
     expect(store.generatedProtocol).not.toContain('gegenüber Alex Muster')
-    expect(store.generatedProtocol).toContain('Rechtl. Betreuer (Alex Muster) tel. informiert.')
+    expect(store.generatedProtocol).toContain('Hat Gesetzl. Betreuer (Alex Muster); tel. informiert.')
   })
 })

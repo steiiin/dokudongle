@@ -27,7 +27,7 @@
               </div>
             </IonItem>
             <DodoInputSelect v-model="representation.representative.involvement" label="Beteiligung"
-              :options="representativeInvolvements" lines="none" />
+              :options="representation.availableInvolvements" lines="none" />
           </template>
         </DodoItemModal>
 
@@ -56,7 +56,7 @@ import DodoInputText from '@/components/inputs/DodoInputText.vue'
 import DodoItemModal from '@/components/ui/DodoItemModal.vue'
 import { useDokuStore } from '@/store/doku'
 import {
-  representativeRoles, representativeInvolvements, therapyRestrictions,
+  representativeRoles, therapyRestrictions,
   type DirectiveStatus, type TherapyRestriction, type RepresentativeRole,
 } from '@/types/protocol/sample/sampleRepresentation'
 
@@ -82,7 +82,7 @@ const namePlaceholder = computed(() => {
   switch (representation.value.representative.role) {
     case 'Sorgeberechtigt': return 'z.B. Mama'
     case 'Bevollmächtigter': return 'z.B. Tochter'
-    case 'Rechtl. Betreuer': return 'z.B. Frau Müller'
+    case 'Gesetzl. Betreuer': return 'z.B. Frau Müller'
     default: return 'Name/Bezeichnung'
   }
 })

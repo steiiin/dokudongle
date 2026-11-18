@@ -285,12 +285,16 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     const unwrap = (value: unknown): unknown => isRecord(value) && 'assessed' in value
       ? (value.assessed === true ? value.value : undefined)
       : value
+    const savedRepresentative = unwrap(savedRepresentation.representative)
+    const representative = isRecord(savedRepresentative) && savedRepresentative.role === 'Rechtl. Betreuer'
+      ? { ...savedRepresentative, role: 'Gesetzl. Betreuer' }
+      : savedRepresentative
     normalizedInput = {
       ...normalizedInput,
       sampler: {
         ...savedSampler,
         representation: {
-          representative: unwrap(savedRepresentation.representative),
+          representative,
           advanceDirective: unwrap(savedRepresentation.advanceDirective),
         },
       },
