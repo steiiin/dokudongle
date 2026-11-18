@@ -57,7 +57,7 @@ watch(() => store.connection.transmissionReconnectCount, () => {
   width: min(100%, 30rem);
   padding: 1.5rem;
   border-radius: 1rem;
-  background: var(--ion-background-color, #fff);
+  background: rgba(var(--ion-background-color-rgb), 70%);
   text-align: center;
 }
 .transmission-actions {
