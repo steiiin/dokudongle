@@ -41,7 +41,7 @@ const emit = defineEmits<{ navigate: [id: DokuGroupId] }>()
   border-radius: 24px;
   background: var(--ion-card-background, var(--ion-background-color, #fff));
   color: var(--ion-text-color, #000);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 12%);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 40%);
 }
 .group-chevron {
   display: grid;

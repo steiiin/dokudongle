@@ -23,6 +23,9 @@ export function useDokuGroupNavigation(
     return element?.querySelector<HTMLElement>('ion-card') ?? element
   }
 
+  // Share the browser's scroll clearance so group headings land below the floating pill.
+  const topClearance = () => scrollElement ? parseFloat(getComputedStyle(scrollElement).scrollPaddingTop) || 0 : 0
+
   function updateCurrentGroup() {
     if (!scrollElement || scrollElement.clientHeight === 0) return
     if (scrollElement.scrollTop <= 1) {
@@ -33,8 +36,9 @@ export function useDokuGroupNavigation(
       activeId.value = groups.value[groups.value.length - 1].id
       return
     }
-    const top = scrollElement.getBoundingClientRect().top + scrollElement.clientTop
-    const bottom = top + scrollElement.clientHeight
+    const viewportTop = scrollElement.getBoundingClientRect().top + scrollElement.clientTop
+    const top = viewportTop + topClearance()
+    const bottom = viewportTop + scrollElement.clientHeight
     let largestHeight = 0
     let largestId = activeId.value
     for (const group of groups.value) {
@@ -94,7 +98,7 @@ export function useDokuGroupNavigation(
     if (!scrollElement || !groups.value.some(group => group.id === id)) return
     const target = anchor(id)
     if (!target) return
-    const y = id === 'einsatz' ? 0 : scrollElement.scrollTop + target.getBoundingClientRect().top - scrollElement.getBoundingClientRect().top
+    const y = id === 'einsatz' ? 0 : scrollElement.scrollTop + target.getBoundingClientRect().top - scrollElement.getBoundingClientRect().top - topClearance()
     await content.value?.$el?.scrollToPoint(0, Math.max(0, y), duration())
     scheduleUpdate()
   }

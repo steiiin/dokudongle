@@ -20,9 +20,10 @@ function frame() {
   callback?.(0)
 }
 
-async function setup() {
+async function setup(topClearance = 0) {
   const content = document.createElement('ion-content')
   const scroll = document.createElement('div')
+  scroll.style.scrollPaddingTop = `${topClearance}px`
   // The viewport starts below fixed app chrome and is 1000px tall.
   vi.spyOn(scroll, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 100, 400, 1000))
   Object.defineProperties(scroll, {
@@ -39,6 +40,7 @@ async function setup() {
     vi.spyOn(section, 'getBoundingClientRect').mockImplementation(() => bounds.get(group.id) ?? new DOMRect())
   }
   content.getScrollElement = vi.fn().mockResolvedValue(scroll)
+  content.scrollToPoint = vi.fn().mockResolvedValue(undefined)
   const groups = ref<DokuGroup[]>([...DOKU_GROUPS])
   let navigation!: ReturnType<typeof useDokuGroupNavigation>
   wrapper = mount(defineComponent({
@@ -55,7 +57,7 @@ async function setup() {
     scroll.dispatchEvent(new Event('scroll'))
     frame()
   }
-  return { ...navigation, groups, scroll, place, update }
+  return { ...navigation, groups, content, scroll, place, update }
 }
 
 beforeEach(() => {
@@ -76,6 +78,21 @@ afterEach(() => {
 })
 
 describe('documentation group visibility tracking', () => {
+  test('excludes the floating toolbar clearance and lands navigation below it', async () => {
+    const { place, update, current, content, navigate } = await setup(60)
+    place('einsatz', -1000, 520)
+    place('abcde', 520, 2000)
+    update()
+    expect(current.value.id).toBe('abcde')
+
+    const card = content.querySelector<HTMLElement>('[data-doku-group="abcde"] > ion-card')!
+    vi.spyOn(card, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 620, 400, 1480))
+    await navigate('abcde')
+    expect(content.scrollToPoint).toHaveBeenLastCalledWith(0, 560, 300)
+    await navigate('einsatz')
+    expect(content.scrollToPoint).toHaveBeenLastCalledWith(0, 0, 300)
+  })
+
   test('switches before the heading reaches the top and follows scrolling in both directions', async () => {
     const { place, update, current, previous, next } = await setup()
     place('einsatz', -1000, 350)

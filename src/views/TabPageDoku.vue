@@ -1,19 +1,21 @@
 <template>
   <IonPage>
-    <IonHeader>
+    <IonHeader class="ion-no-border">
       <IonToolbar>
         <div class="with-badge">
           <IonTitle>Eingabe</IonTitle>
         </div>
         <DodoSendAction show-reset></DodoSendAction>
       </IonToolbar>
-      <DodoBlockToolbar :current="current" :previous="previous" :next="next"
-        :edited="editedGroups[current.id]" @navigate="navigate" />
     </IonHeader>
     <IonContent
       ref="dokuContent"
+      fixed-slot-placement="before"
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
     >
+      <div slot="fixed" class="position-toolbar-vignette" aria-hidden="true" />
+      <DodoBlockToolbar slot="fixed" :current="current" :previous="previous" :next="next"
+        :edited="editedGroups[current.id]" @navigate="navigate" />
 
       <div id="container">
 
@@ -87,12 +89,41 @@ provideTextSuggestionScope()
 </script>
 <style lang="scss" scoped>
 
+  ion-content {
+    /* 44px pill with 8px clearance above and below, scrolled away with the content. */
+    --position-toolbar-space: 60px;
+    --padding-top: var(--position-toolbar-space);
+  }
+
+  ion-content::part(scroll) {
+    scroll-padding-top: var(--position-toolbar-space);
+  }
+
+  .position-toolbar-vignette {
+    top: 0;
+    inset-inline: 0;
+    height: calc(var(--position-toolbar-space) + 8px);
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgb(0 0 0 / 65%) 0%, rgb(0 0 0 / 40%) 50%, transparent 100%);
+  }
+
+  .block-toolbar {
+    top: 0;
+    inset-inline: 0;
+    z-index: 2;
+  }
+
   #container {
     position: relative;
   }
 
   [data-doku-group] {
     display: flow-root;
+  }
+
+  [data-doku-group="einsatz"] > ion-card {
+    margin-top: 0;
   }
 
   .dongle-connecting {

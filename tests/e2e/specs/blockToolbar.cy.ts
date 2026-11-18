@@ -1,6 +1,6 @@
 import type { Components } from '@ionic/core'
 
-const toolbar = '.block-toolbar:visible'
+const toolbar = '.ion-page:not(.ion-page-hidden) > ion-content > .block-toolbar'
 const expectGroup = (id: string) => cy.get(toolbar).should('have.attr', 'data-current-group', id)
 const go = (label: string) => cy.get<HTMLElement & Components.IonContent>('ion-content:visible').first().then($content => {
   const scrollToPoint = cy.spy($content[0], 'scrollToPoint')
@@ -37,7 +37,7 @@ for (const width of [375, 1024]) {
         const label = $bar[0].querySelector('.group-label')!.getBoundingClientRect()
         expect(label.left + label.width / 2).to.be.closeTo(rect.left + rect.width / 2, 1)
         expect($bar[0].querySelector('button')!.getBoundingClientRect().height).to.eq(44)
-        const appToolbar = $bar[0].parentElement!.querySelector('ion-toolbar')!.getBoundingClientRect()
+        const appToolbar = $bar[0].closest('.ion-page')!.querySelector('ion-toolbar')!.getBoundingClientRect()
         expect(rect.top).to.be.greaterThan(appToolbar.bottom)
       })
       cy.screenshot(`block-toolbar-einsatz-${width}`, { capture: 'viewport' })
@@ -62,21 +62,43 @@ for (const width of [375, 1024]) {
       expectGroup('einsatz')
     })
 
+    it('lets content scroll behind the fixed pill while keeping the initial gap', () => {
+      let initialTop = 0
+      cy.get(toolbar).then($bar => { initialTop = $bar[0].getBoundingClientRect().top })
+      cy.get('[data-doku-group="einsatz"] > ion-card').should($card => {
+        const bar = $card[0].ownerDocument.querySelector('.block-toolbar')!.getBoundingClientRect()
+        expect($card[0].getBoundingClientRect().top - bar.bottom).to.be.closeTo(8, 1)
+      })
+      scrollContent().then($scroll => { $scroll[0].scrollTop = 40 })
+      cy.get(toolbar).should($bar => {
+        const bar = $bar[0].getBoundingClientRect()
+        const doc = $bar[0].ownerDocument
+        const card = doc.querySelector('[data-doku-group="einsatz"] > ion-card')!.getBoundingClientRect()
+        expect(bar.top).to.eq(initialTop)
+        expect(card.top).to.be.lessThan(bar.bottom)
+        expect(card.bottom).to.be.greaterThan(bar.bottom)
+        expect($bar[0].contains(doc.elementFromPoint(bar.left + bar.width / 2, bar.bottom - 4))).to.eq(true)
+      })
+      cy.screenshot(`block-toolbar-floating-${width}`, { capture: 'viewport' })
+    })
+
     it('tracks the largest visible block before its heading reaches the top in both directions', () => {
       // Place the EINSATZ/ABCDE boundary at known fractions of the real viewport.
       for (const [fraction, expected] of [[0.35, 'abcde'], [0.45, 'abcde'], [0.55, 'einsatz'], [0.65, 'einsatz']] as const) {
         scrollContent().then($scroll => {
           const element = $scroll[0]
           const section = element.ownerDocument.querySelector('[data-doku-group="abcde"]')!
-          element.scrollTop += section.getBoundingClientRect().top - element.getBoundingClientRect().top - element.clientHeight * fraction
+          const clearance = parseFloat(getComputedStyle(element).scrollPaddingTop)
+          element.scrollTop += section.getBoundingClientRect().top - element.getBoundingClientRect().top - clearance - (element.clientHeight - clearance) * fraction
         })
         expectGroup(expected)
         scrollContent().should($scroll => {
           const element = $scroll[0]
-          const viewportTop = element.getBoundingClientRect().top
+          const clearance = parseFloat(getComputedStyle(element).scrollPaddingTop)
+          const viewportTop = element.getBoundingClientRect().top + clearance
           const bounds = element.ownerDocument.querySelector('[data-doku-group="abcde"]')!.getBoundingClientRect()
-          expect(bounds.top - viewportTop).to.be.closeTo(element.clientHeight * fraction, 2)
-          expect(bounds.bottom).to.be.at.least(viewportTop + element.clientHeight)
+          expect(bounds.top - viewportTop).to.be.closeTo((element.clientHeight - clearance) * fraction, 2)
+          expect(bounds.bottom).to.be.at.least(viewportTop + element.clientHeight - clearance)
         })
       }
     })
