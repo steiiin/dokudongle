@@ -1,5 +1,5 @@
 <template>
-  <DodoContainerCard>
+  <div class="no-card">
     <ion-list>
 
       <ion-item lines="none" class="flavor-row"
@@ -46,7 +46,7 @@
       </ion-item>
 
     </ion-list>
-  </DodoContainerCard>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -84,6 +84,11 @@ const visibleFlavors = computed(() => {
 </script>
 
 <style scoped>
+.no-card {
+  padding-inline: 14px;
+  padding-bottom: 1rem;
+}
+
 ion-list { padding: 0 }
 
 .flavor-row {

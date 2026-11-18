@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     DodoBlockSourceShortcut: typeof import('./src/components/protocol/DodoBlockSourceShortcut.vue')['default']
+    DodoBlockToolbar: typeof import('./src/components/ui/DodoBlockToolbar.vue')['default']
     DodoContainerCard: typeof import('./src/components/ui/DodoContainerCard.vue')['default']
     DodoExaminationCard: typeof import('./src/components/examination/DodoExaminationCard.vue')['default']
     DodoExaminationItem: typeof import('./src/components/examination/DodoExaminationItem.vue')['default']
