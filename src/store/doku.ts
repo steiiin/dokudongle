@@ -17,7 +17,7 @@ import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intox
 import type { IntoxicationSubstance } from '@/types/blocks/intoxikation'
 import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
 import { createBauchschmerzBlockState } from '@/data/blocks/bauchschmerz'
-import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState, normalizeBowelBleeding } from '@/data/blocks/excretions'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState, normalizeBowelBleeding, normalizeUrinaryDetails } from '@/data/blocks/excretions'
 import { composeTextAreaText } from '@/types/blocks/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -334,6 +334,8 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   representation.setRestrictions(representation.advanceDirective.restrictions)
   hydratedProtocol.textAreaBlocks.excretions_bowel.details = normalizeBowelBleeding(
     hydratedProtocol.textAreaBlocks.excretions_bowel.details)
+  hydratedProtocol.textAreaBlocks.excretions_urinary.details = normalizeUrinaryDetails(
+    hydratedProtocol.textAreaBlocks.excretions_urinary.details)
   if (hydratedProtocol.textAreaBlocks.kopfschmerz.details.onset !== 'schlagartig') {
     hydratedProtocol.textAreaBlocks.kopfschmerz.details.peak = ''
   }
