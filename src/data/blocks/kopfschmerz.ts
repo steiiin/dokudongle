@@ -1,43 +1,78 @@
-import { AssessedValue } from '@/types/protocol/input'
 import { TextAreaBlock } from '@/types/blocks/text-area-block'
 import type { KopfschmerzBlockSourceState, KopfschmerzDetails } from '@/types/blocks/kopfschmerz'
 import { concatDoku, prefix } from '@/utils/text'
-import { prefixSeit } from '@/utils/prefix/general'
+import { severityOptions } from '@/data/blocks/bauchschmerz'
 
 export const locationOptions = ['Stirn', 'Schläfe', 'Hinterkopf', 'hinter dem Auge', 'gesamter Kopf'] as const
 export const WOUND_LOCATION = 'Im Wundbereich'
 export const qualityOptions = ['drückend', 'pulsierend–pochend', 'stechend'] as const
 export const provocationOptions = ['körperliche Belastung', 'Husten–Pressen', 'Lagewechsel'] as const
-export const accompanyingOptions = ['Übelkeit', 'Erbrechen', 'Lichtempfindlichkeit', 'Geräuschempfindlichkeit', 'Nackenschmerz'] as const
+export const progressionOptions = [
+  { value: 'zunehmend', label: 'Zunehmend' },
+  { value: 'gleichbleibend', label: 'Gleichbleibend' },
+  { value: 'abnehmend', label: 'Abnehmend' },
+] as const
+export const patternOptions = [
+  { value: 'anhaltend', label: 'Anhaltend' },
+  { value: 'attackenartig', label: 'Attackenartig' },
+] as const
+
+/** Übernimmt auch die früher gespeicherte numerische NRS in die gemeinsame Schmerzskala. */
+export function normalizeKopfschmerzSeverity(input: unknown): KopfschmerzDetails['severity'] {
+  if (typeof input === 'string') {
+    return severityOptions.some(option => option.value === input) ? input as KopfschmerzDetails['severity'] : ''
+  }
+  if (!input || typeof input !== 'object' || !('assessed' in input) || input.assessed !== true
+    || !('value' in input) || typeof input.value !== 'number'
+    || !Number.isInteger(input.value) || input.value < 0 || input.value > 10) return ''
+  const value = input.value
+  return value <= 1 ? 'minimal' : value <= 3 ? 'leicht' : value <= 6 ? 'mittel' : value <= 8 ? 'stark' : 'maximal'
+}
 
 export function createKopfschmerzBlockState(): KopfschmerzBlockSourceState {
   return {
     values: {},
     active: { 'kopfschmerz.symptoms': true },
     details: {
-      onspan: '', onset: '', peak: '', location: [], side: '', quality: [],
-      severity: AssessedValue.unassessed(0), progression: '', pattern: '',
-      provocation: [], accompanying: [],
+      onset: '', peak: '', location: [], side: '', quality: [],
+      severity: '', progression: '', pattern: '', provocation: [],
     },
   }
+}
+
+function joinWithAnd(values: string[]): string {
+  return values.length < 2 ? values[0] ?? '' : `${values.slice(0, -1).join(', ')} und ${values[values.length - 1]}`
+}
+
+function renderLocation(details: KopfschmerzDetails): string {
+  if (details.location.includes('gesamter Kopf')) return 'am gesamten Kopf'
+  const bilateral = details.side === 'beidseits'
+  const regions: [string, string, string][] = [
+    ['Stirn', 'an der', 'Stirn'],
+    ['Schläfe', bilateral ? 'an den' : 'an der', bilateral ? 'Schläfen' : 'Schläfe'],
+    ['Hinterkopf', 'am', 'Hinterkopf'],
+    ['hinter dem Auge', bilateral ? 'hinter den' : 'hinter dem', bilateral ? 'Augen' : 'Auge'],
+    [WOUND_LOCATION, 'im', 'Wundbereich'],
+  ]
+  const groups = new Map<string, string[]>()
+  for (const [location, prep, noun] of regions) {
+    if (details.location.includes(location)) groups.set(prep, [...(groups.get(prep) ?? []), noun])
+  }
+  const location = joinWithAnd([...groups].map(([prep, nouns]) => `${prep} ${joinWithAnd(nouns)}`))
+  return [details.side, location].filter(Boolean).join(' ')
 }
 
 export function renderKopfschmerzText(details: KopfschmerzDetails): string {
   const selected = (options: readonly string[], values: string[]) =>
     options.filter(option => values.includes(option)).join(', ')
-  const severity = details.severity
   return prefix('Kopfschmerzen:', concatDoku([
-    [prefixSeit(details.onspan), details.onset === 'schlagartig' ? 'schlagartiger Beginn'
-      : details.onset === 'allmählich' ? 'allmählicher Beginn' : ''],
+    details.onset === 'schlagartig' ? 'schlagartiger Beginn' : '',
     details.onset === 'schlagartig' && details.peak ? `Schmerzmaximum ${details.peak} erreicht` : '',
-    prefix('Lokalisation:', selected([...locationOptions, WOUND_LOCATION], details.location)),
-    details.side,
+    renderLocation(details),
     selected(qualityOptions, details.quality),
-    severity.isAssessed && Number.isInteger(severity.value) && severity.value >= 0 && severity.value <= 10
-      ? `NRS ${severity.value}/10` : '',
+    normalizeKopfschmerzSeverity(details.severity),
     [details.progression, details.pattern],
     prefix('Verstärkung/Auslösung:', selected(provocationOptions, details.provocation)),
-    prefix('Begleitsymptome:', selected(accompanyingOptions, details.accompanying)),
   ]))
 }
 

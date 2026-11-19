@@ -10,7 +10,7 @@ import { protocolValues } from '@/utils/protocol-values'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
-import { createKopfschmerzBlockState, WOUND_LOCATION } from '@/data/blocks/kopfschmerz'
+import { createKopfschmerzBlockState, normalizeKopfschmerzSeverity, WOUND_LOCATION } from '@/data/blocks/kopfschmerz'
 import { createSchwindelBlockState } from '@/data/blocks/schwindel'
 import { createSehenBlockState } from '@/data/blocks/sehen'
 import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intoxicationBasisOptions, renderIntoxicationSummary } from '@/data/blocks/intoxikation'
@@ -301,6 +301,22 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       },
     }
   }
+  // Die numerische Kopfschmerz-NRS vor der typgeprüften Hydrierung in Kategorien überführen.
+  const headacheSources = normalizedInput.textAreaBlocks
+  const headacheSource = isRecord(headacheSources) ? headacheSources.kopfschmerz : undefined
+  const savedHeadacheDetails = isRecord(headacheSource) ? headacheSource.details : undefined
+  if (isRecord(headacheSources) && isRecord(headacheSource) && isRecord(savedHeadacheDetails)) {
+    normalizedInput = {
+      ...normalizedInput,
+      textAreaBlocks: {
+        ...headacheSources,
+        kopfschmerz: {
+          ...headacheSource,
+          details: { ...savedHeadacheDetails, severity: normalizeKopfschmerzSeverity(savedHeadacheDetails.severity) },
+        },
+      },
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
   // Das alte Feld unterschied Vormund und Betreuer nicht. Die Originalangabe erhalten,
   // ohne daraus eine konkrete Vertretungsbefugnis abzuleiten oder neue Daten zu ersetzen.
@@ -336,8 +352,14 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
     hydratedProtocol.textAreaBlocks.excretions_bowel.details)
   hydratedProtocol.textAreaBlocks.excretions_urinary.details = normalizeUrinaryDetails(
     hydratedProtocol.textAreaBlocks.excretions_urinary.details)
-  if (hydratedProtocol.textAreaBlocks.kopfschmerz.details.onset !== 'schlagartig') {
-    hydratedProtocol.textAreaBlocks.kopfschmerz.details.peak = ''
+  if (headacheDetails.onset !== 'schlagartig') {
+    headacheDetails.peak = ''
+  } else if (!headacheDetails.peak) {
+    headacheDetails.peak = 'sofort'
+  }
+  if (headacheDetails.location.includes('gesamter Kopf')) {
+    headacheDetails.location = ['gesamter Kopf']
+    headacheDetails.side = ''
   }
   restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
 
