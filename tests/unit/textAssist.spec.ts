@@ -430,6 +430,38 @@ describe('text assist integration', () => {
     },
   )
 
+  test.each(['hausnitruf', 'Hausnitruf'])('corrects %s to Hausnotruf after a delimiter', async typed => {
+    for (const delimiter of [' ', '.', ',']) {
+      const input = change(`hausnotruf-${typed}-${delimiter}`, typed, typed + delimiter)
+      const update = await service.processInput(input)
+      expect(update.mutation).toMatchObject({ replacement: 'Hausnotruf' })
+      expect(applyMutation(input.after.text, update.mutation!)).toBe(`Hausnotruf${delimiter}`)
+      expect(await service.processAutomaticInput(input)).toMatchObject({ replacement: 'Hausnotruf' })
+    }
+    expect(service.autocorrect.isMedicalWord('Hausnotruf')).toBe(true)
+  })
+
+  test('rejects Hausmitruf and excludes it from spelling candidates', async () => {
+    for (const word of ['Hausmitruf', 'hausmitruf', 'HAUSMITRUF']) {
+      expect(await service.autocorrect.isCorrect(word), word).toBe(false)
+    }
+    for (const typed of ['hausnitruf', 'Hausnitruf']) {
+      const candidates = await service.autocorrect.getSpellingCandidates(typed, Number.POSITIVE_INFINITY)
+      expect(candidates.map(candidate => candidate.replacement)).toContain('Hausnotruf')
+      expect(candidates.map(candidate => candidate.replacement)).not.toContain('Hausmitruf')
+    }
+  })
+
+  test.each([
+    'Hausnotruf', 'Hausnotrufe', 'Hausnotrufen', 'Hausnotrufs', 'Hausnotrufes',
+    'Haus', 'mit', 'Ruf', 'Notruf',
+  ])('preserves valid word %s after excluding Hausmitruf', async word => {
+    expect(await service.autocorrect.isCorrect(word)).toBe(true)
+    const input = change(`hausnotruf-valid-${word}`, word, `${word} `)
+    expect((await service.processInput(input)).mutation).toBeUndefined()
+    expect(await service.processAutomaticInput(input)).toBeNull()
+  })
+
   test('preserves medical regression words and their plurals after rebuilding user words', async () => {
     await service.autocorrect.rebuildUserWords()
     for (const word of ['Schienung', 'Schienungen', 'Leberzirrhose', 'Leberzirrhosen']) {
