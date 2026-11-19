@@ -1,5 +1,5 @@
 <template>
-  <div  class="transmission" role="dialog" aria-modal="true" aria-labelledby="transmission-title">
+  <div v-if="store.isDongleTransmitting" class="transmission" role="dialog" aria-modal="true" aria-labelledby="transmission-title">
     <div class="transmission-content">
       <h2 id="transmission-title" aria-live="polite">{{ title }}</h2>
       <p v-if="store.connection.transmissionWaitingForDongle" role="status">
@@ -66,4 +66,3 @@ watch(() => store.connection.transmissionReconnectCount, () => {
   margin-top: 1rem;
 }
 </style>
-v-if="store.isDongleTransmitting"
