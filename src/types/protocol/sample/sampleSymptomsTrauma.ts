@@ -51,6 +51,15 @@ export class SstHead {
 
   // ##########################################################################
 
+  get isAmnesiaUnassessable(): boolean
+  {
+    const disability = useDokuStore().doku.xabcDe
+    return !getCtx().isPediatric
+      && disability.isExamined('zops')
+      && (disability.zops.Z === 'teilweise' || disability.zops.Z === 'nein'
+        || disability.zops.S === 'teilweise' || disability.zops.S === 'nein')
+  }
+
   get hasSHTIndicators(): boolean
   {
     return this.isInjured && (
@@ -59,6 +68,7 @@ export class SstHead {
       || getCtx().hasDizziness
       || (getCtx().isLowVigilant && !getCtx().isBaseline)
       || (getCtx().hasHeadache && this.headacheType == 'global')
+      || this.isAmnesiaUnassessable
       || this.Amnesia != ''
       || this.wasInitiallyUnconscious
       || this.Anisocoria != ''
@@ -96,7 +106,7 @@ export class SstHead {
           this.wasInitiallyUnconscious ? 'inital bewusstlos' :
           hasNewLowVigilance ? 'vigilanzgemindert' : ''
 
-        const _amnesia = this.Amnesia
+        const _amnesia = this.isAmnesiaUnassessable ? 'Amnesie nicht beurteilbar' : this.Amnesia
         ? {
             retrograd: 'retrograde Amnesie',
             anterograd: 'anterograde Amnesie',
@@ -115,7 +125,7 @@ export class SstHead {
 
         return PSV(
           concatDoku([_segments], false),
-          `${concatDoku([_segments], false)} - mgl. SHT`
+          `${concatDoku([_segments], false)}${this.isAmnesiaUnassessable ? ' – SHT mgl.' : ' - mgl. SHT'}`
         )
 
       }
@@ -148,7 +158,7 @@ export class SstHead {
   get headText(): string
   {
     const state = this.headPSV.protocolText
-    const line = (text: string) => `Kopf: ${text}.\n`
+    const line = (text: string) => `Kopf: ${text}${text.endsWith('.') ? '' : '.'}\n`
     return !state ? '' : line(state)
   }
 

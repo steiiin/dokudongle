@@ -1,5 +1,5 @@
 <template>
-  <div v-if="store.isDongleTransmitting" class="transmission" role="dialog" aria-modal="true" aria-labelledby="transmission-title">
+  <div  class="transmission" role="dialog" aria-modal="true" aria-labelledby="transmission-title">
     <div class="transmission-content">
       <h2 id="transmission-title" aria-live="polite">{{ title }}</h2>
       <p v-if="store.connection.transmissionWaitingForDongle" role="status">
@@ -57,10 +57,13 @@ watch(() => store.connection.transmissionReconnectCount, () => {
   width: min(100%, 30rem);
   padding: 1.5rem;
   border-radius: 1rem;
-  background: rgba(var(--ion-background-color-rgb), 70%);
   text-align: center;
+}
+.transmission-content > * {
+  filter: drop-shadow(0px 0px 6px black);
 }
 .transmission-actions {
   margin-top: 1rem;
 }
 </style>
+v-if="store.isDongleTransmitting"

@@ -19,7 +19,8 @@
               Initial Bewusstlos?
             </DodoInputToggle>
 
-            <DodoInputSelect v-model="store.doku.sampler.symptoms.trauma.head.Amnesia"
+            <DodoInputSelect v-if="!store.doku.sampler.symptoms.trauma.head.isAmnesiaUnassessable"
+              v-model="store.doku.sampler.symptoms.trauma.head.Amnesia"
               label="Amnesie" :lines="isSHTStateVisible ? (store.context.hasHeadache ? 'inset' : 'full') : 'none'"
               :options="[
                 { value: '', label: 'Keine/Unklar' },
