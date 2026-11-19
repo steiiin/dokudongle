@@ -13,6 +13,7 @@
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
     >
       <DongleSettingsCard />
+      <SeparatedOutputSettingsCard />
       <SpellcheckerSettingsCard />
       <ProtocolHistorySettingsCard />
     </IonContent>
@@ -23,6 +24,7 @@
 import ProtocolHistorySettingsCard from '@/views/settings/ProtocolHistorySettingsCard.vue'
 import SpellcheckerSettingsCard from '@/views/settings/SpellcheckerSettingsCard.vue'
 import DongleSettingsCard from '@/views/settings/DongleSettingsCard.vue'
+import SeparatedOutputSettingsCard from '@/views/settings/SeparatedOutputSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'
 
 const store = useDokuStore()

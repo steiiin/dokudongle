@@ -27,12 +27,27 @@
     @retry="retryCheck"
     @send-anyway="sendAnyway"
   />
+  <IonPopover ref="groupPopover" :is-open="isGroupPopoverOpen" :event="sendEvent" :dismiss-on-select="false"
+    aria-label="Getrennte Ausgabe" @didDismiss="dismissGroups">
+    <IonList class="group-list">
+      <IonListHeader>Getrennte Ausgabe</IonListHeader>
+      <IonItem v-for="group in pendingGroups" :key="group.id" button
+        :disabled="isSending || !group.text.trim() || !store.isDongleConnected || store.connection.isTransmitting"
+        :data-output-group="group.id" @click="sendGroup(group)"
+        :aria-label="`${group.name}: ${!group.text.trim() ? 'Kein Inhalt' : store.sentOutputGroupIds.includes(group.id) ? 'Gesendet' : 'Noch nicht gesendet'}`">
+        <IonIcon slot="start" :icon="store.sentOutputGroupIds.includes(group.id) ? checkmarkCircle : ellipseOutline"
+          :color="store.sentOutputGroupIds.includes(group.id) ? 'success' : 'medium'" />
+        <IonLabel class="ion-text-wrap">{{ group.name }}<p v-if="!group.text.trim()">Kein Inhalt</p></IonLabel>
+      </IonItem>
+      <IonItem v-if="groupSendError" lines="none"><IonLabel color="danger" class="ion-text-wrap" role="alert">{{ groupSendError }}</IonLabel></IonItem>
+    </IonList>
+  </IonPopover>
 </template>
 
 <script setup lang="ts">
 
 import { computed, ref, watch } from 'vue'
-import { paperPlaneSharp } from 'ionicons/icons'
+import { paperPlaneSharp, checkmarkCircle, ellipseOutline } from 'ionicons/icons'
 import { alertController } from '@ionic/core'
 import { Network } from '@capacitor/network'
 
@@ -40,6 +55,7 @@ import { tryScrollingToTop } from '@/utils/input'
 import protocolCheckService, { type ProtocolCheckResult } from '@/services/protocol-check'
 
 import { useDokuStore } from '@/store/doku'
+import type { OutputGroupText } from '@/utils/separated-output'
 
 withDefaults(defineProps<{
   showReset?: boolean
@@ -60,6 +76,13 @@ const checkError = ref(false)
 const checkErrorMessage = ref('')
 const pendingProtocolText = ref<string | null>(null)
 let pendingProtocol: typeof store.doku | null = null
+let pendingRevision: string | undefined
+let pendingSeparated = false
+const pendingGroups = ref<OutputGroupText[]>([])
+const isGroupPopoverOpen = ref(false)
+const groupPopover = ref<{ $el: HTMLIonPopoverElement }>()
+const sendEvent = ref<Event>()
+const groupSendError = ref('')
 
 const isAvailable = computed(() =>
   store.connection.isConnected
@@ -75,11 +98,16 @@ const CHECK_FAILED_MESSAGE = 'Das Protokoll konnte nicht geprüft werden. Prüfe
 const CHANGED_MESSAGE = 'Der Text wurde während der Prüfung geändert. Bitte prüfe die Vorschau und tippe erneut auf Senden.'
 
 const pendingChanged = () => pendingProtocol !== store.doku || pendingProtocolText.value !== store.effectiveProtocolText
-watch(() => [store.effectiveProtocolText, store.doku], () => {
+  || pendingRevision !== store.outputRevision
+watch(() => [store.effectiveProtocolText, store.doku, store.outputRevision], () => {
   if (!isProcessing.value || !pendingChanged()) return
   checkResult.value = null
   checkError.value = true
   checkErrorMessage.value = CHANGED_MESSAGE
+  if (isGroupPopoverOpen.value) {
+    resetCheckState()
+    void showChangedAlert()
+  }
 })
 
 const connectDongle = async () => {
@@ -147,6 +175,9 @@ const confirmMissingInputs = async (): Promise<boolean> => {
 }
 
 const resetCheckState = () => {
+  isGroupPopoverOpen.value = false
+  pendingGroups.value = []
+  groupSendError.value = ''
   isCheckModalOpen.value = false
   isChecking.value = false
   checkResult.value = null
@@ -154,12 +185,58 @@ const resetCheckState = () => {
   checkErrorMessage.value = ''
   pendingProtocolText.value = null
   pendingProtocol = null
+  pendingRevision = undefined
   isSending.value = false
   isProcessing.value = false
 }
 
+const showChangedAlert = async () => {
+  const alert = await alertController.create({ header: 'Protokoll geändert', message: CHANGED_MESSAGE, buttons: ['OK'] })
+  await alert.present()
+}
+
+const dismissGroups = () => {
+  // Programmatic dismissal for a transmission retains the checked session.
+  if (isGroupPopoverOpen.value) resetCheckState()
+}
+
+const sendGroup = async (group: OutputGroupText) => {
+  if (isSending.value || !group.text.trim() || !store.isDongleConnected || store.connection.isTransmitting) return
+  isSending.value = true
+  groupSendError.value = ''
+  try {
+    if (pendingChanged()) { await showChangedAlert(); resetCheckState(); return }
+    if (store.sentOutputGroupIds.includes(group.id)) {
+      const alert = await alertController.create({
+        header: 'Erneut senden?', message: 'Diese Gruppe wurde bereits gesendet.',
+        buttons: [{ text: 'Abbrechen', role: 'cancel' }, { text: 'Erneut senden', role: 'confirm' }],
+      })
+      await alert.present()
+      if ((await alert.onDidDismiss()).role !== 'confirm') return
+    }
+    isGroupPopoverOpen.value = false
+    await groupPopover.value?.$el.dismiss?.()
+    await tryScrollingToTop()
+    if (pendingChanged()) { await showChangedAlert(); resetCheckState(); return }
+    const sent = await store.sendProtocol(group.text, { markComplete: false, groupId: group.id, revision: pendingRevision })
+    if (!sent) groupSendError.value = 'Die Gruppe wurde nicht vollständig gesendet oder der Sendestatus konnte nicht gespeichert werden.'
+  } catch {
+    groupSendError.value = 'Die Gruppe konnte nicht gesendet werden. Bitte erneut versuchen.'
+  } finally {
+    isSending.value = false
+    if (isProcessing.value && !pendingChanged()) isGroupPopoverOpen.value = true
+    else resetCheckState()
+  }
+}
+
 const transmitProtocol = async () => {
   if (isSending.value) return
+
+  if (pendingSeparated && !pendingChanged()) {
+    isCheckModalOpen.value = false
+    isGroupPopoverOpen.value = true
+    return
+  }
 
   isSending.value = true
   isCheckModalOpen.value = false
@@ -234,12 +311,16 @@ const checkBeforeSend = async () => {
   }
 }
 
-const send = async () => {
+const send = async (event?: Event) => {
   if (!isAvailable.value) return
 
   isProcessing.value = true
   pendingProtocolText.value = store.effectiveProtocolText
   pendingProtocol = store.doku
+  pendingRevision = store.outputRevision
+  pendingSeparated = store.separatedOutputEnabled
+  pendingGroups.value = pendingSeparated ? store.outputGroups.map(group => ({ ...group, blocks: [...group.blocks] })) : []
+  sendEvent.value = event
 
   try {
     if (
@@ -258,7 +339,7 @@ const send = async () => {
 }
 
 const closeCheckModal = () => {
-  if (isChecking.value) return
+  if (isChecking.value || !isCheckModalOpen.value) return
   resetCheckState()
 }
 
@@ -276,4 +357,5 @@ const sendAnyway = async () => {
 ion-buttons {
   transform:none;
 }
+.group-list { padding-block: 0.5rem; }
 </style>
