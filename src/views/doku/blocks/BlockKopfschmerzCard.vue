@@ -5,32 +5,39 @@
     </template>
 
     <IonItemDivider><IonLabel>Beginn</IonLabel></IonItemDivider>
-    <DodoInputSelect label="Seit wann?" v-model="details.onspan" empty-label="Keine Angabe"
-      :options="['seit Stunden', 'seit Tagen', 'seit Wochen', 'seit Gestern']"
-      allow-custom custom-label="" custom-placeholder="z.B. heute früh" />
-    <DodoInputSelect label="Beginn" v-model="onset" empty-label="Keine Angabe"
-      :options="[{ value: 'schlagartig', label: 'Schlagartig' }, { value: 'allmählich', label: 'Allmählich' }]" />
-    <DodoInputSelect v-if="details.onset === 'schlagartig'" label="Schmerzmaximum erreicht"
-      v-model="details.peak" empty-label="Keine Angabe"
+    <DodoInputSelect label="Beginn" v-model="onset"
+      :options="[{ value: 'allmählich', label: 'Allmählich / k.A.' }, { value: 'schlagartig', label: 'Schlagartig' }]" />
+    <DodoInputSelect v-if="details.onset === 'schlagartig'" label="↳ Schmerzmaximum"
+      v-model="details.peak"
       :options="[
         { value: 'sofort', label: 'Sofort' },
-        { value: 'innerhalb von 5 Minuten', label: 'Innerhalb von 5 Minuten' },
-        { value: 'später', label: 'Später' },
+        { value: 'innerhalb von 5 Minuten', label: '<5min' },
+        { value: 'später', label: '>5min' },
       ]" />
 
     <IonItemDivider><IonLabel>Lokalisation</IonLabel></IonItemDivider>
+    <IonItem v-if="!wholeHead">
+      <div class="chip-container">
+        <DodoToggleChip v-if="details.side === 'beidseits'" color="success" :model-value="true"
+          @update:model-value="details.side = ''">Beidseits</DodoToggleChip>
+        <template v-else>
+          <DodoToggleChip color="warning" :model-value="details.side === 'links'"
+            @update:model-value="toggleSide('links', $event)">Links</DodoToggleChip>
+          <DodoToggleChip color="warning" :model-value="details.side === 'rechts'"
+            @update:model-value="toggleSide('rechts', $event)">Rechts</DodoToggleChip>
+        </template>
+      </div>
+    </IonItem>
     <IonItem>
       <div class="chip-container">
-        <DodoToggleChip v-for="entry in locationOptions" :key="entry" color="primary"
+        <DodoToggleChip v-for="entry in visibleLocations" :key="entry" color="primary"
           :model-value="details.location.includes(entry)"
-          @update:model-value="toggleLocation(entry, $event)">{{ entry }}</DodoToggleChip>
-        <DodoToggleChip v-if="store.context.isTrauma" color="warning"
+          @update:model-value="toggleLocation(entry, $event)">{{ entry === 'gesamter Kopf' ? 'Gesamter Kopf' : entry }}</DodoToggleChip>
+        <DodoToggleChip v-if="store.context.isTrauma && !wholeHead" color="warning"
           :model-value="details.location.includes(WOUND_LOCATION)"
           @update:model-value="toggleLocation(WOUND_LOCATION, $event)">{{ WOUND_LOCATION }}</DodoToggleChip>
       </div>
     </IonItem>
-    <DodoInputSelect label="Seite" v-model="details.side" empty-label="Keine Angabe"
-      :options="[{ value: 'links', label: 'Links' }, { value: 'rechts', label: 'Rechts' }, { value: 'beidseits', label: 'Beidseits' }]" />
 
     <IonItemDivider><IonLabel>Charakter</IonLabel></IonItemDivider>
     <IonItem>
@@ -42,16 +49,24 @@
     </IonItem>
 
     <IonItemDivider><IonLabel>Stärke</IonLabel></IonItemDivider>
-    <IonItem><DodoInputNumber label="NRS 0–10" v-model="details.severity" :min="0" :max="10" /></IonItem>
+    <DodoInputSelect label="Schmerzen" v-model="details.severity" empty-label="Keine Angabe"
+      :options="severityOptions" lines="none" />
 
     <IonItemDivider><IonLabel>Verlauf</IonLabel></IonItemDivider>
-    <DodoInputSelect label="Entwicklung" v-model="details.progression" empty-label="Keine Angabe"
-      :options="[
-        { value: 'zunehmend', label: 'Zunehmend' }, { value: 'gleichbleibend', label: 'Gleichbleibend' },
-        { value: 'abnehmend', label: 'Abnehmend' },
-      ]" />
-    <DodoInputSelect label="Zeitmuster" v-model="details.pattern" empty-label="Keine Angabe"
-      :options="[{ value: 'anhaltend', label: 'Anhaltend' }, { value: 'attackenartig', label: 'Attackenartig' }]" />
+    <IonItem>
+      <div class="chip-container">
+        <DodoToggleChip v-for="entry in visibleProgressions" :key="entry.value" color="primary"
+          :model-value="details.progression === entry.value"
+          @update:model-value="details.progression = $event ? entry.value : ''">{{ entry.label }}</DodoToggleChip>
+      </div>
+    </IonItem>
+    <IonItem>
+      <div class="chip-container">
+        <DodoToggleChip v-for="entry in visiblePatterns" :key="entry.value" color="success"
+          :model-value="details.pattern === entry.value"
+          @update:model-value="details.pattern = $event ? entry.value : ''">{{ entry.label }}</DodoToggleChip>
+      </div>
+    </IonItem>
 
     <IonItemDivider><IonLabel>Verstärkung / Auslösung</IonLabel></IonItemDivider>
     <IonItem>
@@ -62,43 +77,46 @@
       </div>
     </IonItem>
 
-    <IonItemDivider><IonLabel>Begleitsymptome</IonLabel></IonItemDivider>
-    <IonItem>
-      <div class="chip-container">
-        <DodoToggleChip v-for="entry in accompanyingOptions" :key="entry" color="primary"
-          :model-value="details.accompanying.includes(entry)"
-          @update:model-value="toggleSelection('accompanying', entry, $event)">{{ entry }}</DodoToggleChip>
-      </div>
-    </IonItem>
   </DodoItemModal>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useDokuStore } from '@/store/doku'
+import { severityOptions } from '@/data/blocks/bauchschmerz'
 import type { KopfschmerzDetails } from '@/types/blocks/kopfschmerz'
 import {
-  locationOptions, WOUND_LOCATION, qualityOptions, provocationOptions, accompanyingOptions, renderKopfschmerzText,
+  locationOptions, WOUND_LOCATION, qualityOptions, provocationOptions, progressionOptions, patternOptions, renderKopfschmerzText,
 } from '@/data/blocks/kopfschmerz'
 
 const store = useDokuStore()
 const details = computed(() => store.doku.textAreaBlocks.kopfschmerz.details)
 const hasDetails = computed(() => Boolean(renderKopfschmerzText(details.value).trim()))
 const onset = computed({
-  get: () => details.value.onset,
+  get: () => details.value.onset || 'allmählich',
   set: (value: KopfschmerzDetails['onset']) => {
     details.value.onset = value
-    if (value !== 'schlagartig') details.value.peak = ''
+    details.value.peak = value === 'schlagartig' ? 'sofort' : ''
   },
 })
 
-function toggleSelection(field: 'location' | 'quality' | 'provocation' | 'accompanying', label: string, enabled: boolean) {
+function toggleSelection(field: 'location' | 'quality' | 'provocation', label: string, enabled: boolean) {
   const values = details.value[field].filter(value => value !== label)
   details.value[field] = enabled ? [...values, label] : values
 }
 
+const wholeHead = computed(() => details.value.location.includes('gesamter Kopf'))
+const visibleLocations = computed(() => locationOptions.filter(location => !wholeHead.value || location === 'gesamter Kopf'))
+const visibleProgressions = computed(() => progressionOptions.filter(entry => !details.value.progression || entry.value === details.value.progression))
+const visiblePatterns = computed(() => patternOptions.filter(entry => !details.value.pattern || entry.value === details.value.pattern))
+
+function toggleSide(side: 'links' | 'rechts', enabled: boolean) {
+  details.value.side = !enabled ? '' : details.value.side && details.value.side !== side ? 'beidseits' : side
+}
+
 function toggleLocation(label: string, enabled: boolean) {
   if (enabled) {
+    if (label === 'gesamter Kopf') details.value.side = ''
     details.value.location = label === 'gesamter Kopf' || label === WOUND_LOCATION
       ? [] : details.value.location.filter(value => value !== 'gesamter Kopf' && value !== WOUND_LOCATION)
   }

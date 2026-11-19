@@ -5,7 +5,7 @@ import type {
   ExcretionsBowelsBlockSourceState, ExcretionsBowelsDetails,
   ExcretionsUrinaryBlockSourceState, ExcretionsUrinaryDetails,
 } from '@/types/blocks/excretions'
-import { concatDoku, prefix } from '@/utils/text'
+import { capitalizeBegin, concatDoku, prefix } from '@/utils/text'
 import { prefixVor } from '@/utils/prefix/general'
 
 interface ExcretionsOption {
@@ -15,13 +15,13 @@ interface ExcretionsOption {
 }
 
 export const bowelPatternOptions = [
-  { value: '', label: 'Nicht erfasst' },
+  { value: '', label: 'Normal / k.A.' },
   { value: 'Obstipation', label: 'Obstipation' },
   { value: 'Durchfall', label: 'Durchfall' },
 ]
 
 export const bowelConsistencyOptions = [
-  { value: '', label: 'Nicht erfasst' },
+  { value: '', label: 'Normal / k.A.' },
   { value: 'kügelchenförmig', label: 'Kügelchen' },
   { value: 'hartlaibig', label: 'Hart' },
   { value: 'geformt', label: 'Geformt' },
@@ -84,8 +84,8 @@ function renderBowelBleeding(details: ExcretionsBowelsDetails): string {
   const normalized = normalizeBowelBleeding(details)
   const { blood, bloodAmount, bloodColor } = normalized
   const locations = [
-    blood.includes('on_stool') ? 'auf Stuhl aufgelagert' : '',
-    blood.includes('mixed') ? 'mit Stuhl vermischt' : '',
+    blood.includes('on_stool') ? 'auf dem Stuhl aufgelagert' : '',
+    blood.includes('mixed') ? 'mit dem Stuhl vermischt' : '',
   ].filter(Boolean)
   const findings = [
     locations.length ? `Blut ${locations.join(' und ')}` : '',
@@ -125,7 +125,7 @@ export const hematuriaOptions = [
 export const urinaryOutputOptions: readonly ExcretionsOption[] = [
   { label: 'Verringert',   color: 'warning', value: 'verringerte Ausfuhr' },
   { label: 'Harnverhalt',  color: 'warning' },
-  { label: 'Harndrang',    color: 'success', value: 'ständinger Harndrang' },
+  { label: 'Harndrang',    color: 'success', value: 'ständiger Harndrang' },
   { label: 'Erschwert',    color: 'success', value: 'erschwert' },
 ]
 
@@ -163,25 +163,58 @@ export function createExcretionsUrinaryBlockState(): ExcretionsUrinaryBlockSourc
 }
 
 export function renderExcretionsBowelsText(details: ExcretionsBowelsDetails): string {
-  return prefix('Stuhlgang:', concatDoku([
-    [
-      details.pattern,
-      details.consistency,
-      details.mucus ? 'Schleimbeimengungen' : '',
-      details.lastBowel.isActive ? prefix('zuletzt', prefixVor(details.lastBowel.value)) : '',
-    ],
-    [renderBowelBleeding(details), details.bowelPain ? 'schmerzhafter Stuhlgang' : ''],
-    prefix('DG', details.bowelSounds),
+  const consistency = {
+    '': '',
+    'kügelchenförmig': 'kügelchenförmiger Stuhl',
+    'hartlaibig': 'harter Stuhl',
+    'geformt': 'geformter Stuhl',
+    'breiig': 'breiiger Stuhl',
+    'wässrig': 'wässriger Stuhl',
+  }[details.consistency]
+  const stool = details.mucus
+    ? (consistency ? `${consistency} mit Schleimbeimengungen` : 'Schleimbeimengungen im Stuhl')
+    : consistency
+  return capitalizeBegin(concatDoku([
+    [details.pattern, stool],
+    details.lastBowel.isActive ? prefix('letzter Stuhlgang', prefixVor(details.lastBowel.value)) : '',
+    renderBowelBleeding(details),
+    details.bowelPain ? 'schmerzhafter Stuhlgang' : '',
+    prefix('Darmgeräusche', details.bowelSounds),
   ]))
 }
 
-export function renderExcretionsUrinaryText(details: ExcretionsUrinaryDetails): string {
+export function normalizeUrinaryDetails(details: ExcretionsUrinaryDetails): ExcretionsUrinaryDetails {
+  const retention = details.output.includes('Harnverhalt')
+  const kidneyFindings = ['Nierenklopfschmerz', 'Nierenlager Frei']
+  const lastKidneyFinding = details.pain.filter(value => kidneyFindings.includes(value)).pop()
+  const output = retention
+    ? details.output.filter(value => value !== 'Verringert' && value !== 'Erschwert') : details.output
+  const pain = details.pain.filter(value => !kidneyFindings.includes(value) || value === lastKidneyFinding)
+  return {
+    ...details,
+    output: output.length === details.output.length ? details.output : output,
+    pain: pain.length === details.pain.length ? details.pain : pain,
+    hematuria: retention ? '' : details.hematuria,
+    anomalies: retention && details.anomalies.length ? [] : details.anomalies,
+  }
+}
+
+export function renderExcretionsUrinaryText(input: ExcretionsUrinaryDetails): string {
+  const details = normalizeUrinaryDetails(input)
   const selected = (options: readonly ExcretionsOption[], values: string[]) =>
     options.filter(entry => values.includes(entry.label)).map(entry => entry.value ?? entry.label).join(', ')
+  const hasOutput = (label: string) => details.output.includes(label)
+  const output = [
+    hasOutput('Harndrang') ? 'ständiger Harndrang' : '',
+    hasOutput('Harnverhalt') ? 'Harnverhalt' : '',
+    hasOutput('Erschwert') ? 'Wasserlassen erschwert' : '',
+    hasOutput('Verringert')
+      ? `${hasOutput('Harndrang') || hasOutput('Erschwert') ? '' : 'beim Wasserlassen '}verringerte Ausfuhr` : '',
+  ].filter(Boolean).join(', ')
   const anomalies = selected(urinaryAnomaliesOptions, details.anomalies)
-  return prefix('Wasserlassen:', concatDoku([
-    details.catheterIssues,
-    selected(urinaryOutputOptions, details.output),
+  return capitalizeBegin(concatDoku([
+    output,
+    prefix('Katheter', details.catheterIssues),
     selected(urinaryPainOptions, details.pain),
     anomalies ? `${anomalies} Urin` : '',
     details.hematuria,

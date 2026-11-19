@@ -147,6 +147,7 @@ export class ExposureAbdominal {
   get text(): string {
 
     const parts: string[] = []
+    let painText = ''
 
     // Abdomen iO
     if (this.guarding == ''
@@ -158,7 +159,12 @@ export class ExposureAbdominal {
     if (this.isExamined('pain'))
     {
       if (this.pain != 'keine') {
-        parts.push(`${this.pain} Schmerzen`)
+        const severity = useDokuStore().doku.textAreaBlocks.bauchschmerz.details.severity
+        const description = {
+          '': '', minimal: 'minimale', leicht: 'leichte', mittel: 'mittlere',
+          stark: 'starke', maximal: 'maximale',
+        }[severity]
+        painText = [description, 'Bauchschmerzen'].filter(Boolean).join(' ')
       } else {
         parts.push('schmerzfrei')
       }
@@ -180,7 +186,7 @@ export class ExposureAbdominal {
       parts.push(`DG ${this.peristalsis}`)
     }
 
-    return `Abdomen ${parts.map(e=>e.trim()).filter(e=>e).join('; ')}`
+    return [painText, `Abdomen ${parts.map(e=>e.trim()).filter(e=>e).join('; ')}`].filter(Boolean).join('; ')
 
   }
 

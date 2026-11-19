@@ -74,10 +74,6 @@ export const severityOptions = [
   { value: 'maximal', label: 'Maximal (9-10)' },
 ]
 
-const severityDescriptions = {
-  minimal: 'NRS 0-1', leicht: 'NRS 2-3', mittel: 'NRS 4-6', stark: 'NRS 7-8', maximal: 'NRS 9-10',
-}
-
 export function createBauchschmerzBlockState(): BauchschmerzBlockSourceState {
   return {
     values: {},
@@ -115,16 +111,25 @@ export function renderBauchschmerzRegion(region: BauchschmerzRegion): string {
 export function renderBauchschmerzText(details: BauchschmerzDetails): string {
   const selected = (options: readonly BauchschmerzOption[], values: string[]) =>
     options.filter(entry => values.includes(entry.label)).map(entry => entry.value ?? entry.label)
-  return prefix('Bauchschmerz:', concatDoku([
-    renderBauchschmerzRegion(details.region),
-    details.severity ? severityDescriptions[details.severity] : '',
+  const region = renderBauchschmerzRegion(details.region)
+  const quality = selected(qualityOptions, details.quality)
+  const radiation = selected(radiationOptions, details.radiation)
+  const text = concatDoku([
+    region,
     [prefixSeit(details.onspan), details.onset],
     modifiersText(details.provocation, provocationOptions, 'schlimmer'),
     modifiersText(details.palliation, palliationOptions, 'besser'),
-    selected(qualityOptions, details.quality),
-    prefix('strahlt aus in', joinWithAnd(selected(radiationOptions, details.radiation))),
+    quality,
+    prefix('strahlt aus in', joinWithAnd(radiation)),
     selected(timeOptions, details.time).join(', '),
-  ]))
+  ])
+
+  // Der Symptomblock muss auch getrennt vom E-Text verständlich sein. Eine
+  // Bauchlokalisation plus Schmerzqualität/Ausstrahlung trägt den Kontext;
+  // bloße Richtungen, Zeitangaben oder Verstärker/Verbesserer tun dies nicht.
+  const hasAbdominalLocation = /\b(?:OB|UB|Mittelbauch|Flanke)\b|Nabel|epigastr\./.test(region)
+  if (hasAbdominalLocation && (quality.length > 0 || radiation.length > 0)) return text
+  return prefix('Bauchschmerzen', text)
 }
 
 /** Nur strukturierte Angaben werden gespeichert; die Ausgabe wird beim Rendern berechnet. */

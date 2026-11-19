@@ -10,14 +10,14 @@ import { protocolValues } from '@/utils/protocol-values'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
-import { createKopfschmerzBlockState, WOUND_LOCATION } from '@/data/blocks/kopfschmerz'
+import { createKopfschmerzBlockState, normalizeKopfschmerzSeverity, WOUND_LOCATION } from '@/data/blocks/kopfschmerz'
 import { createSchwindelBlockState } from '@/data/blocks/schwindel'
 import { createSehenBlockState } from '@/data/blocks/sehen'
 import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intoxicationBasisOptions, renderIntoxicationSummary } from '@/data/blocks/intoxikation'
 import type { IntoxicationSubstance } from '@/types/blocks/intoxikation'
 import { createSchwangerschaftBlockState } from '@/data/blocks/schwangerschaft'
 import { createBauchschmerzBlockState } from '@/data/blocks/bauchschmerz'
-import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState, normalizeBowelBleeding } from '@/data/blocks/excretions'
+import { createExcretionsBowelsBlockState, createExcretionsUrinaryBlockState, normalizeBowelBleeding, normalizeUrinaryDetails } from '@/data/blocks/excretions'
 import { composeTextAreaText } from '@/types/blocks/text-area-block'
 import {
   DOKU_SCHEMA_VERSION,
@@ -301,6 +301,22 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
       },
     }
   }
+  // Die numerische Kopfschmerz-NRS vor der typgeprüften Hydrierung in Kategorien überführen.
+  const headacheSources = normalizedInput.textAreaBlocks
+  const headacheSource = isRecord(headacheSources) ? headacheSources.kopfschmerz : undefined
+  const savedHeadacheDetails = isRecord(headacheSource) ? headacheSource.details : undefined
+  if (isRecord(headacheSources) && isRecord(headacheSource) && isRecord(savedHeadacheDetails)) {
+    normalizedInput = {
+      ...normalizedInput,
+      textAreaBlocks: {
+        ...headacheSources,
+        kopfschmerz: {
+          ...headacheSource,
+          details: { ...savedHeadacheDetails, severity: normalizeKopfschmerzSeverity(savedHeadacheDetails.severity) },
+        },
+      },
+    }
+  }
   const hydratedProtocol = hydrateLikeTemplate(resetProtocol(), normalizedInput)
   // Das alte Feld unterschied Vormund und Betreuer nicht. Die Originalangabe erhalten,
   // ohne daraus eine konkrete Vertretungsbefugnis abzuleiten oder neue Daten zu ersetzen.
@@ -334,10 +350,29 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   representation.setRestrictions(representation.advanceDirective.restrictions)
   hydratedProtocol.textAreaBlocks.excretions_bowel.details = normalizeBowelBleeding(
     hydratedProtocol.textAreaBlocks.excretions_bowel.details)
-  if (hydratedProtocol.textAreaBlocks.kopfschmerz.details.onset !== 'schlagartig') {
-    hydratedProtocol.textAreaBlocks.kopfschmerz.details.peak = ''
+  hydratedProtocol.textAreaBlocks.excretions_urinary.details = normalizeUrinaryDetails(
+    hydratedProtocol.textAreaBlocks.excretions_urinary.details)
+  if (headacheDetails.onset !== 'schlagartig') {
+    headacheDetails.peak = ''
+  } else if (!headacheDetails.peak) {
+    headacheDetails.peak = 'sofort'
+  }
+  if (headacheDetails.location.includes('gesamter Kopf')) {
+    headacheDetails.location = ['gesamter Kopf']
+    headacheDetails.side = ''
   }
   restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
+
+  // Die frühere E-Auswahl in die gemeinsame Schmerzskala übernehmen. Danach ist
+  // pain nur noch der Schalter, damit gelöschte Severity nicht erneut migriert wird.
+  const abdominal = hydratedProtocol.xabcdE.abdominal.value
+  const abdominalDetails = hydratedProtocol.textAreaBlocks.bauchschmerz.details
+  if (abdominal.pain === 'leichte' || abdominal.pain === 'starke') {
+    if (!abdominalDetails.severity) {
+      abdominalDetails.severity = abdominal.pain === 'leichte' ? 'leicht' : 'stark'
+    }
+    abdominal.pain = ''
+  }
 
   if (legacyCourse === 1 || legacyCourse === 2) {
     hydratedProtocol.course = ProtocolCourse.TRANSPORT
@@ -1015,6 +1050,11 @@ export const useDokuStore = defineStore('doku', {
       this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
       this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
     },
+    setAbdominalPainEnabled(enabled: boolean) {
+      if (!enabled) this.resetAbdominal()
+      this.setAbdominalAssessed(true)
+      this.setAbdominalPain(enabled ? '' : 'keine')
+    },
     setAbdominalPain(value: ExposureAbdominal['pain'], assess = true) {
       if (assess) this.doku.xabcdE.abdominal.value.assessment.pain = 'active'
       this.doku.xabcdE.abdominal.value.pain = value
@@ -1024,6 +1064,7 @@ export const useDokuStore = defineStore('doku', {
     },
     setAbdominalAssessed(value: boolean) {
       this.doku.xabcdE.abdominal.assessed = value
+      if (!value) this.resetAbdominal()
       if (!this.doku.xabcdE.abdominal.isAssessed || this.doku.xabcdE.abdominal.value.pain === 'keine') {
         this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
       }

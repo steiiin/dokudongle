@@ -204,14 +204,15 @@ describe('individual nonverbal assessments', () => {
     expect(store.generatedProtocol).not.toContain('Nackensteife')
   })
 
-  test.each(['auto', 'active', 'inactive'] as const)('abdominal activation preserves %s pain assessment', async intent => {
+  test.each(['auto', 'active', 'inactive'] as const)('abdominal activation explicitly assesses previously %s pain', async intent => {
     const store = useDokuStore()
     store.doku.xabcdE.abdominal.value.assessment.pain = intent
     const wrapper = mount(AbcdeExposureCard, { global })
     await wrapper.get('[data-examination="abdominal"] .activate-examination').trigger('click')
-    expect(store.doku.xabcdE.abdominal.value.assessment.pain).toBe(intent)
+    expect(store.doku.xabcdE.abdominal.value.assessment.pain).toBe('active')
+    expect(store.context.hasAbdominalIssue).toBe(true)
     store.setFlavor('non_verbal', true)
-    expect(store.doku.xabcdE.abdominal.value.isExamined('pain')).toBe(intent === 'active')
+    expect(store.doku.xabcdE.abdominal.value.isExamined('pain')).toBe(true)
   })
 
   test.each([3, 35])('offers the appropriate orientation assessment at age %s', async age => {
@@ -227,7 +228,7 @@ describe('individual nonverbal assessments', () => {
     expect(store.generatedProtocol).toContain(age === 3 ? 'aufmerksam' : 'orientiert')
   })
 
-  test('shows symptoms in B/C/E and keeps abdominal pain independent of its parent', async () => {
+  test('explicitly activates and removes abdominal pain in nonverbal patients', async () => {
     const store = useDokuStore()
     store.setFlavor('non_verbal', true)
     const breathing = mount(AbcdeBreathingCard, { global })
@@ -237,16 +238,13 @@ describe('individual nonverbal assessments', () => {
     expect(circulation.get('[data-examination="chest"]').classes()).toContain('examination-inactive')
     expect(exposure.get('[data-examination="nausea"]').classes()).toContain('examination-inactive')
     await exposure.get('[data-examination="abdominal"] .activate-examination').trigger('click')
-    expect(exposure.get('[data-examination="pain"]').classes()).toContain('examination-inactive')
-    expect(store.generatedProtocol).toContain('Abdomen weich')
+    expect(store.generatedProtocol).toContain('Bauchschmerzen; Abdomen weich')
     expect(store.generatedProtocol).not.toMatch(/schmerzfrei|Wasserlassen|Stuhlgang/)
-    await exposure.get('[data-examination="pain"] .activate-examination').trigger('click')
-    expect(store.generatedProtocol).toContain('schmerzfrei')
-    store.setAbdominalPain('starke')
+    store.doku.textAreaBlocks.bauchschmerz.details.severity = 'stark'
     store.doku.textAreaBlocks.bauchschmerz.details.quality = ['stechend']
     expect(store.context.hasAbdominalIssue).toBe(true)
     expect(store.generatedProtocol).toContain('stechend')
-    await exposure.get('[data-examination="pain"] .remove-examination').trigger('click')
+    await exposure.get('[data-examination="abdominal"] .remove-examination').trigger('click')
     expect(store.context.hasAbdominalIssue).toBe(false)
     expect(store.generatedProtocol).not.toMatch(/stechend|schmerzfrei/)
     expect(store.doku.textAreaBlocks.bauchschmerz.details.quality).toEqual([])

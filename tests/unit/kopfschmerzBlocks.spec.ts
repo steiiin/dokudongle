@@ -6,7 +6,8 @@ import { createKopfschmerzBlockState, KopfschmerzTextAreaBlock, WOUND_LOCATION }
 import { AssessedValue } from '@/types/protocol/input'
 import { useDokuStore } from '@/store/doku'
 import { appendProtocolAuditEntry, loadDokuState, saveDokuState } from '@/store/persistence'
-import DodoInputNumber from '@/components/inputs/DodoInputNumber.vue'
+import { severityOptions } from '@/data/blocks/bauchschmerz'
+import type { KopfschmerzDetails } from '@/types/blocks/kopfschmerz'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
 import DodoInputToggle from '@/components/inputs/DodoInputToggle.vue'
 import DodoInputTextArea from '@/components/inputs/DodoInputTextArea.vue'
@@ -55,8 +56,6 @@ describe('Kopfschmerz text rendering', () => {
   test('starts empty and renders partial findings without inventing negative symptoms', () => {
     const state = createKopfschmerzBlockState()
     expect(rendered.render(state)).toBeNull()
-    state.details.onspan = '  '
-    expect(rendered.render(state)).toBeNull()
     state.details.quality = ['stechend']
     expect(rendered.render(state)).toMatchObject({
       id: blockId, sourceId: 'kopfschmerz', target, active: true, complete: true,
@@ -68,29 +67,46 @@ describe('Kopfschmerz text rendering', () => {
   test('renders all fields in stable order regardless of selection order', () => {
     const state = createKopfschmerzBlockState()
     Object.assign(state.details, {
-      onspan: '2 Stunden', onset: 'schlagartig', peak: 'innerhalb von 5 Minuten',
+      onset: 'schlagartig', peak: 'innerhalb von 5 Minuten',
       location: ['Schläfe', 'Stirn'], side: 'links', quality: ['pulsierend–pochend'],
-      severity: AssessedValue.assessed(7), progression: 'zunehmend', pattern: 'attackenartig',
-      provocation: ['körperliche Belastung'], accompanying: ['Lichtempfindlichkeit', 'Übelkeit'],
+      severity: 'stark', progression: 'zunehmend', pattern: 'attackenartig',
+      provocation: ['körperliche Belastung'],
     })
     expect(rendered.render(state)?.text).toBe(
-      'Kopfschmerzen: seit 2 Stunden, schlagartiger Beginn; Schmerzmaximum innerhalb von 5 Minuten erreicht; ' +
-      'Lokalisation: Stirn, Schläfe; links; pulsierend–pochend; NRS 7/10; zunehmend, attackenartig; ' +
-      'Verstärkung/Auslösung: körperliche Belastung; Begleitsymptome: Übelkeit, Lichtempfindlichkeit.',
+      'Kopfschmerzen: schlagartiger Beginn; Schmerzmaximum innerhalb von 5 Minuten erreicht; ' +
+      'links an der Stirn und Schläfe; pulsierend–pochend; stark; zunehmend, attackenartig; ' +
+      'Verstärkung/Auslösung: körperliche Belastung.',
     )
   })
 
-  test.each([0, 10])('distinguishes NRS %s from unassessed', value => {
+  test.each(['minimal', 'leicht', 'mittel', 'stark', 'maximal'] as const)('renders severity %s and distinguishes it from unassessed', value => {
     const state = createKopfschmerzBlockState()
-    state.details.severity = AssessedValue.assessed(value)
-    expect(rendered.render(state)?.text).toBe(`Kopfschmerzen: NRS ${value}/10.`)
-    state.details.severity = AssessedValue.unassessed(value)
+    state.details.severity = value
+    expect(rendered.render(state)?.text).toBe(`Kopfschmerzen: ${value}.`)
+    state.details.severity = ''
     expect(rendered.render(state)).toBeNull()
   })
 
-  test.each([-1, 11, 2.5, NaN])('does not render invalid NRS %s', value => {
+  test.each<[string[], KopfschmerzDetails['side'], string]>([
+    [['Stirn'], 'links', 'links an der Stirn'],
+    [['Schläfe', 'Stirn'], 'links', 'links an der Stirn und Schläfe'],
+    [['hinter dem Auge'], 'beidseits', 'beidseits hinter den Augen'],
+    [['Schläfe'], 'beidseits', 'beidseits an den Schläfen'],
+    [['hinter dem Auge'], 'rechts', 'rechts hinter dem Auge'],
+    [['Hinterkopf'], '', 'am Hinterkopf'],
+    [['Stirn', 'Hinterkopf'], '', 'an der Stirn und am Hinterkopf'],
+    [[], 'rechts', 'rechts'],
+    [[WOUND_LOCATION], '', 'im Wundbereich'],
+    [['gesamter Kopf', 'Stirn'], 'links', 'am gesamten Kopf'],
+  ])('connects locations %s and side %s', (location, side, expected) => {
     const state = createKopfschmerzBlockState()
-    state.details.severity = AssessedValue.assessed(value)
+    Object.assign(state.details, { location, side })
+    expect(rendered.render(state)?.text).toBe(`Kopfschmerzen: ${expected}.`)
+  })
+
+  test('ignores removed legacy fields even if supplied directly', () => {
+    const state = createKopfschmerzBlockState()
+    Object.assign(state.details, { onspan: '2 Stunden', accompanying: ['Übelkeit'] })
     expect(rendered.render(state)).toBeNull()
   })
 
@@ -99,29 +115,38 @@ describe('Kopfschmerz text rendering', () => {
     state.details.peak = peak
     expect(rendered.render(state)).toBeNull()
     state.details.onset = 'allmählich'
-    expect(rendered.render(state)?.text).toBe('Kopfschmerzen: allmählicher Beginn.')
+    expect(rendered.render(state)).toBeNull()
     state.details.onset = 'schlagartig'
     expect(rendered.render(state)?.text).toContain(`Schmerzmaximum ${peak} erreicht`)
   })
 })
 
 describe('Kopfschmerz form', () => {
-  test.each(['allmählich', ''] as const)('clears peak when onset changes to %s and never resurrects it', async nextOnset => {
+  test.each(['allmählich', ''] as const)('clears peak for onset %s and defaults to immediate on the next sudden onset', async nextOnset => {
     const store = useDokuStore()
     const form = shallowMount(BlockKopfschmerzCard, { global })
     const select = (label: string) => form.findAllComponents(DodoInputSelect).find(input => input.props('label') === label)
-    expect(select('Schmerzmaximum erreicht')).toBeUndefined()
+    expect(select('Beginn')!.props()).toMatchObject({
+      modelValue: 'allmählich',
+      options: [{ value: 'allmählich', label: 'Allmählich / k.A.' }, { value: 'schlagartig', label: 'Schlagartig' }],
+    })
+    expect(select('Beginn')!.props('emptyLabel')).toBeUndefined()
+    expect(select('↳ Schmerzmaximum')).toBeUndefined()
     select('Beginn')!.vm.$emit('update:modelValue', 'schlagartig')
     await nextTick()
-    select('Schmerzmaximum erreicht')!.vm.$emit('update:modelValue', 'sofort')
-    expect(store.doku.textAreaBlocks.kopfschmerz.details.peak).toBe('sofort')
+    expect(select('↳ Schmerzmaximum')!.props('modelValue')).toBe('sofort')
+    expect(select('↳ Schmerzmaximum')!.props('emptyLabel')).toBeUndefined()
+    select('↳ Schmerzmaximum')!.vm.$emit('update:modelValue', 'später')
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.peak).toBe('später')
     select('Beginn')!.vm.$emit('update:modelValue', nextOnset)
     await nextTick()
-    expect(select('Schmerzmaximum erreicht')).toBeUndefined()
+    expect(select('↳ Schmerzmaximum')).toBeUndefined()
     expect(store.doku.textAreaBlocks.kopfschmerz.details.peak).toBe('')
+    expect(select('Beginn')!.props('modelValue')).toBe('allmählich')
+    expect(rendered.render(store.doku.textAreaBlocks.kopfschmerz)).toBeNull()
     select('Beginn')!.vm.$emit('update:modelValue', 'schlagartig')
     await nextTick()
-    expect(select('Schmerzmaximum erreicht')!.props('modelValue')).toBe('')
+    expect(select('↳ Schmerzmaximum')!.props('modelValue')).toBe('sofort')
   })
 
   test('allows multiple regions, excludes whole head in both directions, and deselects chips', async () => {
@@ -135,8 +160,16 @@ describe('Kopfschmerz form', () => {
     await toggle('Stirn')
     await toggle('Schläfe')
     expect(details.location).toEqual(['Stirn', 'Schläfe'])
-    await toggle('gesamter Kopf')
+    await toggle('Links')
+    await toggle('Gesamter Kopf')
     expect(details.location).toEqual(['gesamter Kopf'])
+    expect(details.side).toBe('')
+    for (const label of ['Links', 'Rechts', 'Beidseits', 'Stirn', 'Schläfe', 'Hinterkopf', 'hinter dem Auge', WOUND_LOCATION]) {
+      expect(form.findAllComponents(DodoToggleChip).some(chip => chip.text() === label)).toBe(false)
+    }
+    await toggle('Gesamter Kopf', false)
+    expect(details.location).toEqual([])
+    expect(details.side).toBe('')
     await toggle('hinter dem Auge')
     expect(details.location).toEqual(['hinter dem Auge'])
     await toggle('hinter dem Auge', false)
@@ -144,13 +177,76 @@ describe('Kopfschmerz form', () => {
     await toggle('drückend')
     await toggle('Husten–Pressen')
     await toggle('Lagewechsel')
-    await toggle('Übelkeit')
-    await toggle('Nackenschmerz')
     expect(rendered.render(store.doku.textAreaBlocks.kopfschmerz)?.text).toBe(
-      'Kopfschmerzen: drückend, stechend; Verstärkung/Auslösung: Husten–Pressen, Lagewechsel; Begleitsymptome: Übelkeit, Nackenschmerz.',
+      'Kopfschmerzen: drückend, stechend; Verstärkung/Auslösung: Husten–Pressen, Lagewechsel.',
     )
-    for (const label of ['stechend', 'drückend', 'Husten–Pressen', 'Lagewechsel', 'Übelkeit', 'Nackenschmerz']) await toggle(label, false)
+    for (const label of ['stechend', 'drückend', 'Husten–Pressen', 'Lagewechsel']) await toggle(label, false)
     expect(form.getComponent(DodoItemModal).props('state')).toBe('Keine Angabe')
+  })
+
+  test.each(['Links', 'Rechts'])('combines side chips starting with %s and clears bilateral selection', async first => {
+    const store = useDokuStore()
+    const form = shallowMount(BlockKopfschmerzCard, { global })
+    const chip = (label: string) => form.findAllComponents(DodoToggleChip).find(item => item.text() === label)
+    const second = first === 'Links' ? 'Rechts' : 'Links'
+    expect(chip(first)!.props()).toMatchObject({ color: 'warning', modelValue: false })
+    chip(first)!.vm.$emit('update:modelValue', true)
+    await nextTick()
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.side).toBe(first.toLowerCase())
+    chip(first)!.vm.$emit('update:modelValue', false)
+    await nextTick()
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.side).toBe('')
+    chip(first)!.vm.$emit('update:modelValue', true)
+    chip(second)!.vm.$emit('update:modelValue', true)
+    await nextTick()
+    expect(chip(first)).toBeUndefined()
+    expect(chip(second)).toBeUndefined()
+    expect(chip('Beidseits')!.props()).toMatchObject({ color: 'success', modelValue: true })
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.side).toBe('beidseits')
+    chip('Beidseits')!.vm.$emit('update:modelValue', false)
+    await nextTick()
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.side).toBe('')
+    expect(chip('Beidseits')).toBeUndefined()
+    expect(chip(first)!.props('modelValue')).toBe(false)
+    expect(chip(second)!.props('modelValue')).toBe(false)
+  })
+
+  test('hides alternatives independently in each course group and allows clearing every choice', async () => {
+    const store = useDokuStore()
+    const form = shallowMount(BlockKopfschmerzCard, { global })
+    const chip = (label: string) => form.findAllComponents(DodoToggleChip).find(item => item.text() === label)
+    const details = store.doku.textAreaBlocks.kopfschmerz.details
+    for (const progression of ['Zunehmend', 'Gleichbleibend', 'Abnehmend']) {
+      expect(chip(progression)!.props('color')).toBe('primary')
+      chip(progression)!.vm.$emit('update:modelValue', true)
+      await nextTick()
+      for (const other of ['Zunehmend', 'Gleichbleibend', 'Abnehmend'].filter(value => value !== progression)) {
+        expect(chip(other)).toBeUndefined()
+      }
+      for (const pattern of ['Anhaltend', 'Attackenartig']) {
+        expect(chip(pattern)!.props('color')).toBe('success')
+        chip(pattern)!.vm.$emit('update:modelValue', true)
+        await nextTick()
+        expect(chip(pattern === 'Anhaltend' ? 'Attackenartig' : 'Anhaltend')).toBeUndefined()
+        expect(details.progression).toBe(progression.toLowerCase())
+        expect(details.pattern).toBe(pattern.toLowerCase())
+        chip(pattern)!.vm.$emit('update:modelValue', false)
+        await nextTick()
+        expect(details.pattern).toBe('')
+      }
+      chip(progression)!.vm.$emit('update:modelValue', false)
+      await nextTick()
+      expect(details.progression).toBe('')
+    }
+  })
+
+  test('removes time-span, side select and accompanying symptom guidance', () => {
+    const form = shallowMount(BlockKopfschmerzCard, { global })
+    const labels = form.findAllComponents(DodoInputSelect).map(select => select.props('label'))
+    expect(labels).toEqual(['Beginn', 'Schmerzen'])
+    for (const text of ['Seit wann?', 'Begleitsymptome', 'Übelkeit', 'Erbrechen', 'Lichtempfindlichkeit', 'Geräuschempfindlichkeit', 'Nackenschmerz']) {
+      expect(form.text()).not.toContain(text)
+    }
   })
 
   test('updates the output live while keeping manual text, undo and other findings independent', async () => {
@@ -163,28 +259,28 @@ describe('Kopfschmerz form', () => {
     const symptoms = shallowMount(SampleSymptomsCard, { global: { ...global, stubs: { BlockKopfschmerzCard: false } } })
     const form = symptoms.getComponent(BlockKopfschmerzCard)
     const editor = symptoms.getComponent(DodoInputTextArea)
-    const nrs = form.getComponent(DodoInputNumber)
-    expect(nrs.props()).toMatchObject({ min: 0, max: 10 })
-    nrs.vm.$emit('update:modelValue', AssessedValue.assessed(0))
+    const nrs = form.findAllComponents(DodoInputSelect).find(select => select.props('label') === 'Schmerzen')!
+    expect(nrs.props()).toMatchObject({ options: severityOptions, emptyLabel: 'Keine Angabe' })
+    nrs.vm.$emit('update:modelValue', 'minimal')
     await nextTick()
-    expect(editor.props('blocks')).toEqual([expect.objectContaining({ text: 'Kopfschmerzen: NRS 0/10.', active: true })])
-    expect(store.generatedProtocol).toContain('Kopfschmerzen: NRS 0/10.\nEigener Text')
+    expect(editor.props('blocks')).toEqual([expect.objectContaining({ text: 'Kopfschmerzen: minimal.', active: true })])
+    expect(store.generatedProtocol).toContain('Kopfschmerzen: minimal.\nEigener Text')
     editor.vm.$emit('activation-change', blockId, false)
     await nextTick()
     expect(store.generatedProtocol).not.toContain('Kopfschmerzen:')
-    nrs.vm.$emit('update:modelValue', AssessedValue.unassessed(0))
+    nrs.vm.$emit('update:modelValue', '')
     await nextTick()
     expect(store.textAreaBlocks).toEqual([])
     expect(form.getComponent(DodoItemModal).props('state')).toBe('Keine Angabe')
-    nrs.vm.$emit('update:modelValue', AssessedValue.assessed(10))
+    nrs.vm.$emit('update:modelValue', 'maximal')
     await nextTick()
-    expect(editor.props('blocks')?.[0]).toMatchObject({ active: false, text: 'Kopfschmerzen: NRS 10/10.' })
+    expect(editor.props('blocks')?.[0]).toMatchObject({ active: false, text: 'Kopfschmerzen: maximal.' })
     manual.undo()
     expect(manual.value).toBe('Vorher')
     expect(JSON.stringify([store.doku.xabcDe, store.doku.xabcdE, store.doku.sampler.symptoms.trauma])).toBe(findings)
     editor.vm.$emit('activation-change', blockId, true)
     await nextTick()
-    expect(store.generatedProtocol).toContain('Kopfschmerzen: NRS 10/10.\nVorher')
+    expect(store.generatedProtocol).toContain('Kopfschmerzen: maximal.\nVorher')
   })
 })
 
@@ -256,7 +352,7 @@ describe('Kopfschmerz source lifecycle', () => {
   test.each([true, false])('persists structured details and activation=%s and restores from history', async active => {
     const store = setup()
     Object.assign(store.doku.textAreaBlocks.kopfschmerz.details, {
-      onset: 'schlagartig', peak: 'sofort', severity: AssessedValue.assessed(0), location: ['Stirn', 'Schläfe'],
+      onset: 'schlagartig', peak: 'sofort', severity: 'minimal', location: ['Stirn', 'Schläfe'],
     })
     store.setTextAreaBlockActive(blockId, active)
     await store.persistToStorage()
@@ -267,7 +363,7 @@ describe('Kopfschmerz source lifecycle', () => {
     await restored.hydrateFromStorage()
     expect(restored.doku.textAreaBlocks.kopfschmerz).toEqual(store.doku.textAreaBlocks.kopfschmerz)
     const block = restored.textAreaBlocks[0]
-    expect(block).toMatchObject({ active, text: expect.stringContaining('NRS 0/10') })
+    expect(block).toMatchObject({ active, text: expect.stringContaining('minimal') })
     const form = shallowMount(BlockKopfschmerzCard, { global })
     expect(form.findAllComponents(DodoToggleChip).find(chip => chip.text() === 'Stirn')!.props('modelValue')).toBe(true)
     await restored.newProtocol()
@@ -295,6 +391,54 @@ describe('Kopfschmerz source lifecycle', () => {
       expect(store.doku.textAreaBlocks.kopfschmerz).toEqual(createKopfschmerzBlockState())
       expect(store.textAreaBlocks).toEqual([])
     } else expect(store.textAreaBlocks[0].text).not.toContain('Schmerzmaximum')
+  })
+
+  test.each([
+    [0, 'minimal'], [1, 'minimal'], [2, 'leicht'], [3, 'leicht'], [4, 'mittel'], [6, 'mittel'],
+    [7, 'stark'], [8, 'stark'], [9, 'maximal'], [10, 'maximal'], [-1, ''], [11, ''], [2.5, ''], [NaN, ''],
+  ])('migrates assessed NRS %s to %s before hydration', async (value, expected) => {
+    vi.mocked(loadDokuState).mockResolvedValue({ schemaVersion: 1, doku: {
+      xabcDe: { headache: true },
+      textAreaBlocks: { kopfschmerz: { details: { severity: AssessedValue.assessed(value) } } },
+    } })
+    const store = useDokuStore()
+    await store.hydrateFromStorage()
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.severity).toBe(expected)
+  })
+
+  test.each([AssessedValue.unassessed(0), AssessedValue.unassessed(10), null, 'invalid'])('leaves unassessed or invalid legacy severity %s empty', async severity => {
+    vi.mocked(loadDokuState).mockResolvedValue({ schemaVersion: 1, doku: {
+      xabcDe: { headache: true }, textAreaBlocks: { kopfschmerz: { details: { severity } } },
+    } })
+    const store = useDokuStore()
+    await store.hydrateFromStorage()
+    expect(store.doku.textAreaBlocks.kopfschmerz.details.severity).toBe('')
+    expect(store.textAreaBlocks).toEqual([])
+  })
+
+  test('discards removed fields and normalizes whole-head and sudden-onset legacy details through history', async () => {
+    vi.mocked(loadDokuState).mockResolvedValue({ schemaVersion: 1, doku: {
+      xabcDe: { headache: true },
+      sampler: { symptoms: { additionalSymptoms: { _text: 'Eigener Text' } } },
+      textAreaBlocks: { kopfschmerz: { active: { [blockId]: false }, details: {
+        onspan: '2 Stunden', accompanying: ['Übelkeit'], onset: 'schlagartig', peak: '',
+        side: 'links', location: ['Stirn', 'gesamter Kopf', WOUND_LOCATION], severity: AssessedValue.assessed(7),
+      } } },
+    } })
+    const store = useDokuStore()
+    await store.hydrateFromStorage()
+    const details = store.doku.textAreaBlocks.kopfschmerz.details
+    expect(details).toMatchObject({ side: '', location: ['gesamter Kopf'], peak: 'sofort', severity: 'stark' })
+    expect(details).not.toHaveProperty('onspan')
+    expect(details).not.toHaveProperty('accompanying')
+    expect(store.textAreaBlocks[0]).toMatchObject({ active: false,
+      text: 'Kopfschmerzen: schlagartiger Beginn; Schmerzmaximum sofort erreicht; am gesamten Kopf; stark.' })
+    expect(store.doku.sampler.symptoms.additionalSymptoms.value).toBe('Eigener Text')
+    await store.newProtocol()
+    expect(await store.restoreProtocolFromHistory(store.protocolHistory[0].id)).toBe(true)
+    expect(store.doku.textAreaBlocks.kopfschmerz.details).toEqual(details)
+    expect(store.textAreaBlocks[0].active).toBe(false)
+    expect(store.doku.sampler.symptoms.additionalSymptoms.value).toBe('Eigener Text')
   })
 
   test('loads legacy protocols with empty new state and keeps existing prose exactly once', async () => {
@@ -339,16 +483,21 @@ describe('wound-localized headache and SHT', () => {
     chip(WOUND_LOCATION)!.vm.$emit('update:modelValue', true)
     await nextTick()
     expect(store.doku.textAreaBlocks.kopfschmerz.details.location).toEqual([WOUND_LOCATION])
-    expect(store.textAreaBlocks[0].text).toContain('Lokalisation: Im Wundbereich')
+    expect(store.textAreaBlocks[0].text).toContain('im Wundbereich')
     expect(headState()).toBe('SHT unwahrscheinlich')
     // Deactivating the generated sentence must not change the clinical finding.
     store.setTextAreaBlockActive(blockId, false)
     expect(store.doku.sampler.symptoms.trauma.head.hasWoundOnlyHeadache).toBe(true)
     for (const location of ['gesamter Kopf', 'Schläfe']) {
-      chip(location)!.vm.$emit('update:modelValue', true)
+      chip(location === 'gesamter Kopf' ? 'Gesamter Kopf' : location)!.vm.$emit('update:modelValue', true)
       await nextTick()
       expect(store.doku.textAreaBlocks.kopfschmerz.details.location).toEqual([location])
       expect(headState()).toBe('SHT möglich')
+      if (location === 'gesamter Kopf') {
+        expect(chip(WOUND_LOCATION)).toBeUndefined()
+        chip('Gesamter Kopf')!.vm.$emit('update:modelValue', false)
+        await nextTick()
+      }
       chip(WOUND_LOCATION)!.vm.$emit('update:modelValue', true)
       await nextTick()
       expect(store.doku.textAreaBlocks.kopfschmerz.details.location).toEqual([WOUND_LOCATION])

@@ -29,6 +29,26 @@
     </IonItem>
 
     <ion-item-divider>
+      <ion-label>Befunde</ion-label>
+    </ion-item-divider>
+
+    <DodoInputSelect v-model="store.doku.xabcdE.abdominal.value.guarding"
+      label="Abwehrspannung" lines="inset"
+      :options="[
+        { value: '', label: 'Keine' },
+        { value: 'leichte', label: 'Leicht' },
+        { value: 'starke', label: 'Stark' },
+      ]" />
+    <DodoInputSelect v-model="store.doku.xabcdE.abdominal.value.peristalsis"
+      label="Peristaltik" lines="none"
+      :options="[
+        { value: '', label: 'Unauffällig' },
+        { value: 'spärlich', label: 'Vermindert' },
+        { value: 'fehlend', label: 'Fehlend' },
+        { value: 'hochgestellt', label: 'Hochgestellt' },
+      ]" />
+
+    <ion-item-divider>
       <ion-label><b>O</b>nset</ion-label>
     </ion-item-divider>
     <DodoInputSelect label="Beginn" v-model="details.onset"
@@ -126,7 +146,10 @@ import {
 
 const store = useDokuStore()
 const details = computed(() => store.doku.textAreaBlocks.bauchschmerz.details)
-const hasDetails = computed(() => Boolean(renderBauchschmerzText(details.value).trim()))
+const hasDetails = computed(() => Boolean(
+  renderBauchschmerzText(details.value).trim() || details.value.severity
+  || store.doku.xabcdE.abdominal.value.guarding || store.doku.xabcdE.abdominal.value.peristalsis,
+))
 
 function toggleSelection(field: 'provocation' | 'palliation' | 'quality' | 'radiation' | 'time', label: string, enabled: boolean) {
   const values = details.value[field].filter(value => value !== label)
