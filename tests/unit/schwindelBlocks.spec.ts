@@ -49,7 +49,7 @@ describe('Schwindel text rendering', () => {
     expect(rendered.render(state)).toBeNull()
     state.details.quality = ['Drehschwindel']
     expect(rendered.render(state)).toMatchObject({
-      id: blockId, target, complete: true, active: true, text: 'Schwindel: Drehschwindel.',
+      id: blockId, target, complete: true, active: true, text: 'Drehschwindel.',
     })
     state.details.quality = []
     expect(rendered.render(state)).toBeNull()
@@ -57,7 +57,17 @@ describe('Schwindel text rendering', () => {
     expect(rendered.render(state)).toBeNull()
   })
 
-  test('preserves OPQRST ordering, preposition groups, and original wording', () => {
+  test.each([
+    [['Schwankschwindel'], 'Schwankschwindel.'],
+    [['Liftgefühl'], 'Schwindel: Liftgefühl.'],
+    [['Liftgefühl', 'Schwankschwindel'], 'Schwankschwindel und Liftgefühl.'],
+  ] as const)('uses a context prefix only when needed for %j', (qualities, expected) => {
+    const state = createSchwindelBlockState()
+    state.details.quality = [...qualities]
+    expect(rendered.render(state)?.text).toBe(expected)
+  })
+
+  test('renders a complete block in option order with natural wording and punctuation', () => {
     const state = createSchwindelBlockState()
     Object.assign(state.details, {
       onset: 'plötzlicher Beginn', onspan: 'heute früh',
@@ -68,27 +78,79 @@ describe('Schwindel text rendering', () => {
       time: ['Erstmalig', 'Zunehmend'],
     })
     expect(rendered.render(state)?.text).toBe(
-      'Schwindel: Drehschwindel, Schwankschwindel; Intensität mittel, unsicher beim Gehen; ' +
-      'heute früh, plötzlicher Beginn; bei Kopfbewegung, körperl. Belastung & beim Aufstehen schlimmer; ' +
-      'beim ruhig liegen, Augen schließen & bei Fixieren eines Punkts besser; ' +
-      'zusätzlich Ohrgeräusche, Hörminderung & Nystagmus; erstmalig, stetig zunehmend.',
+      'Mittelstarker Drehschwindel und mittelstarker Schwankschwindel mit Gangunsicherheit; ' +
+      'heute früh, plötzlicher Beginn; Verstärkung bei Kopfbewegung, beim Aufstehen und bei körperlicher Belastung; ' +
+      'Besserung in ruhiger Liegeposition und beim Schließen der Augen und Fixieren eines Punkts; ' +
+      'zusätzlich Ohrgeräusche, Hörminderung und Nystagmus; erstmalig, stetig zunehmend.',
     )
-    state.details.provocation = ['Kopfbewegung', 'Lagewechsel']
-    state.details.palliation = ['Ruhe', 'Augen zu']
-    expect(rendered.render(state)?.text).toContain('bei Kopfbewegung & Lagewechsel schlimmer')
-    expect(rendered.render(state)?.text).toContain('beim ruhig liegen & Augen schließen besser')
+    expect(rendered.render(state)?.text).not.toContain('&')
+  })
+
+  describe.each([
+    ['minimal', 'minimaler', 'minimales', ', kaum beeinträchtigt'],
+    ['leicht', 'leichter', 'leichtes', ', gehfähig'],
+    ['mittel', 'mittelstarker', 'mittelstarkes', ' mit Gangunsicherheit'],
+    ['stark', 'starker', 'starkes', ', nur mit Hilfe gehfähig'],
+    ['maximal', 'maximal ausgeprägter', 'maximal ausgeprägtes', ', nicht steh- oder gehfähig'],
+  ] as const)('severity %s', (severity, masculine, neuter, description) => {
+    test.each(['Drehschwindel', 'Schwankschwindel', 'Liftgefühl', ''])('agrees with quality "%s"', quality => {
+      const state = createSchwindelBlockState()
+      state.details.severity = severity
+      state.details.quality = quality ? [quality] : []
+      const adjective = quality === 'Liftgefühl' ? neuter : masculine
+      const beginning = quality === 'Liftgefühl'
+        ? `Schwindel: ${adjective}`
+        : adjective[0].toUpperCase() + adjective.slice(1)
+      expect(rendered.render(state)?.text).toBe(`${beginning} ${quality || 'Schwindel'}${description}.`)
+    })
+  })
+
+  test('combines multiple qualities with mixed genders and one functional description', () => {
+    const state = createSchwindelBlockState()
+    state.details.quality = ['Liftgefühl', 'Schwankschwindel', 'Drehschwindel']
+    state.details.severity = 'mittel'
+    expect(rendered.render(state)?.text).toBe(
+      'Mittelstarker Drehschwindel, mittelstarker Schwankschwindel und mittelstarkes Liftgefühl mit Gangunsicherheit.',
+    )
+    state.details.severity = ''
+    expect(rendered.render(state)?.text).toBe('Drehschwindel, Schwankschwindel und Liftgefühl.')
+    state.details.quality = []
+    expect(rendered.render(state)).toBeNull()
   })
 
   test.each([
-    ['minimal', 'minimal, kaum beeinträchtigt'],
-    ['leicht', 'leicht, gehfähig'],
-    ['mittel', 'mittel, unsicher beim Gehen'],
-    ['stark', 'stark, nur mit Hilfe gehfähig'],
-    ['maximal', 'maximal, nicht steh-/gehfähig'],
-  ] as const)('formats severity %s without requiring other fields', (severity, description) => {
+    ['provocation', ['Kopfbewegung'], 'Verstärkung bei Kopfbewegung'],
+    ['provocation', ['Lagewechsel'], 'Verstärkung bei Lagewechsel'],
+    ['provocation', ['Aufstehen'], 'Verstärkung beim Aufstehen'],
+    ['provocation', ['Gehen'], 'Verstärkung beim Gehen'],
+    ['provocation', ['Belastung'], 'Verstärkung bei körperlicher Belastung'],
+    ['provocation', ['Lagewechsel', 'Kopfbewegung'], 'Verstärkung bei Kopfbewegung und Lagewechsel'],
+    ['provocation', ['Gehen', 'Aufstehen'], 'Verstärkung beim Aufstehen und Gehen'],
+    ['provocation', ['Aufstehen', 'Kopfbewegung'], 'Verstärkung bei Kopfbewegung und beim Aufstehen'],
+    ['provocation', ['Belastung', 'Gehen', 'Aufstehen', 'Lagewechsel', 'Kopfbewegung'],
+      'Verstärkung bei Kopfbewegung und Lagewechsel, beim Aufstehen und Gehen und bei körperlicher Belastung'],
+    ['palliation', ['Ruhe'], 'Besserung in ruhiger Liegeposition'],
+    ['palliation', ['Augen zu'], 'Besserung beim Schließen der Augen'],
+    ['palliation', ['Punkt fixieren'], 'Besserung beim Fixieren eines Punkts'],
+    ['palliation', ['Punkt fixieren', 'Augen zu'], 'Besserung beim Schließen der Augen und Fixieren eines Punkts'],
+    ['palliation', ['Augen zu', 'Ruhe'], 'Besserung in ruhiger Liegeposition und beim Schließen der Augen'],
+  ] as const)('renders %s selection %j as a standalone partial finding', (field, selection, expected) => {
     const state = createSchwindelBlockState()
-    state.details.severity = severity
-    expect(rendered.render(state)?.text).toBe(`Schwindel: Intensität ${description}.`)
+    state.details[field] = [...selection]
+    expect(rendered.render(state)?.text).toBe(`Schwindel: ${expected}.`)
+    state.details[field] = []
+    expect(rendered.render(state)).toBeNull()
+  })
+
+  test.each([
+    [['Ohrgeräusche'], 'Ohrgeräusche'],
+    [['Hörminderung', 'Ohrgeräusche'], 'Ohrgeräusche und Hörminderung'],
+    [['Nystagmus', 'Druck im Ohr', 'Hörminderung', 'Ohrgeräusche'],
+      'Ohrgeräusche, Hörminderung, Druck im Ohr und Nystagmus'],
+  ] as const)('renders accompanying symptoms %j without requiring quality or severity', (selection, expected) => {
+    const state = createSchwindelBlockState()
+    state.details.radiation = [...selection]
+    expect(rendered.render(state)?.text).toBe(`Schwindel: zusätzlich ${expected}.`)
   })
 
   test.each([
@@ -126,14 +188,14 @@ describe('Schwindel source lifecycle', () => {
     const quality = () => modal.findAllComponents(DodoToggleChip).find(chip => chip.text() === 'Drehschwindel')!
     quality().vm.$emit('update:modelValue', true)
     await nextTick()
-    const expected = 'Schwindel: Drehschwindel; Intensität leicht, gehfähig; seit 2 Stunden, schleichender Beginn.'
+    const expected = 'Leichter Drehschwindel, gehfähig; seit 2 Stunden, schleichender Beginn.'
     expect(modal.props('state')).toBe('')
     expect(editor.props('blocks')?.[0].text).toBe(expected)
     expect(store.generatedProtocol).toContain(`${expected}\nEigener Text`)
     expect(manual.value).toBe('Eigener Text')
     editor.vm.$emit('activation-change', blockId, false)
     await nextTick()
-    expect(store.generatedProtocol).not.toContain('Schwindel:')
+    expect(store.generatedProtocol).not.toContain(expected)
     expect(editor.props('blocks')?.[0].active).toBe(false)
     quality().vm.$emit('update:modelValue', false)
     await nextTick()
@@ -144,7 +206,7 @@ describe('Schwindel source lifecycle', () => {
     expect(store.textAreaBlocks[0].active).toBe(false)
     editor.vm.$emit('activation-change', blockId, true)
     await nextTick()
-    expect(store.generatedProtocol).toContain('Schwindel: Intensität leicht, gehfähig; seit 2 Stunden, schleichender Beginn.')
+    expect(store.generatedProtocol).toContain('Leichter Schwindel, gehfähig; seit 2 Stunden, schleichender Beginn.')
     await modal.getComponent(IonButton).trigger('click')
     expect(overlay.props('isOpen')).toBe(false)
     expect(modal.props('state')).toBe('')
@@ -177,7 +239,7 @@ describe('Schwindel source lifecycle', () => {
     store.setFlavor('verlegung', true)
     store.setFlavor('einweisung', true)
     store.setDizziness('gerichteter')
-    expect(store.textAreaBlocks).toEqual([expect.objectContaining({ active: false, text: 'Schwindel: Drehschwindel.' })])
+    expect(store.textAreaBlocks).toEqual([expect.objectContaining({ active: false, text: 'Drehschwindel.' })])
   })
 
   test('retains activation and restores the empty indicator when all details are temporarily cleared', async () => {
@@ -199,6 +261,8 @@ describe('Schwindel source lifecycle', () => {
 
   test('persists structured details and activation, and restores chip selections on remount', async () => {
     const store = setup()
+    store.doku.textAreaBlocks.schwindel.details.severity = 'mittel'
+    store.doku.textAreaBlocks.schwindel.details.palliation = ['Ruhe', 'Augen zu']
     store.setTextAreaBlockActive(blockId, false)
     await store.persistToStorage()
     const saved = vi.mocked(saveDokuState).mock.lastCall![0]
@@ -207,11 +271,16 @@ describe('Schwindel source lifecycle', () => {
     const restored = useDokuStore()
     await restored.hydrateFromStorage()
     expect(restored.doku.textAreaBlocks.schwindel).toEqual(store.doku.textAreaBlocks.schwindel)
-    expect(restored.textAreaBlocks[0]).toMatchObject({ active: false, text: 'Schwindel: Drehschwindel.' })
+    expect(restored.textAreaBlocks[0]).toMatchObject({
+      active: false,
+      text: 'Mittelstarker Drehschwindel mit Gangunsicherheit; Besserung in ruhiger Liegeposition und beim Schließen der Augen.',
+    })
     const symptoms = shallowMount(BlockSchwindelCard, { global: { renderStubDefaultSlot: true } })
     const modal = symptoms.getComponent(DodoItemModal)
     expect(modal.props('state')).toBe('')
     expect(modal.findAllComponents(DodoToggleChip).find(chip => chip.text() === 'Drehschwindel')?.props('modelValue')).toBe(true)
+    expect(modal.findAllComponents(DodoToggleChip).find(chip => chip.text() === 'Ruhe')?.props('modelValue')).toBe(true)
+    expect(modal.findAllComponents(DodoToggleChip).find(chip => chip.text() === 'Augen zu')?.props('modelValue')).toBe(true)
   })
 
   test.each([true, false])('reset audits active=%s output, clears state, and history restores it', async active => {
@@ -219,12 +288,12 @@ describe('Schwindel source lifecycle', () => {
     store.setTextAreaBlockActive(blockId, active)
     await store.newProtocol()
     expect(appendProtocolAuditEntry).toHaveBeenCalledWith(expect.objectContaining({
-      [target]: active ? 'Schwindel: Drehschwindel.\nEigener Text' : 'Eigener Text',
+      [target]: active ? 'Drehschwindel.\nEigener Text' : 'Eigener Text',
     }))
     expect(store.doku.textAreaBlocks.schwindel).toEqual(createSchwindelBlockState())
     expect(store.textAreaBlocks).toEqual([])
     expect(await store.restoreProtocolFromHistory(store.protocolHistory[0].id)).toBe(true)
-    expect(store.textAreaBlocks[0]).toMatchObject({ active, text: 'Schwindel: Drehschwindel.' })
+    expect(store.textAreaBlocks[0]).toMatchObject({ active, text: 'Drehschwindel.' })
   })
 
   test('hydration clears persisted details when directed dizziness is not selected', async () => {
@@ -242,7 +311,7 @@ describe('Schwindel source lifecycle', () => {
   })
 
   test('legacy inserted sentences remain manual without producing a duplicate block', async () => {
-    const text = 'Schwindel: Drehschwindel.'
+    const text = 'Schwindel: Drehschwindel; Intensität mittel, unsicher beim Gehen; beim ruhig liegen & Augen schließen besser.'
     vi.mocked(loadDokuState).mockResolvedValue({ schemaVersion: 1, doku: {
       xabcDe: { dizziness: 'gerichteter' },
       sampler: { symptoms: { additionalSymptoms: { _text: text } } },

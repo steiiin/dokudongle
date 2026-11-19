@@ -1,6 +1,6 @@
 import { TextAreaBlock } from '@/types/blocks/text-area-block'
 import type { SchwindelBlockSourceState, SchwindelDetails } from '@/types/blocks/schwindel'
-import { concatDoku, prefix } from '@/utils/text'
+import { capitalizeBegin, concatDoku, prefix } from '@/utils/text'
 import { prefixSeit } from '@/utils/prefix/general'
 
 interface SchwindelOption {
@@ -15,13 +15,13 @@ export const provocationOptions: readonly SchwindelOption[] = [
   { label: 'Lagewechsel',   color: 'primary', prep: 'bei' },
   { label: 'Aufstehen',     color: 'primary', prep: 'beim' },
   { label: 'Gehen',         color: 'success', prep: 'beim' },
-  { label: 'Belastung',     value: 'körperl. Belastung', prep: 'bei', color: 'success' },
+  { label: 'Belastung',     value: 'körperlicher Belastung', prep: 'bei', color: 'success' },
 ]
 
 export const palliationOptions: readonly SchwindelOption[] = [
-  { label: 'Ruhe',           value: 'ruhig liegen', color: 'primary', prep: 'beim' },
-  { label: 'Augen zu',       value: 'Augen schließen', color: 'primary', prep: 'beim' },
-  { label: 'Punkt fixieren', value: 'Fixieren eines Punkts', color: 'primary', prep: 'bei' },
+  { label: 'Ruhe',           value: 'ruhiger Liegeposition', color: 'primary', prep: 'in' },
+  { label: 'Augen zu',       value: 'Schließen der Augen', color: 'primary', prep: 'beim' },
+  { label: 'Punkt fixieren', value: 'Fixieren eines Punkts', color: 'primary', prep: 'beim' },
 ]
 
 export const qualityOptions: readonly SchwindelOption[] = [
@@ -54,11 +54,11 @@ export const severityOptions = [
 ]
 
 const severityDescriptions = {
-  minimal: 'minimal, kaum beeinträchtigt',
-  leicht: 'leicht, gehfähig',
-  mittel: 'mittel, unsicher beim Gehen',
-  stark: 'stark, nur mit Hilfe gehfähig',
-  maximal: 'maximal, nicht steh-/gehfähig',
+  minimal: { adjective: 'minimal', description: ', kaum beeinträchtigt' },
+  leicht: { adjective: 'leicht', description: ', gehfähig' },
+  mittel: { adjective: 'mittelstark', description: ' mit Gangunsicherheit' },
+  stark: { adjective: 'stark', description: ', nur mit Hilfe gehfähig' },
+  maximal: { adjective: 'maximal ausgeprägt', description: ', nicht steh- oder gehfähig' },
 }
 
 export function createSchwindelBlockState(): SchwindelBlockSourceState {
@@ -74,34 +74,44 @@ export function createSchwindelBlockState(): SchwindelBlockSourceState {
 
 function joinWithAnd(values: string[]): string {
   if (values.length <= 1) return values[0] ?? ''
-  return `${values.slice(0, -1).join(', ')} & ${values[values.length - 1]}`
+  return `${values.slice(0, -1).join(', ')} und ${values[values.length - 1]}`
 }
 
-function modifiersText(selected: string[], options: readonly SchwindelOption[], suffix: string): string {
-  const groups: Record<string, string[]> = {}
+function modifiersText(selected: string[], options: readonly SchwindelOption[], heading: string): string {
+  const groups: { prep: string; values: string[] }[] = []
   for (const entry of options.filter(entry => selected.includes(entry.label))) {
     if (!entry.prep) continue
-    ;(groups[entry.prep] ??= []).push(entry.value ?? entry.label)
+    const previous = groups[groups.length - 1]
+    // Nur benachbarte Präpositionen bündeln, damit die Optionsreihenfolge erhalten bleibt.
+    if (previous?.prep === entry.prep) previous.values.push(entry.value ?? entry.label)
+    else groups.push({ prep: entry.prep, values: [entry.value ?? entry.label] })
   }
-  const singlePrep = Object.keys(groups).length <= 1
-  const segments = Object.entries(groups).map(([prep, values]) =>
-    `${prep} ${singlePrep ? joinWithAnd(values) : values.join(', ')}`)
-  return segments.length ? `${segments.join(' & ')} ${suffix}` : ''
+  return prefix(heading, joinWithAnd(groups.map(({ prep, values }) => `${prep} ${joinWithAnd(values)}`)))
+}
+
+function qualityText(qualities: string[], severity: SchwindelDetails['severity']): string {
+  if (!severity) return joinWithAnd(qualities)
+  const { adjective, description } = severityDescriptions[severity]
+  const nouns = qualities.length ? qualities : ['Schwindel']
+  return joinWithAnd(nouns.map(noun => `${adjective}${noun === 'Liftgefühl' ? 'es' : 'er'} ${noun}`)) + description
 }
 
 export function renderSchwindelText(details: SchwindelDetails): string {
   const selected = (options: readonly SchwindelOption[], values: string[]) =>
     options.filter(entry => values.includes(entry.label)).map(entry => entry.value ?? entry.label)
-  const severity = details.severity ? severityDescriptions[details.severity] : ''
-  return prefix('Schwindel:', concatDoku([
-    selected(qualityOptions, details.quality),
-    severity ? `Intensität ${severity}` : '',
+  const quality = qualityText(selected(qualityOptions, details.quality), details.severity)
+  const text = concatDoku([
+    quality,
     [prefixSeit(details.onspan), details.onset],
-    modifiersText(details.provocation, provocationOptions, 'schlimmer'),
-    modifiersText(details.palliation, palliationOptions, 'besser'),
+    modifiersText(details.provocation, provocationOptions, 'Verstärkung'),
+    modifiersText(details.palliation, palliationOptions, 'Besserung'),
     prefix('zusätzlich', joinWithAnd(selected(radiationOptions, details.radiation))),
     selected(timeOptions, details.time).join(', '),
-  ]))
+  ])
+  // Nur die strukturierte Symptomangabe liefert verlässlich den Kontext.
+  return /\b(?:Dreh|Schwank)?schwindel\b/i.test(quality)
+    ? capitalizeBegin(text)
+    : prefix('Schwindel:', text)
 }
 
 /** Berechnet den Vorlagenwert beim Rendern; nur die strukturierten Angaben werden gespeichert. */
