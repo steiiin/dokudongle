@@ -1,4 +1,6 @@
 import type { UnwrapRef } from 'vue'
+import type { KopfschmerzBlockSourceState } from '@/types/blocks/kopfschmerz'
+import { createKopfschmerzBlockState, KopfschmerzTextAreaBlock } from '@/data/blocks/kopfschmerz'
 import type { IntoxicationBlockSourceState } from '@/types/blocks/intoxikation'
 import { createIntoxicationBlockState, IntoxicationTextAreaBlock } from '@/data/blocks/intoxikation'
 import type { Protocol } from '@/types/protocol'
@@ -18,6 +20,7 @@ import {
 } from '@/data/blocks/excretions'
 
 export type TextAreaBlockState = Record<string, TextAreaBlockSourceState> & {
+  kopfschmerz: KopfschmerzBlockSourceState
   intoxikation: IntoxicationBlockSourceState
   schwangerschaft: SchwangerschaftBlockSourceState
   schwindel: SchwindelBlockSourceState
@@ -59,6 +62,12 @@ export const TEXT_AREA_BLOCK_SOURCES: readonly TextAreaBlockSource[] = [
     isAvailable: protocol => protocol.flavors.einweisung,
     outputs: [new TextAreaBlock('einweisung.situation', 'einweisung', 'situation',
       'Einweisung <ARZT> nach <ZIEL> wg. <KRANKHEIT>.\n', einweisungFields, false, 'tertiary')],
+  },
+  {
+    id: 'kopfschmerz', fields: [],
+    isAvailable: protocol => assessmentActive(protocol.xabcDe.assessment.headache, protocol) && protocol.xabcDe.headache,
+    createState: createKopfschmerzBlockState,
+    outputs: [new KopfschmerzTextAreaBlock()],
   },
   {
     id: 'schwindel', fields: [],

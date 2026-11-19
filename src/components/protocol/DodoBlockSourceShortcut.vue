@@ -19,12 +19,14 @@ import { TEXT_AREA_BLOCK_SOURCES } from '@/data/blocks/text-area-blocks'
 import { useDokuStore } from '@/store/doku'
 import BlockSchwangerschaftCard from '@/views/doku/blocks/BlockSchwangerschaftCard.vue'
 import BlockSchwindelCard from '@/views/doku/blocks/BlockSchwindelCard.vue'
+import BlockKopfschmerzCard from '@/views/doku/blocks/BlockKopfschmerzCard.vue'
 import BlockSehenCard from '@/views/doku/blocks/BlockSehenCard.vue'
 import BlockExcretionsBowelsCard from '@/views/doku/blocks/BlockExcretionsBowelsCard.vue'
 import BlockExcretionsUrinaryCard from '@/views/doku/blocks/BlockExcretionsUrinaryCard.vue'
 import BlockBauchschmerzCard from '@/views/doku/blocks/BlockBauchschmerzCard.vue'
 
 const forms = {
+  kopfschmerz: { component: BlockKopfschmerzCard, label: 'Kopfschmerzen' },
   schwangerschaft: { component: BlockSchwangerschaftCard, label: 'Schwangerschaft' },
   schwindel: { component: BlockSchwindelCard, label: 'Schwindel' },
   sehen: { component: BlockSehenCard, label: 'Sehstörungen' },

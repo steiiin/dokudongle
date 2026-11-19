@@ -10,6 +10,7 @@ const pressKey = (key: 'Enter' | ' ') => cy.then(() => Cypress.automation('remot
 }))
 
 const cases = [
+  { source: 'kopfschmerz', title: 'Kopfschmerzen', input: 'Beginn', choice: 'Schlagartig', parent: '', section: 'disability' },
   { source: 'schwangerschaft', title: 'Schwangerschaft', input: 'Mehrlingsstatus', choice: 'Zwillinge', parent: '', section: 'exposure' },
   { source: 'schwindel', title: 'Schwindel', input: 'Beginn', choice: 'Plötzlich', parent: '', section: 'disability' },
   { source: 'excretions_bowel', title: 'Stuhlgang', input: 'Frequenz', choice: 'Durchfall', parent: 'Ausscheidung', section: 'exposure' },

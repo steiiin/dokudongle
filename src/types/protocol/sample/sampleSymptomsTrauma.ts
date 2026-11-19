@@ -1,6 +1,7 @@
 import { onHigh, onNormal } from "@/utils/filter"
 import { concatDoku } from "@/utils/text"
 import { ProtocolStateValue, PSV, SIV, StateItemValue } from "../input"
+import { WOUND_LOCATION } from '@/data/blocks/kopfschmerz'
 
 import { useDokuStore } from "@/store/doku"
 function getCtx() { return useDokuStore().context }
@@ -34,7 +35,6 @@ export class SstHead {
 
   public isInjured: boolean
   public wasInitiallyUnconscious: boolean
-  public headacheType: 'global' | 'local'
   public Amnesia: '' | 'retrograd' | 'anterograd' | 'beides'
   public Anisocoria: '' | 'li_gt_re' | 're_gt_li'
 
@@ -44,7 +44,6 @@ export class SstHead {
   {
     this.isInjured = false
     this.wasInitiallyUnconscious = false
-    this.headacheType = 'global'
     this.Amnesia = ''
     this.Anisocoria = ''
   }
@@ -60,6 +59,14 @@ export class SstHead {
         || disability.zops.S === 'teilweise' || disability.zops.S === 'nein')
   }
 
+  get hasWoundOnlyHeadache(): boolean
+  {
+    const store = useDokuStore()
+    const locations = store.doku.textAreaBlocks.kopfschmerz.details.location
+    return store.context.isTrauma && store.context.hasHeadache
+      && locations.length === 1 && locations[0] === WOUND_LOCATION
+  }
+
   get hasSHTIndicators(): boolean
   {
     return this.isInjured && (
@@ -67,7 +74,7 @@ export class SstHead {
       || getCtx().hasEmesis
       || getCtx().hasDizziness
       || (getCtx().isLowVigilant && !getCtx().isBaseline)
-      || (getCtx().hasHeadache && this.headacheType == 'global')
+      || (getCtx().hasHeadache && !this.hasWoundOnlyHeadache)
       || this.isAmnesiaUnassessable
       || this.Amnesia != ''
       || this.wasInitiallyUnconscious
@@ -88,7 +95,7 @@ export class SstHead {
       if (this.hasSHTIndicators)
       {
 
-        const isHeadacheGlobal = hasHeadache && this.headacheType === 'global'
+        const hasNonWoundHeadache = hasHeadache && !this.hasWoundOnlyHeadache
         const hasNausea = getCtx().hasNausea
         const hasEmesis = getCtx().hasEmesis
         const hasDizziness = getCtx().hasDizziness
@@ -98,8 +105,8 @@ export class SstHead {
           hasNausea ? 'Übelkeit' :
           hasEmesis ? 'Erbrechen' : ''
 
-        const _headache = isHeadacheGlobal && hasDizziness ? 'Kopfschmerzen/Schwindel' :
-          isHeadacheGlobal ? 'Kopfschmerzen' :
+        const _headache = hasNonWoundHeadache && hasDizziness ? 'Kopfschmerzen/Schwindel' :
+          hasNonWoundHeadache ? 'Kopfschmerzen' :
           hasDizziness ? 'Schwindel' : ''
 
         const _vigilance = this.wasInitiallyUnconscious && hasNewLowVigilance ? 'inital bewusstlos, weiterhin vigilanzgemindert' :

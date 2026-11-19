@@ -2,6 +2,8 @@
 
     <hr v-if="ctx.isTrauma">
 
+    <BlockKopfschmerzCard v-if="ctx.requireSampleSymptoms && ctx.hasHeadache" />
+
     <BlockSehenCard v-if="ctx.requireSampleSymptoms && store.doku.xabcDe.vision.matches(true)" />
 
     <BlockSchwindelCard
@@ -33,6 +35,7 @@ import { computed } from 'vue'
 import { useDokuStore } from '@/store/doku'
 import { QU_SYM_OPQRST } from '@/data/quickies'
 import BlockSchwindelCard from '../blocks/BlockSchwindelCard.vue'
+import BlockKopfschmerzCard from '../blocks/BlockKopfschmerzCard.vue'
 import BlockSehenCard from '../blocks/BlockSehenCard.vue'
 import BlockExcretionsBowelsCard from '../blocks/BlockExcretionsBowelsCard.vue'
 import BlockExcretionsUrinaryCard from '../blocks/BlockExcretionsUrinaryCard.vue'

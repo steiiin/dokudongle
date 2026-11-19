@@ -21,7 +21,7 @@
 
             <DodoInputSelect v-if="!store.doku.sampler.symptoms.trauma.head.isAmnesiaUnassessable"
               v-model="store.doku.sampler.symptoms.trauma.head.Amnesia"
-              label="Amnesie" :lines="isSHTStateVisible ? (store.context.hasHeadache ? 'inset' : 'full') : 'none'"
+              label="Amnesie" :lines="isSHTStateVisible ? 'full' : 'none'"
               :options="[
                 { value: '', label: 'Keine/Unklar' },
                 { value: 'retrograd', label: 'Retrograd' },
@@ -29,19 +29,6 @@
                 { value: 'beides', label: 'Beides' },
               ]">
             </DodoInputSelect>
-
-            <template v-if="ctx.hasHeadache">
-
-              <DodoInputSelect v-if="!ctx.isNonVerbal"
-                v-model="store.doku.sampler.symptoms.trauma.head.headacheType"
-                label="Kopfschmerzen" lines="inset"
-                :options="[
-                  { value: 'global', label: 'Ganzer Kopf' },
-                  { value: 'local', label: 'Im Bereich der Wunde' },
-                ]">
-              </DodoInputSelect>
-
-            </template>
 
             <DodoInputSelect v-if="ctx.isNonVerbal"
               v-model="store.doku.sampler.symptoms.trauma.head.Anisocoria"

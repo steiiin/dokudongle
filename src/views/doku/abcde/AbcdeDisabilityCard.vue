@@ -148,10 +148,11 @@
     <DodoExaminationItem id="headache" label="Kopfschmerzen" show-line="full"
       :removable="store.context.isNonVerbal"
       :assessed="store.doku.xabcDe.isExamined('headache')"
-      @update:assessed="store.doku.xabcDe.assessment.headache = $event ? 'active' : 'inactive'"
-      @select="store.doku.xabcDe.headache = true" @remove="store.doku.xabcDe.headache = false">
-      <DodoInputToggle lines="none" v-model="store.doku.xabcDe.headache" @update:model-value="store.doku.xabcDe.assessment.headache = 'active'">
+      @update:assessed="store.setHeadacheAssessed($event)"
+      @select="store.setHeadache(true)" @remove="store.setHeadache(false, false)">
+      <DodoInputToggle lines="none" :model-value="store.doku.xabcDe.headache" @update:model-value="store.setHeadache($event)">
         Kopfschmerzen?
+        <template #label-end><DodoBlockSourceShortcut source="kopfschmerz" /></template>
       </DodoInputToggle>
     </DodoExaminationItem>
 

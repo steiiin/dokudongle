@@ -29,6 +29,7 @@ createApp(defineComponent({
     const store = useDokuStore()
     store.doku.ident.age.timespan = 35
     if (params.has('shortcuts')) {
+      store.setHeadache(true)
       store.setPregnancyAssessed(true)
       store.setDizziness('gerichteter')
       store.setExcretionsAssessed(true)
@@ -41,6 +42,11 @@ createApp(defineComponent({
     const exposure = params.has('exposure')
     if (params.has('nonverbal')) {
       store.doku.flavors.non_verbal = true
+    }
+    if (params.has('trauma')) {
+      store.setFlavor('trauma', true)
+      store.setDizziness('kein')
+      store.doku.sampler.symptoms.trauma.head.isInjured = true
     }
     const modalAssessed = ref(false)
     const selectAssessed = ref(false)

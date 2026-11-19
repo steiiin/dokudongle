@@ -17,6 +17,9 @@ const global = {
 }
 
 const cases = [
+  { source: 'kopfschmerz', label: 'Kopfschmerzen', input: 'Beginn', value: 'schlagartig', field: 'onset',
+    activate: (store: ReturnType<typeof useDokuStore>) => store.setHeadache(true),
+    deactivate: (store: ReturnType<typeof useDokuStore>) => store.setHeadache(false) },
   { source: 'sehen', label: 'Sehstörungen', input: 'Sehverlust', value: 'rechts', field: 'visionLoss',
     activate: (store: ReturnType<typeof useDokuStore>) => store.setVisionSymptoms(true),
     deactivate: (store: ReturnType<typeof useDokuStore>) => store.setVisionSymptoms(false) },

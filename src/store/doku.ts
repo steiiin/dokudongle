@@ -10,6 +10,7 @@ import { protocolValues } from '@/utils/protocol-values'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
+import { createKopfschmerzBlockState, WOUND_LOCATION } from '@/data/blocks/kopfschmerz'
 import { createSchwindelBlockState } from '@/data/blocks/schwindel'
 import { createSehenBlockState } from '@/data/blocks/sehen'
 import { createIntoxicationBlockState, createIntoxicationSubstanceDetails, intoxicationBasisOptions, renderIntoxicationSummary } from '@/data/blocks/intoxikation'
@@ -304,6 +305,17 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   // Das alte Feld unterschied Vormund und Betreuer nicht. Die Originalangabe erhalten,
   // ohne daraus eine konkrete Vertretungsbefugnis abzuleiten oder neue Daten zu ersetzen.
   const samplerInput = isRecord(normalizedInput.sampler) ? normalizedInput.sampler : {}
+  // Die bisherige SHT-Auswahl in die gemeinsame Kopfschmerz-Lokalisation übernehmen.
+  const symptomsInput = isRecord(samplerInput.symptoms) ? samplerInput.symptoms : {}
+  const traumaInput = isRecord(symptomsInput.trauma) ? symptomsInput.trauma : {}
+  const headInput = isRecord(traumaInput.head) ? traumaInput.head : {}
+  const headacheDetails = hydratedProtocol.textAreaBlocks.kopfschmerz.details
+  if (hydratedProtocol.flavors.trauma && headInput.headacheType === 'local' && headacheDetails.location.length === 0) {
+    headacheDetails.location = [WOUND_LOCATION]
+  }
+  if (!hydratedProtocol.flavors.trauma) {
+    headacheDetails.location = headacheDetails.location.filter(location => location !== WOUND_LOCATION)
+  }
   const redflagsInput = isRecord(normalizedInput.redflags) ? normalizedInput.redflags : {}
   const legacyAttendant = redflagsInput.attendant
   if (samplerInput.representation === undefined && isRecord(legacyAttendant)
@@ -322,6 +334,9 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   representation.setRestrictions(representation.advanceDirective.restrictions)
   hydratedProtocol.textAreaBlocks.excretions_bowel.details = normalizeBowelBleeding(
     hydratedProtocol.textAreaBlocks.excretions_bowel.details)
+  if (hydratedProtocol.textAreaBlocks.kopfschmerz.details.onset !== 'schlagartig') {
+    hydratedProtocol.textAreaBlocks.kopfschmerz.details.peak = ''
+  }
   restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
 
   if (legacyCourse === 1 || legacyCourse === 2) {
@@ -940,6 +955,15 @@ export const useDokuStore = defineStore('doku', {
       if (option.value !== 'suspected') substance.reasons = []
       if (option.value !== 'confirmed') substance.amount = ''
     },
+    setHeadache(value: boolean, assess = true) {
+      if (assess) this.doku.xabcDe.assessment.headache = 'active'
+      this.doku.xabcDe.headache = value
+      if (!value) this.doku.textAreaBlocks.kopfschmerz = createKopfschmerzBlockState()
+    },
+    setHeadacheAssessed(value: boolean) {
+      this.doku.xabcDe.assessment.headache = value ? 'active' : 'inactive'
+      if (!value) this.setHeadache(false, false)
+    },
     setDizziness(value: Protocol['xabcDe']['dizziness'], assess = true) {
       if (assess) this.doku.xabcDe.assessment.dizziness = 'active'
       this.doku.xabcDe.dizziness = value
@@ -1015,6 +1039,11 @@ export const useDokuStore = defineStore('doku', {
         this.doku.flavors[key] = enabled
       }
 
+      if (key === 'trauma' && !enabled) {
+        const details = this.doku.textAreaBlocks.kopfschmerz.details
+        details.location = details.location.filter(location => location !== WOUND_LOCATION)
+      }
+
       if (enabled && (key === 'no_emergency_call' || key === 'verlegung' || key === 'einweisung')) {
         this.doku.flavors.no_emergency_call = key === 'no_emergency_call'
         this.doku.flavors.verlegung = key === 'verlegung'
@@ -1044,6 +1073,7 @@ export const useDokuStore = defineStore('doku', {
       this.doku.xaBcde = emptyProtocol.xaBcde
       this.doku.xabCde = emptyProtocol.xabCde
       this.doku.xabcDe = emptyProtocol.xabcDe
+      this.doku.textAreaBlocks.kopfschmerz = emptyProtocol.textAreaBlocks.kopfschmerz
       this.doku.textAreaBlocks.intoxikation = emptyProtocol.textAreaBlocks.intoxikation
       this.doku.xabcdE = emptyProtocol.xabcdE
       this.doku.textAreaBlocks.schwangerschaft = emptyProtocol.textAreaBlocks.schwangerschaft
