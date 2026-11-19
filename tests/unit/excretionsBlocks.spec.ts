@@ -64,6 +64,56 @@ function setup() {
 const modalOptions = { global: { renderStubDefaultSlot: true, stubs: { DodoItemModal: false } } }
 
 describe('Excretions text rendering', () => {
+  test.each<[ExcretionsBowelsDetails['consistency'], string]>([
+    ['kügelchenförmig', 'kügelchenförmiger Stuhl'],
+    ['hartlaibig', 'harter Stuhl'],
+    ['geformt', 'geformter Stuhl'],
+    ['breiig', 'breiiger Stuhl'],
+    ['wässrig', 'wässriger Stuhl'],
+  ])('renders consistency %s alone and with mucus and frequency', (consistency, expected) => {
+    const state = createExcretionsBowelsBlockState()
+    state.details.consistency = consistency
+    const capitalized = expected.charAt(0).toUpperCase() + expected.slice(1)
+    expect(bowels.render(state)?.text).toBe(`${capitalized}.`)
+    state.details.mucus = true
+    expect(bowels.render(state)?.text).toBe(`${capitalized} mit Schleimbeimengungen.`)
+    state.details.pattern = 'Obstipation'
+    expect(bowels.render(state)?.text).toBe(`Obstipation, ${expected} mit Schleimbeimengungen.`)
+  })
+
+  test.each<[Partial<ExcretionsBowelsDetails>, string]>([
+    [{ pattern: 'Obstipation' }, 'Obstipation.'],
+    [{ pattern: 'Durchfall' }, 'Durchfall.'],
+    [{ pattern: 'Durchfall', consistency: 'wässrig' }, 'Durchfall, wässriger Stuhl.'],
+    [{ pattern: 'Durchfall', mucus: true }, 'Durchfall, Schleimbeimengungen im Stuhl.'],
+    [{ bowelSounds: 'normal' }, 'Darmgeräusche normal.'],
+    [{ bowelSounds: 'vermehrt' }, 'Darmgeräusche vermehrt.'],
+    [{ bowelSounds: 'vermindert' }, 'Darmgeräusche vermindert.'],
+    [{ bowelSounds: 'fehlend' }, 'Darmgeräusche fehlend.'],
+    [{ bowelSounds: 'hochgestellt' }, 'Darmgeräusche hochgestellt.'],
+  ])('renders standalone bowel findings with context: %j', (details, expected) => {
+    const state = createExcretionsBowelsBlockState()
+    Object.assign(state.details, details)
+    expect(bowels.render(state)?.text).toBe(expected)
+  })
+
+  test.each<[string, string | undefined]>([
+    ['2 Tagen', 'Letzter Stuhlgang vor 2 Tagen.'],
+    ['vor 2 Tagen', 'Letzter Stuhlgang vor 2 Tagen.'],
+    ['gestern', 'Letzter Stuhlgang gestern.'],
+    ['heute', 'Letzter Stuhlgang heute.'],
+    ['', undefined],
+    ['  ', undefined],
+  ])('renders optional last bowel timing: %j', (value, expected) => {
+    const state = createExcretionsBowelsBlockState()
+    state.details.lastBowel = OptionalValue.active(value)
+    expect(bowels.render(state)?.text).toBe(expected)
+    state.details.lastBowel.active = false
+    expect(bowels.render(state)).toBeNull()
+    state.details.bowelPain = true
+    expect(bowels.render(state)?.text).toBe('Schmerzhafter Stuhlgang.')
+  })
+
   test.each<[Partial<ExcretionsUrinaryDetails>, string]>([
     [{ output: ['Harnverhalt'] }, 'Harnverhalt.'],
     [{ output: ['Erschwert'] }, 'Wasserlassen erschwert.'],
@@ -106,26 +156,28 @@ describe('Excretions text rendering', () => {
   })
 
   test.each<[Partial<ExcretionsBowelsDetails>, string]>([
-    [{ blood: ['paper'] }, 'hellrotes Blut am Toilettenpapier'],
-    [{ blood: ['on_stool'], bloodColor: 'dunkelrot', bloodAmount: 'wenig' }, 'Blut auf Stuhl aufgelagert (dunkelrot, wenig)'],
-    [{ blood: ['mixed'] }, 'Blut mit Stuhl vermischt'],
+    [{ blood: ['paper'] }, 'Hellrotes Blut am Toilettenpapier'],
+    [{ blood: ['on_stool'], bloodColor: 'dunkelrot', bloodAmount: 'wenig' }, 'Blut auf dem Stuhl aufgelagert (dunkelrot, wenig)'],
+    [{ blood: ['mixed'] }, 'Blut mit dem Stuhl vermischt'],
     [{ blood: ['without_stool'], bloodAmount: 'minimal' }, 'Blutabgang ohne Stuhl (minimal)'],
-    [{ blood: ['mixed', 'on_stool'], bloodColor: 'hellrot', bloodAmount: 'deutlich' }, 'Blut auf Stuhl aufgelagert und mit Stuhl vermischt (hellrot, deutlich)'],
-    [{ blood: ['clots', 'on_stool'], bloodColor: 'dunkelrot', bloodAmount: 'wenig' }, 'Blut auf Stuhl aufgelagert (dunkelrot, wenig, mit Koageln)'],
-    [{ blood: ['clots', 'without_stool', 'mixed', 'paper', 'on_stool'], bloodColor: 'schwarz' }, 'hellrotes Blut am Toilettenpapier; Blut auf Stuhl aufgelagert und mit Stuhl vermischt und Blutabgang ohne Stuhl (schwarz, mit Koageln)'],
-    [{ blood: ['paper', 'clots'], bloodColor: 'schwarz', bloodAmount: 'wenig' }, 'hellrotes Blut am Toilettenpapier'],
-    [{ mucus: true }, 'Schleimbeimengungen'],
-    [{ consistency: 'breiig', mucus: true, blood: ['mixed'] }, 'breiig, Schleimbeimengungen; Blut mit Stuhl vermischt'],
+    [{ blood: ['mixed', 'on_stool'], bloodColor: 'hellrot', bloodAmount: 'deutlich' }, 'Blut auf dem Stuhl aufgelagert und mit dem Stuhl vermischt (hellrot, deutlich)'],
+    [{ blood: ['clots', 'on_stool'], bloodColor: 'dunkelrot', bloodAmount: 'wenig' }, 'Blut auf dem Stuhl aufgelagert (dunkelrot, wenig, mit Koageln)'],
+    [{ blood: ['clots', 'without_stool', 'mixed', 'paper', 'on_stool'], bloodColor: 'schwarz' }, 'Hellrotes Blut am Toilettenpapier; Blut auf dem Stuhl aufgelagert und mit dem Stuhl vermischt und Blutabgang ohne Stuhl (schwarz, mit Koageln)'],
+    [{ blood: ['paper', 'clots'], bloodColor: 'schwarz', bloodAmount: 'wenig' }, 'Hellrotes Blut am Toilettenpapier'],
+    [{ mucus: true }, 'Schleimbeimengungen im Stuhl'],
+    [{ consistency: 'breiig', mucus: true, blood: ['mixed'] }, 'Breiiger Stuhl mit Schleimbeimengungen; Blut mit dem Stuhl vermischt'],
   ])('renders bleeding and mucus details %j', (details, expected) => {
     const state = createExcretionsBowelsBlockState()
     Object.assign(state.details, details)
-    expect(bowels.render(state)?.text).toBe(`Stuhlgang: ${expected}.`)
+    expect(bowels.render(state)?.text).toBe(`${expected}.`)
+    state.details.blood.reverse()
+    expect(bowels.render(state)?.text).toBe(`${expected}.`)
   })
 
   test.each(['minimal', 'wenig', 'deutlich', 'überwiegend', 'nicht einschätzbar', 'ca. 20 ml'])('renders amount %s', amount => {
     const state = createExcretionsBowelsBlockState()
     Object.assign(state.details, { blood: ['mixed'], bloodAmount: amount })
-    expect(bowels.render(state)?.text).toBe(`Stuhlgang: Blut mit Stuhl vermischt (${amount}).`)
+    expect(bowels.render(state)?.text).toBe(`Blut mit dem Stuhl vermischt (${amount}).`)
   })
 
   test('ignores orphaned bleeding details without mutating them', () => {
@@ -145,7 +197,7 @@ describe('Excretions text rendering', () => {
     bowelState.details.bowelPain = true
     urinaryState.details.hematuria = 'minimal Blut im Urin'
     expect(bowels.render(bowelState)).toMatchObject({
-      id: bowelId, target, active: true, complete: true, text: 'Stuhlgang: schmerzhafter Stuhlgang.',
+      id: bowelId, target, active: true, complete: true, text: 'Schmerzhafter Stuhlgang.',
     })
     expect(urinary.render(urinaryState)).toMatchObject({
       id: urinaryId, target, active: true, complete: true, text: 'Minimal Blut im Urin.',
@@ -159,10 +211,10 @@ describe('Excretions text rendering', () => {
       blood: ['paper'], bowelPain: true, bowelSounds: 'vermindert',
     })
     expect(bowels.render(state)?.text).toBe(
-      'Stuhlgang: Obstipation, hartlaibig, zuletzt vor 2 Tagen; hellrotes Blut am Toilettenpapier, schmerzhafter Stuhlgang; DG vermindert.',
+      'Obstipation, harter Stuhl; letzter Stuhlgang vor 2 Tagen; hellrotes Blut am Toilettenpapier; schmerzhafter Stuhlgang; Darmgeräusche vermindert.',
     )
     state.details.lastBowel.active = false
-    expect(bowels.render(state)?.text).not.toContain('zuletzt')
+    expect(bowels.render(state)?.text).not.toContain('letzter Stuhlgang')
   })
 
   test('renders urinary findings in a stable order with context', () => {
@@ -347,7 +399,7 @@ describe('Excretions modal editing', () => {
       await nextTick()
       expect(details.bloodAmount).toBe(value)
       expect(bowels.render(store.doku.textAreaBlocks.excretions_bowel)?.text).toBe(
-        `Stuhlgang: Blut mit Stuhl vermischt und Blutabgang ohne Stuhl (hellrot, ${value}, mit Koageln).`,
+        `Blut mit dem Stuhl vermischt und Blutabgang ohne Stuhl (hellrot, ${value}, mit Koageln).`,
       )
     }
     blood.vm.$emit('update:modelValue', ['mixed', 'clots'])
@@ -375,7 +427,7 @@ describe('Excretions modal editing', () => {
       expect(amount.props()).toMatchObject({ modelValue: bloodAmount, disabled: false, allowCustom: true })
       expect(details.bloodAmount).toBe(bloodAmount)
       expect(bowels.render(store.doku.textAreaBlocks.excretions_bowel)?.text).toBe(
-        `Stuhlgang: Blutabgang ohne Stuhl (${bloodAmount}).`,
+        `Blutabgang ohne Stuhl (${bloodAmount}).`,
       )
     },
   )
@@ -388,7 +440,7 @@ describe('Excretions modal editing', () => {
     mucus.vm.$emit('update:modelValue', true)
     await nextTick()
     expect(card.getComponent(DodoItemModal).props('state')).toBe('')
-    expect(bowels.render(useDokuStore().doku.textAreaBlocks.excretions_bowel)?.text).toBe('Stuhlgang: Schleimbeimengungen.')
+    expect(bowels.render(useDokuStore().doku.textAreaBlocks.excretions_bowel)?.text).toBe('Schleimbeimengungen im Stuhl.')
     mucus.vm.$emit('update:modelValue', false)
     await nextTick()
     expect(card.getComponent(DodoItemModal).props('state')).toBe('Keine Angabe')
@@ -450,11 +502,11 @@ describe('Excretions modal editing', () => {
     expect(modal.getComponent(IonModal).props('isOpen')).toBe(true)
     modal.findAllComponents(DodoInputSelectChips).find(select => select.props('label') === 'Blut')!.vm.$emit('update:modelValue', ['on_stool'])
     await nextTick()
-    expect(editor.props('blocks')?.map(block => block.text)).toEqual(['Stuhlgang: Blut auf Stuhl aufgelagert (schwarz).', 'Harnverhalt.'])
-    expect(store.generatedProtocol).toContain('Stuhlgang: Blut auf Stuhl aufgelagert (schwarz).\nHarnverhalt.\nNeuer Text')
+    expect(editor.props('blocks')?.map(block => block.text)).toEqual(['Blut auf dem Stuhl aufgelagert (schwarz).', 'Harnverhalt.'])
+    expect(store.generatedProtocol).toContain('Blut auf dem Stuhl aufgelagert (schwarz).\nHarnverhalt.\nNeuer Text')
     editor.vm.$emit('activation-change', bowelId, false)
     await nextTick()
-    expect(store.generatedProtocol).not.toContain('Stuhlgang:')
+    expect(store.generatedProtocol).not.toContain('Blut auf dem Stuhl aufgelagert')
     expect(store.generatedProtocol).toContain('Harnverhalt.')
     expect(manual.value).toBe('Neuer Text')
     manual.undo()
@@ -551,9 +603,9 @@ describe('Excretions modal editing', () => {
 describe('Excretions source lifecycle', () => {
   test.each([
     ['', [], '', ''],
-    ['Blut am Klopapier', ['paper'], '', 'Stuhlgang: hellrotes Blut am Toilettenpapier.'],
-    ['Blut im Stuhl', ['mixed'], '', 'Stuhlgang: Blut mit Stuhl vermischt.'],
-    ['Teerstuhl', ['mixed'], 'schwarz', 'Stuhlgang: Blut mit Stuhl vermischt (schwarz).'],
+    ['Blut am Klopapier', ['paper'], '', 'Hellrotes Blut am Toilettenpapier.'],
+    ['Blut im Stuhl', ['mixed'], '', 'Blut mit dem Stuhl vermischt.'],
+    ['Teerstuhl', ['mixed'], 'schwarz', 'Blut mit dem Stuhl vermischt (schwarz).'],
   ])('migrates legacy blood value %s from storage and history', async (legacyBlood, blood, bloodColor, text) => {
     const doku = JSON.parse(JSON.stringify(setup().doku))
     doku.textAreaBlocks.excretions_bowel.details = { blood: legacyBlood }
@@ -623,7 +675,7 @@ describe('Excretions source lifecycle', () => {
     store.setExcretionsAssessed(true)
     store.setFlavor('trauma', true)
     expect(store.textAreaBlocks).toEqual([
-      expect.objectContaining({ id: bowelId, active: false, text: 'Stuhlgang: Blut mit Stuhl vermischt (schwarz).' }),
+      expect.objectContaining({ id: bowelId, active: false, text: 'Blut mit dem Stuhl vermischt (schwarz).' }),
       expect.objectContaining({ id: urinaryId, active: true, text: 'Harnverhalt.' }),
     ])
   })
@@ -643,7 +695,7 @@ describe('Excretions source lifecycle', () => {
     const restored = useDokuStore()
     await restored.hydrateFromStorage()
     expect(restored.doku.textAreaBlocks).toEqual(store.doku.textAreaBlocks)
-    expect(restored.textAreaBlocks[0]).toMatchObject({ active: false, text: 'Stuhlgang: Schleimbeimengungen, zuletzt vor 2 Tagen; hellrotes Blut am Toilettenpapier; Blut mit Stuhl vermischt (schwarz, ca. 20 ml, mit Koageln).' })
+    expect(restored.textAreaBlocks[0]).toMatchObject({ active: false, text: 'Schleimbeimengungen im Stuhl; letzter Stuhlgang vor 2 Tagen; hellrotes Blut am Toilettenpapier; Blut mit dem Stuhl vermischt (schwarz, ca. 20 ml, mit Koageln).' })
     const bowelCard = shallowMount(BlockExcretionsBowelsCard, modalOptions)
     expect(bowelCard.getComponent(DodoInputSelectChips).props('modelValue')).toEqual(['paper', 'mixed', 'clots'])
     expect(bowelCard.findAllComponents(DodoInputSelect).find(input => input.props('label') === 'Blutmenge')?.props('modelValue')).toBe('ca. 20 ml')
@@ -703,13 +755,13 @@ describe('Excretions source lifecycle', () => {
     store.setTextAreaBlockActive(urinaryId, false)
     await store.newProtocol()
     expect(appendProtocolAuditEntry).toHaveBeenCalledWith(expect.objectContaining({
-      [target]: 'Stuhlgang: Blut mit Stuhl vermischt (schwarz).\nEigener Text',
+      [target]: 'Blut mit dem Stuhl vermischt (schwarz).\nEigener Text',
     }))
     expect(store.doku.textAreaBlocks.excretions_bowel).toEqual(createExcretionsBowelsBlockState())
     expect(store.doku.textAreaBlocks.excretions_urinary).toEqual(createExcretionsUrinaryBlockState())
     expect(await store.restoreProtocolFromHistory(store.protocolHistory[0].id)).toBe(true)
     expect(store.textAreaBlocks).toEqual([
-      expect.objectContaining({ id: bowelId, active: true, text: 'Stuhlgang: Blut mit Stuhl vermischt (schwarz).' }),
+      expect.objectContaining({ id: bowelId, active: true, text: 'Blut mit dem Stuhl vermischt (schwarz).' }),
       expect.objectContaining({ id: urinaryId, active: false, text: 'Harnverhalt.' }),
     ])
   })

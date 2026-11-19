@@ -15,13 +15,13 @@ interface ExcretionsOption {
 }
 
 export const bowelPatternOptions = [
-  { value: '', label: 'Nicht erfasst' },
+  { value: '', label: 'Normal / k.A.' },
   { value: 'Obstipation', label: 'Obstipation' },
   { value: 'Durchfall', label: 'Durchfall' },
 ]
 
 export const bowelConsistencyOptions = [
-  { value: '', label: 'Nicht erfasst' },
+  { value: '', label: 'Normal / k.A.' },
   { value: 'kügelchenförmig', label: 'Kügelchen' },
   { value: 'hartlaibig', label: 'Hart' },
   { value: 'geformt', label: 'Geformt' },
@@ -84,8 +84,8 @@ function renderBowelBleeding(details: ExcretionsBowelsDetails): string {
   const normalized = normalizeBowelBleeding(details)
   const { blood, bloodAmount, bloodColor } = normalized
   const locations = [
-    blood.includes('on_stool') ? 'auf Stuhl aufgelagert' : '',
-    blood.includes('mixed') ? 'mit Stuhl vermischt' : '',
+    blood.includes('on_stool') ? 'auf dem Stuhl aufgelagert' : '',
+    blood.includes('mixed') ? 'mit dem Stuhl vermischt' : '',
   ].filter(Boolean)
   const findings = [
     locations.length ? `Blut ${locations.join(' und ')}` : '',
@@ -163,15 +163,23 @@ export function createExcretionsUrinaryBlockState(): ExcretionsUrinaryBlockSourc
 }
 
 export function renderExcretionsBowelsText(details: ExcretionsBowelsDetails): string {
-  return prefix('Stuhlgang:', concatDoku([
-    [
-      details.pattern,
-      details.consistency,
-      details.mucus ? 'Schleimbeimengungen' : '',
-      details.lastBowel.isActive ? prefix('zuletzt', prefixVor(details.lastBowel.value)) : '',
-    ],
-    [renderBowelBleeding(details), details.bowelPain ? 'schmerzhafter Stuhlgang' : ''],
-    prefix('DG', details.bowelSounds),
+  const consistency = {
+    '': '',
+    'kügelchenförmig': 'kügelchenförmiger Stuhl',
+    'hartlaibig': 'harter Stuhl',
+    'geformt': 'geformter Stuhl',
+    'breiig': 'breiiger Stuhl',
+    'wässrig': 'wässriger Stuhl',
+  }[details.consistency]
+  const stool = details.mucus
+    ? (consistency ? `${consistency} mit Schleimbeimengungen` : 'Schleimbeimengungen im Stuhl')
+    : consistency
+  return capitalizeBegin(concatDoku([
+    [details.pattern, stool],
+    details.lastBowel.isActive ? prefix('letzter Stuhlgang', prefixVor(details.lastBowel.value)) : '',
+    renderBowelBleeding(details),
+    details.bowelPain ? 'schmerzhafter Stuhlgang' : '',
+    prefix('Darmgeräusche', details.bowelSounds),
   ]))
 }
 

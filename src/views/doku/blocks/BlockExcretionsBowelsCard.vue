@@ -8,15 +8,15 @@
     </IonItemDivider>
     <DodoInputSelect
       v-model="details.pattern"
-      label="Frequenz" lines="inset"
+      label="Frequenz" lines="full"
       :options="bowelPatternOptions">
     </DodoInputSelect>
     <DodoInputSelect
       v-model="details.consistency"
-      label="Konsistenz" lines="inset"
+      label="Konsistenz" lines="full"
       :options="bowelConsistencyOptions">
     </DodoInputSelect>
-    <DodoInputToggle lines="inset" v-model="details.mucus">
+    <DodoInputToggle lines="full" v-model="details.mucus">
       Schleimbeimengungen
     </DodoInputToggle>
     <DodoInputTextOptional lines="none"
@@ -30,18 +30,18 @@
     <DodoInputSelectChips
       :model-value="details.blood"
       @update:model-value="updateBlood"
-      label="Blut" lines="inset"
+      label="Blut" lines="full"
       empty-label="Kein Blut"
       :options="bloodOptions" />
     <template v-if="hasBloodGroup">
-      <DodoInputSelect v-model="details.bloodAmount" label="Blutmenge" lines="inset"
+      <DodoInputSelect v-model="details.bloodAmount" label="Blutmenge" lines="full"
         :options="bloodAmountOptions" empty-label="Nicht erfasst"
         allow-custom custom-option-label="Benutzerdefinierte Angabe"
         custom-label="Blutmenge" custom-placeholder="Menge angeben" />
-      <DodoInputSelect v-model="details.bloodColor" label="Farbe" lines="inset"
+      <DodoInputSelect v-model="details.bloodColor" label="Farbe" lines="full"
         :options="bowelBloodColorOptions" empty-label="Nicht erfasst" />
     </template>
-    <DodoInputToggle lines="inset" v-model="details.bowelPain">
+    <DodoInputToggle lines="full" v-model="details.bowelPain">
       Schmerzhafter Stuhlgang?
     </DodoInputToggle>
     <DodoInputSelect
