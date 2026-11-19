@@ -7,6 +7,8 @@ import { useDokuStore } from '@/store/doku'
 import DodoBlockSourceShortcut from '@/components/protocol/DodoBlockSourceShortcut.vue'
 import DodoItemModal from '@/components/ui/DodoItemModal.vue'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputToggle from '@/components/inputs/DodoInputToggle.vue'
+import AbcdeExposureCard from '@/views/doku/abcde/AbcdeExposureCard.vue'
 
 enableAutoUnmount(afterEach)
 beforeEach(() => setActivePinia(createPinia()))
@@ -36,11 +38,50 @@ const cases = [
     activate: (store: ReturnType<typeof useDokuStore>) => { store.setExcretionsAssessed(true); store.setUrinaryAbnormalities(true) },
     deactivate: (store: ReturnType<typeof useDokuStore>) => store.setUrinaryAbnormalities(false) },
   { source: 'bauchschmerz', label: 'Bauchschmerz', input: 'Beginn', value: 'plötzlicher Beginn', field: 'onset',
-    activate: (store: ReturnType<typeof useDokuStore>) => { store.setAbdominalAssessed(true); store.setAbdominalPain('leichte') },
-    deactivate: (store: ReturnType<typeof useDokuStore>) => store.setAbdominalPain('keine') },
+    activate: (store: ReturnType<typeof useDokuStore>) => store.setAbdominalPainEnabled(true),
+    deactivate: (store: ReturnType<typeof useDokuStore>) => store.setAbdominalPainEnabled(false) },
 ] as const
 
 describe('block source shortcuts', () => {
+  test('abdominal toggle opens the source directly and edits findings in Exposure', async () => {
+    const store = useDokuStore()
+    const wrapper = mount(AbcdeExposureCard, { global })
+    expect(store.doku.xabcdE.abdominalText).toBe('')
+    await wrapper.get('[data-examination="abdominal"] .activate-examination').trigger('click')
+    const abdominalRow = wrapper.get('[data-examination="abdominal"]')
+    const shortcut = abdominalRow.get('[data-block-source="bauchschmerz"]')
+    await shortcut.trigger('click')
+    const modal = wrapper.findAllComponents(DodoItemModal).find(modal => modal.props('label') === 'Bauchschmerz')!
+    expect(modal.getComponent(Ionic.IonModal).props('isOpen')).toBe(true)
+    const selects = modal.findAllComponents(DodoInputSelect)
+    const guarding = selects.find(select => select.props('label') === 'Abwehrspannung')!
+    const peristalsis = selects.find(select => select.props('label') === 'Peristaltik')!
+    const guardingRow = guarding.getComponent(Ionic.IonItem).element
+    const peristalsisRow = peristalsis.getComponent(Ionic.IonItem).element
+    expect(guardingRow.previousElementSibling?.textContent).toBe('Befunde')
+    expect(guardingRow.previousElementSibling?.previousElementSibling?.textContent).toContain('Unterbauch')
+    expect(guardingRow.nextElementSibling).toBe(peristalsisRow)
+    expect(peristalsisRow.nextElementSibling?.textContent).toBe('Onset')
+    guarding.vm.$emit('update:modelValue', 'leichte')
+    peristalsis.vm.$emit('update:modelValue', 'hochgestellt')
+    selects.find(select => select.props('label') === 'Schmerzen')!.vm.$emit('update:modelValue', 'maximal')
+    await nextTick()
+    expect(store.doku.xabcdE.abdominalText).toBe('maximale Bauchschmerzen; Abdomen leichte Abwehrspannung; DG hochgestellt')
+    expect(store.textAreaBlocks).toEqual([])
+    expect(modal.props('state')).toBe('')
+    modal.getComponent(Ionic.IonModal).vm.$emit('willDismiss')
+    const toggle = wrapper.findAllComponents(DodoInputToggle).find(toggle => toggle.text().includes('Bauchschmerz'))!
+    toggle.vm.$emit('update:modelValue', false)
+    await nextTick()
+    expect(wrapper.find('[data-block-source="bauchschmerz"]').exists()).toBe(false)
+    expect(store.doku.xabcdE.abdominalText).toBe('Abdomen weich/schmerzfrei')
+    expect(store.generatedProtocol).not.toMatch(/Bauchschmerzen|Abwehrspannung|DG hochgestellt/)
+    toggle.vm.$emit('update:modelValue', true)
+    await nextTick()
+    expect(store.doku.xabcdE.abdominalText).toBe('Bauchschmerzen; Abdomen weich')
+    expect(wrapper.find('[data-block-source="bauchschmerz"]').exists()).toBe(true)
+  })
+
   test.each(cases)('$source opens the existing form, shares data and follows availability', async entry => {
     const store = useDokuStore()
     const wrapper = mount(DodoBlockSourceShortcut, { props: { source: entry.source }, global, attachTo: document.body })

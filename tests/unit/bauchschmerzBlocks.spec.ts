@@ -3,12 +3,13 @@ import { createPinia, setActivePinia } from 'pinia'
 import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { IonButton, IonItem, IonModal } from '@ionic/vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock, renderBauchschmerzRegion } from '@/data/blocks/bauchschmerz'
-import type { BauchschmerzRegion } from '@/types/blocks/bauchschmerz'
+import { createBauchschmerzBlockState, BauchschmerzTextAreaBlock, renderBauchschmerzRegion, provocationOptions, palliationOptions, qualityOptions, radiationOptions, timeOptions } from '@/data/blocks/bauchschmerz'
+import type { BauchschmerzDetails, BauchschmerzRegion } from '@/types/blocks/bauchschmerz'
 import { DATA_Quickies, resetQuickies } from '@/data/quickies'
 import { useDokuStore } from '@/store/doku'
 import { appendProtocolAuditEntry, loadDokuState, saveDokuState } from '@/store/persistence'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputToggle from '@/components/inputs/DodoInputToggle.vue'
 import DodoInputTextArea from '@/components/inputs/DodoInputTextArea.vue'
 import DodoToggleChip from '@/components/inputs/DodoToggleChip.vue'
 import DodoItemModal from '@/components/ui/DodoItemModal.vue'
@@ -56,7 +57,7 @@ describe('Bauchschmerz text rendering', () => {
     expect(rendered.render(state)).toBeNull()
     state.details.quality = ['stechend']
     expect(rendered.render(state)).toMatchObject({
-      id: blockId, target, complete: true, active: true, text: 'Bauchschmerz: stechend.',
+      id: blockId, target, complete: true, active: true, text: 'Bauchschmerzen stechend.',
     })
     state.details.quality = []
     state.details.onspan = '  '
@@ -83,6 +84,50 @@ describe('Bauchschmerz text rendering', () => {
     const region = createBauchschmerzBlockState().details.region
     for (const key of selected) region[key] = true
     expect(renderBauchschmerzRegion(region)).toBe(expected)
+    const state = createBauchschmerzBlockState()
+    state.details.region = region
+    if (selected.length) expect(rendered.render(state)?.text).toMatch(/^Bauchschmerzen /)
+    else expect(rendered.render(state)).toBeNull()
+  })
+
+  test.each([
+    [['ubmi'], {}, 'Bauchschmerzen unterhalb Nabel.'],
+    [['obre'], {}, 'Bauchschmerzen OB re.'],
+    [['obmi'], {}, 'Bauchschmerzen epigastr.'],
+    [['obli', 'ubli'], { quality: ['stechend'] }, 'Bauchschmerzen linksseitig; stechend.'],
+    [['obli', 'mbmi', 'ubre'], { quality: ['krampfartig'] }, 'Bauchschmerzen diffus; krampfartig.'],
+    [['obmi', 'mbmi', 'ubmi'], { quality: ['ziehend'] }, 'Bauchschmerzen Mittellinie; ziehend.'],
+    [['mbmi'], { onspan: 'seit Tagen' }, 'Bauchschmerzen Nabelregion; seit Tagen.'],
+    [['mbmi'], { provocation: ['Atmung'] }, 'Bauchschmerzen Nabelregion; bei tiefer Atmung schlimmer.'],
+    [['mbmi'], { palliation: ['Stuhlgang'] }, 'Bauchschmerzen Nabelregion; nach Stuhlgang besser.'],
+    [['mbmi'], { time: ['Erstmalig'] }, 'Bauchschmerzen Nabelregion; erstmalig.'],
+    [['ubmi'], { quality: ['stechend'] }, 'unterhalb Nabel; stechend.'],
+    [['obre'], { quality: ['stechend'] }, 'OB re; stechend.'],
+    [['mbli'], { quality: ['ziehend'] }, 'Flanke li; ziehend.'],
+    [['obmi'], { radiation: ['Rücken'] }, 'epigastr; strahlt aus in Rücken.'],
+    [[], { quality: ['stechend'], radiation: ['Rücken'] }, 'Bauchschmerzen stechend; strahlt aus in Rücken.'],
+    [[], { onset: 'plötzlicher Beginn', onspan: 'seit Tagen' }, 'Bauchschmerzen seit Tagen, plötzlicher Beginn.'],
+    [['mbmi'], { quality: ['unbekannt'], radiation: ['unbekannt'] }, 'Bauchschmerzen Nabelregion.'],
+  ] as [Array<keyof BauchschmerzRegion>, Partial<BauchschmerzDetails>, string][])(
+    'adds context only when region %j and details %j need it', (region, details, expected) => {
+      const state = createBauchschmerzBlockState()
+      Object.assign(state.details, details)
+      for (const key of region) state.details.region[key] = true
+      expect(rendered.render(state)?.text).toBe(expected)
+    },
+  )
+
+  test.each([
+    ['provocation', provocationOptions], ['palliation', palliationOptions],
+    ['quality', qualityOptions], ['radiation', radiationOptions], ['time', timeOptions],
+  ] as const)('keeps every isolated %s option understandable', (field, options) => {
+    for (const option of options) {
+      const state = createBauchschmerzBlockState()
+      state.details[field] = [option.label]
+      const text = rendered.render(state)?.text
+      expect(text, option.label).toMatch(/^Bauchschmerzen .+\.$/)
+      expect(text, option.label).not.toContain('NRS')
+    }
   })
 
   test('preserves region and OPQRST ordering, prepositions, option order and wording', () => {
@@ -96,7 +141,7 @@ describe('Bauchschmerz text rendering', () => {
     })
     state.details.region.mbmi = true
     expect(rendered.render(state)?.text).toBe(
-      'Bauchschmerz: Nabelregion; NRS 4-6; heute früh, plötzlicher Beginn; ' +
+      'Nabelregion; heute früh, plötzlicher Beginn; ' +
       'bei tiefer Atmung, Bewegung & nach Nahrungsaufnahme schlimmer; ' +
       'bei körperl. Schonung & im Sitzen & nach Stuhlgang, Erbrechen besser; ' +
       'stechend, krampfartig; strahlt aus in re. Flanke & zwischen die Schulterblätter; ' +
@@ -109,11 +154,21 @@ describe('Bauchschmerz text rendering', () => {
   })
 
   test.each([
-    ['minimal', '0-1'], ['leicht', '2-3'], ['mittel', '4-6'], ['stark', '7-8'], ['maximal', '9-10'],
-  ] as const)('formats severity %s without requiring other fields', (severity, range) => {
-    const state = createBauchschmerzBlockState()
+    ['minimal', 'minimale'], ['leicht', 'leichte'], ['mittel', 'mittlere'], ['stark', 'starke'], ['maximal', 'maximale'],
+    ['', ''],
+  ] as const)('renders severity %s only in Exposure', (severity, adjective) => {
+    const store = useDokuStore()
+    store.setAbdominalPainEnabled(true)
+    const state = store.doku.textAreaBlocks.bauchschmerz
     state.details.severity = severity
-    expect(rendered.render(state)?.text).toBe(`Bauchschmerz: NRS ${range}.`)
+    expect(rendered.render(state)).toBeNull()
+    const pain = [adjective, 'Bauchschmerzen'].filter(Boolean).join(' ')
+    expect(store.doku.xabcdE.abdominalText).toBe(`${pain}; Abdomen weich`)
+    expect(store.generatedProtocol).toContain(pain)
+    state.details.quality = ['stechend']
+    store.setTextAreaBlockActive(blockId, false)
+    expect(store.generatedProtocol).toContain(pain)
+    expect(store.generatedProtocol).not.toMatch(/stechend|NRS|Bauchschmerz:/)
   })
 
   test.each([
@@ -121,11 +176,30 @@ describe('Bauchschmerz text rendering', () => {
   ])('formats custom onset timing %s', (input, expected) => {
     const state = createBauchschmerzBlockState()
     state.details.onspan = input
-    expect(rendered.render(state)?.text).toBe(`Bauchschmerz: ${expected}.`)
+    expect(rendered.render(state)?.text).toBe(`Bauchschmerzen ${expected}.`)
   })
 })
 
 describe('Bauchschmerz source lifecycle', () => {
+  test.each(['severity', 'guarding', 'peristalsis'] as const)('marks the card as filled with only %s, without a symptom block', async field => {
+    const store = useDokuStore()
+    store.setAbdominalPainEnabled(true)
+    const card = shallowMount(BlockBauchschmerzCard)
+    const modal = card.getComponent(DodoItemModal)
+    expect(modal.props('state')).toBe('Keine Angabe')
+    if (field === 'severity') store.doku.textAreaBlocks.bauchschmerz.details.severity = 'minimal'
+    else if (field === 'guarding') store.doku.xabcdE.abdominal.value.guarding = 'starke'
+    else store.doku.xabcdE.abdominal.value.peristalsis = 'fehlend'
+    await nextTick()
+    expect(modal.props('state')).toBe('')
+    expect(store.textAreaBlocks).toEqual([])
+    store.doku.textAreaBlocks.bauchschmerz.details.severity = ''
+    store.doku.xabcdE.abdominal.value.guarding = ''
+    store.doku.xabcdE.abdominal.value.peristalsis = ''
+    await nextTick()
+    expect(modal.props('state')).toBe('Keine Angabe')
+  })
+
   test('appears after Schwindel and excretions only when symptoms and the abdominal finding are available', async () => {
     const store = useDokuStore()
     store.setDizziness('gerichteter')
@@ -159,30 +233,34 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(symptoms.findComponent(BlockBauchschmerzCard).exists()).toBe(false)
   })
 
-  test('Exposure controls and automatic changes use the abdominal source lifecycle', async () => {
+  test('Exposure toggle resets findings and details without automatic pain activation', async () => {
     const store = setup()
     const exposure = shallowMount(AbcdeExposureCard, { global: { renderStubDefaultSlot: true } })
     const assessment = exposure.findAllComponents(DodoExaminationItem).find(item => item.props('id') === 'abdominal')!
-    const pain = exposure.findAllComponents(DodoInputSelect).find(select => select.props('label') === 'Bauchschmerzen')!
+    const pain = assessment.getComponent(DodoInputToggle)
+    expect(exposure.findAllComponents(DodoItemModal).some(modal => modal.props('label') === 'Bauchbefund')).toBe(false)
     store.setTextAreaBlockActive(blockId, false)
-    pain.vm.$emit('update:modelValue', 'keine')
+    store.doku.xabcdE.abdominal.value.guarding = 'leichte'
+    store.doku.xabcdE.abdominal.value.peristalsis = 'hochgestellt'
+    store.doku.textAreaBlocks.bauchschmerz.details.severity = 'maximal'
+    pain.vm.$emit('update:modelValue', false)
     expect(store.doku.textAreaBlocks.bauchschmerz).toEqual(createBauchschmerzBlockState())
+    expect(store.doku.xabcdE.abdominal.value).toMatchObject({ guarding: '', peristalsis: '', pain: 'keine' })
+    expect(store.doku.xabcdE.abdominalText).toBe('Abdomen weich/schmerzfrei')
     store.doku.xabcdE.abdominal.value.guarding = 'leichte'
     await nextTick()
-    expect(store.context.hasAbdominalIssue).toBe(true)
+    expect(store.context.hasAbdominalIssue).toBe(false)
     expect(store.textAreaBlocks).toEqual([])
+    pain.vm.$emit('update:modelValue', true)
     store.doku.textAreaBlocks.bauchschmerz.details.quality = ['stechend']
     store.setFlavor('non_verbal', true)
     expect(store.doku.xabcdE.abdominal.value.pain).toBe('')
     expect(store.doku.textAreaBlocks.bauchschmerz.details.quality).toEqual(['stechend'])
-    store.setFlavor('non_verbal', false)
-    store.setAbdominalPain('starke')
-    store.doku.textAreaBlocks.bauchschmerz.details.quality = ['stechend']
     assessment.vm.$emit('update:assessed', false)
-    assessment.vm.$emit('remove')
     expect(store.doku.xabcdE.abdominal.isAssessed).toBe(false)
-    expect(store.doku.xabcdE.abdominal.value.pain).toBe('keine')
+    expect(store.doku.xabcdE.abdominal.value).toMatchObject({ guarding: '', peristalsis: '', pain: 'keine' })
     expect(store.doku.textAreaBlocks.bauchschmerz).toEqual(createBauchschmerzBlockState())
+    expect(store.doku.xabcdE.abdominalText).toBe('')
   })
 
   test('modal edits update the preview and protocol without duplicating the preview or changing manual text or undo', async () => {
@@ -204,14 +282,14 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(overlay.props('isOpen')).toBe(true)
     expect(store.textAreaBlocks).toEqual([])
     const selects = modal.findAllComponents(DodoInputSelect)
-    expect(selects.map(select => select.props('emptyLabel'))).toEqual(['Keine Angabe', 'Keine Angabe', 'Keine Angabe'])
+    expect(selects.map(select => select.props('label'))).toEqual(['Abwehrspannung', 'Peristaltik', 'Beginn', 'Wann', 'Schmerzen'])
     selects.find(select => select.props('label') === 'Beginn')!.vm.$emit('update:modelValue', 'schleichender Beginn')
     selects.find(select => select.props('label') === 'Wann')!.vm.$emit('update:modelValue', '2 Stunden')
     selects.find(select => select.props('label') === 'Schmerzen')!.vm.$emit('update:modelValue', 'leicht')
     const quality = () => modal.findAllComponents(DodoToggleChip).find(chip => chip.text() === 'stechend')!
     quality().vm.$emit('update:modelValue', true)
     await nextTick()
-    const expected = 'Bauchschmerz: NRS 2-3; seit 2 Stunden, schleichender Beginn; stechend.'
+    const expected = 'Bauchschmerzen seit 2 Stunden, schleichender Beginn; stechend.'
     expect(modal.props('state')).toBe('')
     expect(editor.props('blocks')?.[0].text).toBe(expected)
     expect(store.generatedProtocol).toContain(`${expected}\nEigener Text`)
@@ -219,7 +297,8 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(store.doku.xabcdE.abdominal.value.pain).toBe('')
     editor.vm.$emit('activation-change', blockId, false)
     await nextTick()
-    expect(store.generatedProtocol).not.toContain('Bauchschmerz:')
+    expect(store.generatedProtocol).not.toContain(expected)
+    expect(store.generatedProtocol).toContain('leichte Bauchschmerzen')
     expect(editor.props('blocks')?.[0].active).toBe(false)
     quality().vm.$emit('update:modelValue', false)
     await nextTick()
@@ -230,7 +309,7 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(store.textAreaBlocks[0].active).toBe(false)
     editor.vm.$emit('activation-change', blockId, true)
     await nextTick()
-    expect(store.generatedProtocol).toContain('Bauchschmerz: NRS 2-3; seit 2 Stunden, schleichender Beginn.')
+    expect(store.generatedProtocol).toContain('seit 2 Stunden, schleichender Beginn.')
     await modal.getComponent(IonButton).trigger('click')
     expect(overlay.props('isOpen')).toBe(false)
     expect(modal.props('state')).toBe('')
@@ -267,7 +346,7 @@ describe('Bauchschmerz source lifecycle', () => {
     store.setFlavor('einweisung', true)
     store.setAbdominalAssessed(true)
     store.setAbdominalPain('')
-    expect(store.textAreaBlocks).toEqual([expect.objectContaining({ active: false, text: 'Bauchschmerz: stechend.' })])
+    expect(store.textAreaBlocks).toEqual([expect.objectContaining({ active: false, text: 'Bauchschmerzen stechend.' })])
   })
 
   test('retains activation and restores the empty indicator when all details are temporarily cleared', async () => {
@@ -283,12 +362,15 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(modal.props('state')).toBe('Keine Angabe')
     store.doku.textAreaBlocks.bauchschmerz.details.time = ['Erstmalig']
     await nextTick()
-    expect(store.textAreaBlocks[0]).toMatchObject({ active: false, text: 'Bauchschmerz: erstmalig.' })
+    expect(store.textAreaBlocks[0]).toMatchObject({ active: false, text: 'Bauchschmerzen erstmalig.' })
     expect(modal.props('state')).toBe('')
   })
 
   test('persists structured details and activation, and restores chip selections on remount', async () => {
     const store = setup()
+    store.doku.textAreaBlocks.bauchschmerz.details.severity = 'mittel'
+    store.doku.xabcdE.abdominal.value.guarding = 'leichte'
+    store.doku.xabcdE.abdominal.value.peristalsis = 'spärlich'
     const original = shallowMount(BlockBauchschmerzCard, { global: { renderStubDefaultSlot: true } })
     const regionChip = original.findAllComponents(DodoToggleChip)[0]
     expect(regionChip.text()).toBe('Rechts')
@@ -302,7 +384,8 @@ describe('Bauchschmerz source lifecycle', () => {
     const restored = useDokuStore()
     await restored.hydrateFromStorage()
     expect(restored.doku.textAreaBlocks.bauchschmerz).toEqual(store.doku.textAreaBlocks.bauchschmerz)
-    expect(restored.textAreaBlocks[0]).toMatchObject({ active: false, text: 'Bauchschmerz: OB re; stechend.' })
+    expect(restored.doku.xabcdE.abdominalText).toBe('mittlere Bauchschmerzen; Abdomen leichte Abwehrspannung; DG spärlich')
+    expect(restored.textAreaBlocks[0]).toMatchObject({ active: false, text: 'OB re; stechend.' })
     const symptoms = shallowMount(BlockBauchschmerzCard, { global: { renderStubDefaultSlot: true } })
     const modal = symptoms.getComponent(DodoItemModal)
     expect(modal.props('state')).toBe('')
@@ -315,12 +398,12 @@ describe('Bauchschmerz source lifecycle', () => {
     store.setTextAreaBlockActive(blockId, active)
     await store.newProtocol()
     expect(appendProtocolAuditEntry).toHaveBeenCalledWith(expect.objectContaining({
-      [target]: active ? 'Bauchschmerz: stechend.\nEigener Text' : 'Eigener Text',
+      [target]: active ? 'Bauchschmerzen stechend.\nEigener Text' : 'Eigener Text',
     }))
     expect(store.doku.textAreaBlocks.bauchschmerz).toEqual(createBauchschmerzBlockState())
     expect(store.textAreaBlocks).toEqual([])
     expect(await store.restoreProtocolFromHistory(store.protocolHistory[0].id)).toBe(true)
-    expect(store.textAreaBlocks[0]).toMatchObject({ active, text: 'Bauchschmerz: stechend.' })
+    expect(store.textAreaBlocks[0]).toMatchObject({ active, text: 'Bauchschmerzen stechend.' })
   })
 
   test.each(['unassessed', 'keine'])('hydration clears persisted details when unavailable: %s', async reason => {
@@ -350,6 +433,30 @@ describe('Bauchschmerz source lifecycle', () => {
     expect(store.textAreaBlocks).toEqual([])
     expect(store.doku.sampler.symptoms.additionalSymptoms.value).toBe(text)
     expect(store.generatedProtocol.split(text)).toHaveLength(2)
+  })
+
+  test.each([
+    ['leichte', undefined, 'leicht'], ['starke', undefined, 'stark'],
+    ['leichte', '', 'leicht'], ['starke', 'minimal', 'minimal'], ['', undefined, ''],
+  ] as const)('restores legacy pain %s with severity %s as %s', async (pain, severity, expected) => {
+    vi.mocked(loadDokuState).mockResolvedValue({ schemaVersion: 1, doku: {
+      xabcdE: { abdominal: { assessed: true, value: { pain } } },
+      textAreaBlocks: { bauchschmerz: { details: { severity } } },
+    } })
+    const store = useDokuStore()
+    await store.hydrateFromStorage()
+    expect(store.context.hasAbdominalIssue).toBe(true)
+    expect(store.doku.xabcdE.abdominal.value.pain).toBe('')
+    expect(store.doku.textAreaBlocks.bauchschmerz.details.severity).toBe(expected)
+    expect(store.textAreaBlocks).toEqual([])
+    store.doku.textAreaBlocks.bauchschmerz.details.severity = ''
+    await store.persistToStorage()
+    vi.mocked(loadDokuState).mockResolvedValue(vi.mocked(saveDokuState).mock.lastCall![0])
+    setActivePinia(createPinia())
+    const restored = useDokuStore()
+    await restored.hydrateFromStorage()
+    expect(restored.doku.textAreaBlocks.bauchschmerz.details.severity).toBe('')
+    expect(restored.doku.xabcdE.abdominalText).toBe('Bauchschmerzen; Abdomen weich')
   })
 
   test('quickie reset never registers Bauchschmerz as a modal or template', () => {

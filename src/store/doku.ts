@@ -341,6 +341,17 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
   restoreAssessmentIntents(hydratedProtocol, normalizedInput, resetProtocol())
 
+  // Die frühere E-Auswahl in die gemeinsame Schmerzskala übernehmen. Danach ist
+  // pain nur noch der Schalter, damit gelöschte Severity nicht erneut migriert wird.
+  const abdominal = hydratedProtocol.xabcdE.abdominal.value
+  const abdominalDetails = hydratedProtocol.textAreaBlocks.bauchschmerz.details
+  if (abdominal.pain === 'leichte' || abdominal.pain === 'starke') {
+    if (!abdominalDetails.severity) {
+      abdominalDetails.severity = abdominal.pain === 'leichte' ? 'leicht' : 'stark'
+    }
+    abdominal.pain = ''
+  }
+
   if (legacyCourse === 1 || legacyCourse === 2) {
     hydratedProtocol.course = ProtocolCourse.TRANSPORT
     hydratedProtocol.flavors.verlegung = legacyCourse === 1
@@ -1017,6 +1028,11 @@ export const useDokuStore = defineStore('doku', {
       this.doku.textAreaBlocks.excretions_bowel = createExcretionsBowelsBlockState()
       this.doku.textAreaBlocks.excretions_urinary = createExcretionsUrinaryBlockState()
     },
+    setAbdominalPainEnabled(enabled: boolean) {
+      if (!enabled) this.resetAbdominal()
+      this.setAbdominalAssessed(true)
+      this.setAbdominalPain(enabled ? '' : 'keine')
+    },
     setAbdominalPain(value: ExposureAbdominal['pain'], assess = true) {
       if (assess) this.doku.xabcdE.abdominal.value.assessment.pain = 'active'
       this.doku.xabcdE.abdominal.value.pain = value
@@ -1026,6 +1042,7 @@ export const useDokuStore = defineStore('doku', {
     },
     setAbdominalAssessed(value: boolean) {
       this.doku.xabcdE.abdominal.assessed = value
+      if (!value) this.resetAbdominal()
       if (!this.doku.xabcdE.abdominal.isAssessed || this.doku.xabcdE.abdominal.value.pain === 'keine') {
         this.doku.textAreaBlocks.bauchschmerz = createBauchschmerzBlockState()
       }

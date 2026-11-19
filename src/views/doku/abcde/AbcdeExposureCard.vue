@@ -96,54 +96,15 @@
       </DodoItemModal>
     </DodoExaminationItem>
 
-    <DodoExaminationItem id="abdominal" label="Bauchbefund"
-      :assessed="store.doku.xabcdE.abdominal.assessed" @update:assessed="store.setAbdominalAssessed" show-line="full"
-      @select="selectAbdominal" @activate="abdominalModal?.open()" @remove="store.resetAbdominal">
-      <DodoItemModal ref="abdominalModal" label="Bauchbefund" modal-label="Bauchbefund"
-        :state="store.doku.xabcdE.abdominalState" lines="none">
-
-        <DodoInputSelect
-          v-model="store.doku.xabcdE.abdominal.value.guarding"
-          label="Abwehrspannung" lines="full"
-          :options="[
-            { value: '', label: 'Keine' },
-            { value: 'leichte', label: 'Leicht' },
-            { value: 'starke', label: 'Stark' },
-          ]">
-        </DodoInputSelect>
-
-        <DodoExaminationItem id="pain" label="Bauchschmerzen" show-line="inset"
-          :removable="store.context.isNonVerbal"
-          :assessed="store.doku.xabcdE.abdominal.value.isExamined('pain')"
-          @update:assessed="store.doku.xabcdE.abdominal.value.assessment.pain = $event ? 'active' : 'inactive'"
-          @select="store.setAbdominalPain('keine')" @remove="store.setAbdominalPain('keine', false)"
-          @activate="abdominalPainSelect?.open()">
-          <DodoInputSelect ref="abdominalPainSelect"
-            :model-value="store.doku.xabcdE.abdominal.value.pain"
-            @update:model-value="store.setAbdominalPain($event as ExposureAbdominal['pain'])"
-            label="Bauchschmerzen" lines="none"
-            :options="[
-              { value: 'keine', label: 'Keine' },
-              { value: 'leichte', label: 'Leicht' },
-              { value: '', label: 'Mittel' },
-              { value: 'starke', label: 'Stark' },
-            ]">
-            <template #label-end><DodoBlockSourceShortcut source="bauchschmerz" /></template>
-          </DodoInputSelect>
-        </DodoExaminationItem>
-
-        <DodoInputSelect
-          v-model="store.doku.xabcdE.abdominal.value.peristalsis"
-          label="Peristaltik" lines="none"
-          :options="[
-            { value: '', label: 'Unauffällig' },
-            { value: 'spärlich', label: 'Vermindert' },
-            { value: 'fehlend', label: 'Fehlend' },
-            { value: 'hochgestellt', label: 'Hochgestellt' },
-          ]">
-        </DodoInputSelect>
-
-      </DodoItemModal>
+    <DodoExaminationItem id="abdominal" label="Bauchschmerz" show-line="full"
+      :assessed="store.doku.xabcdE.abdominal.isAssessed && store.doku.xabcdE.abdominal.value.isExamined('pain')"
+      @update:assessed="store.setAbdominalAssessed"
+      @select="store.setAbdominalPainEnabled(true)">
+      <DodoInputToggle :model-value="store.context.hasAbdominalIssue"
+        @update:model-value="store.setAbdominalPainEnabled" lines="none">
+        Bauchschmerz
+        <template #label-end><DodoBlockSourceShortcut source="bauchschmerz" /></template>
+      </DodoInputToggle>
     </DodoExaminationItem>
 
     <DodoExaminationItem id="pregnancy" label="Schwangerschaft" show-line="full"
@@ -162,34 +123,15 @@
 
 <script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
-import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import { computed, ref } from 'vue'
 
 import DodoItemModal from '@/components/ui/DodoItemModal.vue'
-import type { ExposureAbdominal, ExposureExcretions } from '@/types/protocol/abcde'
+import type { ExposureExcretions } from '@/types/protocol/abcde'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
 const ctx = computed(() => store.context)
-const abdominalPainSelect = ref<InstanceType<typeof DodoInputSelect>>()
-function selectAbdominal() {
-  const intent = { ...store.doku.xabcdE.abdominal.value.assessment }
-  store.resetAbdominal()
-  const abdominal = store.doku.xabcdE.abdominal.value
-  abdominal.assessment = intent
-}
-const abdominalModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
 const excretionsModal = ref<InstanceType<typeof DodoItemModal> | null>(null)
-
-// ############################################################################
-
-watch(() => store.doku.xabcdE.abdominal.value.guarding, (v) => {
-  if (v != '' && store.doku.xabcdE.abdominal.value.isExamined('pain') && store.doku.xabcdE.abdominal.value.pain == 'keine') {
-    store.setAbdominalPain('', false)
-  }
-})
-
-
 
 </script>
 <style scoped>
