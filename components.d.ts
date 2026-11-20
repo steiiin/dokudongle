@@ -21,6 +21,7 @@ declare module 'vue' {
     DodoInputAge: typeof import('./src/components/inputs/DodoInputAge.vue')['default']
     DodoInputChip: typeof import('./src/components/inputs/DodoInputChip.vue')['default']
     DodoInputContacts: typeof import('./src/components/inputs/DodoInputContacts.vue')['default']
+    DodoInputEcg: typeof import('./src/components/inputs/DodoInputEcg.vue')['default']
     DodoInputGravTerm: typeof import('./src/components/inputs/DodoInputGravTerm.vue')['default']
     DodoInputNumber: typeof import('./src/components/inputs/DodoInputNumber.vue')['default']
     DodoInputQuick: typeof import('./src/components/inputs/DodoInputQuick.vue')['default']
@@ -105,5 +106,6 @@ declare module 'vue' {
     IonToolbar: typeof import('@ionic/vue')['IonToolbar']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SgarbossaKriterienCheck: typeof import('./src/components/inputs/ecg/SgarbossaKriterienCheck.vue')['default']
   }
 }
