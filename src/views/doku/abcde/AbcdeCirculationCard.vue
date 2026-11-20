@@ -205,19 +205,11 @@
 
     <DodoExaminationItem id="ecg" label="EKG"
       v-model:assessed="store.doku.xabCde.ecg.assessed" show-line="full"
-      @select="store.doku.xabCde.ecg.value = 'SR'"
-      @activate="ecgModal?.open()" @remove="store.doku.xabCde.ecg.value = 'SR'">
+      @select="resetEcg"
+      @activate="ecgModal?.open()" @remove="resetEcg">
       <DodoItemModal ref="ecgModal" label="EKG"
         :state="store.doku.xabCde.ecgState" lines="none">
-        <DodoInputSelect v-model="store.doku.xabCde.ecg.value"
-          label="EKG" lines="none"
-          :options="[
-            { value: 'SR', label: 'Sinusrhythmus' },
-            { value: 'VHF', label: 'Vorhofflimmern' },
-          ]"
-          allow-custom custom-label="Rhythmus"
-          custom-placeholder="z.B. TAA 130-160/min">
-        </DodoInputSelect>
+        <DodoInputEcg v-model="store.doku.xabCde.ecg.value" />
       </DodoItemModal>
     </DodoExaminationItem>
 
@@ -252,6 +244,8 @@ import { computed, ref, watch } from 'vue'
 import { checkmark } from 'ionicons/icons'
 import DodoItemModal from '@/components/ui/DodoItemModal.vue'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
+import DodoInputEcg from '@/components/inputs/DodoInputEcg.vue'
+import { createEcgFinding } from '@/types/protocol/abcde/ecg'
 import { isRestoringReanimation } from '@/store/reanimation'
 
 import { AbcdeCirculation } from '@/types/protocol/abcde'
@@ -321,6 +315,8 @@ const chestModal = ref<InstanceType<typeof DodoItemModal>>()
 function resetChest() {
   store.doku.xabCde.chest = new AbcdeCirculation().chest
 }
+
+function resetEcg() { store.doku.xabCde.ecg.value = createEcgFinding() }
 
 const ecgModal = ref<InstanceType<typeof DodoItemModal>>()
 const edemaSelect = ref<InstanceType<typeof DodoInputSelect>>()

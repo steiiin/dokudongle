@@ -3,16 +3,22 @@
     :color="color"
     :outline="!modelValue"
     :disabled="disabled"
+    role="button"
+    :tabindex="disabled ? -1 : 0"
+    :aria-pressed="modelValue"
     :class="[
       { 'DdToggleChip--inactive': !modelValue, 'DdToggleChip--bold': modelValue },
     ]"
     @click="toggle"
+    @keydown="onKeydown"
   >
     <slot />
   </IonChip>
 </template>
 
 <script setup lang="ts">
+
+import { IonChip } from '@ionic/vue'
 
 const props = withDefaults(
   defineProps<{
@@ -37,12 +43,22 @@ const toggle = () => {
   emit('update:modelValue', !props.modelValue)
 }
 
+const onKeydown = (event: KeyboardEvent) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return
+  event.preventDefault()
+  if (!event.repeat) toggle()
+}
+
 </script>
 
 <style scoped>
 
   ion-chip {
     margin-left: 0;
+  }
+  ion-chip:focus-visible {
+    outline: 2px solid var(--ion-text-color);
+    outline-offset: 2px;
   }
   .DdToggleChip--inactive {
     outline: 1px solid transparent;

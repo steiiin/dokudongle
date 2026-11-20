@@ -1,3 +1,4 @@
+import { normalizeEcgFinding } from '@/types/protocol/abcde/ecg'
 import { FirmwareUUID, DfuUUID } from '@/types/firmware'
 import { decodeFirmwareInfo, isCompatibleFirmware } from '@/utils/dongle/dongle-firmware'
 import { BleClient } from '@capacitor-community/bluetooth-le'
@@ -262,6 +263,15 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
           edema: { assessed: edema.grade !== 'keine Ödeme', value: edema },
         },
       }
+    }
+  }
+  // EKG-Freitext vor der typgeprüften Objekt-Hydrierung verlustfrei übernehmen.
+  if (isRecord(normalizedInput.xabCde) && isRecord(normalizedInput.xabCde.ecg)) {
+    const circulation = normalizedInput.xabCde
+    const ecg = circulation.ecg as Record<string, unknown>
+    normalizedInput = {
+      ...normalizedInput,
+      xabCde: { ...circulation, ecg: { ...ecg, value: normalizeEcgFinding(ecg.value) } },
     }
   }
   // Einzelne Blutungsangaben aus älteren Protokollen vor der Array-Hydrierung übertragen.
