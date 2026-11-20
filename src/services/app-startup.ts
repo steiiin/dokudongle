@@ -5,6 +5,7 @@ import { reactive, readonly, watch, type DeepReadonly } from 'vue'
 
 import { useDokuStore } from '@/store/doku'
 import { initStorage } from '@/store/persistence'
+import { useOutputSettingsStore } from '@/store/output-settings'
 
 export type StartupStatus = 'loading' | 'ready' | 'error'
 
@@ -73,7 +74,10 @@ const defaultDependencies: AppStartupDependencies = {
     watch(() => store.generatedProtocol, () => store.reconcilePreview())
     return store
   },
-  initializeStorage: initStorage,
+  initializeStorage: async () => {
+    await initStorage()
+    await useOutputSettingsStore().hydrate()
+  },
   registerAppStateChange,
   scheduleAfterPaint,
   showError: showErrorToast,

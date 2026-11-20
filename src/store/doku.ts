@@ -5,8 +5,10 @@ import { Capacitor } from '@capacitor/core'
 import { Device as CapacitorDevice } from '@capacitor/device'
 import { defineStore } from 'pinia'
 
-import { toRaw, type UnwrapRef } from 'vue'
+import { toRaw, watch, type UnwrapRef } from 'vue'
 import { protocolValues } from '@/utils/protocol-values'
+import { useOutputSettingsStore } from '@/store/output-settings'
+import { assembleOutputGroups, outputFromFragments, type GeneratedOutput, type OutputBlockId, type OutputGroupText, type OutputProgress } from '@/utils/separated-output'
 import { resetQuickies } from '@/data/quickies'
 import { discardReanimationSnapshot, setReanimation } from '@/store/reanimation'
 import { TEXT_AREA_BLOCK_SOURCES, createTextAreaBlockSourceState, resolveTextAreaBlocks } from '@/data/blocks/text-area-blocks'
@@ -51,6 +53,12 @@ import { editPreview, hasPreviewEdits, hydratePreview, reconcilePreview, resolve
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function hydrateOutputProgress(value: unknown): OutputProgress | null {
+  if (!isRecord(value) || typeof value.revision !== 'string' || !Array.isArray(value.sentGroupIds)
+    || !value.sentGroupIds.every(id => typeof id === 'string')) return null
+  return { revision: value.revision, sentGroupIds: [...new Set(value.sentGroupIds as string[])] }
 }
 
 function hydrateLikeTemplate<T>(template: T, input: unknown): T {
@@ -491,6 +499,7 @@ function archiveProtocol(
 // Vorgänge außerhalb des reaktiven Zustands einreihen. Die Speicherung liest den aktuellen Zustand,
 // sobald sie an der Reihe ist; so kann eine vorgemerkte automatische Speicherung keine abgeschlossene Wiederherstellung überschreiben.
 const storageQueues = new WeakMap<object, Promise<unknown>>()
+const outputProgressObservers = new WeakSet<object>()
 function serializeStorage<T>(store: object, operation: () => Promise<T>): Promise<T> {
   const pending = storageQueues.get(store) ?? Promise.resolve()
   const result = pending.then(operation)
@@ -506,9 +515,11 @@ function persistedProtocolState(state: {
   lastProtocolResetAt: string
   lastProtocolOpenedAt: string
   lastProtocolSentAt: string | null
+  outputProgress?: OutputProgress | null
 }): PersistedDokuState {
   return {
     schemaVersion: DOKU_SCHEMA_VERSION,
+    outputProgress: state.outputProgress ? toPersistable(state.outputProgress) : null,
     updatedAt: new Date().toISOString(),
     lastProtocolResetAt: state.lastProtocolResetAt,
     lastProtocolOpenedAt: state.lastProtocolOpenedAt,
@@ -634,6 +645,7 @@ export const useDokuStore = defineStore('doku', {
 
     doku: resetProtocolState(),
     preview: null as PreviewDocument | null,
+    outputProgress: null as OutputProgress | null,
     protocolHistory: [] as ProtocolHistoryEntry[],
     activeHistoryEntryId: null as string | null,
     isProtocolChanging: false,
@@ -897,6 +909,36 @@ export const useDokuStore = defineStore('doku', {
     },
 
     // Protokoll
+    observeOutputProgress() {
+      if (outputProgressObservers.has(this)) return
+      outputProgressObservers.add(this)
+      watch(() => this.outputRevision, () => this.invalidateOutputProgress(), { flush: 'sync' })
+    },
+    invalidateOutputProgress() {
+      if (this.outputProgress && this.outputProgress.revision !== this.outputRevision) {
+        this.outputProgress = null
+        this.lastProtocolSentAt = null
+      }
+    },
+    async markOutputGroupSent(id: string, revision: string, protocol: UnwrapRef<Protocol>) {
+      this.observeOutputProgress()
+      await serializeStorage(this, async () => {
+        if (this.doku !== protocol || revision !== this.outputRevision) return
+        const groups = this.outputGroups.filter(group => group.text.trim())
+        if (!groups.some(group => group.id === id)) return
+        const outputProgress = { revision, sentGroupIds: [...new Set([...this.sentOutputGroupIds, id])] }
+        const complete = groups.every(group => outputProgress.sentGroupIds.includes(group.id))
+        const lastProtocolSentAt = complete ? new Date().toISOString() : null
+        const protocolHistory = updateHistoryEntry(this.doku, this.protocolHistory, this.activeHistoryEntryId, this.previewDocument)
+        await saveDokuState(persistedProtocolState({ ...this.$state, preview: this.previewDocument,
+          outputProgress, lastProtocolSentAt, protocolHistory }))
+        // Input can change while storage is busy. Never mark a different revision.
+        if (this.doku !== protocol || revision !== this.outputRevision) return
+        this.outputProgress = outputProgress
+        this.lastProtocolSentAt = lastProtocolSentAt
+        this.protocolHistory = protocolHistory
+      })
+    },
     reconcilePreview() {
       const next = this.previewDocument
       if (next !== this.preview) this.preview = next
@@ -925,6 +967,7 @@ export const useDokuStore = defineStore('doku', {
             lastProtocolResetAt: new Date().toISOString(),
             lastProtocolOpenedAt: new Date().toISOString(),
             lastProtocolSentAt: null,
+            outputProgress: null,
           }
           await appendProtocolAuditEntry(createProtocolAuditEntry(this.doku, preview.text))
           await saveDokuState(persistedProtocolState(next))
@@ -955,6 +998,7 @@ export const useDokuStore = defineStore('doku', {
             lastProtocolResetAt: new Date().toISOString(),
             lastProtocolOpenedAt: new Date().toISOString(),
             lastProtocolSentAt: null,
+            outputProgress: null,
           }
           await saveDokuState(persistedProtocolState(next))
           resetQuickies()
@@ -1199,6 +1243,7 @@ export const useDokuStore = defineStore('doku', {
         const next = {
           doku: doku ?? resetProtocol(),
           preview: doku ? hydratePreview(persistedState?.preview) : null,
+          outputProgress: doku ? hydrateOutputProgress(persistedState?.outputProgress) : null,
           protocolHistory,
           activeHistoryEntryId: doku && typeof persistedState?.activeHistoryEntryId === 'string'
             && protocolHistory.some(entry => entry.id === persistedState.activeHistoryEntryId)
@@ -1222,6 +1267,8 @@ export const useDokuStore = defineStore('doku', {
         resetQuickies()
         discardReanimationSnapshot(this.doku)
         this.$patch(state => Object.assign(state, next))
+        this.observeOutputProgress()
+        this.invalidateOutputProgress()
         if (temporary) await removeTemporaryProtocolState()
       })
     },
@@ -1245,9 +1292,12 @@ export const useDokuStore = defineStore('doku', {
         if (protocolHistory !== this.protocolHistory) this.protocolHistory = protocolHistory
       })
     },
-    async sendProtocol(text?: string) {
+    async sendProtocol(text?: string, options: { markComplete?: boolean; groupId?: string; revision?: string } = {}) {
       const protocolText = text ?? this.reconcilePreview().text
       if (!protocolText.trim()) return false
+      const staleGroup = () => options.groupId && (!this.separatedOutputEnabled || options.revision !== this.outputRevision
+        || this.outputGroups.find(group => group.id === options.groupId)?.text !== protocolText)
+      if (staleGroup()) return false
       if (this.connection.isSavingSettings || this.connection.isConnecting || this.connection.isTransmitting || this.connection.isUpdatingFirmware) return false
       this.connection.isTransmitting = true
       this.connection.transmissionPaused = false
@@ -1263,7 +1313,7 @@ export const useDokuStore = defineStore('doku', {
 
       try {
         await this.checkConnection()
-        if (!deviceId || !wasConnected || controller.signal.aborted) return false
+        if (!deviceId || !wasConnected || controller.signal.aborted || staleGroup()) return false
         const events = textToHidEvents(stripNotSupported(protocolText))
         this.connection.transmissionLength = events.length
         await transmitDongleEvents({
@@ -1280,7 +1330,11 @@ export const useDokuStore = defineStore('doku', {
         })
         controller.signal.throwIfAborted()
         // Die Sperre beibehalten, bis der Abschluss für genau dieses Protokoll gespeichert ist.
-        await this.markProtocolSent(Date.now(), protocol)
+        if (options.groupId && options.revision) {
+          await this.markOutputGroupSent(options.groupId, options.revision, protocol)
+        } else if (options.markComplete !== false) {
+          await this.markProtocolSent(Date.now(), protocol)
+        }
         return true
       } catch (error) {
         if (!controller.signal.aborted) console.warn('Protokoll konnte nicht gesendet werden.', error)
@@ -1309,6 +1363,18 @@ export const useDokuStore = defineStore('doku', {
 
   },
   getters: {
+    separatedOutputEnabled(): boolean {
+      return useOutputSettingsStore().config.enabled
+    },
+    outputGroups(): OutputGroupText[] {
+      return assembleOutputGroups(useOutputSettingsStore().config.groups, this.generatedOutput, this.effectiveProtocolText)
+    },
+    outputRevision(): string {
+      return JSON.stringify([this.lastProtocolResetAt, this.generatedOutput, this.effectiveProtocolText, useOutputSettingsStore().config])
+    },
+    sentOutputGroupIds(): string[] {
+      return this.outputProgress?.revision === this.outputRevision ? this.outputProgress.sentGroupIds : []
+    },
     hasProtocolData: (state): boolean => containsProtocolData(state.doku) || hasPreviewEdits(state.preview),
     previewDocument(): PreviewDocument {
       return reconcilePreview(this.preview, this.generatedProtocol)
@@ -1441,40 +1507,43 @@ export const useDokuStore = defineStore('doku', {
     freeformText(state): Record<string, string> {
       return composedFreeformText(state.doku)
     },
-    generatedProtocol(state): string {
-      let text = ''
+    generatedProtocol(): string {
+      return this.generatedOutput.text
+    },
+    generatedOutput(state): GeneratedOutput {
+      const fragments: { block: OutputBlockId; text: string }[] = []
+      const add = (block: OutputBlockId, text: string) => { fragments.push({ block, text }) }
 
       // Besonderer Einsatzverlauf: NEF
       if (state.doku.course == ProtocolCourse.NEF_VOR_ORT) {
-        return multiline([
+        return outputFromFragments([{ block: 'situation', text: multiline([
           'Notarzt bereits vor Ort.',
           'Keine eigenverantwortlichen Maßnahmen durchgeführt.',
           'Einsatzdokumentation im Notarztprotokoll.'
-        ])
+        ]) }])
       }
 
       // Situation
-      text += breakDoku([
-        textIf(state.doku.setting.generateText(), this.context.requireSceneDetails),
-        placeholder(this.freeformText.situation, 'Situation'),
-      ], true)
+      const setting = textIf(state.doku.setting.generateText(), this.context.requireSceneDetails).trim()
+      add('setting', setting ? `${setting}\n` : '')
+      add('situation', breakDoku(placeholder(this.freeformText.situation, 'Situation'), true))
 
 
       if (this.context.requireABCDE)
       {
 
         // ABCDE
-        text += breakDoku([
+        add('abcde', breakDoku([
           state.doku.Xabcde.generateText(this.freeformText['Xabcde.description']),
           state.doku.xAbcde.generateText(),
           state.doku.xaBcde.generateText(),
           state.doku.xabCde.generateText(),
           state.doku.xabcDe.generateText(this.intoxicationSummary),
           state.doku.xabcdE.generateText(),
-        ], true)
+        ], true))
 
         // STU
-        text += textIf(breakDoku([
+        add('abcde', textIf(breakDoku([
           state.doku.sampler.symptoms.trauma.head.generateText(),
           state.doku.sampler.symptoms.trauma.spine.generateText(),
           state.doku.sampler.symptoms.trauma.thorax.generateText(),
@@ -1483,7 +1552,7 @@ export const useDokuStore = defineStore('doku', {
           state.doku.sampler.symptoms.trauma.injuries.length === 1
             ? state.doku.sampler.symptoms.trauma.injuries[0] + '.'
             : state.doku.sampler.symptoms.trauma.injuries.map(injury => `- ${injury}`).join('\n'),
-        ], true), this.context.isTrauma)
+        ], true), this.context.isTrauma))
 
       }
 
@@ -1491,37 +1560,37 @@ export const useDokuStore = defineStore('doku', {
       {
 
         // SAMPLE
-        text += textIf(breakDoku([
+        add('sampler', textIf(breakDoku([
           textIf(prefix('Neuro:', state.doku.xabcDe.neuro.value.symptomsText), state.doku.xabcDe.neuro.isAssessed),
           this.freeformText['sampler.symptoms.additionalSymptoms'],
-        ], true), this.context.requireSampleSymptoms)
-        text += breakDoku([
+        ], true), this.context.requireSampleSymptoms))
+        add('sampler', breakDoku([
           state.doku.sampler.allergies.generateText(),
           state.doku.sampler.medication.generateText(),
-        ], true)
-        text += breakDoku(this.freeformText['sampler.pler.PLER'], true)
-        text += breakDoku(state.doku.sampler.contacts.generateText(), true)
-        text += breakDoku(state.doku.sampler.representation.generateText(), true)
+        ], true))
+        add('sampler', breakDoku(this.freeformText['sampler.pler.PLER'], true))
+        add('contacts', breakDoku(state.doku.sampler.contacts.generateText(), true))
+        add('representation', breakDoku(state.doku.sampler.representation.generateText(), true))
 
       }
 
       // BEHANDLUNG
-      text += textIf(
+      add('measures', textIf(
         breakDoku(
           [
             state.doku.saatreats.getBlock(),
             state.doku.saamed.getBlock()
           ], true
         ), this.context.allowInterventions
-      )
-      text += breakDoku(
+      ))
+      add('course', breakDoku(
         this.context.requireTasks
         ? placeholder(this.freeformText.treatment, 'Verlauf')
-        : this.freeformText.treatment.trim(), true)
-      text += textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags)
-      text += textIf(breakDoku(state.doku.redflags.getRedflagBlock(state.doku.sampler.representation.explanationContext), true), this.context.requireRedflags)
+        : this.freeformText.treatment.trim(), true))
+      add('measures', textIf(breakDoku(state.doku.redflags.getConsentBlock(), true), this.context.requireRedflags))
+      add('explanation', textIf(breakDoku(state.doku.redflags.getRedflagBlock(state.doku.sampler.representation.explanationContext), true), this.context.requireRedflags))
 
-      return text.trim()
+      return outputFromFragments(fragments)
 
     },
 

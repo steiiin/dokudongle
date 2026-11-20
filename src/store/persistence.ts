@@ -2,6 +2,7 @@ import { Storage } from '@ionic/storage'
 import type { UnwrapRef } from 'vue'
 import type { Protocol } from '@/types/protocol'
 import type { PreviewDocument } from '@/utils/preview-document'
+import type { OutputProgress } from '@/utils/separated-output'
 
 // ############################################################################
 
@@ -13,6 +14,7 @@ export const DOKU_SCHEMA_VERSION = 1;
 // ############################################################################
 
 export interface PersistedDokuState {
+  outputProgress?: OutputProgress | null
   schemaVersion?: number
   updatedAt?: string
   lastProtocolResetAt?: string
