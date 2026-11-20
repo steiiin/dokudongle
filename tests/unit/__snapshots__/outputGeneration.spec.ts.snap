@@ -1,0 +1,75 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`legacy protocol text compatibility > einweisung output 1`] = `
+"Patient sitzend angetroffen. Beschwerden seit gestern.
+
+A: Mundraum frei.
+B: Keine Luftnot; Atmung normal.
+C: Haut rosig/warm/trocken; Puls iO; keine Brustenge/-schmerzen.
+D: Wach, orientiert.
+E: Temp. iO.
+
+Letzte Mahlzeit vor zwei Stunden.
+
+Transport ohne Besonderheiten. Übergabe in der Notaufnahme.
+
+Pat. über erforderliche invasive Maßnahmen aufgeklärt; Pat. eingewilligt."
+`;
+
+exports[`legacy protocol text compatibility > nef output 1`] = `
+"Notarzt bereits vor Ort. 
+Keine eigenverantwortlichen Maßnahmen durchgeführt. 
+Einsatzdokumentation im Notarztprotokoll."
+`;
+
+exports[`legacy protocol text compatibility > no_emergency_call output 1`] = `
+"Wohnung; gehfähig.
+Patient sitzend angetroffen. Beschwerden seit gestern.
+
+Letzte Mahlzeit vor zwei Stunden.
+
+Transport ohne Besonderheiten. Übergabe in der Notaufnahme."
+`;
+
+exports[`legacy protocol text compatibility > normal output 1`] = `
+"Wohnung; gehfähig.
+Patient sitzend angetroffen. Beschwerden seit gestern.
+
+A: Mundraum frei.
+B: Keine Luftnot; Atmung normal.
+C: Haut rosig/warm/trocken; Puls iO; keine Brustenge/-schmerzen.
+D: Wach, orientiert.
+E: Temp. iO.
+
+Letzte Mahlzeit vor zwei Stunden.
+
+Transport ohne Besonderheiten. Übergabe in der Notaufnahme.
+
+Pat. über erforderliche invasive Maßnahmen aufgeklärt; Pat. eingewilligt."
+`;
+
+exports[`legacy protocol text compatibility > trauma output 1`] = `
+"Wohnung; gehfähig.
+Patient sitzend angetroffen. Beschwerden seit gestern.
+
+A: Mundraum frei.
+B: Keine Luftnot; Atmung normal.
+C: Haut rosig/warm/trocken; Puls iO; keine Brustenge/-schmerzen.
+D: Wach, orientiert.
+E: Temp. iO.
+
+- Prellung Arm
+- Schürfwunde Bein
+
+Letzte Mahlzeit vor zwei Stunden.
+
+Transport ohne Besonderheiten. Übergabe in der Notaufnahme.
+
+Pat. über erforderliche invasive Maßnahmen aufgeklärt; Pat. eingewilligt."
+`;
+
+exports[`legacy protocol text compatibility > verlegung output 1`] = `
+"Patient sitzend angetroffen. Beschwerden seit gestern.
+
+Transport ohne Besonderheiten. Übergabe in der Notaufnahme."
+`;

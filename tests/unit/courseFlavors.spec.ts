@@ -4,12 +4,10 @@ import { nextTick } from 'vue'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import DodoInputTextArea from '@/components/inputs/DodoInputTextArea.vue'
-import DodoToggleButton from '@/components/inputs/DodoToggleButton.vue'
 import DodoToggleChip from '@/components/inputs/DodoToggleChip.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState } from '@/store/persistence'
 import { ProtocolCourse } from '@/types/protocol'
-import DetailLevelCard from '@/views/doku/DetailLevelCard.vue'
 import FlavorsCard from '@/views/doku/FlavorsCard.vue'
 import SituationCard from '@/views/doku/SituationCard.vue'
 import TaskCourseCard from '@/views/doku/tasks/TaskCourseCard.vue'
@@ -80,22 +78,6 @@ describe('Verlegung and Einweisung flavors', () => {
     expect(store.doku.course).toBe(ProtocolCourse.NEF_VOR_ORT)
     expect(store.doku.flavors.verlegung).toBe(false)
     expect(store.doku.flavors.einweisung).toBe(false)
-  })
-
-  test('keeps only Transport and NEF in the course selector', () => {
-    const wrapper = shallowMount(DetailLevelCard, {
-      global: { renderStubDefaultSlot: true },
-    })
-    const courses = wrapper.findAllComponents(DodoToggleButton)
-
-    expect(courses.map((course) => course.text().trim())).toEqual([
-      'Behandlung / Transport',
-      'NEF vor Ort (keine Maßnahmen)',
-    ])
-    expect(courses.map((course) => course.props('value'))).toEqual([
-      ProtocolCourse.TRANSPORT,
-      ProtocolCourse.NEF_VOR_ORT,
-    ])
   })
 
   test('keeps the blue flavors mutually exclusive without clearing clinical data', () => {

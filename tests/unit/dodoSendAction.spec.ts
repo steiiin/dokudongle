@@ -1,4 +1,4 @@
-import { IonButton, IonFabButton, IonSpinner } from '@ionic/vue'
+import { IonButton, IonFabButton, IonPopover, IonSpinner } from '@ionic/vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import type OpenAI from 'openai'
 import { webcrypto } from 'node:crypto'
@@ -9,6 +9,7 @@ import DodoProtocolCheckModal from '@/components/protocol/DodoProtocolCheckModal
 import DodoSendAction from '@/components/dongle/DodoSendAction.vue'
 import { ProtocolCheckService, type ProtocolCheckResult } from '@/services/protocol-check'
 import TabPagePreview from '@/views/TabPagePreview.vue'
+import type { OutputGroupText } from '@/utils/separated-output'
 
 const mocks = vi.hoisted(() => ({
   getNetworkStatus: vi.fn(),
@@ -20,6 +21,10 @@ const mocks = vi.hoisted(() => ({
   scrollToTop: vi.fn(),
   createAlert: vi.fn(),
   store: {
+    separatedOutputEnabled: false,
+    outputRevision: 'revision-1',
+    outputGroups: [] as OutputGroupText[],
+    sentOutputGroupIds: [] as string[],
     effectiveProtocolText: 'Generated protocol text',
     doku: { identity: 1 },
     isProtocolChanging: false,
@@ -115,6 +120,14 @@ describe('DodoSendAction protocol check', () => {
     vi.resetAllMocks()
     vi.stubGlobal('crypto', webcrypto)
     mocks.store.effectiveProtocolText = 'Generated protocol text'
+    mocks.store.separatedOutputEnabled = false
+    mocks.store.outputRevision = 'revision-1'
+    mocks.store.sentOutputGroupIds = []
+    mocks.store.outputGroups = [
+      { id: 'anamnesis', name: 'ANAMNESE', blocks: ['situation'], text: 'Edited anamnesis' },
+      { id: 'course', name: 'VERLAUF', blocks: ['course'], text: 'Edited course' },
+      { id: 'empty', name: 'EMPTY', blocks: [], text: '' },
+    ]
     mocks.store.doku = { identity: 1 }
     mocks.store.isDongleConnected = true
     mocks.store.isDongleConnecting = false
@@ -482,5 +495,93 @@ describe('DodoSendAction protocol check', () => {
     const wrapper = mountAction()
 
     expect(sendButton(wrapper).props('disabled')).toBe(true)
+  })
+
+  test('checks the entire protocol, opens a popover, and transmits only the chosen group', async () => {
+    mocks.store.separatedOutputEnabled = true
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(mocks.checkProtocol).toHaveBeenCalledWith('Generated protocol text')
+    expect(mocks.sendProtocol).not.toHaveBeenCalled()
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(true)
+    expect(wrapper.get('[data-output-group="empty"]').attributes('disabled')).toBe('true')
+    await wrapper.get('[data-output-group="anamnesis"]').trigger('click')
+    await flushPromises()
+    expect(mocks.sendProtocol).toHaveBeenCalledExactlyOnceWith('Edited anamnesis', {
+      markComplete: false, groupId: 'anamnesis', revision: 'revision-1',
+    })
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(true)
+    await wrapper.get('[data-output-group="course"]').trigger('click')
+    await flushPromises()
+    expect(mocks.checkProtocol).toHaveBeenCalledOnce()
+    expect(mocks.sendProtocol).toHaveBeenLastCalledWith('Edited course', expect.objectContaining({ groupId: 'course' }))
+  })
+
+  test.each(['warning', 'offline'] as const)('split output still requires send-anyway for %s', async mode => {
+    mocks.store.separatedOutputEnabled = true
+    if (mode === 'warning') mocks.checkProtocol.mockResolvedValue(findingResult)
+    else mocks.getNetworkStatus.mockResolvedValue({ connected: false })
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(false)
+    modal(wrapper).vm.$emit('send-anyway')
+    await flushPromises()
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(true)
+    expect(mocks.sendProtocol).not.toHaveBeenCalled()
+  })
+
+  test('shows remembered success, confirms resends, and retains marks across popover dismissal', async () => {
+    mocks.store.separatedOutputEnabled = true
+    mocks.store.sentOutputGroupIds = ['anamnesis']
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[data-output-group="anamnesis"]').attributes('aria-label')).toBe('ANAMNESE: Gesendet')
+    await wrapper.get('[data-output-group="anamnesis"]').trigger('click')
+    await flushPromises()
+    expect(mocks.createAlert).toHaveBeenCalledWith(expect.objectContaining({ header: 'Erneut senden?' }))
+    expect(mocks.sendProtocol).toHaveBeenCalledOnce()
+    wrapper.getComponent(IonPopover).vm.$emit('didDismiss')
+    await flushPromises()
+    expect(sendButton(wrapper).props('disabled')).toBe(false)
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[data-output-group="anamnesis"]').attributes('aria-label')).toContain('Gesendet')
+  })
+
+  test('hides the popover during transfer, prevents duplicates and reopens after cancellation', async () => {
+    mocks.store.separatedOutputEnabled = true
+    let finish!: (success: boolean) => void
+    mocks.sendProtocol.mockReturnValue(new Promise(resolve => { finish = resolve }))
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    const group = wrapper.get('[data-output-group="anamnesis"]')
+    await group.trigger('click')
+    await flushPromises()
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(false)
+    await group.trigger('click')
+    expect(mocks.sendProtocol).toHaveBeenCalledOnce()
+    finish(false)
+    await flushPromises()
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(true)
+    expect(wrapper.get('[data-output-group="anamnesis"]').attributes('aria-label')).toContain('Noch nicht gesendet')
+    expect(wrapper.text()).toContain('nicht vollständig gesendet')
+  })
+
+  test.each(['text', 'grouping', 'protocol'] as const)('invalidates an open group session after a %s change', async kind => {
+    mocks.store.separatedOutputEnabled = true
+    const wrapper = mountAction()
+    await sendButton(wrapper).trigger('click')
+    await flushPromises()
+    if (kind === 'text') reactive(mocks.store).effectiveProtocolText = 'Changed'
+    if (kind === 'grouping') reactive(mocks.store).outputRevision = 'revision-2'
+    if (kind === 'protocol') reactive(mocks.store).doku = { identity: 2 }
+    await flushPromises()
+    expect(wrapper.getComponent(IonPopover).props('isOpen')).toBe(false)
+    expect(mocks.sendProtocol).not.toHaveBeenCalled()
+    expect(sendButton(wrapper).props('disabled')).toBe(false)
   })
 })

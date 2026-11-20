@@ -1,5 +1,5 @@
 <template>
-  <div class="no-card">
+  <div class="no-card" style="margin-top: 1rem;">
     <ion-list>
 
       <ion-item lines="none" class="flavor-row"

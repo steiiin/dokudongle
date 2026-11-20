@@ -40,7 +40,6 @@ describe('TabPageDoku', () => {
     const wrapper = shallowMount(TabPageDoku, { global: { renderStubDefaultSlot: true } })
     const einsatz = wrapper.get('[data-doku-group="einsatz"]')
     expect(einsatz.find('identifikation-card-stub').exists()).toBe(true)
-    expect(einsatz.find('detail-level-card-stub').exists()).toBe(true)
     expect(einsatz.find('flavors-card-stub').exists()).toBe(true)
     expect(einsatz.find('setting-card-stub').exists()).toBe(true)
     expect(einsatz.find('situation-card-stub').exists()).toBe(true)

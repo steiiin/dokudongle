@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import ProtocolHistorySettingsCard from '@/views/settings/ProtocolHistorySettingsCard.vue'
 import SpellcheckerSettingsCard from '@/views/settings/SpellcheckerSettingsCard.vue'
 import DongleSettingsCard from '@/views/settings/DongleSettingsCard.vue'
+import SeparatedOutputSettingsCard from '@/views/settings/SeparatedOutputSettingsCard.vue'
 import DodoSendAction from '@/components/dongle/DodoSendAction.vue'
 import TabPageSettings from '@/views/TabPageSettings.vue'
 import TabsPage from '@/views/TabsPage.vue'
@@ -30,6 +31,7 @@ describe('Settings tab', () => {
     expect(wrapper.findComponent(DodoSendAction).exists()).toBe(true)
     expect(wrapper.getComponent(IonContent).findComponent(DongleSettingsCard).exists()).toBe(true)
     expect(wrapper.getComponent(IonContent).findAllComponents(DongleSettingsCard)).toHaveLength(1)
+    expect(wrapper.getComponent(IonContent).findAllComponents(SeparatedOutputSettingsCard)).toHaveLength(1)
     expect(wrapper.getComponent(IonContent).findAllComponents(SpellcheckerSettingsCard)).toHaveLength(1)
     expect(wrapper.getComponent(IonContent).findAllComponents(ProtocolHistorySettingsCard)).toHaveLength(1)
     expect(wrapper.find('dongle-firmware-card-stub').exists()).toBe(false)
