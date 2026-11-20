@@ -331,7 +331,7 @@ describe('ABCDE examination integration', () => {
     modal.getComponent(IonModal).vm.$emit('willDismiss')
     await nextTick()
     expect(modal.getComponent(IonModal).props('isOpen')).toBe(false)
-    expect(useDokuStore().doku.xabCde.ecg).toMatchObject({ assessed: true, value: 'SR' })
+    expect(useDokuStore().doku.xabCde.ecg).toMatchObject({ assessed: true, value: { rhythm: 'sinus', refinement: 'normo' } })
     await wrapper.get('[data-examination="ecg"] .remove-examination').trigger('click')
     expect(useDokuStore().doku.xabCde.ecg.assessed).toBe(false)
   })

@@ -1,3 +1,4 @@
+import { createEcgFinding, ecgText, ecgNeedsTreatment, type EcgFinding } from './ecg'
 import { assessmentActive, assessmentDefaults } from '../assessment'
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { onHigh, onNormal, textIf } from "@/utils/filter"
@@ -59,7 +60,7 @@ export class AbcdeCirculation {
   public capillaryRefill: '1s' | '2s' | '3s' | '>3s'
   public edema: AssessedValue<CirculationEdema>
 
-  public ecg: AssessedValue<'SR' | 'VHF' | string>
+  public ecg: AssessedValue<EcgFinding>
 
   // #####################################################################
 
@@ -94,7 +95,7 @@ export class AbcdeCirculation {
       grade: 'keine Ödeme',
       variation: 'bekannt',
     })
-    this.ecg = AssessedValue.unassessed('SR')
+    this.ecg = AssessedValue.unassessed(createEcgFinding())
   }
 
   // #####################################################################
@@ -104,7 +105,7 @@ export class AbcdeCirculation {
       || !this.pulse.rhythmic
       || this.pulse.peripheralStrength != 'gut'
       || this.rr != ''
-      || (this.ecg.assessed && !(this.ecg.value == 'SR' || this.ecg.value == 'VHF'))
+      || (this.ecg.assessed && ecgNeedsTreatment(this.ecg.value))
       || this.skin.color != 'rosig'
       || this.skin.centralTemp != 'warm'
       || this.skin.poorSkinTurgor
@@ -163,7 +164,7 @@ export class AbcdeCirculation {
 
   get ecgPSV(): ProtocolStateValue {
     if (!this.ecg.isAssessed) { return PSV('nicht durchgeführt', '') }
-    return PSV(this.ecg.value)
+    return PSV(ecgText(this.ecg.value))
   }
 
   get ecgState(): string {
