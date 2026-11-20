@@ -30,7 +30,6 @@
   <IonPopover ref="groupPopover" :is-open="isGroupPopoverOpen" :event="sendEvent" :dismiss-on-select="false"
     aria-label="Getrennte Ausgabe" @didDismiss="dismissGroups">
     <IonList class="group-list">
-      <IonListHeader>Getrennte Ausgabe</IonListHeader>
       <IonItem v-for="group in pendingGroups" :key="group.id" button
         :disabled="isSending || !group.text.trim() || !store.isDongleConnected || store.connection.isTransmitting"
         :data-output-group="group.id" @click="sendGroup(group)"
