@@ -25,13 +25,13 @@ describe('ECG protocol', () => {
     expect(ecgText(createEcgFinding())).toBe('EKG SR')
     expect(createEcgFinding().sgarbossa).toEqual(['no', 'no', 'no'])
     const lsb = updateEcg(createEcgFinding(), { type: 'bundleBranch', value: 'lsb' })
-    expect(ecgText(lsb)).toBe('EKG SR; LSB; Modifizierte Sgarbossa-Kriterien nicht erfüllt')
+    expect(ecgText(lsb)).toBe('EKG SR; LSB; Sgarbossa negativ')
     expect(normalizeEcgFinding({ ...lsb, sgarbossa: ['unknown', null, 'yes'] }).sgarbossa)
       .toEqual(['no', 'no', 'yes'])
     const finding = { ...createEcgFinding(), bundleBranch: 'lsb', sgarbossa: ['no', 'yes', 'unknown'],
       sves: true, ves: true, morphology: 'poly', st: 'changes', elevation: true, depression: true,
       elevationLeads: ['aVF', 'III', 'II'], depressionLeads: ['V2', 'V1'], notes: 'Frequenz 80/min' } as const
-    expect(ecgText(normalizeEcgFinding(finding))).toBe('EKG SR; LSB; Modifizierte Sgarbossa-Kriterien erfüllt; SVES; polymorphe VES; Frequenz 80/min')
+    expect(ecgText(normalizeEcgFinding(finding))).toBe('EKG SR; LSB; Sgarbossa erfüllt (konk. ST-Senkung); SVES; polymorphe VES; Frequenz 80/min')
     expect(ecgText({ ...createEcgFinding(), st: 'unassessable' })).toBe('EKG SR; ST-Strecke nicht beurteilbar')
   })
 
@@ -41,6 +41,11 @@ describe('ECG protocol', () => {
     expect(finding).toMatchObject({ rhythm: '', refinement: '', notes: text })
     expect(ecgText(finding)).toBe(text)
     expect(normalizeEcgFinding('VHF')).toMatchObject({ rhythm: 'af', refinement: 'normo' })
+  })
+
+  test('keeps ST findings without leads explicit', () => {
+    expect(ecgText({ ...createEcgFinding(), st: 'changes', elevation: true, depression: true }))
+      .toBe('EKG SR; ST-Hebung; ST-Senkung')
   })
 
   test('preserves the treatment hint for SR/VHF and includes new positive findings', () => {
@@ -88,7 +93,7 @@ describe('ECG transitions', () => {
     f = updateEcg(f, { type: 'lead', direction: 'depression', value: 'II' })
     expect(f.elevationLeads).toEqual([])
     expect(f.depressionLeads).toEqual(['II'])
-    expect(ecgText(f)).toBe('EKG SR; ST-Hebungen; ST-Senkungen in II')
+    expect(ecgText(f)).toBe('EKG SR; ST-Hebung; senkt in II')
     f = updateEcg(f, { type: 'st', value: 'depression' })
     expect(f.depressionLeads).toEqual([])
     f = updateEcg(f, { type: 'st', value: 'elevation' })
@@ -104,10 +109,10 @@ describe('ECG transitions', () => {
     let f = updateEcg(original, { type: 'leads', direction: 'elevation', value: ['III', 'II', 'II'] })
     expect(f).toMatchObject({ st: 'changes', elevation: true, elevationLeads: ['II', 'III'] })
     f = updateEcg(f, { type: 'leads', direction: 'depression', value: ['II', 'V1'] })
-    expect(ecgText(f)).toBe('EKG SR; ST-Hebungen in III; ST-Senkungen in II, V1')
+    expect(ecgText(f)).toBe('EKG SR; hebt in III; senkt in II, V1')
     f = updateEcg(f, { type: 'leads', direction: 'depression', value: ['II', 'III', 'V1'] })
     expect(f).toMatchObject({ elevation: false, elevationLeads: [], depression: true })
-    expect(ecgText(f)).toBe('EKG SR; ST-Senkungen in II, III, V1')
+    expect(ecgText(f)).toBe('EKG SR; senkt in II, III, V1')
     f = updateEcg(f, { type: 'leads', direction: 'depression', value: [] })
     expect(f).toMatchObject({ st: 'none', elevation: false, depression: false, depressionLeads: [] })
     expect(ecgText(f)).toBe('EKG SR')
@@ -158,7 +163,7 @@ describe('ECG availability and hidden findings', () => {
         expect(normalizeEcgFinding(f)).toEqual(f)
         if (!sves) expect(ecgText(raw)).not.toContain('SVES')
         if (!ves) expect(ecgText(raw)).not.toContain('VES')
-        if (!hasSt) expect(ecgText(raw)).not.toContain('ST-')
+        if (!hasSt) expect(ecgText(raw)).not.toMatch(/hebt|senkt/)
       }
     }
   })
@@ -191,12 +196,12 @@ describe('ECG availability and hidden findings', () => {
     f = updateEcg(f, { type: 'pacingType', value: 'ventricular' })
     expect(f).toMatchObject({ ...emptySt, bundleBranch: 'none', sves: true, ves: true })
     f = updateEcg(f, { type: 'sgarbossa', index: 0, value: 'yes' })
-    expect(ecgText(f)).toContain('ventrikulär / AV-sequenziell stimuliert; Modifizierte Sgarbossa-Kriterien erfüllt')
+    expect(ecgText(f)).toContain('ventrikulär / AV-sequenziell stimuliert; Sgarbossa erfüllt (konk. ST-Hebung)')
     f = updateEcg(f, { type: 'pacingType', value: 'atrial' })
     expect(f).toMatchObject({ ...emptySt, bundleBranch: 'none', sgarbossa: ['no', 'no', 'no'] })
     f = updateEcg(f, { type: 'bundleBranch', value: 'lsb' })
     f = updateEcg(f, { type: 'sgarbossa', index: 1, value: 'yes' })
-    expect(ecgText(f)).toContain('nur atrial stimuliert; LSB; Modifizierte Sgarbossa-Kriterien erfüllt')
+    expect(ecgText(f)).toContain('nur atrial stimuliert; LSB; Sgarbossa erfüllt (konk. ST-Senkung)')
     f = updateEcg(f, { type: 'pacingType', value: 'ventricular' })
     expect(f.sgarbossa).toEqual(['no', 'no', 'no'])
     f = updateEcg(f, { type: 'sgarbossa', index: 2, value: 'yes' })
@@ -215,6 +220,15 @@ describe('ECG availability and hidden findings', () => {
 })
 
 describe('ECG frequency', () => {
+  test('formats a tachycardic range without a prefix and preserves matching free text', () => {
+    const finding: EcgFinding = {
+      ...createEcgFinding(), rhythm: 'af', refinement: 'tachy', frequency: { lower: 120, upper: 150 },
+    }
+    expect(ecgText(finding)).toBe('EKG TAA; 120-150/min')
+    expect(ecgText({ ...finding, notes: 'Frequenz 120-150/min' }))
+      .toBe('EKG TAA; 120-150/min; Frequenz 120-150/min')
+  })
+
   test('shows only applicable controls with rhythm-derived knob modes and presets', () => {
     for (const rhythm of ['', 'sinus', 'af', 'flutter', 'paced', 'av', 'ventricular', 'arrest'] as const) {
       const refinements: (EcgRefinement | '')[] = ['', ...(rhythm ? refinementOptions[rhythm].map(o => o.value) : [])]
@@ -235,7 +249,7 @@ describe('ECG frequency', () => {
         expect(config).toEqual({ min, max, step: 5, dualKnobs,
           preset: dualKnobs ? { lower: min, upper: max } : brady ? 50 : tachy ? 150 : 60 })
         expect(ecgFrequencyConfig({ ...f, ...{ sves: true, ves: true } })).toEqual(config)
-        expect(ecgText(f)).not.toContain('Frequenz')
+        expect(ecgText(f)).not.toContain('/min')
       }
     }
   })
@@ -264,11 +278,11 @@ describe('ECG frequency', () => {
     expect(f.frequency).toBeNull()
     expect(ecgText(f)).toBe('Sinusbradyk.')
     f = updateEcg(f, { type: 'frequency', value: 45 })
-    expect(ecgText(f)).toBe('Sinusbradyk; Frequenz 45/min')
+    expect(ecgText(f)).toBe('Sinusbradyk; 45/min')
     f = updateEcg(f, { type: 'extrasystoles', value: 'ves' })
     f = updateEcg(f, { type: 'bundleBranch', value: 'rsb' })
     f = updateEcg(f, { type: 'notes', value: 'Kontrolle' })
-    expect(ecgText(f)).toBe('Sinusbradyk; RSB; VES; Frequenz 45/min; Kontrolle')
+    expect(ecgText(f)).toBe('Sinusbradyk; RSB; VES; 45/min; Kontrolle')
     for (const value of ['tachy', 'normo', 'brady'] as const) {
       expect(updateEcg(f, { type: 'refinement', value }).frequency).toBeNull()
     }
@@ -277,7 +291,7 @@ describe('ECG frequency', () => {
     }
     expect(f.frequency).toBe(45)
     const af = normalizeEcgFinding({ ...f, rhythm: 'af', frequency: { lower: 15, upper: 20 } })
-    expect(ecgText(af)).toContain('Frequenz 15-20/min; Kontrolle')
+    expect(ecgText(af)).toContain('15-20/min; Kontrolle')
     expect(updateEcg(createEcgFinding(), { type: 'frequency', value: 50 }).frequency).toBeNull()
     const paced = normalizeEcgFinding({ ...f, rhythm: 'paced' })
     expect(updateEcg(paced, { type: 'pacingType', value: 'ventricular' }).frequency).toBe(45)
@@ -299,4 +313,20 @@ describe('modified Sgarbossa truth table', () => {
     return [values, positives > 0 ? 'erfüllt' : 'nicht erfüllt'] as [SgarbossaAnswers, string]
   })))
   test.each(cases)('%j → %s', (values, expected) => expect(sgarbossaResult(values)).toBe(expected))
+
+  test.each<[SgarbossaAnswers, string]>([
+    [['no', 'no', 'no'], 'Sgarbossa negativ'],
+    [['yes', 'no', 'no'], 'Sgarbossa erfüllt (konk. ST-Hebung)'],
+    [['no', 'yes', 'no'], 'Sgarbossa erfüllt (konk. ST-Senkung)'],
+    [['no', 'no', 'yes'], 'Sgarbossa erfüllt (disk. ST-Hebung)'],
+    [['yes', 'yes', 'no'], 'Sgarbossa erfüllt (konk. ST-Hebung, konk. ST-Senkung)'],
+    [['yes', 'no', 'yes'], 'Sgarbossa erfüllt (konk. ST-Hebung, disk. ST-Hebung)'],
+    [['no', 'yes', 'yes'], 'Sgarbossa erfüllt (konk. ST-Senkung, disk. ST-Hebung)'],
+    [['yes', 'yes', 'yes'], 'Sgarbossa erfüllt (konk. ST-Hebung, konk. ST-Senkung, disk. ST-Hebung)'],
+  ])('reports %j as %s in both applicable contexts', (sgarbossa, expected) => {
+    expect(ecgText({ ...createEcgFinding(), bundleBranch: 'lsb', sgarbossa }))
+      .toBe(`EKG SR; LSB; ${expected}`)
+    expect(ecgText({ ...createEcgFinding(), rhythm: 'paced', pacingType: 'ventricular', sgarbossa }))
+      .toBe(`EKG Schrittmacherrhythmus; ventrikulär / AV-sequenziell stimuliert; ${expected}`)
+  })
 })

@@ -229,20 +229,22 @@ const rhythmTexts: Record<EcgRhythm, Partial<Record<EcgRefinement | '', string>>
 export function ecgText(finding: EcgFinding): string {
   const f = normalizeEcgFinding(finding)
   const result = ecgAvailability(f).sgarbossa ? sgarbossaResult(f.sgarbossa) : ''
-  const stText = (direction: StDirection, label: string) => {
+  const positiveCriteria = ['konk. ST-Hebung', 'konk. ST-Senkung', 'disk. ST-Hebung']
+    .filter((_, index) => f.sgarbossa[index] === 'yes')
+  const stText = (direction: StDirection, verb: string, fallback: string) => {
     const leads = direction === 'elevation' ? f.elevationLeads : f.depressionLeads
-    return f[direction] ? `${label}${leads.length ? ` in ${leads.join(', ')}` : ''}` : ''
+    return f[direction] ? leads.length ? `${verb} in ${leads.join(', ')}` : fallback : ''
   }
   const rhythmText = f.rhythm ? rhythmTexts[f.rhythm][f.refinement] ?? rhythmTexts[f.rhythm]['']! : ''
   const additions = concatDoku([
     f.pacingType === 'atrial' ? 'nur atrial stimuliert' : f.pacingType === 'ventricular' ? 'ventrikulär / AV-sequenziell stimuliert' : '',
     f.bundleBranch === 'none' ? '' : f.bundleBranch.toUpperCase(),
-    result ? `Modifizierte Sgarbossa-Kriterien ${result}` : '',
+    result ? result === 'erfüllt' ? `Sgarbossa erfüllt (${positiveCriteria.join(', ')})` : 'Sgarbossa negativ' : '',
     f.sves ? 'SVES' : '',
     f.ves ? f.morphology === 'mono' ? 'monomorphe VES' : f.morphology === 'poly' ? 'polymorphe VES' : 'VES' : '',
-    stText('elevation', 'ST-Hebungen'), stText('depression', 'ST-Senkungen'),
+    stText('elevation', 'hebt', 'ST-Hebung'), stText('depression', 'senkt', 'ST-Senkung'),
     f.st === 'unassessable' ? 'ST-Strecke nicht beurteilbar' : '',
-    f.frequency !== null ? `Frequenz ${ecgFrequencyText(f.frequency)}` : '',
+    f.frequency !== null ? ecgFrequencyText(f.frequency) : '',
   ], false)
   // Preserve rhythm abbreviations and legacy free text when no joining is needed.
   if (!rhythmText && !additions) return f.notes
