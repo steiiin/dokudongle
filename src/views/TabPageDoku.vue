@@ -22,9 +22,8 @@
         <section data-doku-group="einsatz" aria-label="Einsatz">
           <DodoContainerCard title="Einsatz" card-in-card>
             <IdentifikationCard />
-            <DodoContainerCard title="Protokoll">
-              <DetailLevelCard />
-              <FlavorsCard v-show="isTransport && ctx.requireFlavors" />
+            <DodoContainerCard title="Protokoll" v-show="isTransport && ctx.requireFlavors">
+              <FlavorsCard />
             </DodoContainerCard>
             <SettingCard v-show="isTransport && ctx.requireSceneDetails" />
             <SituationCard v-show="isTransport" />
@@ -51,7 +50,6 @@
 
 <script setup lang="ts">
 
-import DetailLevelCard from './doku/DetailLevelCard.vue'
 import FlavorsCard from './doku/FlavorsCard.vue'
 import DodoTextSuggestionHost from '@/components/text-assist/DodoTextSuggestionHost.vue'
 import DodoBlockToolbar from '@/components/ui/DodoBlockToolbar.vue'
