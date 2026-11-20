@@ -21,7 +21,7 @@
       <div id="container" ref="dokuContainer">
 
         <section data-doku-group="einsatz" aria-label="Einsatz">
-          <DodoContainerCard title="Einsatz" card-in-card>
+          <DodoContainerCard title="" card-in-card>
             <DodoContainerCard title="Protokoll">
               <IonItem class="protocol-age" :lines="isTransport && ctx.requireFlavors ? 'full' : 'none'">
                 <IdentifikationCard />
