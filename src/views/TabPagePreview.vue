@@ -1,6 +1,6 @@
 <template>
   <IonPage>
-    <IonHeader>
+    <IonHeader :mode="mainHeaderMode" class="main-app-header">
       <IonToolbar>
         <div class="with-badge">
           <IonTitle>Vorschau</IonTitle>
@@ -48,7 +48,9 @@ import protocolCheckService, {
   type ProtocolCheckResult,
 } from '@/services/protocol-check'
 import { useDokuStore } from '@/store/doku'
+import { getMainHeaderMode } from '@/utils/ionic-mode'
 import { computed, ref, watch } from 'vue'
+const mainHeaderMode = getMainHeaderMode()
 const store = useDokuStore()
 
 const localPreview = computed(() => store.effectiveProtocolText)

@@ -37,7 +37,7 @@ const emit = defineEmits<{ navigate: [id: DokuGroupId] }>()
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
-  margin: 8px max(12px, var(--ion-safe-area-right, 0px)) 8px max(12px, var(--ion-safe-area-left, 0px));
+  margin-block: 8px;
   border-radius: 24px;
   background: var(--ion-card-background, var(--ion-background-color, #fff));
   color: var(--ion-text-color, #000);

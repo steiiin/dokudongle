@@ -1,6 +1,6 @@
 <template>
   <IonPage>
-    <IonHeader class="ion-no-border">
+    <IonHeader :mode="mainHeaderMode" class="main-app-header ion-no-border">
       <IonToolbar>
         <div class="with-badge">
           <IonTitle>Eingabe</IonTitle>
@@ -12,12 +12,13 @@
       ref="dokuContent"
       fixed-slot-placement="before"
       :class="{ 'dongle-connecting': store.isDongleConnecting }"
+      :style="{ '--doku-content-width': dokuContentWidth }"
     >
       <div slot="fixed" class="position-toolbar-vignette" aria-hidden="true" />
       <DodoBlockToolbar slot="fixed" :current="current" :previous="previous" :next="next"
         :edited="editedGroups[current.id]" @navigate="navigate" />
 
-      <div id="container">
+      <div id="container" ref="dokuContainer">
 
         <section data-doku-group="einsatz" aria-label="Einsatz">
           <DodoContainerCard title="Einsatz" card-in-card>
@@ -66,7 +67,7 @@ import TasksContainerCard from './doku/TasksContainerCard.vue'
 
 // ############################################################################
 
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { ProtocolCourse } from '@/types/protocol'
 import { provideTextSuggestionScope } from '@/services/text-assist/text-suggestions'
@@ -74,9 +75,24 @@ import { editedDokuGroups, visibleDokuGroups } from '@/utils/doku-groups'
 import { useDokuGroupNavigation } from '@/composables/useDokuGroupNavigation'
 
 import { useDokuStore } from '@/store/doku'
+import { getMainHeaderMode } from '@/utils/ionic-mode'
+const mainHeaderMode = getMainHeaderMode()
 const store = useDokuStore()
 const ctx = computed(() => store.context)
 const dokuContent = ref<{ $el?: HTMLIonContentElement } | null>(null)
+const dokuContainer = ref<HTMLElement | null>(null)
+const dokuContentWidth = ref<string>()
+let contentResizeObserver: ResizeObserver | undefined
+
+onMounted(() => {
+  // The fixed slot includes the scrollbar gutter; the cards' container does not.
+  contentResizeObserver = new ResizeObserver(([entry]) => {
+    if (entry.contentRect.width > 0) dokuContentWidth.value = `${entry.contentRect.width}px`
+  })
+  if (dokuContainer.value) contentResizeObserver.observe(dokuContainer.value)
+})
+onBeforeUnmount(() => contentResizeObserver?.disconnect())
+
 const isTransport = computed(() => store.doku.course !== ProtocolCourse.NEF_VOR_ORT)
 const groups = computed(() => visibleDokuGroups(store.doku.course, ctx.value))
 const editedGroups = computed(() => editedDokuGroups(store.doku))
@@ -90,9 +106,14 @@ provideTextSuggestionScope()
 <style lang="scss" scoped>
 
   ion-content {
+    --doku-group-margin-inline: 10px;
     /* 44px pill with 8px clearance above and below, scrolled away with the content. */
     --position-toolbar-space: 60px;
     --padding-top: var(--position-toolbar-space);
+  }
+
+  ion-content.ios {
+    --doku-group-margin-inline: 16px;
   }
 
   ion-content::part(scroll) {
@@ -111,7 +132,13 @@ provideTextSuggestionScope()
   .block-toolbar {
     top: 0;
     inset-inline: 0;
+    inline-size: calc(var(--doku-content-width, 100%) - 2 * var(--doku-group-margin-inline));
     z-index: 2;
+  }
+
+  .block-toolbar,
+  [data-doku-group] > ion-card {
+    margin-inline: var(--doku-group-margin-inline);
   }
 
   #container {

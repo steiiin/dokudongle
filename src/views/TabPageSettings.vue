@@ -1,6 +1,6 @@
 <template>
   <IonPage>
-    <IonHeader>
+    <IonHeader :mode="mainHeaderMode" class="main-app-header">
       <IonToolbar>
         <div class="with-badge">
           <IonTitle>Einstellungen</IonTitle>
@@ -26,7 +26,9 @@ import SpellcheckerSettingsCard from '@/views/settings/SpellcheckerSettingsCard.
 import DongleSettingsCard from '@/views/settings/DongleSettingsCard.vue'
 import SeparatedOutputSettingsCard from '@/views/settings/SeparatedOutputSettingsCard.vue'
 import { useDokuStore } from '@/store/doku'
+import { getMainHeaderMode } from '@/utils/ionic-mode'
 
+const mainHeaderMode = getMainHeaderMode()
 const store = useDokuStore()
 </script>
 

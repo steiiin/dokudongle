@@ -17,6 +17,7 @@
   </IonButtons>
 
   <DodoProtocolCheckModal
+    mode="md"
     :is-open="isCheckModalOpen"
     :is-checking="isChecking"
     :result="checkResult"
@@ -27,7 +28,7 @@
     @retry="retryCheck"
     @send-anyway="sendAnyway"
   />
-  <IonPopover ref="groupPopover" :is-open="isGroupPopoverOpen" :event="sendEvent" :dismiss-on-select="false"
+  <IonPopover ref="groupPopover" mode="md" :is-open="isGroupPopoverOpen" :event="sendEvent" :dismiss-on-select="false"
     aria-label="Getrennte Ausgabe" @didDismiss="dismissGroups">
     <IonList class="group-list">
       <IonItem v-for="group in pendingGroups" :key="group.id" button
