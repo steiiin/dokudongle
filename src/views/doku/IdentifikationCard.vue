@@ -14,7 +14,7 @@ const store = useDokuStore()
 </script>
 <style scoped>
 .no-card {
-  padding-block: .5rem;
-  padding-inline: 11px;
+  padding-block: 1rem;
+  padding-inline: 14px;
 }
 </style>

@@ -21,9 +21,11 @@
 
         <section data-doku-group="einsatz" aria-label="Einsatz">
           <DodoContainerCard title="Einsatz" card-in-card>
-            <IdentifikationCard />
-            <DodoContainerCard title="Protokoll" v-show="isTransport && ctx.requireFlavors">
-              <FlavorsCard />
+            <DodoContainerCard title="Protokoll">
+              <IonItem class="protocol-age" :lines="isTransport && ctx.requireFlavors ? 'full' : 'none'">
+                <IdentifikationCard />
+              </IonItem>
+              <FlavorsCard v-show="isTransport && ctx.requireFlavors" />
             </DodoContainerCard>
             <SettingCard v-show="isTransport && ctx.requireSceneDetails" />
             <SituationCard v-show="isTransport" />
@@ -114,6 +116,11 @@ provideTextSuggestionScope()
 
   #container {
     position: relative;
+  }
+
+  .protocol-age {
+    --padding-start: 0;
+    --inner-padding-end: 0;
   }
 
   [data-doku-group] {

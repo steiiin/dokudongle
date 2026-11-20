@@ -1,5 +1,5 @@
 <template>
-  <div class="no-card" style="margin-top: 1rem;">
+  <div class="no-card" style="margin-top: .5rem;">
     <ion-list>
 
       <ion-item lines="none" class="flavor-row"
@@ -86,7 +86,7 @@ const visibleFlavors = computed(() => {
 <style scoped>
 .no-card {
   padding-inline: 14px;
-  padding-bottom: 1rem;
+  padding-bottom: .75rem;
 }
 
 ion-list { padding: 0 }
