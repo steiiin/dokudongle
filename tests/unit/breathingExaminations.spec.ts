@@ -1,3 +1,4 @@
+import { normalizeAuscultation, setNormalAuscultation } from '@/types/protocol/abcde/auscultation'
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { useDokuStore } from '@/store/doku'
@@ -60,15 +61,18 @@ describe('Breathing assessment semantics', () => {
     vi.spyOn(store, 'context', 'get').mockReturnValue({ ...store.context, verbosity })
     const breathing = store.doku.xaBcde
     expect(breathing.auscultation.assessed).toBe(false)
-    breathing.auscultation.value.wheezing = 're.'
+    breathing.auscultation.value.findings.wheezing.right = { upper: true, base: true }
     expect(breathing.auscultationText).toBe('')
     expect(breathing.needTreatment).toBe(false)
     breathing.auscultation.assessed = true
-    expect(breathing.auscultationText).toBe('Giemen re')
+    expect(breathing.auscultationText).toBe('re. Giemen.')
     expect(breathing.needTreatment).toBe(true)
-    breathing.auscultation.value.wheezing = ''
+    breathing.auscultation.value.findings.wheezing.right = { upper: false, base: false }
     expect(breathing.needTreatment).toBe(false)
-    expect(breathing.auscultationText).toBe(verbosity === ProtocolVerbosity.LOW ? '' : 'Ausk. unauffällig')
+    expect(breathing.auscultationText).toBe('')
+    expect(breathing.auscultationState).toBe('Keine Angaben')
+    breathing.auscultation.value = setNormalAuscultation(true)
+    expect(breathing.auscultationText).toBe('Ausk. unauffällig')
   })
 })
 
@@ -119,7 +123,7 @@ describe('Breathing persistence', () => {
       expect(store.doku.xaBcde[key]).toMatchObject(finding ?? { assessed: false, value: false })
     }
     expect(store.doku.xaBcde.auscultation).toBeInstanceOf(AssessedValue)
-    expect(store.doku.xaBcde.auscultation).toMatchObject(auscultation)
+    expect(store.doku.xaBcde.auscultation).toMatchObject(normalizeAuscultation(auscultation))
   })
 
   test('prefers new fields and supports wrapped legacy fields', async () => {

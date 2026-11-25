@@ -108,9 +108,7 @@ watch(() => store.doku.xAbcde.isBreathing, (v) => {
   store.doku.xaBcde.hasHypoxia = !v
 
   store.doku.xaBcde.auscultation.assessed = false
-  store.doku.xaBcde.auscultation.value.wheezing = ''
-  store.doku.xaBcde.auscultation.value.crackles = ''
-  store.doku.xaBcde.auscultation.value.dimished = ''
+  store.doku.xaBcde.resetAuscultation()
 
   store.doku.xaBcde.paradoxical.assessed = false
   store.doku.xaBcde.paradoxical.value = false

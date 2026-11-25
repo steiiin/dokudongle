@@ -1,5 +1,6 @@
 import { toRaw, type UnwrapRef } from 'vue'
 import type { Protocol } from '@/types/protocol'
+import { normalizeAuscultation, reconcileRestoredAuscultation } from '@/types/protocol/abcde/auscultation'
 
 type ActiveProtocol = UnwrapRef<Protocol>
 type FieldValue = string | number | boolean
@@ -70,6 +71,7 @@ export function setReanimation(protocol: ActiveProtocol, enabled: boolean): void
   // Das gesamte Zurücksetzen absichern, einschließlich der durch die Einsatzbesonderheit selbst ausgelösten Änderungen.
   restoring.add(identity)
   try {
+    const currentAuscultation = normalizeAuscultation(protocol.xaBcde.auscultation).value
     protocol.flavors.reanimation = false
     for (const change of snapshots.get(identity) ?? []) {
       let parent = protocol as unknown as Record<string, unknown>
@@ -77,6 +79,8 @@ export function setReanimation(protocol: ActiveProtocol, enabled: boolean): void
       const key = change.path[change.path.length - 1]
       if (parent[key] === change.applied) parent[key] = change.previous
     }
+    protocol.xaBcde.auscultation.value = reconcileRestoredAuscultation(
+      protocol.xaBcde.auscultation.value, currentAuscultation)
   } finally {
     restoring.delete(identity)
     snapshots.delete(identity)

@@ -19,6 +19,7 @@ declare module 'vue' {
     DodoExaminationList: typeof import('./src/components/examination/DodoExaminationList.vue')['default']
     DodoHint: typeof import('./src/components/ui/DodoHint.vue')['default']
     DodoInputAge: typeof import('./src/components/inputs/DodoInputAge.vue')['default']
+    DodoInputAuscultation: typeof import('./src/components/inputs/DodoInputAuscultation.vue')['default']
     DodoInputChip: typeof import('./src/components/inputs/DodoInputChip.vue')['default']
     DodoInputContacts: typeof import('./src/components/inputs/DodoInputContacts.vue')['default']
     DodoInputEcg: typeof import('./src/components/inputs/DodoInputEcg.vue')['default']
