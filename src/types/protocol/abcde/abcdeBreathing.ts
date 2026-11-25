@@ -1,3 +1,5 @@
+import { auscultationText, emptyAuscultation, hasAuscultationFindings, type BreathingAuscultation } from './auscultation'
+export type { BreathingAuscultation } from './auscultation'
 import { assessmentActive, assessmentDefaults } from '../assessment'
 import { breakDoku, capitalizeBegin, concatDoku, prefix } from "@/utils/text"
 import { assessedText, textDef, textIf } from "@/utils/filter"
@@ -12,12 +14,6 @@ export interface BreathingMech {
   frequency: '' | 'Bradypnoe' | 'Tachypnoe'
   depth: '' | 'Flach' | 'Vertieft'
   pattern: '' | 'Biotsche Atmung' | 'Cheyne-Stokes-Atmung' | 'Kußmaul-Atmung' | 'Hyperventilation'
-}
-
-export interface BreathingAuscultation {
-  wheezing: '' | 'bds.' | 're.' | 'li.'
-  crackles: '' | 'bds.' | 're.' | 'li.'
-  dimished: '' | 'bds.' | 're.' | 'li.'
 }
 
 // ############################################################################
@@ -50,7 +46,7 @@ export class AbcdeBreathing {
     this.hasHypoxia = false
 
     this.mechanics = { frequency: '', depth: '', pattern: '' }
-    this.auscultation = AssessedValue.unassessed({ wheezing: '', crackles: '', dimished: '' })
+    this.auscultation = AssessedValue.unassessed(emptyAuscultation())
 
     this.accessoryMuscles = AssessedValue.unassessed(false)
     this.retractions = AssessedValue.unassessed(false)
@@ -70,12 +66,7 @@ export class AbcdeBreathing {
       || this.mechanics.pattern != ''
       || this.accessoryMuscles.matches(true)
       || this.retractions.matches(true)
-      || (this.auscultation.assessed &&
-          (
-            this.auscultation.value.wheezing != ''
-            || this.auscultation.value.crackles != ''
-            || this.auscultation.value.dimished != ''
-          ))
+      || (this.auscultation.assessed && hasAuscultationFindings(this.auscultation.value))
       || this.paradoxical.matches(true)
       || this.jugularVenousDistension.matches(true)
       || this.emphysema.matches(true)
@@ -144,29 +135,19 @@ export class AbcdeBreathing {
 
   ///////////////////////////////////////////////
 
+  public resetAuscultation(): void {
+    this.auscultation.value = emptyAuscultation()
+  }
+
   get normalAuscultation(): boolean {
-    return (
-      this.auscultation.value.wheezing == ''
-      && this.auscultation.value.crackles == ''
-      && this.auscultation.value.dimished == ''
-    )
+    return this.auscultation.assessed && this.auscultation.value.normalVolume && this.auscultation.value.noAddedSounds
   }
 
   get auscultationPSV(): ProtocolStateValue {
-
-    if (!this.auscultation.isAssessed) { return PSV('nicht abgehört', '') }
-
-    if (this.auscultation.value.wheezing == ''
-        && this.auscultation.value.crackles == ''
-        && this.auscultation.value.dimished == '') {
-      return PSV('unauffällig', 'Ausk. unauffällig') }
-
-    const _wheezing = textIf(`Giemen ${this.auscultation.value.wheezing}`, !!this.auscultation.value.wheezing)
-    const _crackles = textIf(`RGs ${this.auscultation.value.crackles}`, !!this.auscultation.value.crackles)
-    const _dimished = textIf(`Abgeschwächt ${this.auscultation.value.dimished}`, !!this.auscultation.value.dimished)
-
-    return PSV(concatDoku([ _wheezing, _crackles, _dimished ], false))
-
+    if (!this.auscultation.isAssessed) return PSV('nicht abgehört', '')
+    if (this.normalAuscultation) return PSV('unauffällig', 'Ausk. unauffällig')
+    const text = auscultationText(this.auscultation.value)
+    return text ? PSV(text) : PSV('Keine Angaben', '')
   }
 
   get auscultationState(): string {

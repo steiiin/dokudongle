@@ -106,33 +106,10 @@
     <DodoExaminationItem id="auscultation" label="Auskultation"
       v-model:assessed="store.doku.xaBcde.auscultation.assessed"
       :available="store.doku.xAbcde.isBreathing" show-line="full"
-      @activate="auscultationModal?.open()" @remove="resetAuscultation">
+      @select="selectAuscultation" @activate="auscultationModal?.open()" @remove="resetAuscultation">
       <DodoItemModal ref="auscultationModal" label="Auskultation"
         :state="store.doku.xaBcde.auscultationState" lines="none">
-        <DodoInputSelect label="Giemen/Brummen" v-model="store.doku.xaBcde.auscultation.value.wheezing" lines="inset"
-          :options="[
-            { value: '', label: 'Nein' },
-            { value: 'li.', label: 'Links' },
-            { value: 're.', label: 'Rechts' },
-            { value: 'bds.', label: 'Beidseits' },
-          ]">
-        </DodoInputSelect>
-        <DodoInputSelect label="Rasselgeräusche" v-model="store.doku.xaBcde.auscultation.value.crackles" lines="inset"
-          :options="[
-            { value: '', label: 'Nein' },
-            { value: 'li.', label: 'Links' },
-            { value: 're.', label: 'Rechts' },
-            { value: 'bds.', label: 'Beidseits' },
-          ]">
-        </DodoInputSelect>
-        <DodoInputSelect label="Abgeschwächt" v-model="store.doku.xaBcde.auscultation.value.dimished" lines="none"
-          :options="[
-            { value: '', label: 'Nein' },
-            { value: 'li.', label: 'Links' },
-            { value: 're.', label: 'Rechts' },
-            { value: 'bds.', label: 'Beidseits' },
-          ]">
-        </DodoInputSelect>
+        <DodoInputAuscultation v-model="store.doku.xaBcde.auscultation.value" />
 
       </DodoItemModal>
     </DodoExaminationItem>
@@ -166,6 +143,7 @@ import { computed, ref, watch } from 'vue'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
 import DodoItemModal from '@/components/ui/DodoItemModal.vue'
 import { isRestoringReanimation } from '@/store/reanimation'
+import { auscultationGroups, hasAuscultationGroupFindings } from '@/types/protocol/abcde/auscultation'
 
 import { useDokuStore } from '@/store/doku'
 const store = useDokuStore()
@@ -183,10 +161,13 @@ watch(() => store.doku.xaBcde.mechanics.pattern, () => {
 
 const auscultationModal = ref<InstanceType<typeof DodoItemModal>>()
 
+function selectAuscultation() {
+  const value = store.doku.xaBcde.auscultation.value
+  for (const group of auscultationGroups) value[group.normalKey] = !hasAuscultationGroupFindings(value, group.key)
+}
+
 function resetAuscultation() {
-  store.doku.xaBcde.auscultation.value.wheezing = ''
-  store.doku.xaBcde.auscultation.value.crackles = ''
-  store.doku.xaBcde.auscultation.value.dimished = ''
+  store.doku.xaBcde.resetAuscultation()
 }
 
 </script>

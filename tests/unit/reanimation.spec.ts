@@ -1,3 +1,4 @@
+import { confirmAuscultationFinding, emptyAuscultation, emptyAuscultationLocations, setAuscultationGroupNormal, setNormalAuscultation } from '@/types/protocol/abcde/auscultation'
 import { createPinia, setActivePinia } from 'pinia'
 import { enableAutoUnmount, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
@@ -43,7 +44,10 @@ function seedFindings(store: ReturnType<typeof useDokuStore>) {
   p.xaBcde.retractions.assessed = true
   p.xaBcde.retractions.value = true
   p.xaBcde.auscultation.assessed = true
-  p.xaBcde.auscultation.value = { wheezing: 're.', crackles: 'li.', dimished: 'bds.' }
+  p.xaBcde.auscultation.value = emptyAuscultation()
+  p.xaBcde.auscultation.value.findings.wheezing.right.upper = true
+  p.xaBcde.auscultation.value.findings.crackles.left.base = true
+  p.xaBcde.auscultation.value.findings.diminished.right = { upper: true, base: true }
   p.xaBcde.paradoxical.assessed = true
   p.xaBcde.paradoxical.value = true
   p.xaBcde.jugularVenousDistension.assessed = true
@@ -110,6 +114,68 @@ describe('Reanimation restoration', () => {
     expect(plain(store.doku.xaBcde)).toEqual(before)
   })
 
+  test('restores an explicitly normal auscultation after reanimation', () => {
+    const store = useDokuStore()
+    store.doku.xaBcde.auscultation.assessed = true
+    store.doku.xaBcde.auscultation.value = setNormalAuscultation(true)
+    mountClinicalCards()
+    store.setFlavor('reanimation', true)
+    expect(store.doku.xaBcde.auscultation.value).toEqual(emptyAuscultation())
+    expect(store.doku.xaBcde.auscultation.assessed).toBe(false)
+    store.setFlavor('reanimation', false)
+    expect(store.doku.xaBcde.auscultationText).toBe('Ausk. unauffällig')
+  })
+
+  test.each(['pathology', 'normal'] as const)('keeps new %s choices consistent when restoring auscultation', choice => {
+    const store = useDokuStore()
+    const breathing = store.doku.xaBcde
+    breathing.auscultation.assessed = true
+    breathing.auscultation.value.findings.enhanced.right.base = true
+    breathing.auscultation.value.findings.wheezing.right = { upper: true, base: true }
+    breathing.auscultation.value.findings.crackles.left.upper = true
+    mountClinicalCards()
+    store.setFlavor('reanimation', true)
+    // A new examination after breathing resumes takes precedence over the preset snapshot.
+    store.doku.xAbcde.isBreathing = true
+    breathing.auscultation.assessed = true
+    if (choice === 'normal') {
+      breathing.auscultation.value = setNormalAuscultation(true)
+    } else {
+      const selection = emptyAuscultationLocations()
+      selection.right.base = true
+      breathing.auscultation.value = confirmAuscultationFinding(breathing.auscultation.value, 'silent', selection)
+      breathing.auscultation.value = confirmAuscultationFinding(breathing.auscultation.value, 'wheezing', selection)
+    }
+    store.setFlavor('reanimation', false)
+    if (choice === 'normal') {
+      expect(breathing.auscultation.value).toEqual(setNormalAuscultation(true))
+    } else {
+      expect(breathing.auscultation.value.findings.enhanced.right.base).toBe(true)
+      expect(breathing.auscultation.value.findings.silent.right.base).toBe(false)
+      expect(breathing.auscultation.value.findings.wheezing.right.upper).toBe(true)
+      expect(breathing.auscultation.value.findings.wheezing.right.base).toBe(true)
+      expect(breathing.auscultation.value.findings.crackles.left.upper).toBe(true)
+    }
+  })
+
+  test('restores other-group findings while respecting a new group normal selection', () => {
+    const store = useDokuStore()
+    const breathing = store.doku.xaBcde
+    breathing.auscultation.assessed = true
+    breathing.auscultation.value.findings.silent.right.base = true
+    breathing.auscultation.value.findings.wheezing.left.upper = true
+    mountClinicalCards()
+    store.setFlavor('reanimation', true)
+    store.doku.xAbcde.isBreathing = true
+    breathing.auscultation.assessed = true
+    breathing.auscultation.value = setAuscultationGroupNormal(breathing.auscultation.value, 'volume', true)
+    store.setFlavor('reanimation', false)
+    expect(breathing.auscultation.value.normalVolume).toBe(true)
+    expect(breathing.auscultation.value.findings.silent.right.base).toBe(false)
+    expect(breathing.auscultation.value.findings.wheezing.left.upper).toBe(true)
+    expect(breathing.auscultation.value.noAddedSounds).toBe(false)
+  })
+
   test('the chip applies the preset and restores non-default values through the store', async () => {
     const store = useDokuStore()
     store.doku.xabcDe.avpu = 'somnolent'
@@ -165,7 +231,7 @@ describe('Reanimation restoration', () => {
     store.doku.xabCde.pulse.centralStrength = 'schlecht'
     store.doku.xabcDe.gcs.v = 2
     store.doku.xaBcde.mechanics.frequency = 'Bradypnoe'
-    store.doku.xaBcde.auscultation.value.crackles = 'bds.'
+    store.doku.xaBcde.auscultation.value.findings.crackles.right.base = true
     store.doku.xabcdE.abdominal.value.pain = 'leichte'
     store.doku.treatment.setText('New treatment')
     store.doku.situation.setText('New situation')
@@ -177,7 +243,7 @@ describe('Reanimation restoration', () => {
     expect(store.doku.xabCde.pulse.peripheralStrength).toBe('schlecht')
     expect(store.doku.xabcDe.gcs).toMatchObject({ a: 4, v: 2, m: 6 })
     expect(store.doku.xaBcde.mechanics).toEqual({ pattern: 'Kußmaul-Atmung', frequency: 'Bradypnoe', depth: 'Vertieft' })
-    expect(store.doku.xaBcde.auscultation.value.crackles).toBe('bds.')
+    expect(store.doku.xaBcde.auscultation.value.findings.crackles.right.base).toBe(true)
     expect(store.doku.xabcdE.abdominal.value.pain).toBe('leichte')
     expect(store.doku.treatment.value).toBe('New treatment')
     expect(store.doku.situation.value).toBe('New situation')

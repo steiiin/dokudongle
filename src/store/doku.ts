@@ -1,3 +1,4 @@
+import { normalizeAuscultation } from '@/types/protocol/abcde/auscultation'
 import { normalizeEcgFinding } from '@/types/protocol/abcde/ecg'
 import { FirmwareUUID, DfuUUID } from '@/types/firmware'
 import { decodeFirmwareInfo, isCompatibleFirmware } from '@/utils/dongle/dongle-firmware'
@@ -239,6 +240,7 @@ function hydrateProtocolUnchecked(input: unknown): Protocol | null {
   }
   if (isRecord(normalizedInput.xaBcde)) {
     const breathing = { ...normalizedInput.xaBcde }
+    breathing.auscultation = normalizeAuscultation(breathing.auscultation)
     const legacyBreathingFields = {
       accessoryMuscles: 'useAccessoryMuscles',
       retractions: 'hasRetractions',
