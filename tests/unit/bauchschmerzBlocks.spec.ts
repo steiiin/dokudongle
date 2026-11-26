@@ -256,7 +256,7 @@ describe('Bauchschmerz source lifecycle', () => {
     store.setFlavor('non_verbal', true)
     expect(store.doku.xabcdE.abdominal.value.pain).toBe('')
     expect(store.doku.textAreaBlocks.bauchschmerz.details.quality).toEqual(['stechend'])
-    assessment.vm.$emit('update:assessed', false)
+    store.setAbdominalAssessed(false)
     expect(store.doku.xabcdE.abdominal.isAssessed).toBe(false)
     expect(store.doku.xabcdE.abdominal.value).toMatchObject({ guarding: '', peristalsis: '', pain: 'keine' })
     expect(store.doku.textAreaBlocks.bauchschmerz).toEqual(createBauchschmerzBlockState())

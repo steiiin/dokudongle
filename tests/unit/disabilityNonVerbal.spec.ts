@@ -5,6 +5,7 @@ import * as Ionic from '@ionic/vue'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import DodoInputSelect from '@/components/inputs/DodoInputSelect.vue'
 import DodoInputSelectLR from '@/components/inputs/DodoInputSelectLR.vue'
+import DodoInputToggle from '@/components/inputs/DodoInputToggle.vue'
 import { useDokuStore } from '@/store/doku'
 import { loadDokuState, saveDokuState } from '@/store/persistence'
 import { resetProtocol } from '@/types/protocol'
@@ -208,7 +209,8 @@ describe('individual nonverbal assessments', () => {
     const store = useDokuStore()
     store.doku.xabcdE.abdominal.value.assessment.pain = intent
     const wrapper = mount(AbcdeExposureCard, { global })
-    await wrapper.get('[data-examination="abdominal"] .activate-examination').trigger('click')
+    wrapper.get('[data-examination="abdominal"]').getComponent(DodoInputToggle).vm.$emit('update:modelValue', true)
+    await nextTick()
     expect(store.doku.xabcdE.abdominal.value.assessment.pain).toBe('active')
     expect(store.context.hasAbdominalIssue).toBe(true)
     store.setFlavor('non_verbal', true)
@@ -228,7 +230,7 @@ describe('individual nonverbal assessments', () => {
     expect(store.generatedProtocol).toContain(age === 3 ? 'aufmerksam' : 'orientiert')
   })
 
-  test('explicitly activates and removes abdominal pain in nonverbal patients', async () => {
+  test('keeps abdominal pain visible and explicitly toggles it in nonverbal patients', async () => {
     const store = useDokuStore()
     store.setFlavor('non_verbal', true)
     const breathing = mount(AbcdeBreathingCard, { global })
@@ -237,16 +239,25 @@ describe('individual nonverbal assessments', () => {
     expect(breathing.get('[data-examination="breathlessness"]').classes()).toContain('examination-inactive')
     expect(circulation.get('[data-examination="chest"]').classes()).toContain('examination-inactive')
     expect(exposure.get('[data-examination="nausea"]').classes()).toContain('examination-inactive')
-    await exposure.get('[data-examination="abdominal"] .activate-examination').trigger('click')
+    const abdominalRow = exposure.get('[data-examination="abdominal"]')
+    expect(abdominalRow.find('.activate-examination').exists()).toBe(false)
+    expect(abdominalRow.find('.remove-examination').exists()).toBe(false)
+    expect(store.generatedProtocol).not.toContain('schmerzfrei')
+    const toggle = abdominalRow.getComponent(DodoInputToggle)
+    expect(toggle.props('modelValue')).toBe(false)
+    toggle.vm.$emit('update:modelValue', true)
+    await nextTick()
     expect(store.generatedProtocol).toContain('Bauchschmerzen; Abdomen weich')
     expect(store.generatedProtocol).not.toMatch(/schmerzfrei|Wasserlassen|Stuhlgang/)
     store.doku.textAreaBlocks.bauchschmerz.details.severity = 'stark'
     store.doku.textAreaBlocks.bauchschmerz.details.quality = ['stechend']
     expect(store.context.hasAbdominalIssue).toBe(true)
     expect(store.generatedProtocol).toContain('stechend')
-    await exposure.get('[data-examination="abdominal"] .remove-examination').trigger('click')
+    toggle.vm.$emit('update:modelValue', false)
+    await nextTick()
     expect(store.context.hasAbdominalIssue).toBe(false)
-    expect(store.generatedProtocol).not.toMatch(/stechend|schmerzfrei/)
+    expect(store.generatedProtocol).not.toContain('stechend')
+    expect(store.generatedProtocol).toContain('schmerzfrei')
     expect(store.doku.textAreaBlocks.bauchschmerz.details.quality).toEqual([])
   })
 

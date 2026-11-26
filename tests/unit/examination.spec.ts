@@ -98,10 +98,11 @@ describe('optional positive boolean findings', () => {
     expect(row().getComponent(IonToggle).props('modelValue')).toBe(true)
   })
 
-  test('places urinary incontinence between vomiting and excretions', () => {
+  test('places permanent abdominal pain before optional urinary incontinence and excretions', () => {
     const wrapper = mount(AbcdeExposureCard, { global })
     const row = wrapper.get('[data-examination="urinaryIncontinence"]').element
-    expect(row.previousElementSibling?.textContent).toContain('Erbrechen')
+    expect(row.previousElementSibling?.getAttribute('data-examination')).toBe('abdominal')
+    expect(row.previousElementSibling?.previousElementSibling?.textContent).toContain('Erbrechen')
     expect(row.nextElementSibling?.getAttribute('data-examination')).toBe('excretions')
   })
 })

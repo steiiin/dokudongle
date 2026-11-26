@@ -222,7 +222,7 @@ export class AbcdeExposure {
     this.emesis = new ExposureEmisis()
     this.excretions = AssessedValue.unassessed(new ExposureExcretions())
     this.urinaryIncontinence = false
-    this.abdominal = AssessedValue.unassessed(new ExposureAbdominal())
+    this.abdominal = AssessedValue.assessed(new ExposureAbdominal())
     this.pregnancy = AssessedValue.unassessed(true)
   }
 

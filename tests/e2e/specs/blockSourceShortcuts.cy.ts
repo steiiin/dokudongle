@@ -15,7 +15,7 @@ const cases = [
   { source: 'schwindel', title: 'Schwindel', input: 'Beginn', choice: 'Plötzlich', parent: '', section: 'disability' },
   { source: 'excretions_bowel', title: 'Stuhlgang', input: 'Frequenz', choice: 'Durchfall', parent: 'Ausscheidung', section: 'exposure' },
   { source: 'excretions_urinary', title: 'Wasserlassen', input: 'Blut im Urin', choice: 'Etwas', parent: 'Ausscheidung', section: 'exposure' },
-  { source: 'bauchschmerz', title: 'Bauchschmerz', input: 'Beginn', choice: 'Plötzlich', parent: 'Bauchbefund', section: 'exposure' },
+  { source: 'bauchschmerz', title: 'Bauchschmerz', input: 'Beginn', choice: 'Plötzlich', parent: '', section: 'exposure' },
 ]
 
 for (const width of [375, 1024]) {

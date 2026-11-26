@@ -97,9 +97,7 @@
     </DodoExaminationItem>
 
     <DodoExaminationItem id="abdominal" label="Bauchschmerz" show-line="full"
-      :assessed="store.doku.xabcdE.abdominal.isAssessed && store.doku.xabcdE.abdominal.value.isExamined('pain')"
-      @update:assessed="store.setAbdominalAssessed"
-      @select="store.setAbdominalPainEnabled(true)">
+      :assessed="true" :removable="false">
       <DodoInputToggle :model-value="store.context.hasAbdominalIssue"
         @update:model-value="store.setAbdominalPainEnabled" lines="none">
         Bauchschmerz

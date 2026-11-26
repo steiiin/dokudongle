@@ -46,9 +46,14 @@ describe('block source shortcuts', () => {
   test('abdominal toggle opens the source directly and edits findings in Exposure', async () => {
     const store = useDokuStore()
     const wrapper = mount(AbcdeExposureCard, { global })
-    expect(store.doku.xabcdE.abdominalText).toBe('')
-    await wrapper.get('[data-examination="abdominal"] .activate-examination').trigger('click')
     const abdominalRow = wrapper.get('[data-examination="abdominal"]')
+    expect(abdominalRow.find('.activate-examination').exists()).toBe(false)
+    expect(abdominalRow.find('.remove-examination').exists()).toBe(false)
+    expect(store.doku.xabcdE.abdominalText).toBe('Abdomen weich/schmerzfrei')
+    const toggle = abdominalRow.getComponent(DodoInputToggle)
+    expect(toggle.props('modelValue')).toBe(false)
+    toggle.vm.$emit('update:modelValue', true)
+    await nextTick()
     const shortcut = abdominalRow.get('[data-block-source="bauchschmerz"]')
     await shortcut.trigger('click')
     const modal = wrapper.findAllComponents(DodoItemModal).find(modal => modal.props('label') === 'Bauchschmerz')!
@@ -70,7 +75,6 @@ describe('block source shortcuts', () => {
     expect(store.textAreaBlocks).toEqual([])
     expect(modal.props('state')).toBe('')
     modal.getComponent(Ionic.IonModal).vm.$emit('willDismiss')
-    const toggle = wrapper.findAllComponents(DodoInputToggle).find(toggle => toggle.text().includes('Bauchschmerz'))!
     toggle.vm.$emit('update:modelValue', false)
     await nextTick()
     expect(wrapper.find('[data-block-source="bauchschmerz"]').exists()).toBe(false)
